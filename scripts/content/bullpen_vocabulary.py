@@ -1541,4 +1541,185 @@ LESSONS = [
     ]),
   ],
 },
+{
+  "slug": "loops-at-inference",
+  "title": "Loops at Inference: Control Flow, Limits and Dangers",
+  "subtitle": "Running the model more than once — when that buys accuracy, and when it just buys tokens.",
+  "body": [
+    ("p", "The single most common way to improve an LLM system is to stop calling the model once. Sample several times, critique and revise, retry on failure, search over branches. All of these are loops, and they are the main lever you have that doesn't involve changing the model."),
+    ("p", "They also fail in a way worth naming up front, because it predicts which ones work."),
+
+    ("callout", "insight", "The rule that governs all of it", "A loop improves the result only if <strong>signal enters from outside the loop</strong>. A compiler, a test suite, a schema validator, a retrieval hit, or the independence of separate samples — something that isn't the model's own opinion. A loop with no external signal mostly amplifies whatever the model already believed, including its errors. Every result below is explained by that one sentence."),
+
+    ("h2", "The control flow"),
+    ("p", "Strip the branding and there are four shapes. What differs is who decides to go round again."),
+
+    ("figure", "Four loop shapes. The two on the left have an outside signal deciding whether to continue; the two on the right rely on the model's own judgement, and are correspondingly weaker.", '''<svg viewBox="0 0 640 240" role="img" aria-label="Four inference-time loop shapes"><defs><marker id="fa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>
+<text x="12" y="18" class="d-fill-green" font-size="12" font-weight="600">EXTERNAL SIGNAL — reliable</text>
+<rect x="12" y="30" width="290" height="42" rx="6" class="d-box-good"/>
+<text x="26" y="48" class="d-label-b">Verifier-guided</text>
+<text x="26" y="64" class="d-label-sm">generate → run tests → failed? go again</text>
+<rect x="12" y="82" width="290" height="42" rx="6" class="d-box-good"/>
+<text x="26" y="100" class="d-label-b">Self-consistency</text>
+<text x="26" y="116" class="d-label-sm">sample N independently → majority vote</text>
+<text x="338" y="18" class="d-fill-red" font-size="12" font-weight="600">MODEL'S OWN JUDGEMENT — weak</text>
+<rect x="338" y="30" width="290" height="42" rx="6" class="d-box-warn"/>
+<text x="352" y="48" class="d-label-b">Reflection / self-critique</text>
+<text x="352" y="64" class="d-label-sm">answer → "find your mistakes" → revise</text>
+<rect x="338" y="82" width="290" height="42" rx="6" class="d-box-warn"/>
+<text x="352" y="100" class="d-label-b">Model-judged search</text>
+<text x="352" y="116" class="d-label-sm">branch → model scores branches → expand</text>
+<rect x="12" y="146" width="616" height="76" rx="7" class="d-box"/>
+<text x="28" y="168" class="d-label-b">Every loop needs three things or it is a bug</text>
+<text x="28" y="188" class="d-label-sm">1 · a termination condition that is not "the model says it's done"</text>
+<text x="28" y="204" class="d-label-sm">2 · a hard ceiling on turns and on spend</text>
+<text x="28" y="220" class="d-label-sm">3 · repetition detection, so it cannot spin on the same failing action</text>
+</svg>'''),
+
+    ("h2", "What actually works"),
+    ("terms", [
+      ("Verifier-guided retry", "Strongest", "Generate, run the tests, feed failures back. The verifier is ground truth the model can't argue with. This is why coding agents work better than most agentic domains — the loop has a compiler in it."),
+      ("Self-consistency", "Reliable, expensive", "Sample several independent chains at non-zero temperature and take the majority answer. Works because the errors are independent and the right answer is reachable by several routes; wrong answers scatter, correct ones agree."),
+      ("Best-of-N with a reward model", "Strong if the scorer is", "Generate N, pick the highest-scoring. Quality is capped by the scorer — a weak reward model just picks confidently wrong answers."),
+      ("Escalation", "Cheap-first routing", "Try the small model, verify, escalate on failure. Bullpen's whole premise, and it belongs in this family: a loop with an external verifier deciding whether to go round again."),
+    ]),
+
+    ("h2", "What works less than its reputation suggests"),
+    ("p", "<strong>Self-correction without external feedback.</strong> Asking a model to review and fix its own answer is intuitively appealing and, on reasoning tasks, frequently makes things <em>worse</em>. Huang et al. found that models often change correct answers to incorrect ones when told to reconsider, because the instruction to find fault is itself a pressure to change something."),
+    ("p", "Reflexion-style loops do work — but read what they contain: an external signal, usually a test result or environment feedback, converted into words the model can act on. The gain comes from the signal, not from the reflecting."),
+    ("callout", "pitfall", "The test to apply", "Before adding a critique loop, ask what enters it that the model didn't already have. If the answer is \"nothing, it just looks again\", expect little and measure carefully. If the answer is \"a failing test\", \"a schema error\", \"a retrieval result\" — that's a real loop."),
+
+    ("h2", "The dangers"),
+    ("ul", [
+      "<strong>Runaway cost.</strong> No ceiling means an agent can retry a failing call until someone notices the bill. Every loop needs a turn limit and a spend limit, not one or the other.",
+      "<strong>Error compounding.</strong> Steps at 95% reliability give 60% over ten steps. Long loops fail not because a step is bad but because reliability multiplies.",
+      "<strong>Context poisoning.</strong> Each iteration appends to the context. A wrong conclusion at turn 3 is re-read as established fact at turn 30, and the loop entrenches it rather than escaping it.",
+      "<strong>Quadratic cost growth.</strong> The whole conversation is re-sent each turn, so a twenty-turn loop is far more than twenty times a single call.",
+      "<strong>False confidence from agreement.</strong> Self-consistency across samples that share a systematic bias produces unanimous agreement on the wrong answer. Unanimity is not evidence when the samples aren't independent.",
+    ]),
+    ("callout", "matters", "The termination condition is the design", "Most loop bugs are termination bugs. \"Until the model says it's finished\" hands the stopping decision to the component least able to judge whether it succeeded — the same problem as letting a model report its own eval score. Terminate on an external check, a turn cap, or a spend cap. Preferably all three."),
+
+    ("h2", "Choosing a loop"),
+    ("p", "Match the loop to whether the task has a checkable outcome. Code, structured output and retrieval have verifiers, so verifier-guided retry is available and should be the default. Open-ended prose has none, so you're left with self-consistency or best-of-N, and you should expect smaller gains for more tokens. If a task has no external signal at all, extra iterations mostly buy latency."),
+
+    ("links", [
+      ("Self-Consistency (Wang et al., 2022)", "https://arxiv.org/abs/2203.11171",
+       "Sampling several chains and taking the majority. The clearest example of a loop whose signal is sample independence."),
+      ("LLMs Cannot Self-Correct Reasoning Yet (Huang et al., 2023)", "https://arxiv.org/abs/2310.01798",
+       "The evidence that unaided self-critique often degrades correct answers. Read before building a reflection loop."),
+      ("Reflexion (Shinn et al., 2023)", "https://arxiv.org/abs/2303.11366",
+       "Self-reflection that works — note that the loop carries environment feedback, not just introspection."),
+      ("Tree of Thoughts (Yao et al., 2023)", "https://arxiv.org/abs/2305.10601",
+       "Search over branches rather than a single chain, and the cost of doing it."),
+    ]),
+
+    ("quiz", [
+      ("What determines whether an inference-time loop improves the result?",
+       ["The number of iterations allowed",
+        "Whether signal enters from outside the loop — a test, a validator, or sample independence",
+        "Whether the model is large enough to self-assess"], 1),
+      ("You add a 'review your answer and fix any mistakes' step to a reasoning task. What should you expect?",
+       ["A reliable improvement, since the model gets a second chance",
+        "Possibly worse results — unaided self-correction often flips correct answers to incorrect ones",
+        "No change, since the model is deterministic"], 1),
+      ("Why is 'loop until the model says it's done' a poor termination condition?",
+       ["It's slower than a fixed turn count",
+        "It hands the stopping decision to the component least able to judge whether it actually succeeded",
+        "Models cannot reliably produce a stop token"], 1),
+      ("Ten independent samples all agree on the same answer. How much confidence does that justify?",
+       ["Very high — unanimous agreement across samples is strong evidence",
+        "Less than it appears, if the samples share a systematic bias they aren't truly independent",
+        "None — agreement between samples is meaningless"], 1),
+    ]),
+  ],
+},
+{
+  "slug": "loops-in-training",
+  "title": "Loops in Training: Flywheels and Model Collapse",
+  "subtitle": "How a model improves itself across generations — and the way that process eats itself.",
+  "body": [
+    ("p", "The previous lesson looped at inference, leaving the weights untouched. This one loops around <em>training</em>: the model generates data, some of it is kept, the model is retrained, and round it goes. This is how a great deal of current capability was built, and it carries a failure mode with no equivalent at inference time."),
+
+    ("h2", "The training loops that work"),
+    ("terms", [
+      ("RLHF", "Humans rank, model learns", "The loop from the feedback lesson. Human judgement enters at ranking; the reward model then stands in for people at scale."),
+      ("Rejection sampling / STaR", "Keep only what verified", "Generate many attempts, keep the ones reaching a correct answer, fine-tune on those. The model bootstraps from its own successes — the filter is what makes it work."),
+      ("Self-play", "Compete against yourself", "The AlphaGo-style loop. Needs a game with a definite winner, which is why it transfers to code and maths and not to essays."),
+      ("Constitutional / RLAIF", "Model critiques itself against principles", "A written constitution supplies the outside signal in place of a human rater, which is what stops it being pure self-reference."),
+      ("Distillation flywheel", "Big model teaches small", "The teacher is the external signal. Covered in its own lesson."),
+    ]),
+    ("callout", "insight", "The same rule, one level up", "Every training loop above works for the reason inference loops work: something outside the model's own opinion decides what gets kept. A verifier in STaR. A human in RLHF. A game result in self-play. A written constitution in RLAIF. Remove the filter and you have a model training on its own unfiltered output — which is the next section."),
+
+    ("h2", "Model collapse"),
+    ("p", "Train a model on data generated by a previous model, repeatedly, without fresh real data or a filter, and quality degrades in a specific pattern. The tails of the distribution vanish first — rare events, unusual phrasings, minority cases — and then the centre narrows. Shumailov et al. demonstrated this across model families and published it in Nature in 2024."),
+
+    ("figure", "Each generation trains on the last one's output. The rare cases disappear first and the distribution narrows toward its own centre — the model forgets that the tails were ever there.", '''<svg viewBox="0 0 640 200" role="img" aria-label="Successive generations of model collapse narrowing a distribution">
+<g>
+<text x="46" y="18" class="d-label-sm">generation 0 — real data</text>
+<path d="M20 150 Q60 148 90 120 Q120 60 150 60 Q180 60 210 120 Q240 148 280 150" stroke="var(--green)" stroke-width="2.5" fill="none"/>
+<text x="16" y="176" class="d-label-sm">tails present</text>
+</g>
+<g>
+<text x="330" y="18" class="d-label-sm">generation 3</text>
+<path d="M300 150 Q345 150 365 132 Q390 62 415 62 Q440 62 465 132 Q485 150 530 150" stroke="var(--yellow)" stroke-width="2.5" fill="none"/>
+<text x="316" y="176" class="d-label-sm">tails thinning</text>
+</g>
+<g>
+<text x="552" y="18" class="d-label-sm">gen 9</text>
+<path d="M540 150 Q568 150 578 118 Q588 66 600 66 Q612 66 622 118 Q630 150 636 150" stroke="var(--red)" stroke-width="2.5" fill="none"/>
+<text x="540" y="176" class="d-fill-red" font-size="11" font-weight="600">collapsed</text>
+</g>
+</svg>'''),
+
+    ("p", "The mechanism is not mysterious. Any sample under-represents the tails of the distribution it came from. Train on that sample and your model's distribution is slightly narrower. Sample from <em>that</em>, and it narrows again. Errors accumulate in one direction because sampling error is not symmetric in its effect on rare events — and there's nothing pulling the distribution back out."),
+    ("callout", "pitfall", "Why this matters even if you never pretrain a model", "The public web is now substantially model-generated, and the effect applies to anything trained on scraped text. It also applies at your scale, in miniature: fine-tune on your own model's outputs across a few cycles without filtering and you'll narrow it toward its own habits. If you distil, keep the teacher's outputs filtered by something external — tests, human review, a verifier — rather than accepting them wholesale."),
+
+    ("h2", "The other training-loop dangers"),
+    ("ul", [
+      "<strong>Reward hacking.</strong> The loop optimises the measure rather than the goal. Longer answers if raters prefer length; hedged answers if raters penalise being wrong.",
+      "<strong>Sycophancy.</strong> A specific, well-documented outcome of preference loops — agreement is rewarded, so agreement is learned.",
+      "<strong>Narrowing.</strong> Heavy preference tuning makes outputs safer and more uniform and less useful at the edges. A quieter cousin of collapse.",
+      "<strong>Evaluation contamination.</strong> If generated training data is drawn from the same pool as your eval set, your scores rise without capability rising. The benchmark version of leakage.",
+    ]),
+
+    ("h2", "What keeps a training loop honest"),
+    ("terms", [
+      ("A filter that isn't the model", "Non-negotiable", "Tests, execution results, human review, a verified answer key. Something with an opinion the model can't manufacture."),
+      ("Fresh real data each round", "Anchors the tails", "Mixing genuine data with generated data substantially slows collapse. Purely synthetic loops are the dangerous case."),
+      ("Held-out evaluation", "Untouched by the loop", "The loop must not be able to see the set that judges it, or it will optimise it."),
+      ("Diversity monitoring", "Watch the tails", "Track output variety across generations, not just quality. Collapse shows up as narrowing before it shows up as being wrong."),
+    ]),
+
+    ("h2", "Where this lands for you"),
+    ("p", "You will not pretrain a foundation model. You will very plausibly fine-tune on data a model generated — that's the distillation recipe from Block 7, and it's a good recipe. The difference between the version that works and the version that quietly degrades is entirely the filter. Generate widely, keep only what passes something external, mix in real data, and evaluate on a set the loop never saw."),
+
+    ("links", [
+      ("AI models collapse when trained on recursively generated data (Nature, 2024)", "https://www.nature.com/articles/s41586-024-07566-y",
+       "The primary result. Successive generations lose the tails first, then the centre."),
+      ("The Curse of Recursion (Shumailov et al., 2023)", "https://arxiv.org/abs/2305.17493",
+       "The longer preprint, with the mechanism worked through and more model families."),
+      ("STaR: Bootstrapping Reasoning With Reasoning (Zelikman et al., 2022)", "https://arxiv.org/abs/2203.14465",
+       "A self-training loop that works, because generations are filtered by whether they reached the right answer."),
+    ]),
+
+    ("quiz", [
+      ("What separates a training loop that improves a model from one that degrades it?",
+       ["The number of generations it runs for",
+        "Whether an external filter decides what gets kept — tests, humans, a verified answer key",
+        "Whether the model is large enough to evaluate its own output"], 1),
+      ("In model collapse, what degrades first?",
+       ["The most common outputs, which become repetitive",
+        "The tails — rare events, unusual phrasings and minority cases disappear before the centre narrows",
+        "Grammar and syntax"], 1),
+      ("Why does STaR avoid collapse despite training on the model's own generations?",
+       ["It uses a much larger model to generate",
+        "Only generations that reached a verified correct answer are kept — the filter is external",
+        "It trains for a single generation only"], 1),
+      ("You fine-tune on your own model's outputs for several cycles with no filtering. What should you expect?",
+       ["Steady improvement as the model reinforces its strengths",
+        "Narrowing toward its own habits, losing the rare and unusual cases first",
+        "No change, since the data comes from the same distribution"], 1),
+    ]),
+  ],
+},
 ]

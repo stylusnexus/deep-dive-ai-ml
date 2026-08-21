@@ -126,6 +126,18 @@
       "title": "Chain-of-Thought and Reasoning Tokens",
       "file": "lsn-1787000000018-chain-of-thought-and-reasoning.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000019",
+      "title": "Loops at Inference: Control Flow, Limits and Dangers",
+      "file": "lsn-1787000000019-loops-at-inference.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000020",
+      "title": "Loops in Training: Flywheels and Model Collapse",
+      "file": "lsn-1787000000020-loops-in-training.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -220,6 +232,16 @@
       "starred": false
     },
     "lsn-1787000000018": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000019": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000020": {
       "viewed": false,
       "completed": false,
       "starred": false

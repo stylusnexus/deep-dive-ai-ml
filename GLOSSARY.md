@@ -98,6 +98,20 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Faithfulness (of reasoning)** — Whether a stated chain is the actual reason for the answer. Frequently it isn't — treat chains as a debugging aid, never as an audit trail.
 
+**Verifier-guided loop** — Generate, check against something external (tests, compiler, schema), retry on failure. The strongest inference-time loop, because the signal isn't the model's own opinion.
+
+**Self-correction (unaided)** — Asking a model to review and fix its own answer with no external feedback. Often *degrades* correct answers on reasoning tasks; the instruction to find fault is itself pressure to change something.
+
+**Best-of-N** — Generate N candidates, keep the highest-scoring. Quality is capped by the scorer.
+
+**Termination condition** — What stops a loop. "Until the model says it's done" hands the decision to the component least able to judge success. Terminate on an external check, a turn cap and a spend cap.
+
+**Rejection sampling / STaR** — Generate many attempts, keep only those reaching a verified correct answer, fine-tune on those. A self-training loop that works because the filter is external.
+
+**Self-play** — Improving by competing against yourself. Needs a definite winner, which is why it transfers to code and maths and not to prose.
+
+**Model collapse** — Successive generations trained on generated data lose the distribution's tails first, then narrow at the centre. Prevented by an external filter, fresh real data, and held-out evaluation the loop can't see.
+
 ---
 
 ## Block 0 · Orientation
