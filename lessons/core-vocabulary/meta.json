@@ -162,6 +162,12 @@
       "title": "MCP: The Danger Surface",
       "file": "lsn-1787000000024-mcp-dangers.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000025",
+      "title": "Local Hardware: CUDA, Metal and What Actually Constrains You",
+      "file": "lsn-1787000000025-local-hardware-limits.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -286,6 +292,11 @@
       "starred": false
     },
     "lsn-1787000000024": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000025": {
       "viewed": false,
       "completed": false,
       "starred": false

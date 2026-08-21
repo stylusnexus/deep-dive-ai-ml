@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local Hardware: CUDA, Metal and What Actually Constrains You</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 26 of 26</span>
+  <h1>Local Hardware: CUDA, Metal and What Actually Constrains You</h1>
+  <p class="subtitle">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</p>
+
+  <p>"Can I run this locally?" has a more interesting answer than most people expect, and it is rarely about raw speed. Three things decide it — how much memory the accelerator can address, how fast it can read that memory, and whether the software stack supports your chip at all. The third one is where most attempts actually fail.</p>
+  <h2>Two architectures, and the difference is not performance</h2>
+  <figure class="diagram"><svg viewBox="0 0 640 220" role="img" aria-label="Discrete GPU versus unified memory architecture">
+<text x="12" y="18" class="d-accent">NVIDIA — discrete</text>
+<rect x="12" y="28" width="130" height="46" rx="6" class="d-box"/>
+<text x="26" y="48" class="d-label-b">System RAM</text>
+<text x="26" y="64" class="d-label-sm">64-256 GB, slow</text>
+<path d="M142 51 L186 51" class="d-arrow"/>
+<text x="146" y="42" class="d-label-sm">PCIe</text>
+<rect x="186" y="28" width="110" height="46" rx="6" class="d-box-warn"/>
+<text x="200" y="48" class="d-label-b">VRAM</text>
+<text x="200" y="64" class="d-label-sm">8-80 GB, fast</text>
+<text x="12" y="98" class="d-label-sm">Model must fit in VRAM. Spill to system RAM and throughput collapses.</text>
+<text x="12" y="116" class="d-label-sm">Bandwidth ~1000 GB/s on a high-end card.</text>
+<line x1="12" y1="130" x2="628" y2="130" stroke="var(--border)"/>
+<text x="340" y="18" class="d-fill-green" font-size="12" font-weight="600">APPLE SILICON — unified</text>
+<rect x="340" y="28" width="288" height="46" rx="6" class="d-box-good"/>
+<text x="356" y="48" class="d-label-b">One pool, CPU and GPU both address it</text>
+<text x="356" y="64" class="d-label-sm">up to 128-512 GB · no copying, no PCIe hop</text>
+<text x="340" y="98" class="d-label-sm">Model must fit in total RAM, most of which the GPU may use.</text>
+<text x="340" y="116" class="d-label-sm">Bandwidth ~400-800 GB/s — lower, but the capacity is the point.</text>
+<rect x="12" y="146" width="616" height="62" rx="7" class="d-box"/>
+<text x="28" y="168" class="d-label-b">The practical consequence</text>
+<text x="28" y="188" class="d-label-sm">A 24GB card cannot load a 70B model at any speed. 128GB of unified memory runs it at 4-bit comfortably —</text>
+<text x="28" y="204" class="d-label-sm">slower per token than the card would be, and the card cannot run it at all.</text>
+</svg><figcaption>The split that decides what you can run. A discrete GPU has fast private memory that your model must fit inside. Apple Silicon shares one large pool at lower bandwidth. Neither is simply better.</figcaption></figure>
+  <h2>Capacity first, bandwidth second</h2>
+  <p>Inference is memory-bandwidth bound: every generated token requires reading the active weights, so tokens per second tracks bandwidth far more closely than it tracks compute. But bandwidth only matters for models you can actually load. Capacity is a hard wall; bandwidth is a slope.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Weights</div><div><div class="roadmap-title">Parameters × bits ÷ 8</div><div class="roadmap-desc">A 70B model at 4-bit is roughly 35GB. This is the number people quote.</div></div></div><div class="roadmap-item"><div class="roadmap-num">KV cache</div><div><div class="roadmap-title">Grows with context and batch</div><div class="roadmap-desc">The part people forget, and frequently what actually exhausts memory. Long prompts can add many gigabytes.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Overhead</div><div><div class="roadmap-title">Runtime, framework, activations</div><div class="roadmap-desc">Budget a few gigabytes beyond the arithmetic.</div></div></div></div>
+  <div class="callout matters"><span class="label">The rule of thumb worth having</span>Take the weight size, add roughly 20% for cache and overhead at ordinary context lengths, and check it against what your accelerator can actually address — not against total system memory. On a discrete card that means VRAM. On Apple Silicon it means the wired limit, which defaults to about 75% of RAM and is adjustable.</div>
+  <h2>The software stack is where things really break</h2>
+  <p>CUDA is not merely a driver — it is the ecosystem nearly all ML tooling was written against. Kernels, quantisation libraries, training frameworks, and a great many research repositories assume it. Apple's Metal has genuine support in PyTorch through MPS and in dedicated runtimes, and the coverage is not equal.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Works well on Metal</div><div><div class="roadmap-title">Inference, LoRA on small-to-mid models</div><div class="roadmap-desc">llama.cpp, MLX, Ollama, LM Studio, PyTorch MPS for most common operations.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Works with friction</div><div><div class="roadmap-title">Training, custom kernels</div><div class="roadmap-desc">An operation with no MPS implementation silently falls back to CPU. The run completes and takes twenty times longer, with nothing announcing why.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Does not work</div><div><div class="roadmap-title">CUDA-only libraries</div><div class="roadmap-desc">Anything with hand-written CUDA kernels — several quantisation and attention implementations among them. No amount of memory helps.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Containers</div><div><div class="roadmap-title">CPU only on macOS</div><div class="roadmap-desc">Docker cannot pass through the Apple GPU. Containers are for reproducibility; training runs on the host.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">The silent CPU fallback is the one that wastes days</span>PyTorch on MPS falls back to CPU for unimplemented operations rather than failing. Your code runs, produces correct results, and crawls — and the cause is invisible unless you look for it. Set the environment variable that turns fallbacks into errors while developing, so an unsupported operation announces itself instead of quietly costing you an afternoon.</div>
+  <h2>What each setup is genuinely good for</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Apple Silicon, high memory</div><div><div class="roadmap-title">Large models, inference, light fine-tuning</div><div class="roadmap-desc">128GB runs quantised 70B models and LoRA on 7B-13B locally, with the data never leaving the machine. Slower per token than a datacentre card and capable of things a consumer card is not.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Consumer NVIDIA (8-24GB)</div><div><div class="roadmap-title">Small models, real training</div><div class="roadmap-desc">Full CUDA ecosystem and high bandwidth, with a hard capacity ceiling. Excellent for 7B and below.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Rented cloud GPU</div><div><div class="roadmap-title">Anything that needs to be big and fast</div><div class="roadmap-desc">The honest answer for serious training. Hourly, no capital cost, and the ecosystem assumption is always satisfied.</div></div></div><div class="roadmap-item"><div class="roadmap-num">No local GPU</div><div><div class="roadmap-title">Perfectly viable</div><div class="roadmap-desc">Embeddings, classical ML and API-based work need none of this. Do not buy hardware to learn — the course's Block 2 runs on CPU.</div></div></div></div>
+  <h2>The decision, in order</h2>
+  <ul><li><strong>Does it need to be local at all?</strong> Privacy, cost at volume, or offline operation are reasons. Preference is not. An API call is frequently cheaper than the electricity.</li><li><strong>Will it fit?</strong> Weights plus cache plus overhead, against addressable memory. If not, quantise further or pick a smaller model — a heavily quantised larger model usually beats a precise smaller one.</li><li><strong>Is it supported?</strong> Check the library, not the chip. This is the step that actually blocks people.</li><li><strong>Is it fast enough for the job?</strong> Below roughly 10 tokens per second, interactive use becomes unpleasant. Batch work can tolerate far less.</li></ul>
+  <div class="callout insight"><span class="label">Why the local option is more viable than it was</span>Quantisation made large models fit in consumer memory, and unified-memory machines made large amounts of memory addressable by a GPU without datacentre pricing. Neither is a speed story. Both are capacity stories, and capacity is what decides whether something runs at all.</div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Build Applications with Local AI Models</span><span class="bk-a">Manning MEAP</span><span class="bk-n">Practical local serving — model selection for a memory budget, quantisation choices, and the runtime differences this lesson summarises.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://docs.pytorch.org/docs/stable/notes/mps.html" target="_blank" rel="noopener">PyTorch MPS backend</a><span class="link-note">Apple GPU support in PyTorch, including the fallback environment variable worth setting during development.</span></li><li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a><span class="link-note">The inference engine behind most local setups, with the memory arithmetic documented per quantisation level.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why can a 128GB Apple Silicon machine run a model a 24GB NVIDIA card cannot, despite the card being faster?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Apple Silicon has more compute cores</div>
+      <div class="quiz-opt">Capacity is a hard wall and bandwidth is a slope — the model must fit in addressable memory before speed matters at all</div>
+      <div class="quiz-opt">Metal compresses model weights automatically</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Your PyTorch code runs on MPS but is twenty times slower than expected. What is the likely cause?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The model is too large for unified memory</div>
+      <div class="quiz-opt">An operation without an MPS implementation is silently falling back to CPU</div>
+      <div class="quiz-opt">Metal does not support half precision</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What most often blocks running a given model locally?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Insufficient memory</div>
+      <div class="quiz-opt">Library support — CUDA-only kernels do not run on Metal regardless of how much memory you have</div>
+      <div class="quiz-opt">Thermal throttling</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. You want to train seriously and have a 16GB consumer card. What is the honest answer?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Quantise the model until it fits</div>
+      <div class="quiz-opt">Rent a cloud GPU hourly — no capital cost and the ecosystem assumption is always satisfied</div>
+      <div class="quiz-opt">Train on CPU with a larger batch size</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

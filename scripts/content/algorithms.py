@@ -63,6 +63,33 @@ LESSONS = [
       "<strong>Loss falls, validation doesn't.</strong> Not an optimisation problem — that's overfitting, and more training makes it worse.",
     ]),
 
+    ("h2", "The numbers that make it concrete"),
+    ("p", "Abstractly this is downhill walking. Concretely, here is what a training run costs. A 7-billion-parameter model at 16-bit precision is about 14GB of weights. Training it needs roughly four times that again: gradients (one per parameter), plus the optimiser's own state — Adam keeps two running averages per parameter, which is where most of the surprise comes from."),
+    ("terms", [
+      ("Weights", "~14 GB", "The model itself, at 16-bit."),
+      ("Gradients", "~14 GB", "One per parameter, alive during the backward pass."),
+      ("Optimiser state", "~28 GB", "Adam's two moments per parameter. Frequently the largest single item."),
+      ("Activations", "Varies with batch and sequence", "Kept from the forward pass so backprop can use them. The knob you actually tune when you run out of memory."),
+    ]),
+    ("callout", "insight", "Why LoRA is not a small optimisation", "Freeze the base weights and train small adapter matrices instead, and you eliminate gradients and optimiser state for almost every parameter. The 56GB above collapses toward the 14GB of frozen weights plus a rounding error. That is the difference between fine-tuning needing a datacentre and needing your laptop, and it is pure bookkeeping rather than a cleverer algorithm."),
+
+    ("h2", "Reading a loss curve"),
+    ("terms", [
+      ("Falls then flattens", "Healthy", "The flattening is where early stopping earns its place."),
+      ("Spikes then recovers", "Usually fine", "A hard batch. Persistent spiking means the learning rate is too high or gradients need clipping."),
+      ("Goes to NaN", "Broken", "Learning rate first, always. Then check for division by zero or a log of zero in a custom loss."),
+      ("Flat from step one", "Wiring bug", "Not a learning-rate problem. Labels not connected, loss computed on the wrong tensor, or gradients not flowing. Overfit one batch to find out."),
+      ("Falls, validation rises", "Not optimisation", "That is overfitting. More training makes it worse, not better."),
+    ]),
+    ("callout", "matters", "The debugging move worth doing first, every time", "Take one batch of about eight examples and train on it repeatedly with everything else held constant. A correctly-wired network will drive that loss to nearly zero — it can memorise eight things trivially. If it cannot, the bug is in the loop, the data pipeline or the loss, and no amount of hyperparameter tuning will find it. This takes two minutes and it separates 'the model cannot learn this' from 'the code does not work'."),
+
+    ("books", [
+      ("The Principles of Deep Learning Theory", "Roberts, Yaida & Hanin",
+       "For when the intuition stops being enough. Rigorous, and the treatment of initialisation and why depth is hard is the real thing rather than an analogy."),
+      ("Hands-On Machine Learning with Scikit-Learn and PyTorch", "Aurelien Geron",
+       "The practical counterpart — training loops, optimisers and schedules with code you can run."),
+    ]),
+
     ("links", [
       ("Google ML Crash Course: gradient descent", "https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent",
        "Interactive treatment of step size and convergence."),
@@ -139,6 +166,29 @@ LESSONS = [
     ]),
     ("callout", "pitfall", "The thing to actually do", "Run logistic or linear regression first, on every tabular problem, before touching a neural network. If it gets within a couple of points of your fancy model, ship the simple one — it trains in seconds, deploys anywhere, and you can explain its decisions when someone asks."),
 
+    ("h2", "Reading the coefficients, which is the point"),
+    ("p", "Fit a model on the turbine data and you get a number per feature. Those numbers are the deliverable as much as the predictions are — but only if you read them carefully."),
+    ("terms", [
+      ("Scale changes everything", "Standardise before comparing", "A coefficient on vibration in mm/s and one on hours are not comparable magnitudes. Standardise the inputs first, then relative sizes mean something."),
+      ("Sign can flip", "When features correlate", "Add a correlated feature and a coefficient can reverse sign while predictions barely move. That is multicollinearity, and it is why an unstable coefficient is a warning about your features rather than about the world."),
+      ("Log-odds, not probability", "For logistic regression", "A coefficient of 0.7 does not mean 70%. Exponentiate it for an odds ratio — about 2.0, meaning the odds roughly double per unit."),
+      ("Association, not cause", "Always", "Coefficients describe the fitted surface. They are not effects, and reporting them as effects is the commonest way a good model produces a bad decision."),
+    ]),
+
+    ("h2", "What to try before concluding it is too simple"),
+    ("ul", [
+      "<strong>Transform the inputs.</strong> Linear in the <em>parameters</em> does not mean linear in the data. Adding a squared term or a log fits a curve while staying a linear model.",
+      "<strong>Add interactions.</strong> Vibration multiplied by age captures 'old and shaking' as its own signal, which neither term carries alone.",
+      "<strong>Bin a stubborn variable.</strong> Sometimes the relationship is a step, not a slope.",
+      "<strong>Check the residuals.</strong> Plot errors against predictions. Structure in that plot — a curve, a fan — tells you what the model is missing far more precisely than a single score does.",
+    ]),
+    ("callout", "insight", "The residual plot is the most under-used diagnostic in tabular ML", "A well-fitted model leaves residuals that look like noise: no pattern, constant spread. A curve means you are missing a non-linear term. A fan shape — errors growing with the prediction — means the variance is not constant, and your confidence intervals are wrong even where the predictions are fine. One plot, and it tells you which of those you have."),
+
+    ("books", [
+      ("Hands-On Machine Learning with Scikit-Learn and PyTorch", "Aurelien Geron",
+       "Chapter 4 works through linear and logistic regression with the regularised variants, including the geometry of why Lasso zeroes coefficients and Ridge does not."),
+    ]),
+
     ("links", [
       ("Linear models (scikit-learn)", "https://scikit-learn.org/stable/modules/linear_model.html",
        "Ridge, Lasso and Elastic Net with the maths and the API side by side."),
@@ -208,6 +258,28 @@ LESSONS = [
 
     ("h2", "What they're good and bad at"),
     ("p", "Good: mixed numeric and categorical inputs, no scaling required, non-linear relationships, missing values handled natively by some implementations, and complete interpretability. Bad: smooth relationships (they approximate a line with a staircase), extrapolation beyond the training range (impossible — they predict a constant per leaf), and stability."),
+
+    ("h2", "A split, computed"),
+    ("p", "Worth doing once by hand, because it demystifies the whole family. Take 100 turbines, 20 of which failed. Before any split, Gini impurity is 1 minus the sum of squared class proportions: 1 − (0.8² + 0.2²) = 0.32."),
+    ("p", "Now try splitting on vibration above 0.5. Suppose that puts 30 turbines on one side, 15 of them failures, and 70 on the other, 5 of them failures:"),
+    ("terms", [
+      ("High-vibration group", "30 rows, 15 failures", "Gini = 1 − (0.5² + 0.5²) = 0.50. Worse than the parent — a coin flip."),
+      ("Low-vibration group", "70 rows, 5 failures", "Gini = 1 − (0.93² + 0.07²) = 0.13. Much purer."),
+      ("Weighted result", "0.3 × 0.50 + 0.7 × 0.13 = 0.24", "Down from 0.32. That reduction of 0.08 is the split's score."),
+    ]),
+    ("p", "The algorithm computes that number for every feature at every candidate threshold and keeps the best. Then it recurses. Everything else — random forests, gradient boosting, the whole tabular-ML establishment — is built on top of that one greedy calculation."),
+    ("callout", "insight", "Why the split can look like it makes things worse", "The high-vibration group came out at 0.50, above the parent's 0.32, and the split is still excellent. Purity is judged on the weighted average of the children, not on each child, because you have isolated 70 rows you can now be confident about. A group that is uncertain but small costs little."),
+
+    ("h2", "Feature importance, and why it misleads"),
+    ("p", "Trees report which features drove the splits, and this is one of the most trusted and most misread outputs in machine learning. The default measure — total impurity reduction attributed to each feature — is biased toward high-cardinality features. A continuous variable offers hundreds of candidate thresholds; a binary flag offers one. The continuous variable wins more splits partly on opportunity rather than on merit."),
+    ("callout", "pitfall", "Use permutation importance when the answer matters", "Shuffle one feature's values and measure how much performance drops. That directly answers the question people think they are asking — does the model actually rely on this? — and it is computed on held-out data, so it reflects generalisation rather than how the tree happened to be built. Slower, and worth it whenever the importance ranking will be shown to anyone who might act on it."),
+
+    ("books", [
+      ("Grokking AI Algorithms", "Rishal Hurbans",
+       "Visual, patient treatment of tree construction if the split calculation above went past too quickly."),
+      ("Hands-On Machine Learning with Scikit-Learn and PyTorch", "Aurelien Geron",
+       "Chapter 6 on trees, including exporting one as readable text — worth doing once on a real model."),
+    ]),
 
     ("links", [
       ("Decision trees (scikit-learn)", "https://scikit-learn.org/stable/modules/tree.html",
@@ -281,6 +353,26 @@ LESSONS = [
     ]),
     ("p", "For the turbine project in Block 2, run a random forest before the neural network. If the forest wins — which happens more often than the marketing around deep learning suggests — that is a real result, not a failure."),
 
+    ("h2", "Why averaging works, in one line of intuition"),
+    ("p", "Every model's error splits into three parts: bias (wrong on average), variance (jumpy from sample to sample), and noise you cannot touch. Averaging many independent models leaves bias where it was and shrinks variance — roughly by the number of models, if their errors were truly independent."),
+    ("p", "They never are. Trees trained on overlapping data make correlated mistakes, and that correlation is the ceiling on what averaging can buy you. Which is exactly why a random forest samples features at each split: not to be clever, but to drive correlation down so the averaging has more to cancel."),
+    ("callout", "insight", "Boosting attacks the other term", "Bagging reduces variance and leaves bias alone. Boosting reduces bias by fitting each new model to what the ensemble still gets wrong — which is why it reaches higher and why it will happily fit noise once the real signal is exhausted. Two methods, two different terms of the same decomposition. That is the whole distinction, and it tells you which to reach for: unstable model, use bagging; underfitting model, use boosting."),
+
+    ("h2", "The parameters that actually matter"),
+    ("terms", [
+      ("n_estimators (forest)", "More is safe", "Converges to a stable answer. Set it as high as you can afford and stop thinking about it."),
+      ("n_estimators (boosting)", "More is dangerous", "Past the optimum it degrades. This is why early stopping is mandatory here and optional there."),
+      ("learning_rate (boosting)", "The main dial", "Lower means each tree contributes less, so you need more of them and generalise better. 0.05 with early stopping is a sane default."),
+      ("max_depth (boosting)", "Keep it shallow", "3 to 6. Deep trees in a boosted ensemble overfit fast — the ensemble supplies the complexity, not the individual tree."),
+      ("subsample / colsample", "Randomness helps here too", "Sampling rows and columns per tree regularises boosting for the same reason it helps forests."),
+    ]),
+    ("callout", "pitfall", "The tuning trap", "Grid-searching a boosted model against your validation set for hours is a very efficient way to overfit the validation set. Tune a handful of parameters, keep the test set untouched, and remember that a forest at defaults is usually within a couple of points of a boosted model tuned for a day."),
+
+    ("books", [
+      ("Hands-On Machine Learning with Scikit-Learn and PyTorch", "Aurelien Geron",
+       "Chapter 7 covers bagging, forests, boosting and stacking with the parameter guidance that matters in practice."),
+    ]),
+
     ("links", [
       ("Ensemble methods (scikit-learn)", "https://scikit-learn.org/stable/modules/ensemble.html",
        "Forests, gradient boosting and the histogram-based implementations, with parameter guidance."),
@@ -344,6 +436,30 @@ LESSONS = [
 </svg>'''),
 
     ("p", "This is why embeddings are typically a few hundred to a couple of thousand dimensions rather than tens of thousands, why dimensionality reduction (PCA, UMAP) is worth knowing, and why hybrid retrieval — combining vector similarity with keyword matching — outperforms pure vector search on many real corpora. Pure distance is a weaker signal than it looks."),
+
+    ("h2", "Choosing k, honestly"),
+    ("p", "Two standard methods, and the honest caveat that neither is decisive."),
+    ("terms", [
+      ("Elbow method", "Plot within-cluster variance against k", "Look for where the curve bends. Real data frequently has no visible elbow, and then the method tells you nothing."),
+      ("Silhouette score", "How well each point fits its cluster vs the next-nearest", "Ranges -1 to 1; pick the k that maximises the mean. More decisive than the elbow, and slower."),
+      ("Domain constraint", "Usually the real answer", "You need four maintenance tiers because you have four crews. That beats both methods, and it is not a cop-out — k-means has no opinion about what a cluster means."),
+    ]),
+    ("callout", "matters", "Clusters are always returned, whether or not they exist", "Run k-means on uniform random noise with k set to five and you get five tidy clusters with a respectable-looking plot. The algorithm partitions; it does not detect structure. Before believing a clustering, check that the same k on shuffled data looks meaningfully worse. If it does not, you have found the algorithm's behaviour rather than your data's."),
+
+    ("h2", "When k-means is the wrong shape"),
+    ("ul", [
+      "<strong>Elongated or curved groups.</strong> k-means draws straight boundaries around round blobs. DBSCAN follows density instead and finds arbitrary shapes.",
+      "<strong>Very different group sizes.</strong> A large cluster tends to get split while a small one gets absorbed.",
+      "<strong>Outliers.</strong> Every point must join a cluster, so a few extreme values drag a centre toward them. DBSCAN can label points as noise; k-means cannot.",
+      "<strong>Unknown k.</strong> If k is genuinely unknown, hierarchical clustering gives you the whole tree of possible groupings to cut where you like.",
+    ]),
+
+    ("books", [
+      ("A Programmer's Guide to Data Mining", "Ron Zacharski",
+       "Free online. The nearest-neighbour and similarity chapters build the intuition slowly, which is what this material needs."),
+      ("Mining of Massive Datasets", "Leskovec, Rajaraman & Ullman",
+       "Chapter 7 on clustering at scale, including what changes when the data does not fit in memory."),
+    ]),
 
     ("links", [
       ("Clustering (scikit-learn)", "https://scikit-learn.org/stable/modules/clustering.html",
@@ -409,6 +525,24 @@ LESSONS = [
       "<strong>Parallel training.</strong> Unlike sequential architectures, all positions are processed at once during training. This is why transformers scaled and their predecessors didn't.",
     ]),
     ("callout", "insight", "Why 'attention' is a fair name", "The weights are interpretable in a limited way — you can see which earlier tokens most influenced a prediction. Treat that as a debugging aid rather than an explanation; attention weights show where information flowed, not why the model concluded what it did."),
+
+    ("h2", "What multiple heads are for"),
+    ("p", "One attention operation produces one weighted blend. A layer runs several in parallel — typically eight to a hundred and twenty-eight — each with its own learned projections, and concatenates the results."),
+    ("p", "The reason is that a token relates to its context in more than one way at once. \"Turbine\" needs to connect to the verb that governs it, the adjective describing it, and the earlier mention it refers back to. One set of attention weights has to compromise across all three; several sets can specialise. Interpretability work has found heads that appear to track syntactic dependencies and heads that track coreference, though attributing clean single functions to heads is less reliable than early results suggested."),
+
+    ("h2", "The variants you will meet by name"),
+    ("terms", [
+      ("Multi-head attention (MHA)", "The original", "Every head has its own keys and values. Most expressive, largest KV cache."),
+      ("Grouped-query attention (GQA)", "The current default", "Heads share key and value projections in groups. Cuts the KV cache substantially with little quality loss, which is why nearly every recent open model uses it."),
+      ("Sliding window", "Bounded context per layer", "Each token attends only to a nearby span, making cost linear rather than quadratic. Information still travels further by passing up through layers."),
+      ("Causal masking", "Not a variant, a requirement", "During generation a token must not see the future, so the upper triangle of the attention matrix is masked out. This is what makes the model autoregressive."),
+    ]),
+    ("callout", "insight", "GQA is why long context got affordable", "The KV cache scales with the number of key-value heads, not query heads. Sharing them across groups cuts cache memory by a large factor — often four to eight times — with quality differences small enough to be hard to measure. That single architectural change did more for practical long-context serving than any increase in window size, and it is invisible from the outside."),
+
+    ("books", [
+      ("Hands-On Large Language Models", "Alammar & Grootendorst",
+       "By the author of the Illustrated Transformer. The visual explanations are the best available, and the code makes them concrete."),
+    ]),
 
     ("links", [
       ("Attention Is All You Need (Vaswani et al., 2017)", "https://arxiv.org/abs/1706.03762",
@@ -480,6 +614,27 @@ LESSONS = [
     ("callout", "pitfall", "How this fails in production", "RAG quality drops and everyone investigates the prompt, the chunking, the model. The actual cause is an index tuned for speed that never retrieves the right chunk in the first place. Measure recall against exact search on a sample before blaming anything downstream — it takes an hour and rules out an entire category of problem."),
     ("p", "The tuning knobs trade directly: HNSW's <code>ef_search</code> and <code>M</code> raise recall and cost latency and memory. There is no setting that gives you both."),
 
+    ("h2", "The two knobs, and what each costs"),
+    ("terms", [
+      ("M", "Connections per node, set at build time", "Higher means a denser graph: better recall, more memory, slower to build. Changing it means rebuilding the index."),
+      ("ef_construction", "Effort spent while building", "Higher builds a better graph, once, for a longer build. Cheap to be generous with — you pay it only at index time."),
+      ("ef_search", "Candidates examined per query", "The one you tune live. Raise it for recall, pay in latency. This is the dial to move first when recall is low."),
+    ]),
+    ("callout", "matters", "Tune ef_search before rebuilding anything", "Low recall is far more often an ef_search that was left at a library default than a fundamentally wrong index. It costs nothing to raise, takes effect immediately, and its cost is latency you can measure. Only rebuild with a larger M when you have established that ef_search alone cannot reach the recall you need."),
+
+    ("h2", "Measuring recall, in about an hour"),
+    ("p", "Take a sample of real queries — two hundred is plenty. Run each through exact search over the full set and keep the true top-k. Run each through your index. Recall@k is the mean overlap. That number is the honest description of your retrieval layer, and almost nobody computes it."),
+    ("p", "Do this once at build time and re-run it on a schedule, because recall degrades as a corpus grows and shifts. An index tuned when you had 50,000 documents is not necessarily the same index at 500,000."),
+
+    ("h2", "The other reason to keep vectors in Postgres"),
+    ("p", "Specialist vector databases are faster at pure vector search. What they are not good at is the query you actually write, which almost always has a filter attached — this customer, this date range, this document type. Filtered vector search is genuinely hard: filter first and you may search too few candidates to find good neighbours; search first and you may filter away everything you found."),
+    ("callout", "insight", "Filtering is where the real engineering is", "A database that already holds your relational data can combine a vector search with a SQL predicate in one planner. Two separate stores means doing that join yourself, in application code, badly. At the scale most teams operate, one database that does both adequately beats two that each do half the job well."),
+
+    ("books", [
+      ("Mining of Massive Datasets", "Leskovec, Rajaraman & Ullman",
+       "Chapter 3 on locality-sensitive hashing is the theoretical ancestor of everything in this lesson. Free online, and worth it for the intuition about why approximate methods work at all."),
+    ]),
+
     ("links", [
       ("pgvector indexing", "https://github.com/pgvector/pgvector",
        "HNSW and IVFFlat in Postgres, with the parameters and their recall implications."),
@@ -548,6 +703,33 @@ LESSONS = [
       ("2. Fuse", "Reciprocal rank fusion", "Two lines of code, no tuning, no normalisation."),
       ("3. Rerank", "Cross-encoder over ~100", "The accuracy step. Only affordable because the candidate set is small."),
       ("4. Truncate", "Top 3–5 into context", "Precision beats volume — distractors actively cost you."),
+    ]),
+
+    ("h2", "What BM25 is actually computing"),
+    ("p", "Three ideas, each fixing a flaw in the one before it."),
+    ("terms", [
+      ("Term frequency", "A word appearing often signals relevance", "But not linearly. Ten mentions is not ten times more relevant than one, so BM25 saturates — the fifth occurrence adds far less than the second."),
+      ("Inverse document frequency", "Rare words carry more information", "A document matching \"gearbox\" tells you much more than one matching \"the\". Weight each term by how rare it is across the corpus."),
+      ("Length normalisation", "Long documents match everything", "A 50-page manual contains most words by accident. Divide the benefit by length, tuned so that being long is penalised but not fatal."),
+    ]),
+    ("callout", "insight", "Saturation is the part people miss", "Plain term-frequency scoring can be gamed by repetition, and worse, it genuinely misranks — a short document that says \"gearbox\" once is often more relevant than a long one that says it fifteen times in passing. BM25's saturation curve is a small piece of mathematics that encodes a real judgement about how language works, and it is most of why a 1990s algorithm still competes with embeddings."),
+
+    ("h2", "Chunking, which decides more than your retriever does"),
+    ("p", "Every retrieval method here operates on chunks you chose. Choose them badly and no amount of ranking recovers."),
+    ("ul", [
+      "<strong>Too small</strong> and a chunk lacks the context to be understood — a paragraph referring to \"this threshold\" with the threshold defined two chunks earlier.",
+      "<strong>Too large</strong> and the embedding averages several topics into a vector that represents none of them well, while burning context when retrieved.",
+      "<strong>Split on structure, not on character count.</strong> Headings, sections, function boundaries. A chunk that ends mid-sentence embeds badly and reads worse.",
+      "<strong>Overlap a little</strong> so a passage spanning a boundary is not lost by both chunks.",
+      "<strong>Keep the parent reference.</strong> Retrieve the chunk, then optionally expand to its section for context — small to match, larger to read.",
+    ]),
+    ("callout", "pitfall", "Look at your chunks before tuning anything downstream", "Print twenty at random and read them. If you cannot tell what a chunk is about without its neighbours, your retrieval will not be able to either, and every hour spent on embedding models or rerankers is spent on the wrong layer. This takes ten minutes and it is skipped almost universally."),
+
+    ("books", [
+      ("Mining of Massive Datasets", "Leskovec, Rajaraman & Ullman",
+       "Chapter 5 on link analysis and ranking. Older than BM25's current use in RAG and still the clearest account of what ranking is doing."),
+      ("Enterprise RAG", "Manning MEAP",
+       "Chunking strategies and hybrid retrieval in a production framing, which is where this lesson's practical advice comes from."),
     ]),
 
     ("links", [
@@ -628,6 +810,27 @@ LESSONS = [
 
     ("h2", "Where it reappears later"),
     ("p", "Benchmark contamination in Block 5 is leakage at industry scale — the test set was in the training data, so the score measures memory. Tuning a prompt against the same examples you evaluate on is leakage by hand. The defence never changes: keep something back that the optimiser cannot see."),
+
+    ("h2", "Two more forms worth recognising"),
+    ("terms", [
+      ("Feature selection before the split", "Subtle and common", "Choosing the top 20 features by correlation with the target, using all the data, then splitting. Your feature set has already seen the test rows. Select inside the pipeline."),
+      ("Tuning against the test set", "Leakage by repetition", "Every time you look at the test score and change something, a little of that set leaks into your choices. After thirty iterations it has become a validation set with a misleading name."),
+    ]),
+
+    ("h2", "How to actually catch it"),
+    ("ul", [
+      "<strong>Rank the features by importance and interrogate the top one.</strong> If a single feature dominates a hard problem, ask why it is so informative. That question catches most target leakage.",
+      "<strong>Drop your best feature and re-run.</strong> If performance collapses to near-baseline, you have a one-feature model, and that feature deserves scrutiny.",
+      "<strong>Sort by time and re-split.</strong> If a time-ordered split scores far worse than a random one, you were learning from the future.",
+      "<strong>Check for duplicate and near-duplicate rows across splits.</strong> Cheap, and it catches contamination in merged or scraped data.",
+      "<strong>Ask what a human would need.</strong> If a person could not make this prediction from this information at that moment, your model should not be able to either.",
+    ]),
+    ("callout", "matters", "The organisational version of this problem", "Leakage often enters through a column someone else created — a flag set by a downstream process, a field populated by the resolution workflow, a status updated after the fact. You cannot detect that from the data alone. Ask whoever owns the pipeline when each field is written, not just what it means. That conversation catches more leakage than any statistical check."),
+
+    ("books", [
+      ("Designing Machine Learning Systems", "Chip Huyen",
+       "Chapter 4 covers leakage, train-test contamination and the sampling decisions that produce them, in a production framing rather than an academic one."),
+    ]),
 
     ("links", [
       ("Common pitfalls: data leakage (scikit-learn)", "https://scikit-learn.org/stable/common_pitfalls.html",

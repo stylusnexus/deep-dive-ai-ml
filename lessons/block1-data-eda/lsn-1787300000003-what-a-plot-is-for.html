@@ -177,6 +177,14 @@
     .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
     .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
   }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
 </style>
 
 </head>
@@ -189,6 +197,24 @@
   <p>Exploratory analysis becomes a ritual very easily: produce a grid of histograms, note that things look roughly as expected, move on. A plot earns its place only when you would <em>do something different</em> depending on what it shows.</p>
   <h2>Five questions with decisions attached</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">What shape is it?</div><div><div class="roadmap-title">Histogram</div><div class="roadmap-desc">Skewed, bimodal, bounded? Decides whether the mean is a meaningful summary and whether a transform would help.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Does it relate to the target?</div><div><div class="roadmap-title">Box plot by class</div><div class="roadmap-desc">Decides which features are worth keeping before you fit anything.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Are features redundant?</div><div><div class="roadmap-title">Correlation heatmap</div><div class="roadmap-desc">Two near-identical columns destabilise linear models. Decides what to combine or drop.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Do the groups really differ?</div><div><div class="roadmap-title">Bar chart with error bars</div><div class="roadmap-desc">Decides whether an apparent group effect is real or sample noise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Is the missingness informative?</div><div><div class="roadmap-title">Rate by missing flag</div><div class="roadmap-desc">Decides whether the flag becomes a feature.</div></div></div></div>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Five questions and the decision each drives"><defs><marker id="b2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" class="d-fill-muted"/></marker></defs>
+<text x="16" y="18" class="d-accent">QUESTION</text><text x="392" y="18" class="d-fill-green" font-size="12" font-weight="600">DECISION</text>
+<rect x="12" y="26" width="300" height="26" rx="4" class="d-box"/><text x="24" y="44" class="d-label-sm">What shape is it?</text>
+<path d="M320 39 L376 39" class="d-arrow" marker-end="url(#b2)"/>
+<text x="384" y="44" class="d-label-sm">is the mean meaningful? transform?</text>
+<rect x="12" y="58" width="300" height="26" rx="4" class="d-box"/><text x="24" y="76" class="d-label-sm">Does it relate to the target?</text>
+<path d="M320 71 L376 71" class="d-arrow" marker-end="url(#b2)"/>
+<text x="384" y="76" class="d-label-sm">keep the feature or drop it</text>
+<rect x="12" y="90" width="300" height="26" rx="4" class="d-box"/><text x="24" y="108" class="d-label-sm">Are features redundant?</text>
+<path d="M320 103 L376 103" class="d-arrow" marker-end="url(#b2)"/>
+<text x="384" y="108" class="d-label-sm">combine, or drop one</text>
+<rect x="12" y="122" width="300" height="26" rx="4" class="d-box"/><text x="24" y="140" class="d-label-sm">Do the groups really differ?</text>
+<path d="M320 135 L376 135" class="d-arrow" marker-end="url(#b2)"/>
+<text x="384" y="140" class="d-label-sm">real effect, or sample noise</text>
+<rect x="12" y="154" width="300" height="26" rx="4" class="d-box"/><text x="24" y="172" class="d-label-sm">Is the missingness informative?</text>
+<path d="M320 167 L376 167" class="d-arrow" marker-end="url(#b2)"/>
+<text x="384" y="172" class="d-label-sm">flag becomes a feature</text>
+</svg><figcaption>A plot with no decision attached is decoration. These five each end in a choice you would otherwise make by guessing.</figcaption></figure>
   <h2>Read the gap between mean and median</h2>
   <p>Draw both on a histogram. Where the mean sits noticeably to the right of the median, the variable is right-skewed — a long tail pulling the average up. It follows that "the average turbine" is a misleading summary, and that a linear model may do better on the log of the variable than on the variable.</p>
   <h2>The two mistakes that recur</h2>

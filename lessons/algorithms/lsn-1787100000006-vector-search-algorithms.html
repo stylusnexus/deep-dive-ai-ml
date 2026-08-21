@@ -177,6 +177,14 @@
     .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
     .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
   }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
 </style>
 
 </head>
@@ -217,6 +225,16 @@
   <p><strong>Recall@k</strong> is the fraction of true nearest neighbours your index actually returned. An HNSW index at 95% recall silently misses one in twenty of the results it should have found — and because the results it does return look perfectly reasonable, nothing appears broken.</p>
   <div class="callout pitfall"><span class="label">How this fails in production</span>RAG quality drops and everyone investigates the prompt, the chunking, the model. The actual cause is an index tuned for speed that never retrieves the right chunk in the first place. Measure recall against exact search on a sample before blaming anything downstream — it takes an hour and rules out an entire category of problem.</div>
   <p>The tuning knobs trade directly: HNSW's <code>ef_search</code> and <code>M</code> raise recall and cost latency and memory. There is no setting that gives you both.</p>
+  <h2>The two knobs, and what each costs</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">M</div><div><div class="roadmap-title">Connections per node, set at build time</div><div class="roadmap-desc">Higher means a denser graph: better recall, more memory, slower to build. Changing it means rebuilding the index.</div></div></div><div class="roadmap-item"><div class="roadmap-num">ef_construction</div><div><div class="roadmap-title">Effort spent while building</div><div class="roadmap-desc">Higher builds a better graph, once, for a longer build. Cheap to be generous with — you pay it only at index time.</div></div></div><div class="roadmap-item"><div class="roadmap-num">ef_search</div><div><div class="roadmap-title">Candidates examined per query</div><div class="roadmap-desc">The one you tune live. Raise it for recall, pay in latency. This is the dial to move first when recall is low.</div></div></div></div>
+  <div class="callout matters"><span class="label">Tune ef_search before rebuilding anything</span>Low recall is far more often an ef_search that was left at a library default than a fundamentally wrong index. It costs nothing to raise, takes effect immediately, and its cost is latency you can measure. Only rebuild with a larger M when you have established that ef_search alone cannot reach the recall you need.</div>
+  <h2>Measuring recall, in about an hour</h2>
+  <p>Take a sample of real queries — two hundred is plenty. Run each through exact search over the full set and keep the true top-k. Run each through your index. Recall@k is the mean overlap. That number is the honest description of your retrieval layer, and almost nobody computes it.</p>
+  <p>Do this once at build time and re-run it on a schedule, because recall degrades as a corpus grows and shifts. An index tuned when you had 50,000 documents is not necessarily the same index at 500,000.</p>
+  <h2>The other reason to keep vectors in Postgres</h2>
+  <p>Specialist vector databases are faster at pure vector search. What they are not good at is the query you actually write, which almost always has a filter attached — this customer, this date range, this document type. Filtered vector search is genuinely hard: filter first and you may search too few candidates to find good neighbours; search first and you may filter away everything you found.</p>
+  <div class="callout insight"><span class="label">Filtering is where the real engineering is</span>A database that already holds your relational data can combine a vector search with a SQL predicate in one planner. Two separate stores means doing that join yourself, in application code, badly. At the scale most teams operate, one database that does both adequately beats two that each do half the job well.</div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Mining of Massive Datasets</span><span class="bk-a">Leskovec, Rajaraman &amp; Ullman</span><span class="bk-n">Chapter 3 on locality-sensitive hashing is the theoretical ancestor of everything in this lesson. Free online, and worth it for the intuition about why approximate methods work at all.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://github.com/pgvector/pgvector" target="_blank" rel="noopener">pgvector indexing</a><span class="link-note">HNSW and IVFFlat in Postgres, with the parameters and their recall implications.</span></li><li><a href="https://arxiv.org/abs/1603.09320" target="_blank" rel="noopener">Efficient and robust ANN search using HNSW (Malkov &amp; Yashunin)</a><span class="link-note">The HNSW paper. The layered-graph intuition is in the first few pages.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

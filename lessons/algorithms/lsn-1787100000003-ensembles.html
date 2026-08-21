@@ -177,6 +177,14 @@
     .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
     .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
   }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
 </style>
 
 </head>
@@ -222,6 +230,14 @@
   <h2>Choosing between them</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Random forest</div><div><div class="roadmap-title">Fast to a good answer</div><div class="roadmap-desc">Little tuning, resistant to overfitting, strong default. Start here.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Gradient boosting</div><div><div class="roadmap-title">Higher ceiling, more care</div><div class="roadmap-desc">Usually wins on tuned performance. Needs early stopping and learning-rate tuning.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Single tree</div><div><div class="roadmap-title">When you must explain it</div><div class="roadmap-desc">Occasionally the right answer purely because a human has to read the logic.</div></div></div></div>
   <p>For the turbine project in Block 2, run a random forest before the neural network. If the forest wins — which happens more often than the marketing around deep learning suggests — that is a real result, not a failure.</p>
+  <h2>Why averaging works, in one line of intuition</h2>
+  <p>Every model's error splits into three parts: bias (wrong on average), variance (jumpy from sample to sample), and noise you cannot touch. Averaging many independent models leaves bias where it was and shrinks variance — roughly by the number of models, if their errors were truly independent.</p>
+  <p>They never are. Trees trained on overlapping data make correlated mistakes, and that correlation is the ceiling on what averaging can buy you. Which is exactly why a random forest samples features at each split: not to be clever, but to drive correlation down so the averaging has more to cancel.</p>
+  <div class="callout insight"><span class="label">Boosting attacks the other term</span>Bagging reduces variance and leaves bias alone. Boosting reduces bias by fitting each new model to what the ensemble still gets wrong — which is why it reaches higher and why it will happily fit noise once the real signal is exhausted. Two methods, two different terms of the same decomposition. That is the whole distinction, and it tells you which to reach for: unstable model, use bagging; underfitting model, use boosting.</div>
+  <h2>The parameters that actually matter</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">n_estimators (forest)</div><div><div class="roadmap-title">More is safe</div><div class="roadmap-desc">Converges to a stable answer. Set it as high as you can afford and stop thinking about it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">n_estimators (boosting)</div><div><div class="roadmap-title">More is dangerous</div><div class="roadmap-desc">Past the optimum it degrades. This is why early stopping is mandatory here and optional there.</div></div></div><div class="roadmap-item"><div class="roadmap-num">learning_rate (boosting)</div><div><div class="roadmap-title">The main dial</div><div class="roadmap-desc">Lower means each tree contributes less, so you need more of them and generalise better. 0.05 with early stopping is a sane default.</div></div></div><div class="roadmap-item"><div class="roadmap-num">max_depth (boosting)</div><div><div class="roadmap-title">Keep it shallow</div><div class="roadmap-desc">3 to 6. Deep trees in a boosted ensemble overfit fast — the ensemble supplies the complexity, not the individual tree.</div></div></div><div class="roadmap-item"><div class="roadmap-num">subsample / colsample</div><div><div class="roadmap-title">Randomness helps here too</div><div class="roadmap-desc">Sampling rows and columns per tree regularises boosting for the same reason it helps forests.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">The tuning trap</span>Grid-searching a boosted model against your validation set for hours is a very efficient way to overfit the validation set. Tune a handful of parameters, keep the test set untouched, and remember that a forest at defaults is usually within a couple of points of a boosted model tuned for a day.</div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Hands-On Machine Learning with Scikit-Learn and PyTorch</span><span class="bk-a">Aurelien Geron</span><span class="bk-n">Chapter 7 covers bagging, forests, boosting and stacking with the parameter guidance that matters in practice.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/ensemble.html" target="_blank" rel="noopener">Ensemble methods (scikit-learn)</a><span class="link-note">Forests, gradient boosting and the histogram-based implementations, with parameter guidance.</span></li><li><a href="https://xgboost.readthedocs.io/" target="_blank" rel="noopener">XGBoost documentation</a><span class="link-note">The tuning parameters that matter, and why early stopping is not optional.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

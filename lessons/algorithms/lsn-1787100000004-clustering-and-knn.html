@@ -177,6 +177,14 @@
     .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
     .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
   }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
 </style>
 
 </head>
@@ -211,6 +219,13 @@
 <text x="404" y="116" class="d-label-sm">roughly equally far away</text>
 </svg><figcaption>As dimensions rise, the gap between nearest and farthest neighbour collapses toward zero. 'Closest' becomes a weaker and weaker signal.</figcaption></figure>
   <p>This is why embeddings are typically a few hundred to a couple of thousand dimensions rather than tens of thousands, why dimensionality reduction (PCA, UMAP) is worth knowing, and why hybrid retrieval — combining vector similarity with keyword matching — outperforms pure vector search on many real corpora. Pure distance is a weaker signal than it looks.</p>
+  <h2>Choosing k, honestly</h2>
+  <p>Two standard methods, and the honest caveat that neither is decisive.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Elbow method</div><div><div class="roadmap-title">Plot within-cluster variance against k</div><div class="roadmap-desc">Look for where the curve bends. Real data frequently has no visible elbow, and then the method tells you nothing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Silhouette score</div><div><div class="roadmap-title">How well each point fits its cluster vs the next-nearest</div><div class="roadmap-desc">Ranges -1 to 1; pick the k that maximises the mean. More decisive than the elbow, and slower.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Domain constraint</div><div><div class="roadmap-title">Usually the real answer</div><div class="roadmap-desc">You need four maintenance tiers because you have four crews. That beats both methods, and it is not a cop-out — k-means has no opinion about what a cluster means.</div></div></div></div>
+  <div class="callout matters"><span class="label">Clusters are always returned, whether or not they exist</span>Run k-means on uniform random noise with k set to five and you get five tidy clusters with a respectable-looking plot. The algorithm partitions; it does not detect structure. Before believing a clustering, check that the same k on shuffled data looks meaningfully worse. If it does not, you have found the algorithm's behaviour rather than your data's.</div>
+  <h2>When k-means is the wrong shape</h2>
+  <ul><li><strong>Elongated or curved groups.</strong> k-means draws straight boundaries around round blobs. DBSCAN follows density instead and finds arbitrary shapes.</li><li><strong>Very different group sizes.</strong> A large cluster tends to get split while a small one gets absorbed.</li><li><strong>Outliers.</strong> Every point must join a cluster, so a few extreme values drag a centre toward them. DBSCAN can label points as noise; k-means cannot.</li><li><strong>Unknown k.</strong> If k is genuinely unknown, hierarchical clustering gives you the whole tree of possible groupings to cut where you like.</li></ul>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">A Programmer&#x27;s Guide to Data Mining</span><span class="bk-a">Ron Zacharski</span><span class="bk-n">Free online. The nearest-neighbour and similarity chapters build the intuition slowly, which is what this material needs.</span></li><li><span class="bk-t">Mining of Massive Datasets</span><span class="bk-a">Leskovec, Rajaraman &amp; Ullman</span><span class="bk-n">Chapter 7 on clustering at scale, including what changes when the data does not fit in memory.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/clustering.html" target="_blank" rel="noopener">Clustering (scikit-learn)</a><span class="link-note">k-means alongside DBSCAN and hierarchical clustering, with a comparison chart of what each finds.</span></li><li><a href="https://scikit-learn.org/stable/modules/neighbors.html" target="_blank" rel="noopener">Nearest neighbours (scikit-learn)</a><span class="link-note">k-NN, distance metrics, and the tree structures that make it tractable.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

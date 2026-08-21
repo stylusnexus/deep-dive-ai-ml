@@ -177,6 +177,14 @@
     .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
     .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
   }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
 </style>
 
 </head>
@@ -192,6 +200,21 @@
   <h2>Where it lies</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Invented methods</div><div><div class="roadmap-title">Plausible, non-existent APIs</div><div class="roadmap-desc">A pandas method that sounds exactly right and doesn't exist. Easy to catch — it errors.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Silently wrong logic</div><div><div class="roadmap-title">Runs, wrong answer</div><div class="roadmap-desc">The dangerous one. A groupby on the wrong key, a merge that drops rows, an off-by-one on a date window. No error, plausible output.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Confident domain claims</div><div><div class="roadmap-title">Statistics stated as fact</div><div class="roadmap-desc">"A VIF above 5 indicates multicollinearity" — the sort of threshold that's conventional rather than true, delivered with certainty.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Context it cannot have</div><div><div class="roadmap-title">About your specific data</div><div class="roadmap-desc">It hasn't seen your rows. Any claim about what your data contains is inference from the column names.</div></div></div></div>
   <div class="callout pitfall"><span class="label">The failure that actually costs you</span>Not the hallucinated function — that errors immediately. It's the merge that silently drops 400 rows because the join key had different whitespace on each side. The code runs, the output looks fine, and your analysis is wrong. **After every AI-suggested transform, check the row count and the null counts.** Two lines, and it catches most of this.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 180" role="img" aria-label="Loud versus silent AI failures in data work">
+<rect x="12" y="26" width="300" height="120" rx="7" class="d-box-good"/>
+<text x="28" y="50" class="d-fill-green" font-size="12" font-weight="600">FAILS LOUDLY — cheap</text>
+<text x="28" y="76" class="d-label-sm">· a pandas method that does not exist</text>
+<text x="28" y="96" class="d-label-sm">· wrong argument name</text>
+<text x="28" y="116" class="d-label-sm">· syntax error</text>
+<text x="28" y="136" class="d-label-sm">you find out in one second</text>
+<rect x="328" y="26" width="300" height="120" rx="7" class="d-box-warn"/>
+<text x="344" y="50" class="d-fill-red" font-size="12" font-weight="600">FAILS SILENTLY — expensive</text>
+<text x="344" y="76" class="d-label-sm">· merge drops 400 rows on whitespace</text>
+<text x="344" y="96" class="d-label-sm">· groupby on the wrong key</text>
+<text x="344" y="116" class="d-label-sm">· off-by-one on a date window</text>
+<text x="344" y="136" class="d-label-sm">you find out in the meeting</text>
+<text x="12" y="170" class="d-label-sm">The defence is two lines: check the row count and the null counts, before and after every suggested transform.</text>
+</svg><figcaption>The hallucinated function errors immediately and costs you a minute. The silently wrong merge runs, looks fine, and costs you the analysis.</figcaption></figure>
   <h2>A workflow that holds up</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">1. You decide</div><div><div class="roadmap-title">The question and the approach</div><div class="roadmap-desc">The model is bad at knowing what matters in your business. That judgement is the part you're actually paid for.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2. It drafts</div><div><div class="roadmap-title">The code</div><div class="roadmap-desc">Where it's genuinely fast.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3. You verify</div><div><div class="roadmap-title">Shape, nulls, a spot check</div><div class="roadmap-desc">Before and after. Non-negotiable.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4. You interpret</div><div><div class="roadmap-title">What it means</div><div class="roadmap-desc">The model will happily explain a result it cannot see the context for.</div></div></div></div>
   <h2>The trap specific to data work</h2>

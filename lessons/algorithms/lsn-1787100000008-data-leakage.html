@@ -177,6 +177,14 @@
     .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
     .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
   }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
 </style>
 
 </head>
@@ -219,6 +227,12 @@
   <ul><li><strong>Split first, always.</strong> Before any scaling, imputation, encoding or feature selection. Everything is fitted on train and merely applied to validation and test.</li><li><strong>Use a pipeline.</strong> scikit-learn's <code>Pipeline</code> enforces fit-on-train mechanically inside cross-validation. This is what it's for.</li><li><strong>Split by time when time matters.</strong> Train on the past, validate on the future — matching how the model will actually be used.</li><li><strong>Split by group, not by row.</strong> All of a turbine's readings go to one side. <code>GroupKFold</code> exists for this.</li><li><strong>Interrogate every feature.</strong> For each one ask: would I have this value, with this content, at the moment I need the prediction? That single question catches most target leakage.</li></ul>
   <h2>Where it reappears later</h2>
   <p>Benchmark contamination in Block 5 is leakage at industry scale — the test set was in the training data, so the score measures memory. Tuning a prompt against the same examples you evaluate on is leakage by hand. The defence never changes: keep something back that the optimiser cannot see.</p>
+  <h2>Two more forms worth recognising</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Feature selection before the split</div><div><div class="roadmap-title">Subtle and common</div><div class="roadmap-desc">Choosing the top 20 features by correlation with the target, using all the data, then splitting. Your feature set has already seen the test rows. Select inside the pipeline.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Tuning against the test set</div><div><div class="roadmap-title">Leakage by repetition</div><div class="roadmap-desc">Every time you look at the test score and change something, a little of that set leaks into your choices. After thirty iterations it has become a validation set with a misleading name.</div></div></div></div>
+  <h2>How to actually catch it</h2>
+  <ul><li><strong>Rank the features by importance and interrogate the top one.</strong> If a single feature dominates a hard problem, ask why it is so informative. That question catches most target leakage.</li><li><strong>Drop your best feature and re-run.</strong> If performance collapses to near-baseline, you have a one-feature model, and that feature deserves scrutiny.</li><li><strong>Sort by time and re-split.</strong> If a time-ordered split scores far worse than a random one, you were learning from the future.</li><li><strong>Check for duplicate and near-duplicate rows across splits.</strong> Cheap, and it catches contamination in merged or scraped data.</li><li><strong>Ask what a human would need.</strong> If a person could not make this prediction from this information at that moment, your model should not be able to either.</li></ul>
+  <div class="callout matters"><span class="label">The organisational version of this problem</span>Leakage often enters through a column someone else created — a flag set by a downstream process, a field populated by the resolution workflow, a status updated after the fact. You cannot detect that from the data alone. Ask whoever owns the pipeline when each field is written, not just what it means. That conversation catches more leakage than any statistical check.</div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Designing Machine Learning Systems</span><span class="bk-a">Chip Huyen</span><span class="bk-n">Chapter 4 covers leakage, train-test contamination and the sampling decisions that produce them, in a production framing rather than an academic one.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/common_pitfalls.html" target="_blank" rel="noopener">Common pitfalls: data leakage (scikit-learn)</a><span class="link-note">The canonical treatment, with code showing the preprocessing mistake and its fix.</span></li><li><a href="https://scikit-learn.org/stable/modules/compose.html" target="_blank" rel="noopener">Pipelines (scikit-learn)</a><span class="link-note">The mechanism that makes preprocessing leakage structurally difficult to commit.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

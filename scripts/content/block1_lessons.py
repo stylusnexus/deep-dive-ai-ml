@@ -20,6 +20,22 @@ LESSONS = [
     ("p", "In the Block 1 dataset, <code>operating_hours</code> loads as <code>object</code>. The cause turns out to be thousands separators plus a stray <code>hrs</code> suffix on some rows — two different formatting problems in one column, which is exactly what happens when data is assembled from more than one system."),
     ("callout", "matters", "The habit", "Run <code>df.dtypes</code> immediately after loading, every time, and read it. Any numeric-looking column typed as <code>object</code> is a question you must answer before doing anything else. It takes ten seconds and routinely saves an afternoon."),
 
+    ("figure", "Twenty-two rows out of six thousand, all holding the same impossible value, move the mean by a factor of nearly four. A sentinel is missing data wearing a costume.", '''<svg viewBox="0 0 640 180" role="img" aria-label="Effect of sentinel values on a column mean">
+<text x="12" y="18" class="d-label-sm">rotor_speed_rpm, 6,150 rows</text>
+<line x1="60" y1="120" x2="600" y2="120" class="d-arrow"/>
+<rect x="80" y="66" width="150" height="54" rx="4" class="d-fill-accent" opacity="0.75"/>
+<text x="96" y="96" class="d-label-sm">real readings</text>
+<text x="96" y="140" class="d-label-sm">0-28 rpm</text>
+<circle cx="470" cy="52" r="7" class="d-fill-red"/>
+<circle cx="486" cy="52" r="7" class="d-fill-red"/>
+<circle cx="502" cy="52" r="7" class="d-fill-red"/>
+<text x="430" y="36" class="d-fill-red" font-size="11" font-weight="600">22 rows at exactly 9999.0</text>
+<text x="440" y="140" class="d-label-sm">physically impossible</text>
+<line x1="140" y1="60" x2="140" y2="130" stroke="var(--green)" stroke-width="2"/>
+<text x="106" y="164" class="d-fill-green" font-size="11" font-weight="600">mean 14.4 without</text>
+<line x1="330" y1="60" x2="330" y2="130" stroke="var(--red)" stroke-width="2" stroke-dasharray="4 4"/>
+<text x="300" y="164" class="d-fill-red" font-size="11" font-weight="600">mean 53.3 with</text>
+</svg>'''),
     ("h2", "The types you'll meet"),
     ("terms", [
       ("int64 / float64", "Numbers", "Note that a column with any missing value becomes float, because NaN is a float. An integer column that arrives as float often just means 'has gaps'."),
@@ -75,6 +91,27 @@ LESSONS = [
       ("4. Missingness pattern", "Not just the amount", "Which columns, how much, and — the important part — whether the missing rows differ systematically from the rest."),
     ]),
 
+    ("figure", "Reconnaissance in order. Each finding changes how you read everything after it, which is why they come before any cleaning.", '''<svg viewBox="0 0 640 190" role="img" aria-label="The four findings of a first pass"><defs><marker id="b1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="26" width="140" height="50" rx="6" class="d-box-accent"/>
+<text x="26" y="46" class="d-label-b">1 · Target balance</text>
+<text x="26" y="64" class="d-label-sm">84.6% is free here</text>
+<path d="M152 51 L182 51" class="d-arrow-accent" marker-end="url(#b1)"/>
+<rect x="182" y="26" width="140" height="50" rx="6" class="d-box-warn"/>
+<text x="196" y="46" class="d-label-b">2 · Leaking features</text>
+<text x="196" y="64" class="d-label-sm">before any model</text>
+<path d="M322 51 L352 51" class="d-arrow-accent" marker-end="url(#b1)"/>
+<rect x="352" y="26" width="130" height="50" rx="6" class="d-box"/>
+<text x="366" y="46" class="d-label-b">3 · Duplicates</text>
+<text x="366" y="64" class="d-label-sm">two kinds</text>
+<path d="M482 51 L512 51" class="d-arrow-accent" marker-end="url(#b1)"/>
+<rect x="512" y="26" width="116" height="50" rx="6" class="d-box"/>
+<text x="526" y="46" class="d-label-b">4 · Missingness</text>
+<text x="526" y="64" class="d-label-sm">pattern, not %</text>
+<rect x="12" y="100" width="616" height="76" rx="7" class="d-box"/>
+<text x="28" y="122" class="d-label-b">What you must not do yet</text>
+<text x="28" y="142" class="d-label-sm">no imputing · no dropping columns for being messy · no fitting scalers or encoders · no feature engineering</text>
+<text x="28" y="162" class="d-label-sm">Every one of those decisions is better made after you know why the data looks the way it does.</text>
+</svg>'''),
     ("h2", "Finding the leak"),
     ("p", "The Block 1 dataset carries a column called <code>maintenance_ticket_raised</code>. It looks like a legitimate operational feature. Cross-tabulate it against the target and every <code>URGENT</code> value corresponds to a failure — because the ticket is raised <em>in response to</em> the failure."),
     ("p", "Train on it and you get a near-perfect model that cannot work in production, because at prediction time the ticket doesn't exist yet. The question that catches this is one line from your intake sheet: <em>would I have this value, with this content, at the moment I need the prediction?</em>"),
@@ -127,6 +164,31 @@ LESSONS = [
     ]),
     ("callout", "insight", "You cannot test for MNAR directly", "By definition you don't have the values that would prove it. What you can do is compare rows where a value is missing against rows where it's present, on every *other* column. If those groups differ systematically, treat MNAR as likely — and involve someone who knows how the data is collected."),
 
+    ("figure", "Same 7% missing, three different worlds. Only the third biases your model — and it is the one where the median fill feels most obviously correct.", '''<svg viewBox="0 0 640 200" role="img" aria-label="MCAR MAR and MNAR compared">
+<g><text x="30" y="18" class="d-fill-green" font-size="12" font-weight="600">MCAR</text>
+<rect x="12" y="28" width="190" height="96" rx="6" class="d-box"/>
+<circle cx="42" cy="52" r="5" class="d-fill-muted"/><circle cx="82" cy="72" r="5" class="d-fill-muted"/>
+<circle cx="122" cy="46" r="5" class="d-fill-red"/><circle cx="62" cy="100" r="5" class="d-fill-muted"/>
+<circle cx="162" cy="86" r="5" class="d-fill-red"/><circle cx="102" cy="110" r="5" class="d-fill-muted"/>
+<text x="20" y="146" class="d-label-sm">gaps scattered evenly</text>
+<text x="20" y="164" class="d-fill-green" font-size="11" font-weight="600">filling is safe</text></g>
+<g><text x="250" y="18" class="d-fill-yellow" font-size="12" font-weight="600">MAR</text>
+<rect x="222" y="28" width="190" height="96" rx="6" class="d-box"/>
+<circle cx="252" cy="52" r="5" class="d-fill-muted"/><circle cx="292" cy="72" r="5" class="d-fill-muted"/>
+<circle cx="352" cy="46" r="5" class="d-fill-red"/><circle cx="382" cy="60" r="5" class="d-fill-red"/>
+<circle cx="272" cy="100" r="5" class="d-fill-muted"/><circle cx="368" cy="88" r="5" class="d-fill-red"/>
+<line x1="330" y1="30" x2="330" y2="122" stroke="var(--yellow)" stroke-dasharray="4 4"/>
+<text x="230" y="146" class="d-label-sm">explained by another column</text>
+<text x="230" y="164" class="d-fill-yellow" font-size="11" font-weight="600">fill using that column</text></g>
+<g><text x="460" y="18" class="d-fill-red" font-size="12" font-weight="600">MNAR</text>
+<rect x="432" y="28" width="196" height="96" rx="6" class="d-box-warn"/>
+<circle cx="462" cy="104" r="5" class="d-fill-muted"/><circle cx="502" cy="92" r="5" class="d-fill-muted"/>
+<circle cx="542" cy="52" r="5" class="d-fill-red"/><circle cx="572" cy="42" r="5" class="d-fill-red"/>
+<circle cx="602" cy="38" r="5" class="d-fill-red"/><circle cx="522" cy="76" r="5" class="d-fill-muted"/>
+<text x="440" y="146" class="d-label-sm">the highest values are the gaps</text>
+<text x="440" y="164" class="d-fill-red" font-size="11" font-weight="600">filling hides the signal</text></g>
+<text x="12" y="192" class="d-label-sm">In the turbine data the missing group fails at 24.0% against 14.9% — the sensors drop out on the turbines that shake hardest.</text>
+</svg>'''),
     ("h2", "The Block 1 case"),
     ("p", "Vibration readings are missing on about 7% of turbines. Comparing those rows against the rest: the missing group has a failure rate of 24% against 14.9% for the rest. Missingness is strongly associated with the outcome."),
     ("p", "The mechanism is physical — the sensors fail most on the turbines shaking hardest. So the missing values are disproportionately the <em>high</em> ones. Fill them with the median and you replace the most alarming readings in the dataset with typical ones, systematically hiding the risk you were hired to detect."),
@@ -183,6 +245,24 @@ LESSONS = [
       ("Is the missingness informative?", "Rate by missing flag", "Decides whether the flag becomes a feature."),
     ]),
 
+    ("figure", "A plot with no decision attached is decoration. These five each end in a choice you would otherwise make by guessing.", '''<svg viewBox="0 0 640 200" role="img" aria-label="Five questions and the decision each drives"><defs><marker id="b2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" class="d-fill-muted"/></marker></defs>
+<text x="16" y="18" class="d-accent">QUESTION</text><text x="392" y="18" class="d-fill-green" font-size="12" font-weight="600">DECISION</text>
+<rect x="12" y="26" width="300" height="26" rx="4" class="d-box"/><text x="24" y="44" class="d-label-sm">What shape is it?</text>
+<path d="M320 39 L376 39" class="d-arrow" marker-end="url(#b2)"/>
+<text x="384" y="44" class="d-label-sm">is the mean meaningful? transform?</text>
+<rect x="12" y="58" width="300" height="26" rx="4" class="d-box"/><text x="24" y="76" class="d-label-sm">Does it relate to the target?</text>
+<path d="M320 71 L376 71" class="d-arrow" marker-end="url(#b2)"/>
+<text x="384" y="76" class="d-label-sm">keep the feature or drop it</text>
+<rect x="12" y="90" width="300" height="26" rx="4" class="d-box"/><text x="24" y="108" class="d-label-sm">Are features redundant?</text>
+<path d="M320 103 L376 103" class="d-arrow" marker-end="url(#b2)"/>
+<text x="384" y="108" class="d-label-sm">combine, or drop one</text>
+<rect x="12" y="122" width="300" height="26" rx="4" class="d-box"/><text x="24" y="140" class="d-label-sm">Do the groups really differ?</text>
+<path d="M320 135 L376 135" class="d-arrow" marker-end="url(#b2)"/>
+<text x="384" y="140" class="d-label-sm">real effect, or sample noise</text>
+<rect x="12" y="154" width="300" height="26" rx="4" class="d-box"/><text x="24" y="172" class="d-label-sm">Is the missingness informative?</text>
+<path d="M320 167 L376 167" class="d-arrow" marker-end="url(#b2)"/>
+<text x="384" y="172" class="d-label-sm">flag becomes a feature</text>
+</svg>'''),
     ("h2", "Read the gap between mean and median"),
     ("p", "Draw both on a histogram. Where the mean sits noticeably to the right of the median, the variable is right-skewed — a long tail pulling the average up. It follows that \"the average turbine\" is a misleading summary, and that a linear model may do better on the log of the variable than on the variable."),
 
@@ -245,6 +325,21 @@ LESSONS = [
     ]),
     ("callout", "pitfall", "The failure that actually costs you", "Not the hallucinated function — that errors immediately. It's the merge that silently drops 400 rows because the join key had different whitespace on each side. The code runs, the output looks fine, and your analysis is wrong. **After every AI-suggested transform, check the row count and the null counts.** Two lines, and it catches most of this."),
 
+    ("figure", "The hallucinated function errors immediately and costs you a minute. The silently wrong merge runs, looks fine, and costs you the analysis.", '''<svg viewBox="0 0 640 180" role="img" aria-label="Loud versus silent AI failures in data work">
+<rect x="12" y="26" width="300" height="120" rx="7" class="d-box-good"/>
+<text x="28" y="50" class="d-fill-green" font-size="12" font-weight="600">FAILS LOUDLY — cheap</text>
+<text x="28" y="76" class="d-label-sm">· a pandas method that does not exist</text>
+<text x="28" y="96" class="d-label-sm">· wrong argument name</text>
+<text x="28" y="116" class="d-label-sm">· syntax error</text>
+<text x="28" y="136" class="d-label-sm">you find out in one second</text>
+<rect x="328" y="26" width="300" height="120" rx="7" class="d-box-warn"/>
+<text x="344" y="50" class="d-fill-red" font-size="12" font-weight="600">FAILS SILENTLY — expensive</text>
+<text x="344" y="76" class="d-label-sm">· merge drops 400 rows on whitespace</text>
+<text x="344" y="96" class="d-label-sm">· groupby on the wrong key</text>
+<text x="344" y="116" class="d-label-sm">· off-by-one on a date window</text>
+<text x="344" y="136" class="d-label-sm">you find out in the meeting</text>
+<text x="12" y="170" class="d-label-sm">The defence is two lines: check the row count and the null counts, before and after every suggested transform.</text>
+</svg>'''),
     ("h2", "A workflow that holds up"),
     ("terms", [
       ("1. You decide", "The question and the approach", "The model is bad at knowing what matters in your business. That judgement is the part you're actually paid for."),

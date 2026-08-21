@@ -87,6 +87,14 @@ def render_block(b):
         _, caption, svg = b
         return (f'  <figure class="diagram">{svg}'
                 f"<figcaption>{caption}</figcaption></figure>")
+    if kind == "books":
+        items = "".join(
+            f'<li><span class="bk-t">{E(t)}</span>'
+            f'<span class="bk-a">{E(a)}</span>'
+            f'<span class="bk-n">{n}</span></li>' for t, a, n in b[1]
+        )
+        return (f'  <div class="further shelf"><h3>On your shelf</h3>'
+                f'<ul class="books">{items}</ul></div>')
     if kind == "links":
         items = "".join(
             f'<li><a href="{u}" target="_blank" rel="noopener">{E(t)}</a>'

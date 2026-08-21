@@ -177,6 +177,14 @@
     .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
     .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
   }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
 </style>
 
 </head>
@@ -191,6 +199,22 @@
   <p>When pandas loads a CSV it infers a type per column. That inference is a free test result and most people skim past it. A column you expect to be numeric arriving as <code>object</code> means pandas found something it couldn't parse and fell back to text.</p>
   <p>In the Block 1 dataset, <code>operating_hours</code> loads as <code>object</code>. The cause turns out to be thousands separators plus a stray <code>hrs</code> suffix on some rows — two different formatting problems in one column, which is exactly what happens when data is assembled from more than one system.</p>
   <div class="callout matters"><span class="label">The habit</span>Run <code>df.dtypes</code> immediately after loading, every time, and read it. Any numeric-looking column typed as <code>object</code> is a question you must answer before doing anything else. It takes ten seconds and routinely saves an afternoon.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 180" role="img" aria-label="Effect of sentinel values on a column mean">
+<text x="12" y="18" class="d-label-sm">rotor_speed_rpm, 6,150 rows</text>
+<line x1="60" y1="120" x2="600" y2="120" class="d-arrow"/>
+<rect x="80" y="66" width="150" height="54" rx="4" class="d-fill-accent" opacity="0.75"/>
+<text x="96" y="96" class="d-label-sm">real readings</text>
+<text x="96" y="140" class="d-label-sm">0-28 rpm</text>
+<circle cx="470" cy="52" r="7" class="d-fill-red"/>
+<circle cx="486" cy="52" r="7" class="d-fill-red"/>
+<circle cx="502" cy="52" r="7" class="d-fill-red"/>
+<text x="430" y="36" class="d-fill-red" font-size="11" font-weight="600">22 rows at exactly 9999.0</text>
+<text x="440" y="140" class="d-label-sm">physically impossible</text>
+<line x1="140" y1="60" x2="140" y2="130" stroke="var(--green)" stroke-width="2"/>
+<text x="106" y="164" class="d-fill-green" font-size="11" font-weight="600">mean 14.4 without</text>
+<line x1="330" y1="60" x2="330" y2="130" stroke="var(--red)" stroke-width="2" stroke-dasharray="4 4"/>
+<text x="300" y="164" class="d-fill-red" font-size="11" font-weight="600">mean 53.3 with</text>
+</svg><figcaption>Twenty-two rows out of six thousand, all holding the same impossible value, move the mean by a factor of nearly four. A sentinel is missing data wearing a costume.</figcaption></figure>
   <h2>The types you&#x27;ll meet</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">int64 / float64</div><div><div class="roadmap-title">Numbers</div><div class="roadmap-desc">Note that a column with any missing value becomes float, because NaN is a float. An integer column that arrives as float often just means 'has gaps'.</div></div></div><div class="roadmap-item"><div class="roadmap-num">object</div><div><div class="roadmap-title">Usually strings</div><div class="roadmap-desc">The catch-all. Also what a mixed-type column becomes, which is why it's worth investigating.</div></div></div><div class="roadmap-item"><div class="roadmap-num">category</div><div><div class="roadmap-title">Repeated labels</div><div class="roadmap-desc">Far less memory than object for low-cardinality columns, and it makes the intended set of values explicit.</div></div></div><div class="roadmap-item"><div class="roadmap-num">datetime64</div><div><div class="roadmap-title">Real dates</div><div class="roadmap-desc">Only if you asked for it. Dates loaded as strings sort alphabetically, which puts 2026-01 before 2025-12 — a silent and nasty bug.</div></div></div><div class="roadmap-item"><div class="roadmap-num">bool</div><div><div class="roadmap-title">True/False</div><div class="roadmap-desc">Becomes object the moment a missing value appears.</div></div></div></div>
   <h2>Units and names</h2>

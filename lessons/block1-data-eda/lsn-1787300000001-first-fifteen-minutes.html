@@ -177,6 +177,14 @@
     .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
     .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
   }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
 </style>
 
 </head>
@@ -189,6 +197,27 @@
   <p>There's a strong pull, on opening a new dataset, to start fixing things. Resist it for fifteen minutes. The first pass is reconnaissance, and going in with a repair instinct means you fix symptoms before understanding the problem.</p>
   <h2>The four findings that change everything downstream</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">1. The target&#x27;s balance</div><div><div class="roadmap-title">Before any metric</div><div class="roadmap-desc">A 15% positive rate means 85% accuracy is free. Every score you read later is interpreted against that number.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2. Leaking features</div><div><div class="roadmap-title">Before any model</div><div class="roadmap-desc">Any column that only exists because the outcome already happened. Catch it now or discover it in production.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3. Duplicates</div><div><div class="roadmap-title">Two kinds</div><div class="roadmap-desc">Identical rows, and the same real thing recorded twice under different ids. The second kind is easy to miss and inflates your scores.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4. Missingness pattern</div><div><div class="roadmap-title">Not just the amount</div><div class="roadmap-desc">Which columns, how much, and — the important part — whether the missing rows differ systematically from the rest.</div></div></div></div>
+  <figure class="diagram"><svg viewBox="0 0 640 190" role="img" aria-label="The four findings of a first pass"><defs><marker id="b1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="26" width="140" height="50" rx="6" class="d-box-accent"/>
+<text x="26" y="46" class="d-label-b">1 · Target balance</text>
+<text x="26" y="64" class="d-label-sm">84.6% is free here</text>
+<path d="M152 51 L182 51" class="d-arrow-accent" marker-end="url(#b1)"/>
+<rect x="182" y="26" width="140" height="50" rx="6" class="d-box-warn"/>
+<text x="196" y="46" class="d-label-b">2 · Leaking features</text>
+<text x="196" y="64" class="d-label-sm">before any model</text>
+<path d="M322 51 L352 51" class="d-arrow-accent" marker-end="url(#b1)"/>
+<rect x="352" y="26" width="130" height="50" rx="6" class="d-box"/>
+<text x="366" y="46" class="d-label-b">3 · Duplicates</text>
+<text x="366" y="64" class="d-label-sm">two kinds</text>
+<path d="M482 51 L512 51" class="d-arrow-accent" marker-end="url(#b1)"/>
+<rect x="512" y="26" width="116" height="50" rx="6" class="d-box"/>
+<text x="526" y="46" class="d-label-b">4 · Missingness</text>
+<text x="526" y="64" class="d-label-sm">pattern, not %</text>
+<rect x="12" y="100" width="616" height="76" rx="7" class="d-box"/>
+<text x="28" y="122" class="d-label-b">What you must not do yet</text>
+<text x="28" y="142" class="d-label-sm">no imputing · no dropping columns for being messy · no fitting scalers or encoders · no feature engineering</text>
+<text x="28" y="162" class="d-label-sm">Every one of those decisions is better made after you know why the data looks the way it does.</text>
+</svg><figcaption>Reconnaissance in order. Each finding changes how you read everything after it, which is why they come before any cleaning.</figcaption></figure>
   <h2>Finding the leak</h2>
   <p>The Block 1 dataset carries a column called <code>maintenance_ticket_raised</code>. It looks like a legitimate operational feature. Cross-tabulate it against the target and every <code>URGENT</code> value corresponds to a failure — because the ticket is raised <em>in response to</em> the failure.</p>
   <p>Train on it and you get a near-perfect model that cannot work in production, because at prediction time the ticket doesn't exist yet. The question that catches this is one line from your intake sheet: <em>would I have this value, with this content, at the moment I need the prediction?</em></p>

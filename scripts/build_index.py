@@ -23,6 +23,7 @@ BLURBS = {
  "mcp-dangers": "Named attack classes from the spec itself — and why it says the protocol cannot enforce its own security principles.",
  "spec-driven-development": "Vibe coding and spec-driven development as a spectrum — and the one question that tells you where a task belongs on it.",
  "version-control-basics": "Git and GitHub from zero — and why an agent writing the code makes version control more necessary, not less.",
+ "local-hardware-limits": "CUDA versus Metal, why capacity beats bandwidth, and the silent CPU fallback that wastes days.",
  "the-map": "AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it's an architecture, not a model. Read this first.",
  "agent-loop-and-harness": "The two most-confused words in any agent codebase — and why most agent failures are harness failures, not model failures.",
  "tokens-context-and-kv-cache": "Why a model 'forgets', why long conversations get expensive quadratically, and what prompt caching is actually caching.",

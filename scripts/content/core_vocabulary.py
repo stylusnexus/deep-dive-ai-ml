@@ -2166,4 +2166,106 @@ LESSONS = [
     ]),
   ],
 },
+{
+  "slug": "local-hardware-limits",
+  "title": "Local Hardware: CUDA, Metal and What Actually Constrains You",
+  "subtitle": "Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.",
+  "body": [
+    ("p", "\"Can I run this locally?\" has a more interesting answer than most people expect, and it is rarely about raw speed. Three things decide it — how much memory the accelerator can address, how fast it can read that memory, and whether the software stack supports your chip at all. The third one is where most attempts actually fail."),
+
+    ("h2", "Two architectures, and the difference is not performance"),
+
+    ("figure", "The split that decides what you can run. A discrete GPU has fast private memory that your model must fit inside. Apple Silicon shares one large pool at lower bandwidth. Neither is simply better.", '''<svg viewBox="0 0 640 220" role="img" aria-label="Discrete GPU versus unified memory architecture">
+<text x="12" y="18" class="d-accent">NVIDIA — discrete</text>
+<rect x="12" y="28" width="130" height="46" rx="6" class="d-box"/>
+<text x="26" y="48" class="d-label-b">System RAM</text>
+<text x="26" y="64" class="d-label-sm">64-256 GB, slow</text>
+<path d="M142 51 L186 51" class="d-arrow"/>
+<text x="146" y="42" class="d-label-sm">PCIe</text>
+<rect x="186" y="28" width="110" height="46" rx="6" class="d-box-warn"/>
+<text x="200" y="48" class="d-label-b">VRAM</text>
+<text x="200" y="64" class="d-label-sm">8-80 GB, fast</text>
+<text x="12" y="98" class="d-label-sm">Model must fit in VRAM. Spill to system RAM and throughput collapses.</text>
+<text x="12" y="116" class="d-label-sm">Bandwidth ~1000 GB/s on a high-end card.</text>
+<line x1="12" y1="130" x2="628" y2="130" stroke="var(--border)"/>
+<text x="340" y="18" class="d-fill-green" font-size="12" font-weight="600">APPLE SILICON — unified</text>
+<rect x="340" y="28" width="288" height="46" rx="6" class="d-box-good"/>
+<text x="356" y="48" class="d-label-b">One pool, CPU and GPU both address it</text>
+<text x="356" y="64" class="d-label-sm">up to 128-512 GB · no copying, no PCIe hop</text>
+<text x="340" y="98" class="d-label-sm">Model must fit in total RAM, most of which the GPU may use.</text>
+<text x="340" y="116" class="d-label-sm">Bandwidth ~400-800 GB/s — lower, but the capacity is the point.</text>
+<rect x="12" y="146" width="616" height="62" rx="7" class="d-box"/>
+<text x="28" y="168" class="d-label-b">The practical consequence</text>
+<text x="28" y="188" class="d-label-sm">A 24GB card cannot load a 70B model at any speed. 128GB of unified memory runs it at 4-bit comfortably —</text>
+<text x="28" y="204" class="d-label-sm">slower per token than the card would be, and the card cannot run it at all.</text>
+</svg>'''),
+
+    ("h2", "Capacity first, bandwidth second"),
+    ("p", "Inference is memory-bandwidth bound: every generated token requires reading the active weights, so tokens per second tracks bandwidth far more closely than it tracks compute. But bandwidth only matters for models you can actually load. Capacity is a hard wall; bandwidth is a slope."),
+    ("terms", [
+      ("Weights", "Parameters × bits ÷ 8", "A 70B model at 4-bit is roughly 35GB. This is the number people quote."),
+      ("KV cache", "Grows with context and batch", "The part people forget, and frequently what actually exhausts memory. Long prompts can add many gigabytes."),
+      ("Overhead", "Runtime, framework, activations", "Budget a few gigabytes beyond the arithmetic."),
+    ]),
+    ("callout", "matters", "The rule of thumb worth having", "Take the weight size, add roughly 20% for cache and overhead at ordinary context lengths, and check it against what your accelerator can actually address — not against total system memory. On a discrete card that means VRAM. On Apple Silicon it means the wired limit, which defaults to about 75% of RAM and is adjustable."),
+
+    ("h2", "The software stack is where things really break"),
+    ("p", "CUDA is not merely a driver — it is the ecosystem nearly all ML tooling was written against. Kernels, quantisation libraries, training frameworks, and a great many research repositories assume it. Apple's Metal has genuine support in PyTorch through MPS and in dedicated runtimes, and the coverage is not equal."),
+    ("terms", [
+      ("Works well on Metal", "Inference, LoRA on small-to-mid models", "llama.cpp, MLX, Ollama, LM Studio, PyTorch MPS for most common operations."),
+      ("Works with friction", "Training, custom kernels", "An operation with no MPS implementation silently falls back to CPU. The run completes and takes twenty times longer, with nothing announcing why."),
+      ("Does not work", "CUDA-only libraries", "Anything with hand-written CUDA kernels — several quantisation and attention implementations among them. No amount of memory helps."),
+      ("Containers", "CPU only on macOS", "Docker cannot pass through the Apple GPU. Containers are for reproducibility; training runs on the host."),
+    ]),
+    ("callout", "pitfall", "The silent CPU fallback is the one that wastes days", "PyTorch on MPS falls back to CPU for unimplemented operations rather than failing. Your code runs, produces correct results, and crawls — and the cause is invisible unless you look for it. Set the environment variable that turns fallbacks into errors while developing, so an unsupported operation announces itself instead of quietly costing you an afternoon."),
+
+    ("h2", "What each setup is genuinely good for"),
+    ("terms", [
+      ("Apple Silicon, high memory", "Large models, inference, light fine-tuning", "128GB runs quantised 70B models and LoRA on 7B-13B locally, with the data never leaving the machine. Slower per token than a datacentre card and capable of things a consumer card is not."),
+      ("Consumer NVIDIA (8-24GB)", "Small models, real training", "Full CUDA ecosystem and high bandwidth, with a hard capacity ceiling. Excellent for 7B and below."),
+      ("Rented cloud GPU", "Anything that needs to be big and fast", "The honest answer for serious training. Hourly, no capital cost, and the ecosystem assumption is always satisfied."),
+      ("No local GPU", "Perfectly viable", "Embeddings, classical ML and API-based work need none of this. Do not buy hardware to learn — the course's Block 2 runs on CPU."),
+    ]),
+
+    ("h2", "The decision, in order"),
+    ("ul", [
+      "<strong>Does it need to be local at all?</strong> Privacy, cost at volume, or offline operation are reasons. Preference is not. An API call is frequently cheaper than the electricity.",
+      "<strong>Will it fit?</strong> Weights plus cache plus overhead, against addressable memory. If not, quantise further or pick a smaller model — a heavily quantised larger model usually beats a precise smaller one.",
+      "<strong>Is it supported?</strong> Check the library, not the chip. This is the step that actually blocks people.",
+      "<strong>Is it fast enough for the job?</strong> Below roughly 10 tokens per second, interactive use becomes unpleasant. Batch work can tolerate far less.",
+    ]),
+    ("callout", "insight", "Why the local option is more viable than it was", "Quantisation made large models fit in consumer memory, and unified-memory machines made large amounts of memory addressable by a GPU without datacentre pricing. Neither is a speed story. Both are capacity stories, and capacity is what decides whether something runs at all."),
+
+    ("books", [
+      ("Build Applications with Local AI Models", "Manning MEAP",
+       "Practical local serving — model selection for a memory budget, quantisation choices, and the runtime differences this lesson summarises."),
+    ]),
+
+    ("links", [
+      ("PyTorch MPS backend", "https://docs.pytorch.org/docs/stable/notes/mps.html",
+       "Apple GPU support in PyTorch, including the fallback environment variable worth setting during development."),
+      ("llama.cpp", "https://github.com/ggml-org/llama.cpp",
+       "The inference engine behind most local setups, with the memory arithmetic documented per quantisation level."),
+    ]),
+
+    ("quiz", [
+      ("Why can a 128GB Apple Silicon machine run a model a 24GB NVIDIA card cannot, despite the card being faster?",
+       ["Apple Silicon has more compute cores",
+        "Capacity is a hard wall and bandwidth is a slope — the model must fit in addressable memory before speed matters at all",
+        "Metal compresses model weights automatically"], 1),
+      ("Your PyTorch code runs on MPS but is twenty times slower than expected. What is the likely cause?",
+       ["The model is too large for unified memory",
+        "An operation without an MPS implementation is silently falling back to CPU",
+        "Metal does not support half precision"], 1),
+      ("What most often blocks running a given model locally?",
+       ["Insufficient memory",
+        "Library support — CUDA-only kernels do not run on Metal regardless of how much memory you have",
+        "Thermal throttling"], 1),
+      ("You want to train seriously and have a 16GB consumer card. What is the honest answer?",
+       ["Quantise the model until it fits",
+        "Rent a cloud GPU hourly — no capital cost and the ecosystem assumption is always satisfied",
+        "Train on CPU with a larger batch size"], 1),
+    ]),
+  ],
+},
 ]

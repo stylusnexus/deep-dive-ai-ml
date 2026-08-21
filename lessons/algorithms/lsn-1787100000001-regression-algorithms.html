@@ -177,6 +177,14 @@
     .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
     .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
   }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
 </style>
 
 </head>
@@ -221,6 +229,13 @@
   <h2>Assumptions that break quietly</h2>
   <ul><li><strong>Linearity.</strong> The relationship really is roughly a straight line. Plot it before assuming.</li><li><strong>Independence.</strong> Rows don't influence each other. Time series violate this badly — consecutive days are not independent samples.</li><li><strong>No extreme multicollinearity.</strong> Two nearly-identical inputs make coefficients unstable and uninterpretable, even while predictions stay fine.</li><li><strong>Outlier sensitivity.</strong> Squared error means one extreme point can drag the whole line.</li></ul>
   <div class="callout pitfall"><span class="label">The thing to actually do</span>Run logistic or linear regression first, on every tabular problem, before touching a neural network. If it gets within a couple of points of your fancy model, ship the simple one — it trains in seconds, deploys anywhere, and you can explain its decisions when someone asks.</div>
+  <h2>Reading the coefficients, which is the point</h2>
+  <p>Fit a model on the turbine data and you get a number per feature. Those numbers are the deliverable as much as the predictions are — but only if you read them carefully.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Scale changes everything</div><div><div class="roadmap-title">Standardise before comparing</div><div class="roadmap-desc">A coefficient on vibration in mm/s and one on hours are not comparable magnitudes. Standardise the inputs first, then relative sizes mean something.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Sign can flip</div><div><div class="roadmap-title">When features correlate</div><div class="roadmap-desc">Add a correlated feature and a coefficient can reverse sign while predictions barely move. That is multicollinearity, and it is why an unstable coefficient is a warning about your features rather than about the world.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Log-odds, not probability</div><div><div class="roadmap-title">For logistic regression</div><div class="roadmap-desc">A coefficient of 0.7 does not mean 70%. Exponentiate it for an odds ratio — about 2.0, meaning the odds roughly double per unit.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Association, not cause</div><div><div class="roadmap-title">Always</div><div class="roadmap-desc">Coefficients describe the fitted surface. They are not effects, and reporting them as effects is the commonest way a good model produces a bad decision.</div></div></div></div>
+  <h2>What to try before concluding it is too simple</h2>
+  <ul><li><strong>Transform the inputs.</strong> Linear in the <em>parameters</em> does not mean linear in the data. Adding a squared term or a log fits a curve while staying a linear model.</li><li><strong>Add interactions.</strong> Vibration multiplied by age captures 'old and shaking' as its own signal, which neither term carries alone.</li><li><strong>Bin a stubborn variable.</strong> Sometimes the relationship is a step, not a slope.</li><li><strong>Check the residuals.</strong> Plot errors against predictions. Structure in that plot — a curve, a fan — tells you what the model is missing far more precisely than a single score does.</li></ul>
+  <div class="callout insight"><span class="label">The residual plot is the most under-used diagnostic in tabular ML</span>A well-fitted model leaves residuals that look like noise: no pattern, constant spread. A curve means you are missing a non-linear term. A fan shape — errors growing with the prediction — means the variance is not constant, and your confidence intervals are wrong even where the predictions are fine. One plot, and it tells you which of those you have.</div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Hands-On Machine Learning with Scikit-Learn and PyTorch</span><span class="bk-a">Aurelien Geron</span><span class="bk-n">Chapter 4 works through linear and logistic regression with the regularised variants, including the geometry of why Lasso zeroes coefficients and Ridge does not.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/linear_model.html" target="_blank" rel="noopener">Linear models (scikit-learn)</a><span class="link-note">Ridge, Lasso and Elastic Net with the maths and the API side by side.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
