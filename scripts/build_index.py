@@ -12,6 +12,7 @@ BLURBS = {
  "missing-data-mechanisms": "MCAR, MAR, MNAR — and why 'fill with the median' can destroy exactly the signal you need.",
  "what-a-plot-is-for": "Five questions with decisions attached, and the two chart mistakes that recur everywhere.",
  "ai-assisted-analysis": "Let it write the code, don't let it make the decisions — and check row counts after every transform.",
+ "swe-bench-and-how-to-run-it": "The benchmark behind lesson 2's numbers — how a task is built, how to run it on Apple Silicon, and how to build one for your own repo.",
  "the-map": "AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it's an architecture, not a model. Read this first.",
  "agent-loop-and-harness": "The two words your own docs use most — and why almost every agent failure is a harness failure, not a model failure.",
  "tokens-context-and-kv-cache": "Why a model 'forgets', why long conversations get expensive quadratically, and what prompt caching is actually caching.",
@@ -111,6 +112,8 @@ doc = f"""<!DOCTYPE html>
     <p>Ten questions to answer before writing code. Filled in before every project, reviewed after.</p></a></li>
   <li><a class="card" href="artifacts/selection-scorecard.md"><h2>Selection scorecard</h2>
     <p>For choosing a model, a vendor, or a framework — three decisions with three different failure modes.</p></a></li>
+  <li><a class="card" href="artifacts/sop/README.md"><h2>SOP checklists</h2>
+    <p>Aviation-style: killer items marked, hard gates, and a separate non-normal checklist for when something is already wrong.</p></a></li>
   <li><a class="card" href="GLOSSARY.md"><h2>Glossary</h2>
     <p>Every term the program defines, accumulating block by block and feeding spaced repetition.</p></a></li>
 </ol>

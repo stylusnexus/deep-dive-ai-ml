@@ -6,6 +6,7 @@ Emits lessons/<topic>/*.html + meta.json in the same house format as
 statistics-for-ai and aigp-exam-prep.
 """
 import importlib.util
+import re
 import html
 import json
 import pathlib
@@ -47,6 +48,9 @@ window.addEventListener("message", (e) => {
 
 E = html.escape
 
+# variants with a CSS rule in _lesson_style.html; anything else renders unstyled
+CALLOUT_VARIANTS = set(re.findall(r"\.callout\.([a-z]+)", STYLE))
+
 
 def render_block(b):
     kind = b[0]
@@ -58,6 +62,9 @@ def render_block(b):
         return f"  <p>{b[1]}</p>"
     if kind == "callout":
         _, variant, label, text = b
+        assert variant in CALLOUT_VARIANTS, (
+            f"undefined callout variant {variant!r} — add CSS or use one of "
+            f"{sorted(CALLOUT_VARIANTS)}")
         return (f'  <div class="callout {variant}"><span class="label">{E(label)}</span>'
                 f"{text}</div>")
     if kind == "ul":

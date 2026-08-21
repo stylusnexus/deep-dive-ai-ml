@@ -300,4 +300,98 @@ LESSONS = [
     ]),
   ],
 },
+{
+  "slug": "swe-bench-and-how-to-run-it",
+  "title": "SWE-bench, and How to Actually Run It",
+  "subtitle": "The benchmark behind the numbers in lesson 2 — how it is built, how to run it, and what it does not tell you.",
+  "body": [
+    ("p", "Lesson 2 used SWE-bench to show a sixteen-point spread from scaffolding alone. This lesson is how that benchmark works and how to run it yourself — partly because it's the standard for agentic coding, and mostly because its design is the clearest worked example of the measurement discipline in lessons 3 and 4."),
+
+    ("h2", "What a task actually is"),
+    ("p", "Each instance is a real GitHub issue and the real pull request that closed it. The system under test gets the repository at the commit <em>before</em> the fix, plus the issue text. It must produce a patch. Nothing else."),
+    ("terms", [
+      ("repo + base_commit", "The starting state", "The repository exactly as it stood before anyone fixed this."),
+      ("problem_statement", "The issue text", "What a human maintainer was given. Often incomplete, sometimes misleading — which is the point."),
+      ("FAIL_TO_PASS", "The tests that must start passing", "Drawn from the real PR's tests. These fail at base_commit and pass after the genuine fix."),
+      ("PASS_TO_PASS", "The tests that must keep passing", "Everything already green. This is what stops 'delete the failing test' from scoring."),
+      ("patch / test_patch", "The reference answer", "Held back during the run and used only to validate the fixture."),
+    ]),
+
+    ("callout", "insight", "Look at what that pair of test sets is doing", "FAIL_TO_PASS and PASS_TO_PASS together are exactly the instrument invariant from lesson 3, implemented. The task must fail before the work and pass after it, and the system must not break anything else to get there. An agent that changes nothing fails FAIL_TO_PASS; an agent that guts the suite fails PASS_TO_PASS. Doing nothing and solving it cannot score the same. Most homemade benchmarks omit the second half and quietly reward vandalism."),
+
+    ("h2", "The four variants, and which number people quote"),
+    ("terms", [
+      ("SWE-bench", "2,294 test instances", "The full set, twelve Python repositories. Plus a 225-instance dev split."),
+      ("SWE-bench Lite", "300 instances", "Filtered toward self-contained problems. Cheaper to run, easier — do not compare its scores to the others."),
+      ("SWE-bench Verified", "500 instances", "Human-validated with OpenAI Preparedness to remove tasks that were underspecified or impossible. This is the number almost everyone reports, including lesson 2."),
+      ("Multimodal / Multilingual", "Beyond Python", "Multimodal keeps its test split private and is graded through a cloud CLI — a deliberate defence against contamination."),
+    ]),
+    ("callout", "pitfall", "The comparison people get wrong", "A Lite score and a Verified score are not the same measurement, and neither is comparable to the full set. If a vendor quotes 'SWE-bench' without saying which, the number is uninterpretable. Ask. This is lesson 4's step 1 — write down what you are measuring before you run — applied to reading someone else's claim."),
+
+    ("h2", "Running it"),
+    ("p", "Evaluation is Docker-based: each instance gets a container with the repo and its dependencies at the right commit. That's the only way per-repo environments stay reproducible, and it's why the harness needs real memory and disk."),
+    ("code", """git clone git@github.com:SWE-bench/SWE-bench.git
+cd SWE-bench && pip install -e ."""),
+    ("p", "Then the step almost everyone skips — <strong>validate the fixture before trusting any result</strong> by running the reference patches through it:"),
+    ("code", """# grade the known-good answer: this MUST resolve
+swebench eval verified --gold -i sympy__sympy-20590 --run-id validate-gold"""),
+    ("callout", "warning", "On Apple Silicon, add --namespace ''", "The harness pulls prebuilt Linux images from DockerHub by default. On an M-series Mac you want <code>--namespace ''</code> so images build locally instead. Expect this to be slow the first time and to want real disk — a full Verified run builds hundreds of containers. Build them ahead with <code>swebench images build verified -j 8</code>."),
+    ("p", "Your own run takes a predictions file — one patch per instance — and reports a resolve rate:"),
+    ("code", """swebench eval verified -p predictions.jsonl --run-id my-run-01 -j 8
+
+# re-grade saved logs later without rebuilding any containers
+swebench report my-run-01 -d verified"""),
+
+    ("h2", "What the score does and doesn't mean"),
+    ("p", "The headline is <strong>resolve rate</strong>: the fraction of instances where FAIL_TO_PASS passed and PASS_TO_PASS held. It is a genuinely honest metric — machine-checkable, no judge model, no partial credit for looking plausible. It is also narrower than it reads."),
+    ("ul", [
+      "<strong>Resolved is not correct.</strong> A patch that passes the tests may still be wrong in ways the tests don't cover. The tests are the ones that shipped, not an exhaustive spec.",
+      "<strong>Contamination is real.</strong> These are public repositories and the issues predate most training cutoffs. Some fixes are memorised rather than derived. Verified reduces bad tasks; it cannot remove this.",
+      "<strong>Hints leak.</strong> Some issue text contains most of the solution. That's faithful to real life and it means the benchmark measures a mix of reasoning and reading.",
+      "<strong>Python, twelve repos.</strong> Performance here does not transfer automatically to your Go service or your TypeScript frontend.",
+      "<strong>The harness dominates more than you expect.</strong> Which is lesson 2's point, and the reason a leaderboard entry describes a scaffold at least as much as a model.",
+    ]),
+
+    ("h2", "The part that actually applies to your work"),
+    ("p", "You are unlikely to need a SWE-bench number. You are very likely to need a benchmark for <em>your</em> repository, and SWE-bench is the design worth copying — because your merged pull requests are already labelled data."),
+    ("terms", [
+      ("1 · Mine closed PRs", "That fixed something and touched tests", "The issue is the prompt, the merge commit's parent is the base, the PR is the reference answer."),
+      ("2 · Derive both test sets", "Fail-to-pass and pass-to-pass", "Run the suite at base to find what fails; everything else must stay green."),
+      ("3 · Validate with gold", "Reference patch must resolve", "If it doesn't, the fixture is broken and every later number is noise."),
+      ("4 · Freeze the set", "Then leave it alone", "Its value comes from staying fixed. Edit it between runs and it measures nothing."),
+      ("5 · Hold some back", "Never tune against all of it", "Tuning a scaffold against every task is leakage by hand."),
+    ]),
+    ("callout", "matters", "Why this beats the public number for you", "A benchmark built from your own merged PRs is in your language, your codebase, your conventions, and nobody has optimised against it. It is the twenty-item rule from the eval-battery lesson, applied to code, and it is what <code>honest-bench</code> does — replaying real closed pull requests so the outcome is established before the agent starts and its self-report is irrelevant."),
+
+    ("links", [
+      ('SWE-bench', 'https://www.swebench.com/',
+       'Leaderboards for each variant. Read which variant a number refers to before comparing anything.'),
+      ('SWE-bench on GitHub', 'https://github.com/SWE-bench/SWE-bench',
+       'The harness, the CLI shown above, and the dataset definitions.'),
+      ('Introducing SWE-bench Verified — OpenAI', 'https://openai.com/index/introducing-swe-bench-verified/',
+       'How the 500 were validated, and what was wrong with the tasks removed.'),
+      ('SWE-bench experiments — raw submissions', 'https://github.com/swe-bench/experiments',
+       "Every submission's resolved-task list. The source of lesson 2's numbers, and recomputable yourself."),
+    ]),
+
+    ("quiz", [
+      ("What stops a SWE-bench agent from scoring by deleting the failing test?",
+       ["A human reviews every patch",
+        "PASS_TO_PASS — the tests that were already green must stay green",
+        "The patch is diffed against the reference answer"], 1),
+      ("A vendor reports '62% on SWE-bench'. What must you ask first?",
+       ["Which model they used",
+        "Which variant — Lite, Verified and the full set are not comparable measurements",
+        "How many samples they averaged over"], 1),
+      ("Why run the harness against the reference patches (--gold) before your own predictions?",
+       ["To warm the Docker image cache",
+        "To confirm the fixture actually resolves a known-good patch — if it can't, every later number is noise",
+        "It's required before submitting to the leaderboard"], 1),
+      ("Why is a benchmark built from your own merged PRs more useful to you than a SWE-bench score?",
+       ["It's larger and more statistically rigorous",
+        "It's in your language and codebase, and nobody has optimised against it",
+        "It avoids the need for Docker"], 1),
+    ]),
+  ],
+},
 ]

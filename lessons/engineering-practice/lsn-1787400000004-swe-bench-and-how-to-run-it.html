@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWE-bench, and How to Actually Run It</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 5 of 5</span>
+  <h1>SWE-bench, and How to Actually Run It</h1>
+  <p class="subtitle">The benchmark behind the numbers in lesson 2 — how it is built, how to run it, and what it does not tell you.</p>
+
+  <p>Lesson 2 used SWE-bench to show a sixteen-point spread from scaffolding alone. This lesson is how that benchmark works and how to run it yourself — partly because it's the standard for agentic coding, and mostly because its design is the clearest worked example of the measurement discipline in lessons 3 and 4.</p>
+  <h2>What a task actually is</h2>
+  <p>Each instance is a real GitHub issue and the real pull request that closed it. The system under test gets the repository at the commit <em>before</em> the fix, plus the issue text. It must produce a patch. Nothing else.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">repo + base_commit</div><div><div class="roadmap-title">The starting state</div><div class="roadmap-desc">The repository exactly as it stood before anyone fixed this.</div></div></div><div class="roadmap-item"><div class="roadmap-num">problem_statement</div><div><div class="roadmap-title">The issue text</div><div class="roadmap-desc">What a human maintainer was given. Often incomplete, sometimes misleading — which is the point.</div></div></div><div class="roadmap-item"><div class="roadmap-num">FAIL_TO_PASS</div><div><div class="roadmap-title">The tests that must start passing</div><div class="roadmap-desc">Drawn from the real PR's tests. These fail at base_commit and pass after the genuine fix.</div></div></div><div class="roadmap-item"><div class="roadmap-num">PASS_TO_PASS</div><div><div class="roadmap-title">The tests that must keep passing</div><div class="roadmap-desc">Everything already green. This is what stops 'delete the failing test' from scoring.</div></div></div><div class="roadmap-item"><div class="roadmap-num">patch / test_patch</div><div><div class="roadmap-title">The reference answer</div><div class="roadmap-desc">Held back during the run and used only to validate the fixture.</div></div></div></div>
+  <div class="callout insight"><span class="label">Look at what that pair of test sets is doing</span>FAIL_TO_PASS and PASS_TO_PASS together are exactly the instrument invariant from lesson 3, implemented. The task must fail before the work and pass after it, and the system must not break anything else to get there. An agent that changes nothing fails FAIL_TO_PASS; an agent that guts the suite fails PASS_TO_PASS. Doing nothing and solving it cannot score the same. Most homemade benchmarks omit the second half and quietly reward vandalism.</div>
+  <h2>The four variants, and which number people quote</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">SWE-bench</div><div><div class="roadmap-title">2,294 test instances</div><div class="roadmap-desc">The full set, twelve Python repositories. Plus a 225-instance dev split.</div></div></div><div class="roadmap-item"><div class="roadmap-num">SWE-bench Lite</div><div><div class="roadmap-title">300 instances</div><div class="roadmap-desc">Filtered toward self-contained problems. Cheaper to run, easier — do not compare its scores to the others.</div></div></div><div class="roadmap-item"><div class="roadmap-num">SWE-bench Verified</div><div><div class="roadmap-title">500 instances</div><div class="roadmap-desc">Human-validated with OpenAI Preparedness to remove tasks that were underspecified or impossible. This is the number almost everyone reports, including lesson 2.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Multimodal / Multilingual</div><div><div class="roadmap-title">Beyond Python</div><div class="roadmap-desc">Multimodal keeps its test split private and is graded through a cloud CLI — a deliberate defence against contamination.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">The comparison people get wrong</span>A Lite score and a Verified score are not the same measurement, and neither is comparable to the full set. If a vendor quotes 'SWE-bench' without saying which, the number is uninterpretable. Ask. This is lesson 4's step 1 — write down what you are measuring before you run — applied to reading someone else's claim.</div>
+  <h2>Running it</h2>
+  <p>Evaluation is Docker-based: each instance gets a container with the repo and its dependencies at the right commit. That's the only way per-repo environments stay reproducible, and it's why the harness needs real memory and disk.</p>
+  <pre><code>git clone git@github.com:SWE-bench/SWE-bench.git
+cd SWE-bench &amp;&amp; pip install -e .</code></pre>
+  <p>Then the step almost everyone skips — <strong>validate the fixture before trusting any result</strong> by running the reference patches through it:</p>
+  <pre><code># grade the known-good answer: this MUST resolve
+swebench eval verified --gold -i sympy__sympy-20590 --run-id validate-gold</code></pre>
+  <div class="callout warning"><span class="label">On Apple Silicon, add --namespace &#x27;&#x27;</span>The harness pulls prebuilt Linux images from DockerHub by default. On an M-series Mac you want <code>--namespace ''</code> so images build locally instead. Expect this to be slow the first time and to want real disk — a full Verified run builds hundreds of containers. Build them ahead with <code>swebench images build verified -j 8</code>.</div>
+  <p>Your own run takes a predictions file — one patch per instance — and reports a resolve rate:</p>
+  <pre><code>swebench eval verified -p predictions.jsonl --run-id my-run-01 -j 8
+
+# re-grade saved logs later without rebuilding any containers
+swebench report my-run-01 -d verified</code></pre>
+  <h2>What the score does and doesn&#x27;t mean</h2>
+  <p>The headline is <strong>resolve rate</strong>: the fraction of instances where FAIL_TO_PASS passed and PASS_TO_PASS held. It is a genuinely honest metric — machine-checkable, no judge model, no partial credit for looking plausible. It is also narrower than it reads.</p>
+  <ul><li><strong>Resolved is not correct.</strong> A patch that passes the tests may still be wrong in ways the tests don't cover. The tests are the ones that shipped, not an exhaustive spec.</li><li><strong>Contamination is real.</strong> These are public repositories and the issues predate most training cutoffs. Some fixes are memorised rather than derived. Verified reduces bad tasks; it cannot remove this.</li><li><strong>Hints leak.</strong> Some issue text contains most of the solution. That's faithful to real life and it means the benchmark measures a mix of reasoning and reading.</li><li><strong>Python, twelve repos.</strong> Performance here does not transfer automatically to your Go service or your TypeScript frontend.</li><li><strong>The harness dominates more than you expect.</strong> Which is lesson 2's point, and the reason a leaderboard entry describes a scaffold at least as much as a model.</li></ul>
+  <h2>The part that actually applies to your work</h2>
+  <p>You are unlikely to need a SWE-bench number. You are very likely to need a benchmark for <em>your</em> repository, and SWE-bench is the design worth copying — because your merged pull requests are already labelled data.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">1 · Mine closed PRs</div><div><div class="roadmap-title">That fixed something and touched tests</div><div class="roadmap-desc">The issue is the prompt, the merge commit's parent is the base, the PR is the reference answer.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2 · Derive both test sets</div><div><div class="roadmap-title">Fail-to-pass and pass-to-pass</div><div class="roadmap-desc">Run the suite at base to find what fails; everything else must stay green.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3 · Validate with gold</div><div><div class="roadmap-title">Reference patch must resolve</div><div class="roadmap-desc">If it doesn't, the fixture is broken and every later number is noise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4 · Freeze the set</div><div><div class="roadmap-title">Then leave it alone</div><div class="roadmap-desc">Its value comes from staying fixed. Edit it between runs and it measures nothing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5 · Hold some back</div><div><div class="roadmap-title">Never tune against all of it</div><div class="roadmap-desc">Tuning a scaffold against every task is leakage by hand.</div></div></div></div>
+  <div class="callout matters"><span class="label">Why this beats the public number for you</span>A benchmark built from your own merged PRs is in your language, your codebase, your conventions, and nobody has optimised against it. It is the twenty-item rule from the eval-battery lesson, applied to code, and it is what <code>honest-bench</code> does — replaying real closed pull requests so the outcome is established before the agent starts and its self-report is irrelevant.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.swebench.com/" target="_blank" rel="noopener">SWE-bench</a><span class="link-note">Leaderboards for each variant. Read which variant a number refers to before comparing anything.</span></li><li><a href="https://github.com/SWE-bench/SWE-bench" target="_blank" rel="noopener">SWE-bench on GitHub</a><span class="link-note">The harness, the CLI shown above, and the dataset definitions.</span></li><li><a href="https://openai.com/index/introducing-swe-bench-verified/" target="_blank" rel="noopener">Introducing SWE-bench Verified — OpenAI</a><span class="link-note">How the 500 were validated, and what was wrong with the tasks removed.</span></li><li><a href="https://github.com/swe-bench/experiments" target="_blank" rel="noopener">SWE-bench experiments — raw submissions</a><span class="link-note">Every submission's resolved-task list. The source of lesson 2's numbers, and recomputable yourself.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. What stops a SWE-bench agent from scoring by deleting the failing test?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A human reviews every patch</div>
+      <div class="quiz-opt">PASS_TO_PASS — the tests that were already green must stay green</div>
+      <div class="quiz-opt">The patch is diffed against the reference answer</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. A vendor reports &#x27;62% on SWE-bench&#x27;. What must you ask first?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Which model they used</div>
+      <div class="quiz-opt">Which variant — Lite, Verified and the full set are not comparable measurements</div>
+      <div class="quiz-opt">How many samples they averaged over</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why run the harness against the reference patches (--gold) before your own predictions?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">To warm the Docker image cache</div>
+      <div class="quiz-opt">To confirm the fixture actually resolves a known-good patch — if it can&#x27;t, every later number is noise</div>
+      <div class="quiz-opt">It&#x27;s required before submitting to the leaderboard</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Why is a benchmark built from your own merged PRs more useful to you than a SWE-bench score?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It&#x27;s larger and more statistically rigorous</div>
+      <div class="quiz-opt">It&#x27;s in your language and codebase, and nobody has optimised against it</div>
+      <div class="quiz-opt">It avoids the need for Docker</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

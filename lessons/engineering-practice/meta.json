@@ -37,6 +37,12 @@
       "title": "How to Measure",
       "file": "lsn-1787400000003-how-to-measure.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000004",
+      "title": "SWE-bench, and How to Actually Run It",
+      "file": "lsn-1787400000004-swe-bench-and-how-to-run-it.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -56,6 +62,11 @@
       "starred": false
     },
     "lsn-1787400000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000004": {
       "viewed": false,
       "completed": false,
       "starred": false

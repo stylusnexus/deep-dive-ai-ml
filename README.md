@@ -28,6 +28,11 @@ Everything here is built to deliver three things that aren't modules — they're
 2. **How to evaluate platforms, tools and models** → [`artifacts/selection-scorecard.md`](artifacts/selection-scorecard.md), used for every model, vendor and framework decision
 3. **How to speak the language** → [`GLOSSARY.md`](GLOSSARY.md), built cumulatively and fed into spaced repetition
 
+And when you're actually building: [`artifacts/sop/`](artifacts/sop/) — checklists in the
+aviation sense. A master run-through plus focused ones for training, deep learning,
+fine-tuning, generative AI, LLM engineering, measurement, and a separate non-normal
+checklist for when something is already broken.
+
 ## Start here
 
 1. Read [`CURRICULUM.md`](CURRICULUM.md) — the week-by-week map
