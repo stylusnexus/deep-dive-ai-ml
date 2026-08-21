@@ -68,6 +68,66 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 ---
 
+## Block 0 · Orientation
+
+**AI ⊃ ML ⊃ Deep learning ⊃ Generative AI** — They nest, they aren't alternatives. AI is any system doing something intelligent; ML learns from data instead of rules; deep learning is many-layered neural networks that learn their own features; generative AI produces content rather than a label.
+
+**Agentic AI** — Deliberately outside that nesting: an architecture, not a model type. A loop that lets a model choose actions and use tools.
+
+**Predictive vs generative** — Predictive models answer closed questions with checkable answers. Generative models produce open-ended content, which is why evaluating them is a research problem rather than a formula.
+
+---
+
+## Block 0 · Algorithms
+
+**Gradient descent** — Compute the slope of the loss with respect to each parameter, step the other way, repeat. The learning rate is the step size and the cause of most training instability.
+
+**Backpropagation** — Computing all those gradients efficiently by applying the chain rule backwards from the loss. Why training needs more memory than inference: forward-pass activations must be kept.
+
+**Epoch / batch / mini-batch** — One full pass through the data; how many examples per gradient step. Mini-batch (32–512) is what everyone uses.
+
+**Adam** — The default optimiser. Adapts step size per parameter rather than using one global learning rate.
+
+**Linear regression** — Fits a line minimising squared error. Interpretable coefficients. The baseline for numeric prediction.
+
+**Logistic regression** — Fits a linear combination through a sigmoid to produce a probability. Classifies, despite the name. The threshold is a business decision, not a model output.
+
+**Ridge (L2) / Lasso (L1) / Elastic Net** — Regularised regression. Ridge shrinks coefficients; Lasso drives some to exactly zero, selecting features.
+
+**Gini impurity / entropy** — How a decision tree scores a candidate split. Both measure how purely a split separates classes.
+
+**Pruning / max_depth** — The controls that stop a tree splitting until every leaf holds one row.
+
+**Bagging** — Train many models on random samples of rows, average them. Cancels variance.
+
+**Random forest** — Bagging plus random feature selection at each split, decorrelating the trees further. The strong, low-tuning tabular default.
+
+**Gradient boosting** — Sequential trees, each fitted to the previous ensemble's errors. Higher ceiling than a forest, and will overfit without early stopping. XGBoost, LightGBM, CatBoost.
+
+**k-means** — Assign points to nearest centre, move centres to the mean, repeat. You choose k. Requires scaled features.
+
+**k-NN** — No training; find the k most similar examples at prediction time and vote. RAG retrieval is this algorithm over embeddings.
+
+**Curse of dimensionality** — As dimensions rise, nearest and farthest distances converge, so "closest" carries less information.
+
+**Attention (query, key, value)** — Each token compares its query against every key and takes a weighted blend of values. All-to-all, which is why cost is quadratic in sequence length.
+
+**Transformer** — Stacked attention layers with multiple heads. Positional information must be added separately because attention is order-blind.
+
+**HNSW / IVF** — Approximate nearest-neighbour indexes. HNSW navigates a layered graph; IVF searches only the nearest clusters. Both trade recall for speed.
+
+**Recall@k** — The fraction of true nearest neighbours an index actually returned. The number nobody measures, and a common hidden cause of poor RAG.
+
+**BM25** — Term-frequency keyword ranking, adjusted for rare terms and diminishing repeats. Beats embeddings on identifiers, error codes and rare terms.
+
+**Reciprocal rank fusion** — Combine ranked lists using positions rather than scores: sum of 1/(k + rank), k≈60. No normalisation needed.
+
+**Cross-encoder reranker** — Scores query and document together rather than separately. Much more accurate, far too slow for a whole corpus — so it reranks a shortlist.
+
+**Data leakage** — Information available at training time but not at prediction time. Inflates training *and* validation together, so the usual overfitting gap shows nothing wrong.
+
+---
+
 ## Block 1 · Python, Data & EDA
 *to come*
 

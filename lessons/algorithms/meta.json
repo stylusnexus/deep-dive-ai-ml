@@ -1,0 +1,118 @@
+{
+  "title": "Algorithms That Matter Here",
+  "topic": "algorithms",
+  "icon": "\u2699\ufe0f",
+  "description": "The algorithms this domain actually runs on \u2014 from gradient descent to HNSW \u2014 explained by what they do and where they break, not by their derivations.",
+  "tags": [
+    "ai",
+    "algorithms",
+    "ml"
+  ],
+  "colorScheme": "purple",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-08-20",
+  "lessons": [
+    {
+      "id": "lsn-1787100000000",
+      "title": "Gradient Descent and Backpropagation",
+      "file": "lsn-1787100000000-gradient-descent-and-backprop.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787100000001",
+      "title": "Linear and Logistic Regression",
+      "file": "lsn-1787100000001-regression-algorithms.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787100000002",
+      "title": "Decision Trees: How a Split Gets Chosen",
+      "file": "lsn-1787100000002-decision-trees.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787100000003",
+      "title": "Ensembles: Bagging, Forests and Boosting",
+      "file": "lsn-1787100000003-ensembles.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787100000004",
+      "title": "k-Means, k-NN and the Curse of Dimensionality",
+      "file": "lsn-1787100000004-clustering-and-knn.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787100000005",
+      "title": "Attention and the Transformer",
+      "file": "lsn-1787100000005-attention-and-transformers.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787100000006",
+      "title": "Nearest-Neighbour Search at Scale",
+      "file": "lsn-1787100000006-vector-search-algorithms.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787100000007",
+      "title": "Ranking and Hybrid Retrieval",
+      "file": "lsn-1787100000007-ranking-and-hybrid-retrieval.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787100000008",
+      "title": "Data Leakage",
+      "file": "lsn-1787100000008-data-leakage.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1787100000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787100000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787100000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787100000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787100000004": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787100000005": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787100000006": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787100000007": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787100000008": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}

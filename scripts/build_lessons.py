@@ -72,11 +72,20 @@ def render_block(b):
             f'<div class="roadmap-desc">{d}</div></div></div>'
             for n, t, d in b[1]
         )
-        return f'  <div class="roadmap">{rows}</div>'
+        # numeric labels keep the circle; word labels get the pill variant
+        numeric = all(str(n).strip().isdigit() for n, _, _ in b[1])
+        cls = "roadmap" if numeric else "roadmap terms"
+        return f'  <div class="{cls}">{rows}</div>'
     if kind == "figure":
         _, caption, svg = b
         return (f'  <figure class="diagram">{svg}'
                 f"<figcaption>{caption}</figcaption></figure>")
+    if kind == "links":
+        items = "".join(
+            f'<li><a href="{u}" target="_blank" rel="noopener">{E(t)}</a>'
+            f'<span class="link-note">{n}</span></li>' for t, u, n in b[1]
+        )
+        return f'  <div class="further"><h3>Further reading</h3><ul class="links">{items}</ul></div>'
     if kind == "quiz":
         parts = ['  <div class="quiz">', "    <h3>✅ Check Yourself</h3>"]
         for n, (q, opts, ans) in enumerate(b[1], 1):

@@ -152,12 +152,35 @@
   .d-fill-red { fill: var(--red); }
   .d-fill-yellow { fill: var(--yellow); }
   .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
 </style>
 
 </head>
 <body>
 
-  <span class="pill">Lesson 3 of 9</span>
+  <span class="pill">Lesson 3 of 13</span>
   <h1>Weights, GGUF and Quantization</h1>
   <p class="subtitle">What Q4_K_M actually means, and the trade you're making when you pick it.</p>
 
@@ -169,7 +192,7 @@
   <p>The cost is precision. Each weight is stored approximately. In practice, 4-bit quantization of a large model degrades quality surprisingly little — usually far less than dropping to a smaller model of the same file size. That trade is the entire reason local inference is practical.</p>
   <div class="callout matters"><span class="label">The rule of thumb worth memorising</span>A 4-bit quantized 70B model almost always beats a 16-bit 13B model, despite similar file sizes. Prefer the bigger model, more heavily quantized.</div>
   <h2>Reading Q4_K_M</h2>
-  <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">Q</div><div><div class="roadmap-title">Quantized</div><div class="roadmap-desc">As opposed to full-precision F16 or F32.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">Four bits per weight</div><div class="roadmap-desc">The main lever. Lower means smaller and faster, but less precise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">K</div><div><div class="roadmap-title">K-quant method</div><div class="roadmap-desc">A smarter scheme that varies precision across parts of the model instead of applying one rate everywhere.</div></div></div><div class="roadmap-item"><div class="roadmap-num">M</div><div><div class="roadmap-title">Medium</div><div class="roadmap-desc">Within K-quants: S (small), M (medium), L (large). Larger keeps more precision in the layers that matter most.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Q</div><div><div class="roadmap-title">Quantized</div><div class="roadmap-desc">As opposed to full-precision F16 or F32.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">Four bits per weight</div><div class="roadmap-desc">The main lever. Lower means smaller and faster, but less precise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">K</div><div><div class="roadmap-title">K-quant method</div><div class="roadmap-desc">A smarter scheme that varies precision across parts of the model instead of applying one rate everywhere.</div></div></div><div class="roadmap-item"><div class="roadmap-num">M</div><div><div class="roadmap-title">Medium</div><div class="roadmap-desc">Within K-quants: S (small), M (medium), L (large). Larger keeps more precision in the layers that matter most.</div></div></div></div>
   <p>So <strong>Q4_K_M</strong> is a four-bit K-quant at medium size — the default recommendation for most local models, and a sensible one. Q5_K_M is slightly better and slightly bigger; Q8_0 is near-lossless and roughly twice the size; Q2 is usually where quality visibly breaks.</p>
   <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Model size by quantization level">
 <text x="12" y="20" class="d-label-b">A 70B model on disk</text>
@@ -191,6 +214,7 @@
   <p><strong>GGUF</strong> (GPT-Generated Unified Format) is the file format that holds quantized weights plus the metadata needed to run them — tokenizer, architecture, prompt template. It's the format <code>llama.cpp</code> and Ollama consume. One file, self-describing, no Python environment required.</p>
   <p>This is distinct from Hugging Face's <code>safetensors</code>, which stores full-precision weights for training and fine-tuning. The usual pipeline: fine-tune in safetensors, convert to GGUF, quantize, serve.</p>
   <div class="callout pitfall"><span class="label">Your orphaned 95GB</span>Your own audit found roughly 95GB of local weights that nothing actually serves — a very common outcome. Quantized models are cheap to download and easy to forget. Before pulling another, check what's already on disk.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://huggingface.co/docs/hub/gguf" target="_blank" rel="noopener">GGUF on the Hugging Face Hub</a><span class="link-note">Format reference, and the quantization table naming every Q-variant.</span></li><li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a><span class="link-note">The engine. The README's quantization section is the primary source for the trade-offs here.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. You have 40GB to spend on a local model. Which is generally the better choice?</p>

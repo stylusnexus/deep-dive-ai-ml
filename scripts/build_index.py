@@ -6,6 +6,7 @@ STYLE = (ROOT / "scripts" / "_index_style.html").read_text()
 E = html.escape
 
 BLURBS = {
+ "the-map": "AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it's an architecture, not a model. Read this first.",
  "agent-loop-and-harness": "The two words your own docs use most — and why almost every agent failure is a harness failure, not a model failure.",
  "tokens-context-and-kv-cache": "Why a model 'forgets', why long conversations get expensive quadratically, and what prompt caching is actually caching.",
  "weights-gguf-quantization": "What Q4_K_M means character by character, and why a heavily quantized big model beats a small precise one.",
@@ -15,18 +16,43 @@ BLURBS = {
  "routing-and-escalation": "The idea Bullpen is built on — try cheap, verify, escalate — plus temperature and top-k.",
  "eval-battery": "How you know any of it works, and why the only number worth trusting is one you built yourself.",
  "overfitting-and-underfitting": "The most important pair of words in machine learning, and the habit that catches the dangerous one.",
+ "agents-autonomy-and-danger": "What actually makes something an agent, the autonomy ladder, and every way one can hurt you.",
+ "feedback-rlhf-and-humans": "RLHF, DPO and Constitutional AI — plus the difference between in, on, and out of the loop.",
+ "context-engineering": "Attention is U-shaped over position, distractors actively hurt, and tool results are context too.",
+ "structured-output-json": "The ladder from 'asking nicely' to constrained decoding, and why valid JSON still isn't correct JSON.",
+ "gradient-descent-and-backprop": "The one algorithm underneath every trained model, and why training needs so much more memory than inference.",
+ "regression-algorithms": "The baseline everything else must beat — and why the threshold, not the model, makes the decision.",
+ "decision-trees": "How a split gets chosen, and why depth is the overfitting dial.",
+ "ensembles": "Bagging cancels variance, boosting corrects errors — and which to reach for first.",
+ "clustering-and-knn": "Two algorithms built on distance, and why distance means less as dimensions rise.",
+ "attention-and-transformers": "Query, key, value — and why doubling the context quadruples the cost.",
+ "vector-search-algorithms": "HNSW, IVF, and the recall you quietly trade for speed without ever measuring it.",
+ "ranking-and-hybrid-retrieval": "BM25, reciprocal rank fusion and rerankers — why pure vector search is rarely best.",
+ "data-leakage": "The failure that inflates training and validation together, so nothing looks wrong until production.",
 }
 
-meta = json.loads((ROOT / "lessons" / "bullpen-vocabulary" / "meta.json").read_text())
-cards = []
-for l in meta["lessons"]:
-    slug = l["file"].split("-", 2)[2].rsplit(".", 1)[0]
-    cards.append(
-        f'  <li><a class="card" href="lessons/bullpen-vocabulary/{l["file"]}">\n'
-        f'    <h2>{E(l["title"])}</h2>\n'
-        f'    <p>{E(BLURBS.get(slug, ""))}</p>\n'
-        f"  </a></li>"
-    )
+def section(topic, heading, note):
+    meta = json.loads((ROOT / "lessons" / topic / "meta.json").read_text())
+    cards = []
+    for l in meta["lessons"]:
+        slug = l["file"].split("-", 2)[2].rsplit(".", 1)[0]
+        cards.append(
+            f'  <li><a class="card" href="lessons/{topic}/{l["file"]}">\n'
+            f'    <h2>{E(l["title"])}</h2>\n'
+            f'    <p>{E(BLURBS.get(slug, ""))}</p>\n  </a></li>')
+    return (f'<h2 style="margin-top:44px">{heading}</h2>\n'
+            f'<p class="lede" style="font-size:1em">{note}</p>\n'
+            f'<ol class="lessons">\n{chr(10).join(cards)}\n</ol>'), len(meta["lessons"])
+
+secs, total = [], 0
+for topic, heading, note in [
+    ("orientation", "Start here", "One picture that places every term in the program. Ten minutes, and the rest makes more sense."),
+    ("bullpen-vocabulary", "Block 0 · Vocabulary",
+     "The terms the rest of the program assumes, taught against Bullpen — a system you built — rather than someone else's toy example."),
+    ("algorithms", "Block 0 · Algorithms",
+     "What each algorithm does and where it breaks. Your statistics course covers the maths; this covers the machinery."),
+]:
+    html_, n = section(topic, heading, note); secs.append(html_); total += n
 
 doc = f"""<!DOCTYPE html>
 <html lang="en">
@@ -40,25 +66,28 @@ doc = f"""<!DOCTYPE html>
 
 <p class="eyebrow">🎯 Self-built program</p>
 <h1>Post Graduate Program in AI &amp; Machine Learning</h1>
-<p class="lede">A rebuild of the UT Austin / McCombs PGP curriculum as ~13 weeks of lessons, runnable notebooks and four portfolio projects — with the security, evaluation, cost and fine-tuning material the original leaves out.</p>
+<p class="lede">A rebuild of the UT Austin / McCombs PGP AI&amp;ML curriculum as ~13 weeks of lessons, runnable notebooks and four portfolio projects — with the security, evaluation, cost and fine-tuning material the original leaves out.</p>
 
 <div class="meta">
+  <span class="chip">{total} lessons built</span>
   <span class="chip">10 blocks</span>
   <span class="chip">4 portfolio projects</span>
   <span class="chip">Docker environments</span>
-  <span class="chip">Spaced repetition built in</span>
 </div>
 
-<h2 style="margin-top:44px">Block 0 · Vocabulary</h2>
-<p class="lede" style="font-size:1em">The terms the rest of the program assumes, taught against Bullpen — a system you built — rather than someone else's toy example.</p>
+{chr(10).join(secs)}
 
+<h2 style="margin-top:44px">Already complete elsewhere</h2>
 <ol class="lessons">
-{chr(10).join(cards)}
+  <li><a class="card" href="https://github.com/stylusnexus/statistics-for-ai"><h2>Statistical Learning</h2>
+    <p>Ten lessons — probability, distributions, the CLT, regression, information theory, evaluation metrics and LLM statistics.</p></a></li>
+  <li><a class="card" href="https://github.com/stylusnexus/aigp-exam-prep"><h2>Responsible AI &amp; Governance</h2>
+    <p>Twelve lessons — the EU AI Act, NIST AI RMF, ISO 42001, and the governance lifecycle.</p></a></li>
 </ol>
 
-<h2 style="margin-top:44px">Everything else</h2>
+<h2 style="margin-top:44px">The program</h2>
 <ol class="lessons">
-  <li><a class="card" href="CURRICULUM.md"><h2>The curriculum</h2>
+  <li><a class="card" href="CURRICULUM.md"><h2>Curriculum</h2>
     <p>All ten blocks, week by week, each with an exit criterion that runs rather than a box that ticks.</p></a></li>
   <li><a class="card" href="artifacts/project-intake.md"><h2>Project intake sheet</h2>
     <p>Ten questions to answer before writing code. Filled in before every project, reviewed after.</p></a></li>
@@ -72,4 +101,4 @@ doc = f"""<!DOCTYPE html>
 </html>
 """
 (ROOT / "index.html").write_text(doc)
-print(f"built index.html ({len(meta['lessons'])} lesson cards)")
+print(f"built index.html — {total} lessons across 3 sets")

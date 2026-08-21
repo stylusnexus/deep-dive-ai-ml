@@ -1,0 +1,29 @@
+{
+  "title": "Start Here: The Map",
+  "topic": "orientation",
+  "icon": "\ud83d\uddfa\ufe0f",
+  "description": "How AI, machine learning, deep learning, generative AI and agents actually nest inside one another \u2014 and where every block of this program sits on that map.",
+  "tags": [
+    "ai",
+    "orientation"
+  ],
+  "colorScheme": "blue",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-08-20",
+  "lessons": [
+    {
+      "id": "lsn-1787200000000",
+      "title": "The Map: AI, ML, Deep Learning, GenAI and Agents",
+      "file": "lsn-1787200000000-the-map.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1787200000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}

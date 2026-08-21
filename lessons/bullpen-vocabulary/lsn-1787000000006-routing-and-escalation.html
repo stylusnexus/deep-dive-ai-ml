@@ -152,12 +152,35 @@
   .d-fill-red { fill: var(--red); }
   .d-fill-yellow { fill: var(--yellow); }
   .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
 </style>
 
 </head>
 <body>
 
-  <span class="pill">Lesson 7 of 9</span>
+  <span class="pill">Lesson 7 of 13</span>
   <h1>Routing, Escalation and Sampling Controls</h1>
   <p class="subtitle">The idea Bullpen is built on — plus temperature and top-k, which decide how a model picks words.</p>
 
@@ -194,10 +217,11 @@
   <p>The trade is worth it when most tasks are easy — which, for coding assistance, they are. Routing is an economic bet on the shape of your workload, so it's worth measuring that shape rather than assuming it.</p>
   <h2>Temperature and top-k: how the next word gets picked</h2>
   <p>At each step the model produces a probability across every token in its vocabulary. Sampling controls decide how that distribution gets turned into one choice.</p>
-  <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">Temperature</div><div><div class="roadmap-title">Flattens or sharpens the distribution</div><div class="roadmap-desc">0 means always take the most likely token — deterministic and repetitive. Around 0.7 is a conversational default. Above ~1.2, coherence degrades.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-k</div><div><div class="roadmap-title">Consider only the k most likely tokens</div><div class="roadmap-desc">Discards the long tail of nonsense before sampling.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-p</div><div><div class="roadmap-title">Consider the smallest set summing to probability p</div><div class="roadmap-desc">Adapts to the distribution's shape — more choices when the model is unsure, fewer when it's confident. Usually preferred over top-k.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Temperature</div><div><div class="roadmap-title">Flattens or sharpens the distribution</div><div class="roadmap-desc">0 means always take the most likely token — deterministic and repetitive. Around 0.7 is a conversational default. Above ~1.2, coherence degrades.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-k</div><div><div class="roadmap-title">Consider only the k most likely tokens</div><div class="roadmap-desc">Discards the long tail of nonsense before sampling.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-p</div><div><div class="roadmap-title">Consider the smallest set summing to probability p</div><div class="roadmap-desc">Adapts to the distribution's shape — more choices when the model is unsure, fewer when it's confident. Usually preferred over top-k.</div></div></div></div>
   <div class="callout matters"><span class="label">The practical setting</span>For anything parsed by code — tool calls, structured output, classification, routing — use temperature 0 or very close. You want repeatability, not creativity. Save higher temperatures for prose where variation is the point. A surprising share of 'the agent is flaky' bugs are just an unnecessarily high temperature on a structured task.</div>
   <h2>Determinism, honestly</h2>
   <p>Temperature 0 makes sampling deterministic but does not guarantee identical outputs across runs. Batching, hardware differences, and floating-point non-associativity introduce variation, especially with hosted providers. Design evaluations to tolerate small differences rather than assuming byte-identical replies.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2406.18665" target="_blank" rel="noopener">RouteLLM (Ong et al., 2024)</a><span class="link-note">The predict-which-model approach Bullpen deliberately inverts. Useful for arguing with.</span></li><li><a href="https://github.com/stylusnexus/Bullpen" target="_blank" rel="noopener">Bullpen: docs/routing-strategy.md</a><span class="link-note">Your own strategy doc — the escalation criteria in prose.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Why does Bullpen try a local model first rather than predicting which model to use?</p>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Map: AI, ML, Deep Learning, GenAI and Agents</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 1 of 1</span>
+  <h1>The Map: AI, ML, Deep Learning, GenAI and Agents</h1>
+  <p class="subtitle">Read this before anything else. Every term in the program has a place on one picture.</p>
+
+  <p>These five words get used as though they were alternatives to each other. They aren't — they nest. Most confusion in this field comes from treating a category and one of its subsets as if they were rivals, and almost every vendor pitch you will ever read depends on that confusion going unnoticed.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 400" role="img" aria-label="Nested relationship of AI, machine learning, deep learning and generative AI">
+<rect x="12" y="12" width="450" height="376" rx="14" fill="none" stroke="var(--muted)" stroke-width="2"/>
+<text x="28" y="38" class="d-label-b">ARTIFICIAL INTELLIGENCE</text>
+<text x="28" y="56" class="d-label-sm">any system doing something we'd call intelligent</text>
+<text x="28" y="74" class="d-label-sm">rule engines · search · planning · expert systems</text>
+
+<rect x="40" y="88" width="394" height="288" rx="12" fill="none" stroke="var(--accent)" stroke-width="2"/>
+<text x="56" y="112" class="d-accent">MACHINE LEARNING</text>
+<text x="56" y="130" class="d-label-sm">learns patterns from data instead of being programmed with rules</text>
+<text x="56" y="148" class="d-label-sm">regression · decision trees · random forests · k-means</text>
+
+<rect x="68" y="162" width="338" height="200" rx="10" fill="none" stroke="var(--accent2)" stroke-width="2"/>
+<text x="84" y="186" style="fill:var(--accent2);font-size:12px;font-weight:600;font-family:-apple-system,sans-serif">DEEP LEARNING</text>
+<text x="84" y="204" class="d-label-sm">many-layered neural networks · learns its own features</text>
+<text x="84" y="222" class="d-label-sm">CNNs for images · transformers for sequences</text>
+
+<rect x="96" y="236" width="282" height="112" rx="8" fill="none" stroke="var(--green)" stroke-width="2"/>
+<text x="112" y="260" style="fill:var(--green);font-size:12px;font-weight:600;font-family:-apple-system,sans-serif">GENERATIVE AI</text>
+<text x="112" y="278" class="d-label-sm">produces new content rather than a label or number</text>
+
+<rect x="124" y="292" width="226" height="44" rx="6" class="d-box-good"/>
+<text x="140" y="312" class="d-label-b">LARGE LANGUAGE MODELS</text>
+<text x="140" y="328" class="d-label-sm">generative AI over text</text>
+
+<rect x="482" y="120" width="146" height="160" rx="12" class="d-box-warn"/>
+<text x="498" y="146" style="fill:var(--red);font-size:12px;font-weight:600;font-family:-apple-system,sans-serif">AGENTIC AI</text>
+<text x="498" y="168" class="d-label-sm">not a model type —</text>
+<text x="498" y="184" class="d-label-sm">an architecture.</text>
+<text x="498" y="208" class="d-label-sm">wraps any model in</text>
+<text x="498" y="224" class="d-label-sm">a loop with tools,</text>
+<text x="498" y="240" class="d-label-sm">so it can act rather</text>
+<text x="498" y="256" class="d-label-sm">than only answer.</text>
+<path d="M478 200 L360 250" class="d-arrow"/>
+</svg><figcaption>Each ring is contained by the one outside it. Generative AI is a kind of deep learning, which is a kind of machine learning, which is a kind of artificial intelligence. Agentic AI sits outside the nesting because it is an architecture, not a model type — it wraps a model in a loop that can act.</figcaption></figure>
+  <h2>Reading the rings from the outside in</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Artificial intelligence</div><div><div class="roadmap-title">The whole field</div><div class="roadmap-desc">Any system doing something that looks intelligent. A chess engine from 1997 and a thermostat's scheduling logic both qualify. Broad enough that on its own the word carries very little information.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Machine learning</div><div><div class="roadmap-title">Learns from data</div><div class="roadmap-desc">Rather than being given rules, it is given examples and infers the rules. Everything in Block 2 lives here — and it does not require a neural network.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Deep learning</div><div><div class="roadmap-title">Neural networks, many layers</div><div class="roadmap-desc">Learns its own features rather than being handed them. Needs more data and more compute, and wins decisively on images, audio and language.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Generative AI</div><div><div class="roadmap-title">Produces content</div><div class="roadmap-desc">Outputs text, images or audio instead of a label or a number. A spam classifier is ML but not generative; an image generator is both.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Agentic AI</div><div><div class="roadmap-title">An architecture, not a model</div><div class="roadmap-desc">Sits outside the nesting deliberately. It is a loop that lets a model choose actions and use tools — you could build one around a small classical model, though in practice it's built around an LLM.</div></div></div></div>
+  <h2>The distinction that actually matters day to day</h2>
+  <p><strong>Predictive versus generative.</strong> A predictive model answers a closed question — which category, what number, how likely. Its output can be checked against a known right answer, which makes evaluation straightforward and the statistics well-established.</p>
+  <p>A generative model produces open-ended content. There is usually no single right answer, which is why evaluating generative systems is a research problem rather than a formula, and why this program gives evaluation its own week.</p>
+  <div class="callout insight"><span class="label">Why the older material still matters</span>It is tempting to skip Block 2's regression and decision trees to get to the LLM material. Don't. Overfitting, train/test splits, leakage, precision and recall, the bias–variance trade — these were all discovered in the predictive world and they apply unchanged to everything after it. Benchmark contamination is a test-set leak. Reward hacking is overfitting. The vocabulary transfers wholesale.</div>
+  <h2>Where each block of this program sits</h2>
+  <figure class="diagram"><svg viewBox="0 0 640 260" role="img" aria-label="Program blocks mapped onto the field"><defs><marker id="ma" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="16" width="180" height="52" rx="7" class="d-box-accent"/>
+<text x="26" y="38" class="d-label-b">Blocks 1–2</text>
+<text x="26" y="56" class="d-label-sm">ML · data, models, metrics</text>
+<path d="M192 42 L226 42" class="d-arrow-accent" marker-end="url(#ma)"/>
+<rect x="226" y="16" width="180" height="52" rx="7" class="d-box-accent"/>
+<text x="240" y="38" class="d-label-b">Block 3</text>
+<text x="240" y="56" class="d-label-sm">GenAI · LLMs and RAG</text>
+<path d="M406 42 L440 42" class="d-arrow-accent" marker-end="url(#ma)"/>
+<rect x="440" y="16" width="188" height="52" rx="7" class="d-box-warn"/>
+<text x="454" y="38" class="d-label-b">Block 4</text>
+<text x="454" y="56" class="d-label-sm">Agentic · loops and tools</text>
+<rect x="12" y="94" width="180" height="52" rx="7" class="d-box"/>
+<text x="26" y="116" class="d-label-b">Blocks 5–6</text>
+<text x="26" y="134" class="d-label-sm">evaluation · security</text>
+<rect x="226" y="94" width="180" height="52" rx="7" class="d-box"/>
+<text x="240" y="116" class="d-label-b">Block 7</text>
+<text x="240" y="134" class="d-label-sm">training and fine-tuning</text>
+<rect x="440" y="94" width="188" height="52" rx="7" class="d-box"/>
+<text x="454" y="116" class="d-label-b">Block 8</text>
+<text x="454" y="134" class="d-label-sm">deployment and APIs</text>
+<rect x="12" y="172" width="616" height="44" rx="7" class="d-box-good"/>
+<text x="26" y="192" class="d-label-b">Block 0 · vocabulary and algorithms</text>
+<text x="26" y="210" class="d-label-sm">underneath everything — the terms and the algorithms every block above assumes you already have</text>
+<text x="12" y="244" class="d-label-sm">Statistical learning and responsible AI are already built, and slot in alongside Blocks 2 and 6.</text>
+</svg><figcaption>The program runs roughly outside-in and then upward: foundations first, then the generative layer, then the architecture that puts a model in charge of actions, then everything needed to run it in production.</figcaption></figure>
+  <h2>One honest caveat about the picture</h2>
+  <p>Neat diagrams like the one above are simplifications, and this one has a visible seam: reinforcement learning doesn't sit tidily inside any ring — it's a third learning paradigm alongside supervised and unsupervised, and it shows up both in classical ML and in how LLMs are aligned. Treat the rings as a map for orientation rather than a taxonomy to defend.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://developers.google.com/machine-learning/crash-course/framing/what-is-supervised-learning" target="_blank" rel="noopener">Google ML Crash Course: framing</a><span class="link-note">The supervised/unsupervised framing that the middle ring rests on.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents</a><span class="link-note">Why the outer box is an architecture rather than a model class — and when you don't need it.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Is every generative AI system also machine learning?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">No — generative AI is a separate field that developed independently</div>
+      <div class="quiz-opt">Yes — generative AI sits inside deep learning, which sits inside machine learning</div>
+      <div class="quiz-opt">Only when it&#x27;s built on a transformer</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why is agentic AI drawn outside the nested rings rather than inside them?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Because it&#x27;s newer than the other categories</div>
+      <div class="quiz-opt">Because it&#x27;s an architecture that wraps a model in a loop with tools, not a type of model</div>
+      <div class="quiz-opt">Because agents don&#x27;t use machine learning</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. A spam classifier that outputs &#x27;spam&#x27; or &#x27;not spam&#x27; is which of these?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">Machine learning but not generative AI</div>
+      <div class="quiz-opt">Generative AI, because it produces an output</div>
+      <div class="quiz-opt">Neither — it&#x27;s a rule-based system</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Why does the predictive material still matter once you&#x27;re working with LLMs?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It doesn&#x27;t — LLMs made those techniques obsolete</div>
+      <div class="quiz-opt">Overfitting, leakage, train/test discipline and evaluation metrics all transfer directly; benchmark contamination is a test-set leak</div>
+      <div class="quiz-opt">Because LLMs are built out of decision trees internally</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

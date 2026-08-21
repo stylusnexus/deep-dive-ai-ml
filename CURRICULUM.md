@@ -14,10 +14,14 @@ and the [glossary](GLOSSARY.md) accumulating throughout.
 Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 - Docker environments for Torch and Keras, pgvector, MLflow
-- `lessons/bullpen-vocabulary/` — 8 lessons covering the 14 terms that recur across Bullpen's own docs
-- Wire in the two finished courses (statistics, governance)
+- `lessons/orientation/` — one map placing every term in the program ✅
+- `lessons/bullpen-vocabulary/` — 13 lessons on the terms that recur across Bullpen's own docs, plus overfitting, agents and danger, RLHF and human-in-the-loop, context engineering, structured output ✅
+- `lessons/algorithms/` — 9 lessons on the algorithms this domain runs on, from gradient descent to HNSW and data leakage ✅
+- Wire in the two finished courses (statistics, governance) ✅
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
+
+**Status: 23 lessons built, 25 diagrams, 49 cited sources.**
 
 ---
 

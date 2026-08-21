@@ -152,12 +152,35 @@
   .d-fill-red { fill: var(--red); }
   .d-fill-yellow { fill: var(--yellow); }
   .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
 </style>
 
 </head>
 <body>
 
-  <span class="pill">Lesson 5 of 9</span>
+  <span class="pill">Lesson 5 of 13</span>
   <h1>Embeddings, Vectors and Semantic Routing</h1>
   <p class="subtitle">How a machine decides two things 'mean' something similar — and where that fails.</p>
 
@@ -194,6 +217,7 @@
   <div class="callout pitfall"><span class="label">The baseline you should always run</span>Before reaching for a vector database, try keyword search — BM25 or plain Postgres full-text. On short, jargon-heavy, identifier-rich corpora it frequently wins, and it costs nothing to test. This is the intake sheet's 'dumb baseline' question applied to retrieval.</div>
   <h2>Vector stores</h2>
   <p>A <strong>vector database</strong> stores vectors alongside their source text and finds nearest neighbours quickly. Block 3 uses <code>pgvector</code> — the Postgres extension — because it means one database rather than two, and because at the scale you'll work at, the specialist stores buy speed you don't need.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://sbert.net" target="_blank" rel="noopener">Sentence Transformers</a><span class="link-note">The practical library for embeddings, with clear docs on model choice and similarity.</span></li><li><a href="https://github.com/pgvector/pgvector" target="_blank" rel="noopener">pgvector</a><span class="link-note">The Postgres extension Block 3 uses. Read the indexing notes before loading real data.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Why route with embeddings rather than asking an LLM to classify each turn?</p>

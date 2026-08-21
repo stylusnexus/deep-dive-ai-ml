@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ensembles: Bagging, Forests and Boosting</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 4 of 9</span>
+  <h1>Ensembles: Bagging, Forests and Boosting</h1>
+  <p class="subtitle">Why many mediocre models beat one good one — and which kind to reach for.</p>
+
+  <p>A single decision tree is unstable and overfits. Combine many of them correctly and you get one of the strongest algorithm families available for tabular data — still, in 2026, routinely beating neural networks on the kind of data most businesses actually have.</p>
+  <h2>Two strategies, opposite in spirit</h2>
+  <figure class="diagram"><svg viewBox="0 0 640 220" role="img" aria-label="Bagging versus boosting"><defs><marker id="ea" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>
+<text x="12" y="20" class="d-accent">BAGGING — parallel, independent</text>
+<rect x="12" y="32" width="70" height="26" rx="4" class="d-box"/><text x="30" y="50" class="d-label-sm">tree 1</text>
+<rect x="12" y="64" width="70" height="26" rx="4" class="d-box"/><text x="30" y="82" class="d-label-sm">tree 2</text>
+<rect x="12" y="96" width="70" height="26" rx="4" class="d-box"/><text x="30" y="114" class="d-label-sm">tree 3</text>
+<path d="M82 45 L140 72" class="d-arrow" marker-end="url(#ea)"/>
+<path d="M82 77 L140 77" class="d-arrow" marker-end="url(#ea)"/>
+<path d="M82 109 L140 82" class="d-arrow" marker-end="url(#ea)"/>
+<rect x="140" y="60" width="90" height="34" rx="5" class="d-box-good"/>
+<text x="152" y="82" class="d-label-sm">average</text>
+<text x="12" y="146" class="d-label-sm">cancels variance</text>
+<text x="12" y="162" class="d-label-sm">hard to overfit</text>
+<line x1="270" y1="20" x2="270" y2="190" stroke="var(--border)" stroke-width="1"/>
+<text x="300" y="20" class="d-accent">BOOSTING — sequential, corrective</text>
+<rect x="300" y="60" width="76" height="34" rx="4" class="d-box"/><text x="318" y="82" class="d-label-sm">tree 1</text>
+<path d="M376 77 L404 77" class="d-arrow" marker-end="url(#ea)"/>
+<rect x="404" y="60" width="76" height="34" rx="4" class="d-box"/><text x="422" y="82" class="d-label-sm">tree 2</text>
+<path d="M480 77 L508 77" class="d-arrow" marker-end="url(#ea)"/>
+<rect x="508" y="60" width="76" height="34" rx="4" class="d-box"/><text x="526" y="82" class="d-label-sm">tree 3</text>
+<text x="300" y="118" class="d-label-sm">each trained on what</text>
+<text x="300" y="134" class="d-label-sm">the previous got wrong</text>
+<text x="300" y="162" class="d-label-sm">higher ceiling · will overfit if unchecked</text>
+</svg><figcaption>Bagging trains many independent models in parallel and averages away their variance. Boosting trains models in sequence, each one correcting what the last got wrong.</figcaption></figure>
+  <h2>Bagging and random forests</h2>
+  <p><strong>Bagging</strong> (bootstrap aggregating) trains each tree on a random sample of the rows, drawn with replacement, then averages their predictions. Because the trees see different data, their errors are partly independent, and averaging cancels them.</p>
+  <p>A <strong>random forest</strong> adds a second source of randomness: at each split, only a random subset of features is considered. This stops every tree from picking the same dominant feature at the root, decorrelating them further. More decorrelation, more variance cancelled.</p>
+  <div class="callout matters"><span class="label">Why forests are the safe default</span>A random forest is remarkably hard to overfit by adding trees — more trees converge toward a stable answer rather than degrading. It needs almost no tuning, handles mixed data types, and gives usable feature importances. When you need a strong tabular baseline in ten minutes, this is it.</div>
+  <h2>Boosting</h2>
+  <p><strong>Boosting</strong> works sequentially. Train a weak, shallow tree. Look at what it got wrong. Train the next tree specifically to fix those errors. Repeat, adding each new tree's contribution scaled by a learning rate.</p>
+  <p><strong>Gradient boosting</strong> formalises this: each new tree is fitted to the gradient of the loss — the residual errors — which is the same gradient descent idea from lesson 1, applied by adding models instead of adjusting weights. XGBoost, LightGBM and CatBoost are optimised implementations, and they win a great many tabular competitions.</p>
+  <div class="callout pitfall"><span class="label">Boosting will overfit if you let it</span>Unlike forests, adding boosting rounds past the optimum makes the model worse. You need early stopping against a validation set, plus a low learning rate and shallow trees. More rounds is not more better.</div>
+  <h2>Choosing between them</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Random forest</div><div><div class="roadmap-title">Fast to a good answer</div><div class="roadmap-desc">Little tuning, resistant to overfitting, strong default. Start here.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Gradient boosting</div><div><div class="roadmap-title">Higher ceiling, more care</div><div class="roadmap-desc">Usually wins on tuned performance. Needs early stopping and learning-rate tuning.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Single tree</div><div><div class="roadmap-title">When you must explain it</div><div class="roadmap-desc">Occasionally the right answer purely because a human has to read the logic.</div></div></div></div>
+  <p>For the turbine project in Block 2, run a random forest before the neural network. If the forest wins — which happens more often than the marketing around deep learning suggests — that is a real result, not a failure.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/ensemble.html" target="_blank" rel="noopener">Ensemble methods (scikit-learn)</a><span class="link-note">Forests, gradient boosting and the histogram-based implementations, with parameter guidance.</span></li><li><a href="https://xgboost.readthedocs.io/" target="_blank" rel="noopener">XGBoost documentation</a><span class="link-note">The tuning parameters that matter, and why early stopping is not optional.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why does a random forest sample features at each split as well as sampling rows?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">To train faster on wide datasets</div>
+      <div class="quiz-opt">To stop every tree picking the same dominant feature, decorrelating them so averaging cancels more error</div>
+      <div class="quiz-opt">To handle missing values</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. You add 500 more rounds to a gradient boosting model and validation performance drops. Why?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">Boosting keeps fitting residuals, so past the optimum it starts fitting noise</div>
+      <div class="quiz-opt">The learning rate decayed to zero</div>
+      <div class="quiz-opt">The model ran out of features to split on</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Which is the better ten-minute baseline on a new tabular problem?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Gradient boosting, because it has the higher ceiling</div>
+      <div class="quiz-opt">Random forest, because it&#x27;s resistant to overfitting and needs almost no tuning</div>
+      <div class="quiz-opt">A neural network, because it handles any data type</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

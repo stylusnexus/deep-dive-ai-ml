@@ -66,6 +66,30 @@
       "title": "Overfitting and Underfitting",
       "file": "lsn-1787000000008-overfitting-and-underfitting.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000009",
+      "title": "Agents, Autonomy and the Danger Surface",
+      "file": "lsn-1787000000009-agents-autonomy-and-danger.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000010",
+      "title": "Reinforcement, Feedback and Humans in the Loop",
+      "file": "lsn-1787000000010-feedback-rlhf-and-humans.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000011",
+      "title": "Context Engineering: What Goes In Decides What Comes Out",
+      "file": "lsn-1787000000011-context-engineering.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000012",
+      "title": "Structured Output: JSON You Can Actually Parse",
+      "file": "lsn-1787000000012-structured-output-json.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -110,6 +134,26 @@
       "starred": false
     },
     "lsn-1787000000008": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000009": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000010": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000011": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000012": {
       "viewed": false,
       "completed": false,
       "starred": false

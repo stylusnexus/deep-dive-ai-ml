@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attention and the Transformer</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 6 of 9</span>
+  <h1>Attention and the Transformer</h1>
+  <p class="subtitle">The algorithm every model in this program is built from.</p>
+
+  <p>Every LLM you use is a transformer, and the transformer's central mechanism is <strong>attention</strong>. You don't need the matrix algebra to work effectively with these models, but you do need the shape of the idea — because it explains context limits, cost curves, and why the KV cache exists.</p>
+  <h2>The problem attention solves</h2>
+  <p>To predict the next word in "The turbine that the engineers inspected last week finally ___", the model must connect "turbine" to "finally" across ten intervening words. Earlier architectures processed text in order and carried a running summary, which meant long-range connections faded. Attention lets every position look directly at every other position, at any distance, in one step.</p>
+  <h2>Query, key, value</h2>
+  <p>Each token produces three vectors. The <strong>query</strong> is what this token is looking for. The <strong>key</strong> is what each token offers. The <strong>value</strong> is the content it contributes. Compare one token's query against every key, turn the resulting scores into weights, and take a weighted sum of the values.</p>
+  <p>That's it: each token's new representation is a blend of all tokens, weighted by relevance. Stack this operation dozens of times, with several independent attention "heads" per layer learning different relationships, and you have a transformer.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="All-to-all attention and its quadratic cost">
+<text x="12" y="18" class="d-accent">each token looks at every token</text>
+<g class="d-label-sm">
+<rect x="40" y="34" width="72" height="26" rx="4" class="d-box"/><text x="60" y="52">The</text>
+<rect x="130" y="34" width="72" height="26" rx="4" class="d-box-accent"/><text x="142" y="52">turbine</text>
+<rect x="220" y="34" width="72" height="26" rx="4" class="d-box"/><text x="238" y="52">that</text>
+<rect x="310" y="34" width="72" height="26" rx="4" class="d-box"/><text x="330" y="52">was</text>
+<rect x="400" y="34" width="72" height="26" rx="4" class="d-box-accent"/><text x="416" y="52">finally</text>
+</g>
+<path d="M436 34 Q300 0 166 34" stroke="var(--accent)" stroke-width="2" fill="none"/>
+<path d="M430 60 Q380 88 346 60" class="d-arrow"/>
+<path d="M424 60 Q340 96 256 60" class="d-arrow"/>
+<path d="M418 60 Q250 104 76 60" class="d-arrow"/>
+<text x="196" y="18" class="d-accent">strongest link, ten words apart</text>
+<line x1="12" y1="120" x2="628" y2="120" stroke="var(--border)"/>
+<text x="12" y="144" class="d-label-sm">n tokens → n × n comparisons. Double the context and attention cost quadruples.</text>
+<text x="12" y="164" class="d-label-sm">This is why long context is expensive, why the KV cache exists, and why context windows have limits at all.</text>
+</svg><figcaption>Every token attends to every other token. That all-to-all comparison is what gives transformers their long-range reach — and why cost grows with the square of sequence length.</figcaption></figure>
+  <h2>What follows from the algorithm</h2>
+  <ul><li><strong>Quadratic cost.</strong> n tokens means n² comparisons. Doubling context quadruples attention work — the reason long context is priced the way it is.</li><li><strong>Position must be added.</strong> Attention is order-blind by construction, so position information is injected separately (rotary embeddings, in most current models). Extending context beyond training length is largely a positional-encoding problem.</li><li><strong>The KV cache is a direct consequence.</strong> Keys and values for previous tokens don't change as generation proceeds, so they're cached rather than recomputed. Lesson 2 of the vocabulary set, arriving from the other direction.</li><li><strong>Parallel training.</strong> Unlike sequential architectures, all positions are processed at once during training. This is why transformers scaled and their predecessors didn't.</li></ul>
+  <div class="callout insight"><span class="label">Why &#x27;attention&#x27; is a fair name</span>The weights are interpretable in a limited way — you can see which earlier tokens most influenced a prediction. Treat that as a debugging aid rather than an explanation; attention weights show where information flowed, not why the model concluded what it did.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need (Vaswani et al., 2017)</a><span class="link-note">The original paper. Section 3.2 is the mechanism; the rest is scaffolding.</span></li><li><a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">The Illustrated Transformer</a><span class="link-note">The clearest visual walkthrough available, and the one most people learn from.</span></li><li><a href="https://github.com/rasbt/LLMs-from-scratch" target="_blank" rel="noopener">Build a Large Language Model (From Scratch)</a><span class="link-note">You have this repo locally — ch03 implements attention line by line in PyTorch.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why does doubling the context length more than double the cost of attention?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Longer sequences need more layers</div>
+      <div class="quiz-opt">Every token is compared with every other, so n tokens means n² comparisons</div>
+      <div class="quiz-opt">The KV cache has to be rebuilt from scratch</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why do transformers need positional encoding added separately?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">To compress the input</div>
+      <div class="quiz-opt">Attention compares all positions equally and is inherently order-blind</div>
+      <div class="quiz-opt">To keep the vocabulary size manageable</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What can attention weights legitimately tell you?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Why the model reached its conclusion</div>
+      <div class="quiz-opt">Where information flowed — useful for debugging, not a full explanation</div>
+      <div class="quiz-opt">How confident the model is in its answer</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

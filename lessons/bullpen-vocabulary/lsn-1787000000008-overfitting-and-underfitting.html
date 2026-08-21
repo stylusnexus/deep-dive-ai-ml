@@ -152,14 +152,37 @@
   .d-fill-red { fill: var(--red); }
   .d-fill-yellow { fill: var(--yellow); }
   .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
 </style>
 
 </head>
 <body>
 
-  <span class="pill">Lesson 9 of 9</span>
+  <span class="pill">Lesson 9 of 13</span>
   <h1>Overfitting and Underfitting</h1>
-  <p class="subtitle">The single most important pair of words in machine learning \u2014 and the reason you always hold data back.</p>
+  <p class="subtitle">The single most important pair of words in machine learning — and the reason you always hold data back.</p>
 
   <p>Every model you build from Block 2 onward can fail in exactly two directions. It can be too simple to capture what's in the data, or so flexible that it memorises the specific examples it was shown instead of learning the pattern behind them. Almost all practical machine learning is navigating between those two failures.</p>
   <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Underfitting, good fit and overfitting compared">
@@ -171,7 +194,7 @@
 <circle cx="134" cy="94" r="3.5" class="d-fill-muted"/><circle cx="158" cy="56" r="3.5" class="d-fill-muted"/>
 <circle cx="178" cy="68" r="3.5" class="d-fill-muted"/><circle cx="56" cy="146" r="3.5" class="d-fill-muted"/>
 <path d="M30 140 L190 62" stroke="var(--red)" stroke-width="2.5" fill="none"/>
-<text x="30" y="182" class="d-label-sm">too simple \u2014 misses</text>
+<text x="30" y="182" class="d-label-sm">too simple — misses</text>
 <text x="30" y="196" class="d-label-sm">the real shape</text>
 </g>
 <g>
@@ -193,10 +216,10 @@
 <circle cx="560" cy="94" r="3.5" class="d-fill-muted"/><circle cx="584" cy="56" r="3.5" class="d-fill-muted"/>
 <circle cx="604" cy="68" r="3.5" class="d-fill-muted"/><circle cx="482" cy="146" r="3.5" class="d-fill-muted"/>
 <path d="M468 146 L482 146 L494 112 L514 120 L538 82 L560 94 L584 56 L604 68" stroke="var(--red)" stroke-width="2.5" fill="none"/>
-<text x="456" y="182" class="d-label-sm">threads every point \u2014</text>
+<text x="456" y="182" class="d-label-sm">threads every point —</text>
 <text x="456" y="196" class="d-label-sm">memorised the noise</text>
 </g>
-</svg><figcaption>The same data, three models. The middle one is worse on the training points than the right one \u2014 and far better on everything else.</figcaption></figure>
+</svg><figcaption>The same data, three models. The middle one is worse on the training points than the right one — and far better on everything else.</figcaption></figure>
   <h2>Underfitting: the model is too simple</h2>
   <p>An <strong>underfit</strong> model hasn't got enough capacity, or hasn't trained long enough, to represent the real relationship. It performs badly on the training data <em>and</em> badly on new data. This is the easier problem — it's obvious, and the fix is usually more capacity, better features, or longer training.</p>
   <h2>Overfitting: the model memorised</h2>
@@ -204,13 +227,13 @@
   <div class="callout pitfall"><span class="label">How this gets shipped</span>Someone reports 99% accuracy. Nobody asks 99% on what. The model was scored on the same data it trained on, which measures memory rather than learning. Any accuracy figure without a held-out set behind it is not a result.</div>
   <h2>The one habit that catches it</h2>
   <p>Split your data before you do anything else:</p>
-  <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">Train</div><div><div class="roadmap-title">~70%</div><div class="roadmap-desc">The model learns from this and only this.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Validation</div><div><div class="roadmap-title">~15%</div><div class="roadmap-desc">Used while developing \u2014 tuning, choosing between models, deciding when to stop.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Test</div><div><div class="roadmap-title">~15%</div><div class="roadmap-desc">Touched once, at the very end. Every time you look, it becomes a little more like validation data.</div></div></div></div>
-  <p>The gap between training and validation performance is the diagnostic. Small gap and poor scores on both means underfitting. Large gap \u2014 excellent on train, mediocre on validation \u2014 means overfitting.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Train</div><div><div class="roadmap-title">~70%</div><div class="roadmap-desc">The model learns from this and only this.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Validation</div><div><div class="roadmap-title">~15%</div><div class="roadmap-desc">Used while developing — tuning, choosing between models, deciding when to stop.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Test</div><div><div class="roadmap-title">~15%</div><div class="roadmap-desc">Touched once, at the very end. Every time you look, it becomes a little more like validation data.</div></div></div></div>
+  <p>The gap between training and validation performance is the diagnostic. Small gap and poor scores on both means underfitting. Large gap — excellent on train, mediocre on validation — means overfitting.</p>
   <figure class="diagram"><svg viewBox="0 0 640 240" role="img" aria-label="Training and validation loss curves diverging">
 <line x1="60" y1="20" x2="60" y2="190" class="d-arrow"/>
 <line x1="60" y1="190" x2="610" y2="190" class="d-arrow"/>
 <text x="14" y="100" class="d-label-sm">loss</text>
-<text x="300" y="216" class="d-label-sm">training time \u2192</text>
+<text x="300" y="216" class="d-label-sm">training time →</text>
 <path d="M60 44 Q150 120 250 148 Q380 172 600 182" stroke="var(--accent)" stroke-width="2.5" fill="none"/>
 <text x="470" y="172" class="d-accent">training loss</text>
 <path d="M60 50 Q150 122 250 140 Q330 152 400 130 Q490 100 600 52" stroke="var(--red)" stroke-width="2.5" fill="none"/>
@@ -219,14 +242,15 @@
 <circle cx="286" cy="143" r="5" class="d-fill-green"/>
 <text x="192" y="24" class="d-fill-green" font-size="12" font-weight="600">stop here</text>
 <text x="96" y="214" class="d-label-sm">both improving</text>
-<text x="330" y="214" class="d-label-sm">memorising \u2014 validation gets worse while training keeps improving</text>
+<text x="330" y="214" class="d-label-sm">memorising — validation gets worse while training keeps improving</text>
 </svg><figcaption>Training loss almost always keeps falling. Validation loss is the one that tells the truth. The moment they diverge is where you should have stopped.</figcaption></figure>
   <h2>The fixes, in the order worth trying</h2>
   <ul><li><strong>More data.</strong> Almost always the strongest remedy. Harder to memorise a large, varied set.</li><li><strong>Early stopping.</strong> Halt when validation loss stops improving. Free, and shown above.</li><li><strong>Regularisation.</strong> Penalise complexity (L1/L2), or drop random units during training (dropout).</li><li><strong>Simplify.</strong> Fewer parameters, shallower trees, fewer features.</li><li><strong>Cross-validation.</strong> Rotate which slice is held out, so your estimate doesn't hinge on one lucky split.</li></ul>
   <h2>Where this shows up outside classical ML</h2>
   <p>The same failure follows you through the whole program under different names:</p>
-  <ul><li><strong>Fine-tuning (Block 7).</strong> Train too long on a small dataset and the model parrots your examples, losing the general ability that made it useful. Held-out evaluation before and after is non-negotiable.</li><li><strong>Benchmarks (Block 5).</strong> Contaminated benchmarks are overfitting at industry scale \u2014 the test set leaked into training, so the score measures memory. Your own twenty-item eval set is a private held-out set, which is precisely why it's worth more than a public leaderboard.</li><li><strong>Prompt engineering (Block 3).</strong> Tuning a prompt against the same five examples until it's perfect on them is overfitting by hand. Hold some examples back.</li></ul>
+  <ul><li><strong>Fine-tuning (Block 7).</strong> Train too long on a small dataset and the model parrots your examples, losing the general ability that made it useful. Held-out evaluation before and after is non-negotiable.</li><li><strong>Benchmarks (Block 5).</strong> Contaminated benchmarks are overfitting at industry scale — the test set leaked into training, so the score measures memory. Your own twenty-item eval set is a private held-out set, which is precisely why it's worth more than a public leaderboard.</li><li><strong>Prompt engineering (Block 3).</strong> Tuning a prompt against the same five examples until it's perfect on them is overfitting by hand. Hold some examples back.</li></ul>
   <div class="callout matters"><span class="label">The transferable idea</span>Any time you tune something against results you can see, you risk fitting the measurement rather than the thing being measured. The defence is always the same: keep some data where you can't look at it.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/cross_validation.html" target="_blank" rel="noopener">Cross-validation (scikit-learn)</a><span class="link-note">The canonical reference, with the diagrams. You'll use this directly in Block 2.</span></li><li><a href="https://developers.google.com/machine-learning/crash-course/overfitting/overfitting" target="_blank" rel="noopener">Google ML Crash Course: overfitting</a><span class="link-note">Generalisation, regularisation and early stopping, worked through interactively.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. A model scores 99% on training data and 62% on data it hasn&#x27;t seen. What&#x27;s happening?</p>
