@@ -138,6 +138,18 @@
       "title": "Loops in Training: Flywheels and Model Collapse",
       "file": "lsn-1787000000020-loops-in-training.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000021",
+      "title": "Skills: Packaging What an Agent Should Know",
+      "file": "lsn-1787000000021-skills.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000022",
+      "title": "Operating an Agent",
+      "file": "lsn-1787000000022-operating-an-agent.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -242,6 +254,16 @@
       "starred": false
     },
     "lsn-1787000000020": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000021": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000022": {
       "viewed": false,
       "completed": false,
       "starred": false

@@ -134,6 +134,18 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Test-time compute** — Spending computation at inference rather than parameters at training. The capability axis you control without training anything.
 
+**Skill** — A folder packaging procedural knowledge: a SKILL.md with a name and a when-to-use description, plus optional reference files and executable scripts. A tool is a verb, an MCP server is a place, a skill is a method.
+
+**Progressive disclosure** — Name and description always in context; the body loads on trigger; bundled files load only when reached. Lets a skill be arbitrarily detailed without that detail costing anything until used.
+
+**Trajectory log** — Every turn, every tool call, and a named termination reason. The only artefact that survives an agent run, since runs cannot be reproduced.
+
+**Termination reason** — Completed / turn cap / spend cap / timeout / error, recorded distinguishably. Without it a wall clock looks like a model giving up.
+
+**Circuit breaker vs kill switch** — A breaker halts a pattern of runs on error rate or spend; a kill switch halts everything via one flag with no deploy. Both are needed, and neither stops in-flight work unless cancellation is checked between turns.
+
+**Prompt accretion** — Defensive lines added per incident and never removed, until the instructions contradict each other. Date every addition and re-run the eval set with it removed.
+
 ---
 
 ## Block 0 · Orientation

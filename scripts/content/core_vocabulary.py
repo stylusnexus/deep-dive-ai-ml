@@ -1782,4 +1782,201 @@ LESSONS = [
     ]),
   ],
 },
+{
+  "slug": "skills",
+  "title": "Skills: Packaging What an Agent Should Know",
+  "subtitle": "Procedural knowledge as a loadable folder — and why the scripts inside it matter as much as the prose.",
+  "body": [
+    ("p", "A tool gives an agent a capability. A <strong>skill</strong> gives it expertise — the procedure, the conventions, the edge cases, and often the code to do the deterministic parts properly. The useful framing is onboarding: what you would write down for a competent new hire who does not yet know how your organisation does this particular thing."),
+
+    ("h2", "The shape of one"),
+    ("p", "A skill is a folder. The only required file is <code>SKILL.md</code>, whose frontmatter carries a name and — critically — a description of <em>when to use it</em>. The body holds the actual instructions. Alongside it can sit reference documents, templates, and executable scripts."),
+    ("code", """my-skill/
+  SKILL.md          name + description in frontmatter, instructions in the body
+  reference.md      detail loaded only when the body points at it
+  scripts/
+    extract.py      run as a tool, or read as documentation — your choice"""),
+
+    ("h2", "Progressive disclosure, which is the whole design"),
+
+    ("figure", "Three levels, each paid for only when reached. The description is always in context; everything else arrives on demand. This is the context-budget argument applied to knowledge instead of to tools.", '''<svg viewBox="0 0 640 210" role="img" aria-label="Three levels of progressive disclosure in a skill"><defs><marker id="sa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="16" width="360" height="48" rx="6" class="d-box-accent"/>
+<text x="28" y="38" class="d-label-b">Level 1 · name + description</text>
+<text x="28" y="56" class="d-label-sm">always in the system prompt · tens of tokens</text>
+<text x="390" y="46" class="d-label-sm">always paid</text>
+<path d="M192 64 L192 82" class="d-arrow-accent" marker-end="url(#sa)"/>
+<rect x="12" y="82" width="360" height="48" rx="6" class="d-box"/>
+<text x="28" y="104" class="d-label-b">Level 2 · the SKILL.md body</text>
+<text x="28" y="122" class="d-label-sm">loaded when the model judges it relevant</text>
+<text x="390" y="112" class="d-label-sm">paid on trigger</text>
+<path d="M192 130 L192 148" class="d-arrow-accent" marker-end="url(#sa)"/>
+<rect x="12" y="148" width="360" height="48" rx="6" class="d-box"/>
+<text x="28" y="170" class="d-label-b">Level 3+ · bundled files and scripts</text>
+<text x="28" y="188" class="d-label-sm">loaded, or executed, only when actually needed</text>
+<text x="390" y="178" class="d-label-sm">often never paid</text>
+</svg>'''),
+
+    ("p", "Only the name and description occupy context by default. The body loads when the model decides the skill applies. Referenced files load later still, if at all. The consequence is that a skill can be arbitrarily detailed without that detail costing anything until it is used — which is why a fifty-page procedure is a reasonable thing to package this way and an unreasonable thing to put in a system prompt."),
+    ("callout", "insight", "You have met this argument twice already", "This is the same finding as tool search — loading definitions on demand cut tokens by 85% <em>and improved selection accuracy</em> — and the same finding as context engineering, where precision beats volume. More available knowledge is only useful if it is not all resident. Progressive disclosure is how a system gets deep without getting slow."),
+
+    ("h2", "The scripts are not a detail"),
+    ("p", "A skill can bundle code, and that code plays two roles at once: something the agent executes, and something it reads as documentation of how the job is done."),
+    ("p", "The reason this matters is the deterministic-first argument arriving in a new place. Extracting fields from a PDF form is not a language problem — it is parsing. A bundled script does it exactly, every time, without the file entering the context window at all. The model orchestrates; the script computes. You get reliability where reliability is available and judgement where it is not."),
+    ("callout", "matters", "Decide explicitly which role each script plays", "\"Run this\" and \"read this to understand the convention\" are different instructions with different costs, and a script that is ambiguous between them gets used wrongly in both directions. Say which, in the SKILL.md body, for every script you bundle."),
+
+    ("h2", "Skill, tool, or MCP server?"),
+    ("terms", [
+      ("Tool", "A single capability", "One function with a schema. \"Send an email.\" The unit of what the agent can do."),
+      ("MCP server", "An external integration", "A connection to a system that lives outside your codebase, spoken in a standard protocol so it works across clients."),
+      ("Skill", "A procedure and its knowledge", "\"How we write a release note here\" — the workflow, the conventions, the templates, and any code that helps. Frequently composed of calls to the tools and servers above."),
+    ]),
+    ("p", "The distinction that decides it: a tool is a <em>verb</em>, an MCP server is a <em>place</em>, and a skill is a <em>method</em>. If what you are packaging is knowledge about how to do something — rather than the ability to do it — it is a skill."),
+
+    ("h2", "Building one that actually triggers"),
+    ("ul", [
+      "<strong>Start from an evaluation, not from the document.</strong> Run representative tasks, find where the agent underperforms, and write the skill against that gap. A skill written from imagination usually addresses a problem the agent did not have.",
+      "<strong>The description is the trigger, so it is prompt engineering.</strong> The model decides relevance from that one line. Vague descriptions produce skills that never fire, or fire constantly. This is the same lesson as tool naming, with the same fix: write it as if explaining to someone unfamiliar.",
+      "<strong>Split when it grows.</strong> An unwieldy SKILL.md defeats the point. Move detail into referenced files so it loads only when reached.",
+      "<strong>Keep mutually exclusive paths apart.</strong> If half the document only applies to one case, that half should be a separate file rather than context everyone pays for.",
+      "<strong>Watch it in real use and iterate.</strong> Where it failed to trigger, and where it triggered wrongly, are both fixable — and both are description problems more often than body problems.",
+    ]),
+
+    ("h2", "The security question, which is the same one as MCP"),
+    ("p", "A skill can contain instructions and executable code, and both run in your environment with your agent's permissions. Installing one from an untrusted source is closer to adding a dependency than to reading a document — and unlike a dependency, its instructions are read by a model that is disposed to follow them."),
+    ("callout", "warning", "Audit before installing", "Read the SKILL.md body for instructions that direct the agent outward — fetching from a network, writing outside the working directory, contacting a service. Read the bundled scripts and their dependencies. A skill is a supply-chain surface and an injection surface at the same time, which is a combination worth being deliberate about. Block 6 treats this properly."),
+
+    ("h2", "Where this lands in the program"),
+    ("p", "Skills sit on top of nearly everything in Block 0: progressive disclosure is context engineering, bundled scripts are deterministic-first, the description is a tool description, and installing one is the trust question from the MCP lesson. That convergence is the point — a skill is not a new primitive so much as a container for the ones you already have."),
+
+    ("links", [
+      ("Equipping agents for the real world with Agent Skills — Anthropic", "https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills",
+       "The design rationale, the onboarding framing, and the guidance on iterating from real usage."),
+      ("Agent Skills documentation", "https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview",
+       "The SKILL.md format, frontmatter fields and progressive-disclosure mechanics in detail."),
+      ("anthropics/skills", "https://github.com/anthropics/skills",
+       "Working examples. Read a few end to end before writing your own — the descriptions in particular."),
+    ]),
+
+    ("quiz", [
+      ("What occupies context by default when a skill is installed?",
+       ["The whole SKILL.md body, so the model knows what is available",
+        "Only the name and description — the body loads when the model judges it relevant",
+        "Nothing, until the user names the skill explicitly"], 1),
+      ("Why bundle a script inside a skill rather than describing the procedure in prose?",
+       ["Scripts are faster to write than documentation",
+        "Deterministic work should be computed, not generated — the script does it exactly, and the file never enters the context window",
+        "Prose instructions cannot be versioned"], 1),
+      ("Your skill never triggers, even on tasks it clearly covers. Where do you look first?",
+       ["The body, which probably lacks detail",
+        "The description — it is what the model uses to judge relevance",
+        "The bundled scripts, which may be failing silently"], 1),
+      ("What is the difference between a skill and a tool?",
+       ["Skills are written in Markdown and tools in code",
+        "A tool is the ability to do something; a skill is the knowledge of how it is done here — often composed of tool calls",
+        "Skills run locally and tools run remotely"], 1),
+    ]),
+  ],
+},
+{
+  "slug": "operating-an-agent",
+  "title": "Operating an Agent",
+  "subtitle": "Monitoring, controlling and maintaining one after it ships — the part nobody plans for.",
+  "body": [
+    ("p", "The agents lesson covered what one is and how it can hurt you. This is the operational half: how you watch it, how you stop it, and how you keep it working as everything underneath it moves. An agent is not a feature you ship — it is a system you run."),
+
+    ("h2", "What to log, and why the usual answer is wrong"),
+    ("p", "Most systems log inputs and outputs. For an agent that is not enough, because the interesting failures happen in the middle. You need the trajectory:"),
+    ("terms", [
+      ("Every turn", "Full request and response", "Including the reasoning, where the provider exposes it. A harness that records only final answers cannot tell you why a run went wrong."),
+      ("Every tool call", "Arguments and result", "Truncated for storage, but recorded. This is where an injection would show up."),
+      ("The termination reason", "Named, not inferred", "Completed, turn cap, spend cap, timeout, error. Distinguishable — otherwise a wall clock looks like a model giving up."),
+      ("The manifest", "Model, versions, budgets, config", "So a run six weeks old can still be interpreted."),
+      ("Cost and latency", "Per run and per turn", "Both drift upward quietly as prompts and tool sets grow."),
+    ]),
+    ("callout", "matters", "The log is the only artefact that survives", "You cannot reproduce an agent run — sampling, retrieval, external state and the model behind an alias all move. The trajectory log is not a debugging convenience; it is the sole evidence that the run happened the way you think it did. Treat gaps in it as outages."),
+
+    ("h2", "What to watch"),
+    ("p", "Ground truth for agent quality arrives late or never, so as with drift you monitor proxies that are available immediately:"),
+    ("ul", [
+      "<strong>Turn count distribution.</strong> A rising median means the agent is working harder for the same outcomes — usually the earliest signal that something upstream changed.",
+      "<strong>Termination mix.</strong> The share of runs ending on a cap rather than on completion. A shift here is a shift in behaviour.",
+      "<strong>Tool error rate, by tool.</strong> One integration degrading looks like general flakiness until you break it out.",
+      "<strong>Cost per completed task.</strong> Not cost per call — the denominator matters, because retries hide in it.",
+      "<strong>Human intervention rate.</strong> How often someone overrides, corrects or abandons. The most honest quality metric you have, and usually the last one anyone instruments.",
+      "<strong>Approval-gate rejection rate.</strong> If people start rejecting what the agent proposes, that is a regression, whatever your evals say.",
+    ]),
+
+    ("h2", "Control: the three switches you need before launch"),
+
+    ("figure", "Budget caps stop one run. A circuit breaker stops a pattern across runs. A kill switch stops everything. They are different mechanisms and you need all three, because they fail at different scopes.", '''<svg viewBox="0 0 640 190" role="img" aria-label="Three levels of agent control">
+<rect x="12" y="26" width="196" height="66" rx="7" class="d-box-good"/>
+<text x="28" y="50" class="d-label-b">Budget caps</text>
+<text x="28" y="68" class="d-label-sm">turns, tokens, wall clock</text>
+<text x="28" y="84" class="d-label-sm">scope: one run</text>
+<rect x="222" y="26" width="196" height="66" rx="7" class="d-box"/>
+<text x="238" y="50" class="d-label-b">Circuit breaker</text>
+<text x="238" y="68" class="d-label-sm">error rate or spend over time</text>
+<text x="238" y="84" class="d-label-sm">scope: a pattern of runs</text>
+<rect x="432" y="26" width="196" height="66" rx="7" class="d-box-warn"/>
+<text x="448" y="50" class="d-label-b">Kill switch</text>
+<text x="448" y="68" class="d-label-sm">one flag, no deploy needed</text>
+<text x="448" y="84" class="d-label-sm">scope: everything</text>
+<text x="12" y="126" class="d-label-sm">The test that matters: can someone who is not you stop this at 3am, from their phone, without a deploy?</text>
+<text x="12" y="148" class="d-label-sm">If the answer is no, the kill switch does not exist yet — a plan to comment out a call is not a control.</text>
+<text x="12" y="176" class="d-label-sm">And an agent with write access needs its in-flight work halted, not merely its new work refused.</text>
+</svg>'''),
+
+    ("callout", "warning", "Halting is not the same as not starting", "Flipping a flag usually stops <em>new</em> runs. An agent already mid-trajectory with a write-capable tool will finish what it is doing. If that matters — and where the tools mutate anything, it does — you need in-flight cancellation checked between turns, not just an admission gate at the front."),
+
+    ("h2", "Maintenance: what rots"),
+    ("p", "An agent that worked in March and not in September usually has not broken. Its surroundings moved:"),
+    ("terms", [
+      ("The model", "Aliases float", "A version alias points somewhere new and behaviour shifts with no deploy on your side. Pin versions and upgrade deliberately."),
+      ("The tools", "APIs change under you", "A field is added, a limit tightens, an error format changes. Contract-test your tools independently of the agent."),
+      ("The retrieval corpus", "It grows", "Chunks that ranked well no longer do. Index recall degrades quietly; measure it on a schedule."),
+      ("The prompts", "They accumulate", "Every incident adds a line, nothing is removed, and eventually the instructions contradict each other. Prune."),
+      ("The users", "They learn", "As people discover what it does well, they ask harder things. Your traffic distribution shifts even when nothing about the system does."),
+    ]),
+    ("callout", "pitfall", "The prompt-accretion failure is the most predictable", "Each incident produces a defensive sentence in the system prompt. Six months later it is a wall of edge cases, several of which conflict, and no one can say which are load-bearing. Date every addition, attach it to the incident that caused it, and re-run your eval set with it removed before assuming it still earns its place. A rule kept past its reason is the harness failure from the practice set, in its most common form."),
+
+    ("h2", "The routine"),
+    ("terms", [
+      ("Daily", "Glance at the dashboard", "Turn counts, termination mix, cost per task, error rate by tool."),
+      ("Weekly", "Read three trajectories", "Whole ones, end to end, chosen at random. Aggregates hide the failures worth finding, and nothing substitutes for reading what actually happened."),
+      ("On every change", "Re-run the eval set", "Prompt, model, tool or retrieval change — all of them are treatments."),
+      ("Monthly", "Re-run it anyway", "Nothing changed on your side is not the same as nothing changed."),
+      ("Per incident", "One line, written down", "What broke, why, and what would have caught it earlier. That third clause is the one that compounds."),
+    ]),
+
+    ("h2", "Unattended is a different risk class"),
+    ("p", "Everything above assumes someone is watching sometimes. An agent on a schedule or a trigger, acting without anyone present, needs more: a narrow job rather than a broad one, credentials scoped to that job, safe stopping points it can reach on its own, a complete action log, and a human approval gate before anything irreversible or outward-facing."),
+    ("p", "The arithmetic is unforgiving — broad instructions plus wide access plus nobody watching is blast radius with no one to contain it. Narrow one of those three and the other two matter far less."),
+
+    ("links", [
+      ("Effective harnesses for long-running agents — Anthropic", "https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents",
+       "What changes when an agent runs for hours, including the operational surface it creates."),
+      ("How we built our multi-agent research system — Anthropic", "https://www.anthropic.com/engineering/multi-agent-research-system",
+       "Production experience, including the observability cost of fanning out."),
+    ]),
+
+    ("quiz", [
+      ("Why is logging inputs and outputs insufficient for an agent?",
+       ["Outputs are too large to store efficiently",
+        "The interesting failures happen mid-trajectory — you need every turn, every tool call, and a named termination reason",
+        "Inputs and outputs are already captured by the model provider"], 1),
+      ("Which is usually the most honest quality signal in production?",
+       ["The eval set score, re-run weekly",
+        "How often a human overrides, corrects or abandons what the agent did",
+        "Average turn count per run"], 1),
+      ("You flip the kill-switch flag. What might still happen?",
+       ["Nothing — the flag stops all activity",
+        "Runs already mid-trajectory finish what they are doing, including any writes, unless cancellation is checked between turns",
+        "Queued runs execute but new ones are refused"], 1),
+      ("An agent that worked in March fails in September with no deploy on your side. What is the most likely cause?",
+       ["The model degraded through use",
+        "Something underneath moved — a floating model alias, a changed tool API, a grown retrieval corpus, or shifted user behaviour",
+        "Accumulated state in the session store"], 1),
+    ]),
+  ],
+},
 ]

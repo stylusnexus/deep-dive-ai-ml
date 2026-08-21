@@ -17,6 +17,8 @@ BLURBS = {
  "localising-a-failure": "Control fixtures, metric design, and why a true narrow observation keeps getting promoted to a false general one.",
  "models-judging-models": "LLM-as-judge: four documented biases, and the one failure mode that manufactures effects rather than adding noise.",
  "deterministic-first": "A model is the most expensive, slowest, least testable component you can use — the judgement is knowing when it earns that.",
+ "skills": "Procedural knowledge as a loadable folder — progressive disclosure, bundled scripts, and when a skill beats a tool or an MCP server.",
+ "operating-an-agent": "Logging trajectories, watching the right proxies, three control switches, and what rots when nothing on your side changed.",
  "the-map": "AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it's an architecture, not a model. Read this first.",
  "agent-loop-and-harness": "The two most-confused words in any agent codebase — and why most agent failures are harness failures, not model failures.",
  "tokens-context-and-kv-cache": "Why a model 'forgets', why long conversations get expensive quadratically, and what prompt caching is actually caching.",
