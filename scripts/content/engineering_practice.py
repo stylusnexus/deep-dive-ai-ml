@@ -775,4 +775,199 @@ swebench report my-run-01 -d verified"""),
     ]),
   ],
 },
+{
+  "slug": "spec-driven-development",
+  "title": "Vibe Coding and Spec-Driven Development",
+  "subtitle": "A spectrum, not a binary — and the question that tells you where on it a task belongs.",
+  "body": [
+    ("p", "When an agent writes the code, the most leveraged thing a person produces is no longer the code. It is whatever the agent works from. That observation has hardened into a named discipline, and it is worth understanding as a spectrum rather than as a doctrine, because both ends of the spectrum are correct for different work."),
+
+    ("h2", "The two ends"),
+    ("p", "<strong>Vibe coding</strong> is describing what you want, accepting what comes back, and iterating by reaction. It is fast, it has almost no ceremony, and it is genuinely the right mode for a prototype, a script, or anything you will read once and throw away."),
+    ("p", "Its failure mode is documented and specific: output that is plausible and drifts from intent, invented APIs, and decay as the project grows — because nothing durable records what the thing was supposed to do, so each session re-derives intent from whatever is currently in context."),
+    ("p", "<strong>Spec-driven development</strong> inverts the artifact order. A written, version-controlled specification is the source of truth; an implementation plan is derived from it; the plan is broken into tasks; code is generated last. When requirements change you edit the spec and regenerate, rather than editing code and hoping the spec catches up."),
+
+    ("figure", "The spectrum, and what you buy at each point. Cost rises left to right and so does durability. Neither end is the answer — the task decides.", '''<svg viewBox="0 0 640 210" role="img" aria-label="Spectrum from vibe coding to spec-driven development">
+<line x1="30" y1="120" x2="610" y2="120" class="d-arrow"/>
+<rect x="20" y="46" width="140" height="56" rx="6" class="d-box-good"/>
+<text x="34" y="68" class="d-label-b">Vibe</text>
+<text x="34" y="86" class="d-label-sm">describe, accept, iterate</text>
+<rect x="184" y="46" width="140" height="56" rx="6" class="d-box"/>
+<text x="198" y="68" class="d-label-b">Prompt + tests</text>
+<text x="198" y="86" class="d-label-sm">intent encoded as checks</text>
+<rect x="348" y="46" width="140" height="56" rx="6" class="d-box"/>
+<text x="362" y="68" class="d-label-b">Design note</text>
+<text x="362" y="86" class="d-label-sm">approach agreed first</text>
+<rect x="500" y="46" width="128" height="56" rx="6" class="d-box-accent"/>
+<text x="514" y="68" class="d-label-b">Full spec</text>
+<text x="514" y="86" class="d-label-sm">spec → plan → tasks</text>
+<text x="20" y="146" class="d-fill-green" font-size="11" font-weight="600">minutes of overhead</text>
+<text x="20" y="164" class="d-label-sm">throwaway · exploratory · one reader</text>
+<text x="470" y="146" class="d-fill-accent" font-size="11" font-weight="600">hours of overhead</text>
+<text x="386" y="164" class="d-label-sm">multi-session · multi-person · long-lived</text>
+<text x="20" y="196" class="d-label-sm">The mistake is picking a point by taste rather than by task. Both ends are right somewhere.</text>
+</svg>'''),
+
+    ("h2", "The question that decides"),
+    ("callout", "matters", "How many times will intent need to survive being forgotten?", "That is the whole test. A script you write and run once: never — vibe it. A feature built across four sessions, by two people and an agent, that someone will modify next quarter: many times, and every one of those is an opportunity for intent to drift. The spec is not documentation overhead. It is the mechanism by which intent survives a context window ending."),
+    ("p", "Notice this is the same argument as the ADR from the artifacts lesson, applied forward instead of backward. An ADR records why a decision was made so nobody re-litigates it. A spec records what is being built so nobody re-derives it. Both exist because a model's context does not persist and a person's memory is worse than they think."),
+
+    ("h2", "Why it works better with agents than it ever did with people"),
+    ("p", "Specification-first is an old idea with a poor track record — waterfall's central failure was that specs went stale the moment implementation began, and nobody read them. Two things changed:"),
+    ("ul", [
+      "<strong>Regeneration is now cheap.</strong> The reason specs went stale was that updating the spec and updating the code were two expensive efforts, so only one happened. When code generation is minutes, editing the spec and regenerating is a real workflow rather than an aspiration.",
+      "<strong>The reader is tireless and literal.</strong> A human implementer skims a forty-page spec. An agent reads all of it, every time, and will faithfully implement an ambiguity you would have silently resolved. That is both the strength and the trap.",
+    ]),
+    ("callout", "pitfall", "The trap in that second point", "An agent implementing a spec cannot tell the difference between a decision you made and a sentence you wrote carelessly. Every under-specified area becomes an invented answer, delivered confidently and consistently. Waterfall's specs were ignored; these are followed exactly, which surfaces vagueness as working code rather than as questions. Expect to discover what you actually meant by reading what you got."),
+
+    ("h2", "What a workable spec contains"),
+    ("terms", [
+      ("The decision, not the prose", "What changes for whom", "A spec that reads like a brochure produces code that reads like a brochure."),
+      ("Acceptance criteria", "Checkable, not aspirational", "\"Fast\" is not a criterion. \"p95 under 400ms on the existing fixture set\" is."),
+      ("Explicit non-goals", "What this does not do", "The highest-value section, and the one most often missing. It is what stops an agent helpfully expanding scope."),
+      ("Constraints and prior decisions", "The things it may not change", "Link the ADRs. An agent that does not know a constraint exists will cheerfully violate it."),
+      ("Open questions", "Named, not silently resolved", "Anything you have not decided should be marked as undecided, or it will be decided for you."),
+    ]),
+
+    ("h2", "Where it fits with everything else here"),
+    ("p", "The spec is not a fifth kind of artifact so much as the fourth member of a family you already know. The harness is executed by a machine; a recipe is followed by a person; an ADR is consulted when someone wants to know why they cannot do the obvious thing; a spec is what an agent builds from. And all four share the failure mode from the artifacts lesson — <strong>true when written, still asserting itself after its truth expired</strong>. A stale spec is worse than none, because it carries authority."),
+    ("p", "It also composes with the loops material. A spec with checkable acceptance criteria is an external verifier, which is precisely what makes a build-test-fix loop work rather than spin. Spec-driven development and verifier-guided looping are the same idea meeting from opposite directions: one supplies the signal, the other consumes it."),
+
+    ("h2", "The honest position"),
+    ("p", "The methodology is young, the tooling is proliferating faster than the evidence, and much of what is written about it is advocacy. Treat claims about productivity gains the way you would treat any unmeasured claim in this course — as a hypothesis with a plausible mechanism. The mechanism here is sound, which is a reason to try it, not a reason to believe a number."),
+    ("p", "The defensible version is modest and probably enough: when intent must survive multiple sessions, write it down before generating; keep it in version control; keep it current or delete it. Everything past that is tooling preference."),
+
+    ("links", [
+      ("GitHub Spec Kit", "https://github.com/github/spec-kit",
+       "The open-source toolkit that popularised the four-phase workflow. Agent-agnostic and CLI-first — the easiest place to see the shape of it."),
+      ("Spec-Driven Development: a spec-first approach — Microsoft", "https://developer.microsoft.com/blog/spec-driven-development-ai-native-engineering/",
+       "The rationale written out, including the honest account of why specification-first failed the first time."),
+    ]),
+
+    ("quiz", [
+      ("What is the test for how much specification a task needs?",
+       ["The size of the codebase it touches",
+        "How many times intent will need to survive being forgotten — across sessions, people and months",
+        "Whether the code will be reviewed by a human"], 1),
+      ("Why did specification-first fail in the waterfall era but work better with agents?",
+       ["Agents write better specifications than people did",
+        "Regeneration is now cheap, so editing the spec and regenerating is a real workflow rather than an aspiration",
+        "Modern specs are shorter"], 1),
+      ("What happens to an under-specified area of a spec when an agent implements it?",
+       ["The agent flags it as ambiguous and asks",
+        "It becomes an invented answer, delivered confidently and consistently — vagueness surfaces as working code, not as questions",
+        "The agent implements the most common convention"], 1),
+      ("Which section of a spec is most often missing and most valuable?",
+       ["The architecture diagram",
+        "Explicit non-goals — what this does not do, which is what stops an agent helpfully expanding scope",
+        "The list of files to be changed"], 1),
+    ]),
+  ],
+},
+{
+  "slug": "version-control-basics",
+  "title": "Version Control, and Why Agents Make It Non-Optional",
+  "subtitle": "Git and GitHub from zero — plus the argument for why this matters more now, not less.",
+  "body": [
+    ("p", "If you have never used version control, this is the lesson that unlocks several others: the course has already told you to commit at phase boundaries, to revert a fix to confirm it caused the improvement, and to isolate agent work on a branch. All three assume git. Here is enough to do them."),
+
+    ("h2", "The idea, in one paragraph"),
+    ("p", "Git records snapshots of your project over time. Each snapshot — a <strong>commit</strong> — captures every file as it stood, with a message saying why. You can compare any two, return to any one, and work on several versions at once without them interfering. GitHub is a hosted copy of that history, which gives you a backup, a place to collaborate, and somewhere to review changes before they land."),
+
+    ("h2", "The seven commands that cover most days"),
+    ("code", """git status                    # what has changed but is not yet saved
+git diff                      # exactly what changed, line by line
+git add .                     # stage the changes you want in the next snapshot
+git commit -m "fix: ..."      # take the snapshot, with a reason
+git log --oneline             # the history, one line per commit
+git push                      # send commits to GitHub
+git pull                      # bring down what others (or another machine) pushed"""),
+    ("callout", "matters", "Run the first two before every commit", "<code>git status</code> and <code>git diff</code> take five seconds and prevent the two commonest mistakes: committing something you did not mean to (a key, a large data file, a debugging change), and committing only half of a change because the other half was never staged. A feature that ships with its configuration flag but not the code that reads the flag is a real and common bug — the flag exists, nothing uses it, and no test fails."),
+
+    ("h2", "Branches"),
+    ("p", "A <strong>branch</strong> is an independent line of work. You start one, make commits on it, and the main line is untouched until you deliberately merge. This is what lets you try something risky without endangering anything that works."),
+    ("code", """git switch -c feat/turbine-baseline   # start a branch and move onto it
+# ... work, commit, work, commit ...
+git push -u origin feat/turbine-baseline
+# open a pull request on GitHub, review the diff, merge
+
+git switch main && git pull            # back to the main line, now updated"""),
+    ("p", "A <strong>pull request</strong> is a proposal to merge a branch, with the full diff laid out for review and discussion. Even working alone it is worth using, because reading your own change as a diff — separated from the act of writing it — catches things nothing else does."),
+
+    ("h2", "Why this matters more with an agent, not less"),
+
+    ("figure", "Without version control an agent's changes accumulate into one indivisible blob you can only accept or abandon. With it, every step is a place you can return to, and the diff is the review surface.", '''<svg viewBox="0 0 640 200" role="img" aria-label="Agent work with and without version control">
+<text x="12" y="18" class="d-fill-red" font-size="12" font-weight="600">NO VERSION CONTROL</text>
+<rect x="12" y="30" width="290" height="52" rx="6" class="d-box-warn"/>
+<text x="28" y="52" class="d-label-sm">40 files changed across 3 hours</text>
+<text x="28" y="70" class="d-label-sm">accept all of it, or lose all of it</text>
+<text x="12" y="112" class="d-fill-green" font-size="12" font-weight="600">WITH VERSION CONTROL</text>
+<circle cx="30" cy="146" r="7" class="d-fill-green"/>
+<circle cx="98" cy="146" r="7" class="d-fill-green"/>
+<circle cx="166" cy="146" r="7" class="d-fill-green"/>
+<circle cx="234" cy="146" r="7" class="d-fill-red"/>
+<circle cx="302" cy="146" r="7" class="d-fill-muted"/>
+<line x1="30" y1="146" x2="302" y2="146" stroke="var(--border)" stroke-width="2"/>
+<text x="12" y="176" class="d-label-sm">good · good · good · broke it · return here</text>
+<path d="M234 158 Q200 182 172 160" stroke="var(--accent)" stroke-width="1.8" fill="none"/>
+<rect x="340" y="30" width="288" height="140" rx="7" class="d-box"/>
+<text x="356" y="52" class="d-label-b">What the history buys you</text>
+<text x="356" y="74" class="d-label-sm">· the diff is how you review agent output</text>
+<text x="356" y="94" class="d-label-sm">· revert the fix, re-run, confirm it was the fix</text>
+<text x="356" y="114" class="d-label-sm">· branches isolate risky autonomous work</text>
+<text x="356" y="134" class="d-label-sm">· bisect finds which change broke it</text>
+<text x="356" y="154" class="d-label-sm">· the log says what changed when a run regressed</text>
+</svg>'''),
+
+    ("ul", [
+      "<strong>The diff is your review surface.</strong> You did not write the code, so reading it as a diff is how you actually review it. Without commits there is no diff, only a changed working tree.",
+      "<strong>Reverting is a measurement technique.</strong> The measurement checklist ends with removing the fix and re-running to confirm the number moves back. That step is impossible without version control, which is why it is the step people skip.",
+      "<strong>Branches are isolation.</strong> An agent working autonomously on a branch cannot damage anything that works. This is the cheapest safety control available for unattended runs.",
+      "<strong>Bisect finds the culprit.</strong> When something broke somewhere in forty commits, <code>git bisect</code> finds which one by binary search rather than by guesswork.",
+      "<strong>Commits are the incident timeline.</strong> When an agent's behaviour regresses and nothing on your side changed, the log is the first place to check whether that is actually true.",
+    ]),
+    ("callout", "insight", "Commit more often than feels necessary", "The course tells you to commit at every phase boundary rather than at feature end, and agent work makes the case stronger. A three-hour autonomous run that produces one enormous commit is nearly unreviewable; the same work as twelve commits is a sequence you can read, and revert partially. Reverting from a clean checkpoint costs nothing. Reverting from a snarl costs an afternoon."),
+
+    ("h2", "Three habits worth forming immediately"),
+    ("terms", [
+      ("Write why, not what", "The diff already says what", "\"fix: reject empty vibration readings before scaling\" beats \"updated file\". Six weeks later, only one of those helps."),
+      ("Never commit secrets", "Once pushed, treat as leaked", "A <code>.env</code> in <code>.gitignore</code> before the first commit. History is hard to scrub and mirrors already exist."),
+      ("Keep data out", "Large files bloat forever", "Git stores every version of everything. A 400MB CSV committed once is in the history permanently. Generate data from a seeded script instead — which is how the Block 1 dataset works."),
+    ]),
+
+    ("h2", "The two commands worth being careful with"),
+    ("p", "<code>git push --force</code> rewrites history on a shared branch and can destroy someone else's work. <code>git reset --hard</code> discards uncommitted changes irrecoverably. Both have legitimate uses and neither should be typed reflexively. Everything else in git is recoverable, which is worth knowing when you are new — the fear of breaking something is mostly unfounded."),
+
+    ("h2", "What GitHub adds"),
+    ("p", "Beyond hosting: pull requests for review, issues for tracking work, and Actions for running your tests automatically on every push. That last one connects directly to the evaluation material — a benchmark that runs itself on every change is the difference between measuring occasionally and measuring always."),
+
+    ("links", [
+      ("Git Book — chapters 1 to 3", "https://git-scm.com/book/en/v2",
+       "Free and genuinely the best reference. The first three chapters cover everything above properly."),
+      ("GitHub Quickstart", "https://docs.github.com/en/get-started/quickstart",
+       "Account through first pull request, with the interface shown."),
+      ("Conventional Commits", "https://www.conventionalcommits.org/",
+       "The message format used throughout this course — type(scope): description. Machine-readable, so tooling can derive changelogs from it."),
+    ]),
+
+    ("quiz", [
+      ("Why is reverting a change a measurement technique rather than just a recovery tool?",
+       ["It restores a known-good state after a failed experiment",
+        "Removing the fix and re-running confirms the fix was what moved the number — otherwise you have learned the wrong lesson",
+        "It reduces the size of the repository"], 1),
+      ("An agent runs autonomously for three hours. What should the output look like in git?",
+       ["One commit, so the change is atomic and easy to revert",
+        "Many commits, so the work is reviewable as a sequence and can be reverted partially",
+        "No commits until a human has reviewed everything"], 1),
+      ("What should you run before every commit?",
+       ["git log, to see recent history",
+        "git status and git diff — they catch unintended files and half-staged changes",
+        "git pull, to avoid conflicts"], 1),
+      ("Why keep large data files out of git?",
+       ["GitHub rejects files over a size limit",
+        "Git stores every version permanently, so a large file committed once bloats the history forever — generate it from a seeded script instead",
+        "Binary files cannot be diffed"], 1),
+    ]),
+  ],
+},
 ]

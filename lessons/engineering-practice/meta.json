@@ -67,6 +67,18 @@
       "title": "Deterministic First",
       "file": "lsn-1787400000008-deterministic-first.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000009",
+      "title": "Vibe Coding and Spec-Driven Development",
+      "file": "lsn-1787400000009-spec-driven-development.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000010",
+      "title": "Version Control, and Why Agents Make It Non-Optional",
+      "file": "lsn-1787400000010-version-control-basics.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -111,6 +123,16 @@
       "starred": false
     },
     "lsn-1787400000008": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000009": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000010": {
       "viewed": false,
       "completed": false,
       "starred": false
