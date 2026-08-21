@@ -206,11 +206,7 @@ Generation: {f'`{model}`' if base else 'extractive stand-in (no local endpoint r
 **Can:** answer single-hop questions where the fact lives in one document, with
 citations, at {np.mean(grounded):.2f} mean groundedness.
 
-**Cannot:** reliably answer questions needing facts from two documents. Retrieval
-recall drops from {np.mean([r['retrieval_recall'] for r in single]):.2f} to
-{np.mean([r['retrieval_recall'] for r in multi]):.2f} on multi-hop questions,
-because the question embeds close to one document and not the other. That is a
-limit of single-shot retrieval, not a tuning problem — it needs a retrieval loop.
+**Cannot:** reliably answer questions needing facts from two documents. Retrieval recall drops from {np.mean([r['retrieval_recall'] for r in single]):.2f} to {np.mean([r['retrieval_recall'] for r in multi]):.2f} on multi-hop questions, because the question embeds close to one document and not the other. That is a limit of single-shot retrieval, not a tuning problem — it needs a retrieval loop.
 
 **Refusal:** {'the system correctly refuses when the corpus does not contain the answer.'
               if refusal['correct'] else
