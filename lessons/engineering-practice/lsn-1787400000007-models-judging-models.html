@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Models Judging Models</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 8 of 8</span>
+  <h1>Models Judging Models</h1>
+  <p class="subtitle">LLM-as-judge — what it genuinely buys you, the four biases it ships with, and the failure that manufactures results.</p>
+
+  <p>Deterministic grading is the top of the ladder and most interesting outputs don't have it. Summaries, explanations, tone, helpfulness, whether an answer is <em>grounded</em> in its sources — none compiles, none has a test suite. The pragmatic answer is to have another model grade it, and that answer is genuinely useful and genuinely dangerous in ways worth knowing precisely.</p>
+  <h2>What it buys you</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Coverage</div><div><div class="roadmap-title">Grades what nothing else can</div><div class="roadmap-desc">Open-ended text, where the alternative is no measurement at all rather than a better one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Scale</div><div><div class="roadmap-title">Hundreds of items, minutes, pennies</div><div class="roadmap-desc">Human labelling of the same set is days and real money.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Consistency</div><div><div class="roadmap-title">Same rubric every time</div><div class="roadmap-desc">Human raters drift across a long session; a judge at temperature 0 does not.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Structure</div><div><div class="roadmap-title">Rubric dimensions, not one score</div><div class="roadmap-desc">Groundedness, completeness and tone as separate numbers, which a single human score usually blurs.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Iteration speed</div><div><div class="roadmap-title">The real win</div><div class="roadmap-desc">A judge you can run in ninety seconds changes how often you measure, and frequency of measurement matters more than precision of any single run.</div></div></div></div>
+  <h2>The four biases it ships with</h2>
+  <p>These are documented, reproducible, and present by default. Treat them as properties of the instrument rather than as bugs to be prompted away.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Position bias</div><div><div class="roadmap-title">Order changes the verdict</div><div class="roadmap-desc">Present the same two answers in the opposite order and judges flip a substantial fraction of their decisions. Mitigate by running both orders and discarding disagreements — or counting them as ties.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Verbosity bias</div><div><div class="roadmap-title">Longer reads as better</div><div class="roadmap-desc">A judge rewards length beyond the point where length helps. If one of your variants is chattier, you will measure that.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Self-preference</div><div><div class="roadmap-title">Models favour their own output</div><div class="roadmap-desc">Evaluators recognise and prefer their own generations. A judge from the same family as the system under test is not neutral.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Score compression</div><div><div class="roadmap-title">Everything is a 7 or 8</div><div class="roadmap-desc">Absolute 1–10 scoring clusters hard. Pairwise comparison discriminates far better than asking for a number.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">Circularity is the version that voids the result entirely</span>If the judge is the model under test, you are asking a system to score itself and the number carries no information about capability. The softer version is subtler and far more common: judging with a model from the same family, trained on overlapping data, sharing the same blind spots. It will not notice the errors it would have made itself — which are exactly the errors you most need to catch.</div>
+  <h2>The failure that manufactures results</h2>
+  <p>The biases above add noise, and noise is survivable. There is a worse case, and it is easy to walk into.</p>
+  <p>On one project an automated flag called <code>edit_attempted</code> was used as a measurement. It had been built as a safety classifier, and it counted certain shell commands as evidence of an edit attempt. About 15% of the recorded attempts had no edit tool call behind them at all.</p>
+  <p>That alone is tolerable — a known error rate can be corrected for. The problem was that <strong>the error was not uniform across conditions.</strong> The experimental condition relaxed budgets, which meant it ran more shell commands, which meant it accumulated more phantom credits. The difference between conditions was partly a measurement of shell activity rather than of editing.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 190" role="img" aria-label="Uniform judge error versus condition-correlated judge error">
+<text x="12" y="18" class="d-fill-green" font-size="12" font-weight="600">ERROR EVEN ACROSS CONDITIONS — survivable</text>
+<rect x="12" y="30" width="120" height="24" rx="4" class="d-box"/><text x="26" y="47" class="d-label-sm">control</text>
+<rect x="140" y="30" width="60" height="24" rx="4" class="d-fill-muted" opacity="0.5"/><text x="152" y="47" class="d-label-sm">+err</text>
+<rect x="12" y="60" width="150" height="24" rx="4" class="d-box-accent"/><text x="26" y="77" class="d-label-sm">treatment</text>
+<rect x="170" y="60" width="60" height="24" rx="4" class="d-fill-muted" opacity="0.5"/><text x="182" y="77" class="d-label-sm">+err</text>
+<text x="248" y="62" class="d-label-sm">the gap survives — error cancels</text>
+<line x1="12" y1="98" x2="628" y2="98" stroke="var(--border)"/>
+<text x="12" y="122" class="d-fill-red" font-size="12" font-weight="600">ERROR TRACKS THE CONDITION — fatal</text>
+<rect x="12" y="134" width="120" height="24" rx="4" class="d-box"/><text x="26" y="151" class="d-label-sm">control</text>
+<rect x="140" y="134" width="26" height="24" rx="4" class="d-fill-red" opacity="0.45"/>
+<rect x="12" y="164" width="120" height="22" rx="4" class="d-box-accent"/><text x="26" y="180" class="d-label-sm">treatment</text>
+<rect x="140" y="164" width="120" height="22" rx="4" class="d-fill-red" opacity="0.6"/><text x="152" y="180" class="d-label-sm">much more error</text>
+<text x="286" y="152" class="d-label-sm">the "effect" is the bias</text>
+</svg><figcaption>Noise that is even across conditions costs you power. Bias that tracks the condition you are testing invents an effect, and no amount of extra sampling removes it.</figcaption></figure>
+  <div class="callout warning"><span class="label">Ask this before trusting any judge comparison</span>Not "how accurate is the judge?" but <strong>"is the judge's error correlated with the thing I changed?"</strong> If one variant produces longer answers and your judge rewards length, you have a verbosity bias masquerading as an improvement. If one variant is more verbose because it explains itself more, you cannot tell those apart from the score alone. Extra samples will not save you — bias does not average out.</div>
+  <h2>A judge that is silently off is worse than no judge</h2>
+  <p>On the same project, one configuration default meant the verifier was nil. That single value disabled turn-end verification, the fix-attempt loop and per-edit feedback simultaneously — and nothing said so. The system continued producing results that looked like verified results.</p>
+  <p>No judge at all is an obvious gap. A judge that has quietly stopped running is a number that carries authority it has not earned. Assert that your grader ran, on every run, and fail loudly when it did not.</p>
+  <h2>How to use one properly</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Last resort on the ladder</div><div><div class="roadmap-title">Not first reach</div><div class="roadmap-desc">Deterministic, then reference-match, then judge. Every rung down costs certainty.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Different family from the system</div><div><div class="roadmap-title">Avoid self-preference</div><div class="roadmap-desc">And never the model under test.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Pairwise, not absolute</div><div><div class="roadmap-title">Discriminates far better</div><div class="roadmap-desc">"Which is better" beats "score this 1-10", which clusters.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Both orders, every time</div><div><div class="roadmap-title">Neutralises position bias</div><div class="roadmap-desc">Disagreement between orders is a tie, and its rate is a health metric for your judge.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Calibrate against humans</div><div><div class="roadmap-title">The step nobody does</div><div class="roadmap-desc">Label 30-50 items by hand once. Measure agreement. If the judge disagrees with you on the cases you care about, it is not measuring what you think.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Report agreement alongside scores</div><div><div class="roadmap-title">Honesty about the instrument</div><div class="roadmap-desc">A judge score without a known agreement rate is an opinion with a decimal point.</div></div></div></div>
+  <div class="callout matters"><span class="label">When you can buy a deterministic verifier, buy it</span>Bullpen's edit verification runs typecheckers and a language server — not a model. It is narrower than a judge and it is not an opinion, which is what a loop needs when the verdict decides whether to escalate. Reach for a judge where nothing checkable exists, not because it was quicker to build than a real check.</div>
+  <h2>Where this connects</h2>
+  <p>This is the same principle as the loops lesson, one level up: a loop or a score improves things only when signal enters from outside. A judge from the same family as the system under test is not outside. A grader whose error tracks your treatment is not outside. Human labels, a compiler, a test suite and a held-out answer key are.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2306.05685" target="_blank" rel="noopener">Judging LLM-as-a-Judge (Zheng et al., 2023)</a><span class="link-note">The MT-Bench paper. Documents position, verbosity and self-enhancement bias, and reports agreement rates against human raters.</span></li><li><a href="https://arxiv.org/abs/2305.17926" target="_blank" rel="noopener">LLMs are not Fair Evaluators (Wang et al., 2023)</a><span class="link-note">Position bias in detail, and the swap-and-compare mitigation used above.</span></li><li><a href="https://arxiv.org/abs/2404.13076" target="_blank" rel="noopener">LLM Evaluators Recognize and Favor Their Own Generations (Panickssery et al., 2024)</a><span class="link-note">Self-preference measured directly. The reason a judge from the same family as the system under test is not neutral.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. What is the most dangerous property an automated grader can have?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A high overall error rate</div>
+      <div class="quiz-opt">An error rate that correlates with the condition being tested, which manufactures an effect that more sampling cannot remove</div>
+      <div class="quiz-opt">Slow evaluation speed</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why prefer pairwise comparison over absolute 1-10 scoring?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It is cheaper to run</div>
+      <div class="quiz-opt">Absolute scores cluster tightly, while pairwise judgements discriminate far better</div>
+      <div class="quiz-opt">It removes the need to randomise order</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. You judge your system&#x27;s output using a model from the same family as the system. What is the risk?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The judge will be too harsh on familiar phrasing</div>
+      <div class="quiz-opt">Self-preference, and shared blind spots — it will not catch the errors it would have made itself</div>
+      <div class="quiz-opt">None, provided temperature is set to 0</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. A config default left the verifier nil for an entire run. Why is that worse than having no verifier?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It wastes compute on a disabled component</div>
+      <div class="quiz-opt">The system keeps producing results that look verified, so the numbers carry authority they haven&#x27;t earned</div>
+      <div class="quiz-opt">It causes the loop to terminate early</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

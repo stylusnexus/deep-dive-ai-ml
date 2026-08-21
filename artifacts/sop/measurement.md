@@ -15,6 +15,14 @@ If either half is untrue, stop. Everything below produces noise.
 - [ ] Threshold that would count as success, fixed in advance
 - [ ] Guardrail metric chosen — what must not get worse
 
+## 1b · Rule out the invisible
+- [ ] ☠ Run manifest emitted: model, endpoint, every budget, verification state, config version
+- [ ] Every terminator names itself when it fires — a wall clock must not look like a model stopping
+- [ ] Effective values printed **after** all writers, not the values you requested
+- [ ] Nothing truncated mid-measurement (output budget, context, tool-result clipping)
+- [ ] Non-completions classified — infrastructure errors kept out of capability numbers
+- [ ] Control fixture included, and read first when a board looks uniform
+
 ## 2 · Baseline
 - [ ] Whole set, not a spot check
 - [ ] Repeated, so you know the run-to-run spread
@@ -23,6 +31,11 @@ If either half is untrue, stop. Everything below produces noise.
 ## 3 · One treatment at a time
 - [ ] One change, or a bundled screen with the cost stated: you'll know *something* worked, not *what*
 - [ ] Everything else held fixed
+
+## 3b · Make the result locatable
+- [ ] Engagement reported separately from correctness — a metric that merges them hides what to fix
+- [ ] Every model failing identically? Suspect the harness before the models
+- [ ] For each passing test, what it does **not** establish, written down now
 
 ## 4 · Read it honestly
 - [ ] Compared against baseline spread, not against zero

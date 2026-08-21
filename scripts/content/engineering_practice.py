@@ -394,4 +394,281 @@ swebench report my-run-01 -d verified"""),
     ]),
   ],
 },
+{
+  "slug": "confounds-you-cannot-see",
+  "title": "Confounds You Cannot See",
+  "subtitle": "The limits, overrides and truncations that end a run silently — and get read as capability.",
+  "body": [
+    ("p", "Lesson 3 asked whether your instrument can tell success from inaction. This lesson is about the layer beneath that: whether anything <em>else</em> ended the run, and whether you would know."),
+    ("p", "The failure has a shape. A run stops early. The output shows no error. You attribute the result to the model — because the model is the only component you were thinking about — and you design your next experiment against that attribution. Then you do it eight more times."),
+
+    ("callout", "matters", "The definition worth memorising", "<strong>A limit that can end a run and cannot be seen is not a guard, it is a confound.</strong> The distinction isn't whether the limit is reasonable — most of them are. It is whether its firing appears anywhere in the output you read afterwards. An invisible guard doesn't just stop the run; it stops it while looking exactly like the thing you were trying to measure."),
+
+    ("h2", "A worked case: six mechanisms, one symptom"),
+    ("p", "Nine runs of a local coding agent on one issue produced zero edits. The obvious reading was that the model wouldn't commit a change. The runs were in fact terminated by <strong>six different mechanisms</strong>, none of which appeared in the output:"),
+    ("terms", [
+      ("A read-budget nudge", "set to 3 by a task classifier", "Fired before the model reached the edit."),
+      ("A phase transition", "clamped the pre-edit limit to 4", "Silently overwrote the operator's setting."),
+      ("Decomposition", "reassigned the nudge to 3 for the rest of the run", "A third writer to the same number."),
+      ("A whole-run wall clock", "separate from the per-call timeout", "Nothing in the log named it when it fired."),
+      ("The wrong model", "the flag used a different config key", "Six runs credited to a 30B were served by a 9B."),
+      ("A nil verifier", "one config default was false", "Which disabled turn-end verification, the fix-attempt loop and per-edit feedback at once."),
+    ]),
+    ("p", "Every one of those presents identically as \"the model won't commit an edit\". Two of them aren't even about the model — one is a clock, one is a routing bug that meant the measured system was never the system under test."),
+
+    ("figure", "The same observation is consistent with every branch. Nothing in the output distinguishes them, so the reading defaults to whichever component you were already thinking about — which is the model.", '''<svg viewBox="0 0 640 220" role="img" aria-label="One symptom consistent with many hidden causes"><defs><marker id="ca" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>
+<rect x="12" y="90" width="150" height="44" rx="7" class="d-box-warn"/>
+<text x="26" y="112" class="d-label-b">zero edits</text>
+<text x="26" y="128" class="d-label-sm">observed</text>
+<path d="M162 100 L214 30" class="d-arrow" marker-end="url(#ca)"/>
+<path d="M162 106 L214 66" class="d-arrow" marker-end="url(#ca)"/>
+<path d="M162 112 L214 106" class="d-arrow" marker-end="url(#ca)"/>
+<path d="M162 118 L214 146" class="d-arrow" marker-end="url(#ca)"/>
+<path d="M162 124 L214 186" class="d-arrow" marker-end="url(#ca)"/>
+<rect x="214" y="14" width="200" height="30" rx="5" class="d-box"/><text x="226" y="34" class="d-label-sm">read budget fired at 3</text>
+<rect x="214" y="52" width="200" height="30" rx="5" class="d-box"/><text x="226" y="72" class="d-label-sm">wall clock expired</text>
+<rect x="214" y="90" width="200" height="30" rx="5" class="d-box"/><text x="226" y="110" class="d-label-sm">wrong model served</text>
+<rect x="214" y="128" width="200" height="30" rx="5" class="d-box"/><text x="226" y="148" class="d-label-sm">verifier nil, feedback off</text>
+<rect x="214" y="166" width="200" height="30" rx="5" class="d-box-accent"/><text x="226" y="186" class="d-label-sm">the model genuinely refused</text>
+<text x="432" y="186" class="d-accent">← the only one you tested</text>
+</svg>'''),
+
+    ("h2", "An override that runs before the thing it overrides is not an override"),
+    ("p", "Two attempts to loosen that read budget did nothing while reporting success. Both were applied early and then overwritten — once by a phase-transition clamp, once by the task classifier. Both times the environment said 30 and the log printed 3, and both times the flat result was read as a model failure."),
+    ("callout", "insight", "Setting a knob and proving it engaged are two different acts", "The fix is not a better default. It is that the effective value must be printed after everything that can write to it, and operator overrides must be applied last. If your experiment turns a dial, your output must show the dial's final position — otherwise a null result is ambiguous between \"the treatment doesn't work\" and \"the treatment never happened\"."),
+
+    ("h2", "Truncation manufactures conclusions"),
+    ("p", "A separate episode: three consecutive tests concluded that a model architecture could not reuse its cache. All three ran with an output budget so small that the model was cut off mid-thought. The fragment fed into the next turn could never match what was cached — guaranteeing the observed failure for a reason that had nothing to do with architecture. Raising the budget so the turn actually completed flipped the same test."),
+    ("p", "The general form: <strong>a limit that truncates the thing being measured contaminates everything downstream of it.</strong> Output budgets, context windows, tool-result clipping, log rotation. Any of them can quietly convert your experiment into a measurement of the limit."),
+    ("callout", "pitfall", "The dangerous version is when the story is good", "That architecture conclusion was plausible. There was a mechanism, it was consistent with the observation, and it would have made a nice slide. When a test result and an appealing explanation agree, that agreement is not confirmation — it is the moment to isolate the variable, because a satisfying story is precisely what stops people looking further."),
+
+    ("h2", "Infrastructure errors are not capability failures"),
+    ("p", "In one battery, roughly six of fourteen cells for a model failed on a tool-call parsing error in the serving layer, which the loop treated as fatal. That is pure harness noise sitting in the middle of a capability measurement. Until it was separated out, the model's score was partly a measurement of a parser."),
+    ("p", "Classify every non-completion before you aggregate. A run that failed because the model couldn't do the task and a run that failed because a socket closed do not belong in the same number."),
+
+    ("h2", "One prompt is not an experiment"),
+    ("p", "A first smoke run on a single fixture showed a discriminator between two conditions of <strong>+1.00</strong> — an apparently decisive result. The full seven-fixture run showed <strong>+0.00</strong>. The single fixture wasn't representative, and nothing about the n=1 result signalled that."),
+    ("p", "This is the sample-size point from your statistics course arriving in agent evaluation, where it bites harder because runs are slow and expensive and the temptation to conclude from one is correspondingly larger. Whole set, repeated, mean and spread, against a baseline — or you have an anecdote."),
+
+    ("h2", "The checklist this produces"),
+    ("ul", [
+      "<strong>Emit a run manifest.</strong> Model, endpoint, every budget, verification state, config version. If it can end or alter the run, it goes in the manifest.",
+      "<strong>Make every terminator name itself.</strong> A wall clock that expires should say so, distinguishably from a model that stopped.",
+      "<strong>Print effective values, not requested ones.</strong> After all writers have run.",
+      "<strong>Announce mid-run changes.</strong> If a phase transition rewrites a budget, that belongs in the output.",
+      "<strong>Classify non-completions</strong> before aggregating anything.",
+      "<strong>Check the instrument when a finding is surprising.</strong> Three wrong claims in one hour on that project came from the measuring tooling, not the system — a filename inside a search result read as a file the agent chose, a ratio read as parallelism, a counter misread because the grep pattern only matched single digits.",
+    ]),
+    ("callout", "warning", "And the cheap habit that beats all of it", "Count before theorising. A separate incident on the same project was misdiagnosed three times — as a bad timeout argument, then a dead shell, then, confidently and in writing, as a fork bomb from background loops. One command listing running processes by name would have named the real cause at any point. When something is broken, enumerate before you explain."),
+
+    ("links", [
+      ('Building effective agents — Anthropic', 'https://www.anthropic.com/engineering/building-effective-agents',
+       'Argues for the simplest scaffold that works — partly because every added mechanism is another thing that can end a run invisibly.'),
+      ('SWE-bench experiments — raw submissions', 'https://github.com/swe-bench/experiments',
+       "Each submission records its own configuration. Worth reading a few as examples of what a run manifest should contain."),
+    ]),
+
+    ("quiz", [
+      ("What makes a run limit a confound rather than a guard?",
+       ["That it fires too early to be useful",
+        "That its firing doesn't appear in the output you read afterwards, so it's indistinguishable from the thing you were measuring",
+        "That it was set by the framework rather than by you"], 1),
+      ("You set a budget to 30, the run behaves as though it were 3, and the result is flat. What can you conclude about the treatment?",
+       ["It doesn't work",
+        "Nothing — a null result is ambiguous between 'the treatment failed' and 'the treatment never happened'",
+        "That the budget is the wrong lever"], 1),
+      ("Three tests support an appealing architectural explanation. What should that agreement prompt?",
+       ["Writing it up, since the mechanism and the data agree",
+        "Isolating the variable — a satisfying story is what stops people looking further",
+        "Running a fourth test under the same conditions"], 1),
+      ("Six of fourteen eval cells fail on a serving-layer parsing error. What must you do before aggregating?",
+       ["Retry them and average everything together",
+        "Classify non-completions, so infrastructure failures don't sit inside a capability number",
+        "Drop that model from the comparison"], 1),
+    ]),
+  ],
+},
+{
+  "slug": "localising-a-failure",
+  "title": "Localising a Failure",
+  "subtitle": "Knowing something is broken is easy. Knowing which part is the whole job.",
+  "body": [
+    ("p", "A zero is ambiguous. \"The models scored 0 of 7\" is consistent with the models being incapable, the harness strangling them before they engage, the rubric being too strict, or the fixtures being broken. Every one of those calls for a different fix, and picking wrongly costs you weeks."),
+    ("p", "Four techniques turn an ambiguous result into a located one. None is expensive."),
+
+    ("h2", "1 · A control fixture"),
+    ("p", "Add one task you are confident is easy, in the same domain, exercised by the same harness. Then read the pair:"),
+
+    ("figure", "The control is the discriminator. Same model, same harness, same domain — only difficulty differs, so the pattern of pass and fail tells you which component is the wall.", '''<svg viewBox="0 0 640 190" role="img" aria-label="Reading a control fixture against a hard fixture">
+<rect x="12" y="34" width="180" height="26" rx="4" class="d-box"/><text x="24" y="52" class="d-label-sm">control (easy)</text>
+<rect x="12" y="66" width="180" height="26" rx="4" class="d-box"/><text x="24" y="84" class="d-label-sm">target (hard)</text>
+<text x="228" y="26" class="d-label-sm">control ✓ / target ✗</text>
+<rect x="228" y="34" width="180" height="58" rx="5" class="d-box-good"/>
+<text x="240" y="56" class="d-label-sm">the wall is the specific</text>
+<text x="240" y="72" class="d-label-sm">difficulty — scope, not ability</text>
+<text x="440" y="26" class="d-label-sm">control ✗ / target ✗</text>
+<rect x="440" y="34" width="188" height="58" rx="5" class="d-box-warn"/>
+<text x="452" y="56" class="d-label-sm">the harness or the rubric,</text>
+<text x="452" y="72" class="d-label-sm">not the model</text>
+<text x="12" y="128" class="d-label-sm">Without the control, 0/7 is consistent with both columns and you cannot tell which you are looking at.</text>
+<text x="12" y="150" class="d-label-sm">Worked case: a 30B model failed every multi-file fixture and passed the single-file control cleanly, under both guard</text>
+<text x="12" y="168" class="d-label-sm">conditions — which located the wall at multi-file scope rather than at coding ability.</text>
+</svg>'''),
+
+    ("callout", "matters", "Build the control before you need it", "Every benchmark should carry at least one task you would be alarmed to fail. Its job is not to be scored — it is to tell you, on the day everything reads zero, whether the instrument is still working. This is instrument validity from lesson 3, running continuously rather than once at setup."),
+
+    ("h2", "2 · Suspect the harness when every tier fails identically"),
+    ("p", "A frontier model with a strong published benchmark score produced zero edit attempts and zero source recall on one battery — dying in the first few iterations, before it engaged with the task at all. A capable model failing <em>without trying</em> is not a capability signal. It is a harness signal."),
+    ("p", "The general rule: when models of very different capability fail in the same way and at the same point, the thing they have in common is the scaffolding, not their weights. Capability differences should produce differently-shaped failures."),
+
+    ("h2", "3 · Metric definition decides what you can see"),
+    ("p", "One battery scored task-pass on recall over the full expected file set, including documentation and tests. Real near-misses — runs that found the right code and broke the build — scored zero alongside runs that never found anything, and the whole board read as uniform failure."),
+    ("p", "Rescoring on source files only surfaced that the same model was reaching 0.50–0.67 on hard fixtures. Same runs, same data, different metric, and a completely different conclusion: not \"never found the code\" but \"found it and couldn't edit it correctly\" — two different problems with two different fixes."),
+    ("callout", "insight", "Design the metric to separate the failures you care about", "A metric that collapses distinct failure modes into one number is not neutral — it actively hides the distinction you need. Report engagement separately from correctness. If your score cannot tell <em>never attempted</em> from <em>attempted and got it wrong</em>, it cannot tell you what to fix next, however precise it looks."),
+
+    ("h2", "4 · State what a green result proves — and what it does not"),
+    ("p", "An end-to-end test on a new serving runtime landed a correct single-file edit and it was tempting to record it as \"the new runtime works\". It proved the serving path and the integration. It said nothing about the multi-file capability that was the entire point of the investigation, because the runtime was serving the same weights."),
+    ("p", "Every passing test has a scope. Writing down what it does <em>not</em> establish, at the moment you record the pass, is what stops \"the plumbing works\" quietly becoming \"the problem is solved\" three weeks later when nobody remembers the distinction."),
+
+    ("h2", "The error underneath all four"),
+    ("p", "One project logged the same reasoning failure at least three times in a fortnight, in unrelated areas:"),
+    ("terms", [
+      ("\"This model can't run on that engine\"", "One build format tested", "A different build of the same weights loaded first try."),
+      ("\"This architecture can't reuse its cache\"", "Three tests, all truncated", "The truncation caused the failure, not the architecture."),
+      ("\"This runtime is twice as fast\"", "Measured on the wrong engine mode", "The flag was inert in the configuration tested."),
+    ]),
+    ("callout", "pitfall", "A true narrow observation promoted to a false general one", "In each case the specific measurement was correct. What was wrong was the scope of the claim built on it. Before writing \"X cannot do Y\", name exactly what you tested — which build, which configuration, which budget, which mode — and ask whether the claim you are about to make is larger than the evidence under it. It usually is."),
+
+    ("h2", "In practice"),
+    ("ul", [
+      "Put an easy control in every benchmark and read it first when a board looks uniform",
+      "When every model fails identically, investigate the harness before the models",
+      "Report engagement and correctness as separate numbers",
+      "Record what each passing test does not establish, at the time you record the pass",
+      "Write claims at the scope of the evidence — name the build, the config, the budget",
+    ]),
+
+    ("links", [
+      ('SWE-bench', 'https://www.swebench.com/',
+       'Note that variants exist precisely to separate difficulty from capability — Lite versus Verified is a control-fixture argument at benchmark scale.'),
+      ("Let's Verify Step by Step (Lightman et al., 2023)", 'https://arxiv.org/abs/2305.20050',
+       'Process versus outcome scoring — the same idea as separating engagement from correctness, done at the step level.'),
+    ]),
+
+    ("quiz", [
+      ("Every model in your battery scores zero, from a small local one to a frontier model. What should you investigate first?",
+       ["The models — the task may be beyond current capability",
+        "The harness, since the thing they all share is the scaffolding, not their weights",
+        "The fixtures, which are probably mislabelled"], 1),
+      ("What is a control fixture for?",
+       ["Establishing a floor score for the leaderboard",
+        "Telling you, when everything reads zero, whether the instrument still works and where the wall is",
+        "Giving weaker models something they can pass"], 1),
+      ("Rescoring the same runs on a narrower metric changes 'uniform failure' into '0.50-0.67 on hard tasks'. What does that show?",
+       ["The original metric was miscalculated",
+        "A metric that collapses distinct failure modes hides the distinction you need to choose a fix",
+        "The narrower metric is too generous"], 1),
+      ("An integration test on a new runtime passes with a single-file edit. What have you established?",
+       ["That the runtime works and the investigation can close",
+        "That the serving path and integration work — and nothing about the multi-file question, since the weights are unchanged",
+        "That the previous runtime was the bottleneck"], 1),
+    ]),
+  ],
+},
+{
+  "slug": "models-judging-models",
+  "title": "Models Judging Models",
+  "subtitle": "LLM-as-judge — what it genuinely buys you, the four biases it ships with, and the failure that manufactures results.",
+  "body": [
+    ("p", "Deterministic grading is the top of the ladder and most interesting outputs don't have it. Summaries, explanations, tone, helpfulness, whether an answer is <em>grounded</em> in its sources — none compiles, none has a test suite. The pragmatic answer is to have another model grade it, and that answer is genuinely useful and genuinely dangerous in ways worth knowing precisely."),
+
+    ("h2", "What it buys you"),
+    ("terms", [
+      ("Coverage", "Grades what nothing else can", "Open-ended text, where the alternative is no measurement at all rather than a better one."),
+      ("Scale", "Hundreds of items, minutes, pennies", "Human labelling of the same set is days and real money."),
+      ("Consistency", "Same rubric every time", "Human raters drift across a long session; a judge at temperature 0 does not."),
+      ("Structure", "Rubric dimensions, not one score", "Groundedness, completeness and tone as separate numbers, which a single human score usually blurs."),
+      ("Iteration speed", "The real win", "A judge you can run in ninety seconds changes how often you measure, and frequency of measurement matters more than precision of any single run."),
+    ]),
+
+    ("h2", "The four biases it ships with"),
+    ("p", "These are documented, reproducible, and present by default. Treat them as properties of the instrument rather than as bugs to be prompted away."),
+    ("terms", [
+      ("Position bias", "Order changes the verdict", "Present the same two answers in the opposite order and judges flip a substantial fraction of their decisions. Mitigate by running both orders and discarding disagreements — or counting them as ties."),
+      ("Verbosity bias", "Longer reads as better", "A judge rewards length beyond the point where length helps. If one of your variants is chattier, you will measure that."),
+      ("Self-preference", "Models favour their own output", "Evaluators recognise and prefer their own generations. A judge from the same family as the system under test is not neutral."),
+      ("Score compression", "Everything is a 7 or 8", "Absolute 1–10 scoring clusters hard. Pairwise comparison discriminates far better than asking for a number."),
+    ]),
+    ("callout", "pitfall", "Circularity is the version that voids the result entirely", "If the judge is the model under test, you are asking a system to score itself and the number carries no information about capability. The softer version is subtler and far more common: judging with a model from the same family, trained on overlapping data, sharing the same blind spots. It will not notice the errors it would have made itself — which are exactly the errors you most need to catch."),
+
+    ("h2", "The failure that manufactures results"),
+    ("p", "The biases above add noise, and noise is survivable. There is a worse case, and it is easy to walk into."),
+    ("p", "On one project an automated flag called <code>edit_attempted</code> was used as a measurement. It had been built as a safety classifier, and it counted certain shell commands as evidence of an edit attempt. About 15% of the recorded attempts had no edit tool call behind them at all."),
+    ("p", "That alone is tolerable — a known error rate can be corrected for. The problem was that <strong>the error was not uniform across conditions.</strong> The experimental condition relaxed budgets, which meant it ran more shell commands, which meant it accumulated more phantom credits. The difference between conditions was partly a measurement of shell activity rather than of editing."),
+
+    ("figure", "Noise that is even across conditions costs you power. Bias that tracks the condition you are testing invents an effect, and no amount of extra sampling removes it.", '''<svg viewBox="0 0 640 190" role="img" aria-label="Uniform judge error versus condition-correlated judge error">
+<text x="12" y="18" class="d-fill-green" font-size="12" font-weight="600">ERROR EVEN ACROSS CONDITIONS — survivable</text>
+<rect x="12" y="30" width="120" height="24" rx="4" class="d-box"/><text x="26" y="47" class="d-label-sm">control</text>
+<rect x="140" y="30" width="60" height="24" rx="4" class="d-fill-muted" opacity="0.5"/><text x="152" y="47" class="d-label-sm">+err</text>
+<rect x="12" y="60" width="150" height="24" rx="4" class="d-box-accent"/><text x="26" y="77" class="d-label-sm">treatment</text>
+<rect x="170" y="60" width="60" height="24" rx="4" class="d-fill-muted" opacity="0.5"/><text x="182" y="77" class="d-label-sm">+err</text>
+<text x="248" y="62" class="d-label-sm">the gap survives — error cancels</text>
+<line x1="12" y1="98" x2="628" y2="98" stroke="var(--border)"/>
+<text x="12" y="122" class="d-fill-red" font-size="12" font-weight="600">ERROR TRACKS THE CONDITION — fatal</text>
+<rect x="12" y="134" width="120" height="24" rx="4" class="d-box"/><text x="26" y="151" class="d-label-sm">control</text>
+<rect x="140" y="134" width="26" height="24" rx="4" class="d-fill-red" opacity="0.45"/>
+<rect x="12" y="164" width="120" height="22" rx="4" class="d-box-accent"/><text x="26" y="180" class="d-label-sm">treatment</text>
+<rect x="140" y="164" width="120" height="22" rx="4" class="d-fill-red" opacity="0.6"/><text x="152" y="180" class="d-label-sm">much more error</text>
+<text x="286" y="152" class="d-label-sm">the "effect" is the bias</text>
+</svg>'''),
+
+    ("callout", "warning", "Ask this before trusting any judge comparison", "Not \"how accurate is the judge?\" but <strong>\"is the judge's error correlated with the thing I changed?\"</strong> If one variant produces longer answers and your judge rewards length, you have a verbosity bias masquerading as an improvement. If one variant is more verbose because it explains itself more, you cannot tell those apart from the score alone. Extra samples will not save you — bias does not average out."),
+
+    ("h2", "A judge that is silently off is worse than no judge"),
+    ("p", "On the same project, one configuration default meant the verifier was nil. That single value disabled turn-end verification, the fix-attempt loop and per-edit feedback simultaneously — and nothing said so. The system continued producing results that looked like verified results."),
+    ("p", "No judge at all is an obvious gap. A judge that has quietly stopped running is a number that carries authority it has not earned. Assert that your grader ran, on every run, and fail loudly when it did not."),
+
+    ("h2", "How to use one properly"),
+    ("terms", [
+      ("Last resort on the ladder", "Not first reach", "Deterministic, then reference-match, then judge. Every rung down costs certainty."),
+      ("Different family from the system", "Avoid self-preference", "And never the model under test."),
+      ("Pairwise, not absolute", "Discriminates far better", "\"Which is better\" beats \"score this 1-10\", which clusters."),
+      ("Both orders, every time", "Neutralises position bias", "Disagreement between orders is a tie, and its rate is a health metric for your judge."),
+      ("Calibrate against humans", "The step nobody does", "Label 30-50 items by hand once. Measure agreement. If the judge disagrees with you on the cases you care about, it is not measuring what you think."),
+      ("Report agreement alongside scores", "Honesty about the instrument", "A judge score without a known agreement rate is an opinion with a decimal point."),
+    ]),
+    ("callout", "matters", "When you can buy a deterministic verifier, buy it", "Bullpen's edit verification runs typecheckers and a language server — not a model. It is narrower than a judge and it is not an opinion, which is what a loop needs when the verdict decides whether to escalate. Reach for a judge where nothing checkable exists, not because it was quicker to build than a real check."),
+
+    ("h2", "Where this connects"),
+    ("p", "This is the same principle as the loops lesson, one level up: a loop or a score improves things only when signal enters from outside. A judge from the same family as the system under test is not outside. A grader whose error tracks your treatment is not outside. Human labels, a compiler, a test suite and a held-out answer key are."),
+
+    ("links", [
+      ('Judging LLM-as-a-Judge (Zheng et al., 2023)', 'https://arxiv.org/abs/2306.05685',
+       'The MT-Bench paper. Documents position, verbosity and self-enhancement bias, and reports agreement rates against human raters.'),
+      ('LLMs are not Fair Evaluators (Wang et al., 2023)', 'https://arxiv.org/abs/2305.17926',
+       'Position bias in detail, and the swap-and-compare mitigation used above.'),
+      ('LLM Evaluators Recognize and Favor Their Own Generations (Panickssery et al., 2024)', 'https://arxiv.org/abs/2404.13076',
+       "Self-preference measured directly. The reason a judge from the same family as the system under test is not neutral."),
+    ]),
+
+    ("quiz", [
+      ("What is the most dangerous property an automated grader can have?",
+       ["A high overall error rate",
+        "An error rate that correlates with the condition being tested, which manufactures an effect that more sampling cannot remove",
+        "Slow evaluation speed"], 1),
+      ("Why prefer pairwise comparison over absolute 1-10 scoring?",
+       ["It is cheaper to run",
+        "Absolute scores cluster tightly, while pairwise judgements discriminate far better",
+        "It removes the need to randomise order"], 1),
+      ("You judge your system's output using a model from the same family as the system. What is the risk?",
+       ["The judge will be too harsh on familiar phrasing",
+        "Self-preference, and shared blind spots — it will not catch the errors it would have made itself",
+        "None, provided temperature is set to 0"], 1),
+      ("A config default left the verifier nil for an entire run. Why is that worse than having no verifier?",
+       ["It wastes compute on a disabled component",
+        "The system keeps producing results that look verified, so the numbers carry authority they haven't earned",
+        "It causes the loop to terminate early"], 1),
+    ]),
+  ],
+},
 ]

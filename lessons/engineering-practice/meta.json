@@ -43,6 +43,24 @@
       "title": "SWE-bench, and How to Actually Run It",
       "file": "lsn-1787400000004-swe-bench-and-how-to-run-it.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000005",
+      "title": "Confounds You Cannot See",
+      "file": "lsn-1787400000005-confounds-you-cannot-see.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000006",
+      "title": "Localising a Failure",
+      "file": "lsn-1787400000006-localising-a-failure.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000007",
+      "title": "Models Judging Models",
+      "file": "lsn-1787400000007-models-judging-models.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -67,6 +85,21 @@
       "starred": false
     },
     "lsn-1787400000004": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000005": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000006": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000007": {
       "viewed": false,
       "completed": false,
       "starred": false

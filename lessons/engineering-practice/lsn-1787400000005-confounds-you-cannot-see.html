@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confounds You Cannot See</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 6 of 8</span>
+  <h1>Confounds You Cannot See</h1>
+  <p class="subtitle">The limits, overrides and truncations that end a run silently — and get read as capability.</p>
+
+  <p>Lesson 3 asked whether your instrument can tell success from inaction. This lesson is about the layer beneath that: whether anything <em>else</em> ended the run, and whether you would know.</p>
+  <p>The failure has a shape. A run stops early. The output shows no error. You attribute the result to the model — because the model is the only component you were thinking about — and you design your next experiment against that attribution. Then you do it eight more times.</p>
+  <div class="callout matters"><span class="label">The definition worth memorising</span><strong>A limit that can end a run and cannot be seen is not a guard, it is a confound.</strong> The distinction isn't whether the limit is reasonable — most of them are. It is whether its firing appears anywhere in the output you read afterwards. An invisible guard doesn't just stop the run; it stops it while looking exactly like the thing you were trying to measure.</div>
+  <h2>A worked case: six mechanisms, one symptom</h2>
+  <p>Nine runs of a local coding agent on one issue produced zero edits. The obvious reading was that the model wouldn't commit a change. The runs were in fact terminated by <strong>six different mechanisms</strong>, none of which appeared in the output:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">A read-budget nudge</div><div><div class="roadmap-title">set to 3 by a task classifier</div><div class="roadmap-desc">Fired before the model reached the edit.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A phase transition</div><div><div class="roadmap-title">clamped the pre-edit limit to 4</div><div class="roadmap-desc">Silently overwrote the operator's setting.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decomposition</div><div><div class="roadmap-title">reassigned the nudge to 3 for the rest of the run</div><div class="roadmap-desc">A third writer to the same number.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A whole-run wall clock</div><div><div class="roadmap-title">separate from the per-call timeout</div><div class="roadmap-desc">Nothing in the log named it when it fired.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The wrong model</div><div><div class="roadmap-title">the flag used a different config key</div><div class="roadmap-desc">Six runs credited to a 30B were served by a 9B.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A nil verifier</div><div><div class="roadmap-title">one config default was false</div><div class="roadmap-desc">Which disabled turn-end verification, the fix-attempt loop and per-edit feedback at once.</div></div></div></div>
+  <p>Every one of those presents identically as "the model won't commit an edit". Two of them aren't even about the model — one is a clock, one is a routing bug that meant the measured system was never the system under test.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 220" role="img" aria-label="One symptom consistent with many hidden causes"><defs><marker id="ca" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>
+<rect x="12" y="90" width="150" height="44" rx="7" class="d-box-warn"/>
+<text x="26" y="112" class="d-label-b">zero edits</text>
+<text x="26" y="128" class="d-label-sm">observed</text>
+<path d="M162 100 L214 30" class="d-arrow" marker-end="url(#ca)"/>
+<path d="M162 106 L214 66" class="d-arrow" marker-end="url(#ca)"/>
+<path d="M162 112 L214 106" class="d-arrow" marker-end="url(#ca)"/>
+<path d="M162 118 L214 146" class="d-arrow" marker-end="url(#ca)"/>
+<path d="M162 124 L214 186" class="d-arrow" marker-end="url(#ca)"/>
+<rect x="214" y="14" width="200" height="30" rx="5" class="d-box"/><text x="226" y="34" class="d-label-sm">read budget fired at 3</text>
+<rect x="214" y="52" width="200" height="30" rx="5" class="d-box"/><text x="226" y="72" class="d-label-sm">wall clock expired</text>
+<rect x="214" y="90" width="200" height="30" rx="5" class="d-box"/><text x="226" y="110" class="d-label-sm">wrong model served</text>
+<rect x="214" y="128" width="200" height="30" rx="5" class="d-box"/><text x="226" y="148" class="d-label-sm">verifier nil, feedback off</text>
+<rect x="214" y="166" width="200" height="30" rx="5" class="d-box-accent"/><text x="226" y="186" class="d-label-sm">the model genuinely refused</text>
+<text x="432" y="186" class="d-accent">← the only one you tested</text>
+</svg><figcaption>The same observation is consistent with every branch. Nothing in the output distinguishes them, so the reading defaults to whichever component you were already thinking about — which is the model.</figcaption></figure>
+  <h2>An override that runs before the thing it overrides is not an override</h2>
+  <p>Two attempts to loosen that read budget did nothing while reporting success. Both were applied early and then overwritten — once by a phase-transition clamp, once by the task classifier. Both times the environment said 30 and the log printed 3, and both times the flat result was read as a model failure.</p>
+  <div class="callout insight"><span class="label">Setting a knob and proving it engaged are two different acts</span>The fix is not a better default. It is that the effective value must be printed after everything that can write to it, and operator overrides must be applied last. If your experiment turns a dial, your output must show the dial's final position — otherwise a null result is ambiguous between "the treatment doesn't work" and "the treatment never happened".</div>
+  <h2>Truncation manufactures conclusions</h2>
+  <p>A separate episode: three consecutive tests concluded that a model architecture could not reuse its cache. All three ran with an output budget so small that the model was cut off mid-thought. The fragment fed into the next turn could never match what was cached — guaranteeing the observed failure for a reason that had nothing to do with architecture. Raising the budget so the turn actually completed flipped the same test.</p>
+  <p>The general form: <strong>a limit that truncates the thing being measured contaminates everything downstream of it.</strong> Output budgets, context windows, tool-result clipping, log rotation. Any of them can quietly convert your experiment into a measurement of the limit.</p>
+  <div class="callout pitfall"><span class="label">The dangerous version is when the story is good</span>That architecture conclusion was plausible. There was a mechanism, it was consistent with the observation, and it would have made a nice slide. When a test result and an appealing explanation agree, that agreement is not confirmation — it is the moment to isolate the variable, because a satisfying story is precisely what stops people looking further.</div>
+  <h2>Infrastructure errors are not capability failures</h2>
+  <p>In one battery, roughly six of fourteen cells for a model failed on a tool-call parsing error in the serving layer, which the loop treated as fatal. That is pure harness noise sitting in the middle of a capability measurement. Until it was separated out, the model's score was partly a measurement of a parser.</p>
+  <p>Classify every non-completion before you aggregate. A run that failed because the model couldn't do the task and a run that failed because a socket closed do not belong in the same number.</p>
+  <h2>One prompt is not an experiment</h2>
+  <p>A first smoke run on a single fixture showed a discriminator between two conditions of <strong>+1.00</strong> — an apparently decisive result. The full seven-fixture run showed <strong>+0.00</strong>. The single fixture wasn't representative, and nothing about the n=1 result signalled that.</p>
+  <p>This is the sample-size point from your statistics course arriving in agent evaluation, where it bites harder because runs are slow and expensive and the temptation to conclude from one is correspondingly larger. Whole set, repeated, mean and spread, against a baseline — or you have an anecdote.</p>
+  <h2>The checklist this produces</h2>
+  <ul><li><strong>Emit a run manifest.</strong> Model, endpoint, every budget, verification state, config version. If it can end or alter the run, it goes in the manifest.</li><li><strong>Make every terminator name itself.</strong> A wall clock that expires should say so, distinguishably from a model that stopped.</li><li><strong>Print effective values, not requested ones.</strong> After all writers have run.</li><li><strong>Announce mid-run changes.</strong> If a phase transition rewrites a budget, that belongs in the output.</li><li><strong>Classify non-completions</strong> before aggregating anything.</li><li><strong>Check the instrument when a finding is surprising.</strong> Three wrong claims in one hour on that project came from the measuring tooling, not the system — a filename inside a search result read as a file the agent chose, a ratio read as parallelism, a counter misread because the grep pattern only matched single digits.</li></ul>
+  <div class="callout warning"><span class="label">And the cheap habit that beats all of it</span>Count before theorising. A separate incident on the same project was misdiagnosed three times — as a bad timeout argument, then a dead shell, then, confidently and in writing, as a fork bomb from background loops. One command listing running processes by name would have named the real cause at any point. When something is broken, enumerate before you explain.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">Argues for the simplest scaffold that works — partly because every added mechanism is another thing that can end a run invisibly.</span></li><li><a href="https://github.com/swe-bench/experiments" target="_blank" rel="noopener">SWE-bench experiments — raw submissions</a><span class="link-note">Each submission records its own configuration. Worth reading a few as examples of what a run manifest should contain.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. What makes a run limit a confound rather than a guard?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">That it fires too early to be useful</div>
+      <div class="quiz-opt">That its firing doesn&#x27;t appear in the output you read afterwards, so it&#x27;s indistinguishable from the thing you were measuring</div>
+      <div class="quiz-opt">That it was set by the framework rather than by you</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. You set a budget to 30, the run behaves as though it were 3, and the result is flat. What can you conclude about the treatment?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It doesn&#x27;t work</div>
+      <div class="quiz-opt">Nothing — a null result is ambiguous between &#x27;the treatment failed&#x27; and &#x27;the treatment never happened&#x27;</div>
+      <div class="quiz-opt">That the budget is the wrong lever</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Three tests support an appealing architectural explanation. What should that agreement prompt?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Writing it up, since the mechanism and the data agree</div>
+      <div class="quiz-opt">Isolating the variable — a satisfying story is what stops people looking further</div>
+      <div class="quiz-opt">Running a fourth test under the same conditions</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Six of fourteen eval cells fail on a serving-layer parsing error. What must you do before aggregating?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Retry them and average everything together</div>
+      <div class="quiz-opt">Classify non-completions, so infrastructure failures don&#x27;t sit inside a capability number</div>
+      <div class="quiz-opt">Drop that model from the comparison</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>
