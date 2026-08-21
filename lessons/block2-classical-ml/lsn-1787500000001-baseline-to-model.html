@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>From Baseline to Model</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 2 of 4</span>
+  <h1>From Baseline to Model</h1>
+  <p class="subtitle">A ladder of increasing complexity, climbed only as far as the evidence justifies.</p>
+
+  <p>The temptation on a new problem is to reach for the strongest thing you know. The disciplined approach is a ladder, and it is faster in practice because most rungs take minutes and each one tells you something the next cannot.</p>
+  <h2>The ladder</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">0 · Majority class</div><div><div class="roadmap-title">Seconds</div><div class="roadmap-desc">Predict the most common answer for everything. This is the number every later result is judged against.</div></div></div><div class="roadmap-item"><div class="roadmap-num">1 · One rule</div><div><div class="roadmap-title">Minutes</div><div class="roadmap-desc">Threshold the single most predictive feature. Surprisingly often within a point or two of everything above it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2 · Logistic regression</div><div><div class="roadmap-title">Minutes</div><div class="roadmap-desc">Interpretable coefficients, fast, deployable anywhere. The real baseline for tabular problems.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3 · Random forest</div><div><div class="roadmap-title">Minutes</div><div class="roadmap-desc">Strong, needs almost no tuning, resistant to overfitting. Usually your first genuinely competitive score.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4 · Gradient boosting</div><div><div class="roadmap-title">Hours, with care</div><div class="roadmap-desc">Higher ceiling, requires early stopping and a learning rate you chose deliberately.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5 · Neural network</div><div><div class="roadmap-title">Days</div><div class="roadmap-desc">For tabular data this is rarely the answer, and the next lesson explains why.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Climb the ladder until the gain stops justifying the cost, then stop.</p><p class="know-why">Each rung costs more to build, tune, explain and operate than the one below it. A two-point gain that turns an interpretable model into an opaque one is frequently a bad trade, and it is a trade nobody makes explicitly if the ladder is skipped.</p><p class="know-eg"><span class="know-eg-label">For example</span>On the turbine data, logistic regression reaches 71% recall cross-validated. A tuned boosted model reaches 74%. Three points, in exchange for a model you cannot explain to a maintenance manager, that needs a serving runtime, and that will need retuning when the data drifts. Sometimes worth it. Not automatically.</p></blockquote>
+  <h2>Comparing honestly</h2>
+  <p>Most model comparisons are quietly unfair, in ways that all favour the newer model. Four rules make them fair:</p>
+  <ul><li><strong>Same split, same folds, same seed.</strong> A different random split can move a score by more than a real modelling improvement.</li><li><strong>Same preprocessing pipeline.</strong> If one model gets scaled and imputed features and another gets raw ones, you are comparing pipelines, not models.</li><li><strong>Same metric, chosen before you looked.</strong> Picking the metric that flatters your preferred model afterwards is the most common form of self-deception in this work.</li><li><strong>Report the spread, not just the mean.</strong> A model at 74% ± 4 and one at 71% ± 3 are not clearly different, and presenting them as though they were is a claim the data does not support.</li></ul>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Model comparison with error bars">
+<line x1="180" y1="182" x2="600" y2="182" class="d-arrow"/>
+<text x="330" y="202" class="d-label-sm">recall, cross-validated</text>
+<text x="12" y="36" class="d-label-sm">majority class</text>
+<line x1="196" y1="30" x2="196" y2="30" stroke="var(--muted)" stroke-width="3"/>
+<circle cx="196" cy="30" r="5" class="d-fill-muted"/>
+<text x="208" y="34" class="d-label-sm">0.00</text>
+<text x="12" y="66" class="d-label-sm">one rule</text>
+<line x1="300" y1="60" x2="360" y2="60" stroke="var(--muted)" stroke-width="2"/>
+<circle cx="330" cy="60" r="5" class="d-fill-muted"/>
+<text x="372" y="64" class="d-label-sm">0.52</text>
+<text x="12" y="96" class="d-label-sm">logistic regression</text>
+<line x1="392" y1="90" x2="452" y2="90" stroke="var(--accent)" stroke-width="2"/>
+<circle cx="422" cy="90" r="5" class="d-fill-accent"/>
+<text x="464" y="94" class="d-label-sm">0.71 ± 0.04</text>
+<text x="12" y="126" class="d-label-sm">random forest</text>
+<line x1="400" y1="120" x2="466" y2="120" stroke="var(--accent)" stroke-width="2"/>
+<circle cx="433" cy="120" r="5" class="d-fill-accent"/>
+<text x="478" y="124" class="d-label-sm">0.73 ± 0.05</text>
+<text x="12" y="156" class="d-label-sm">gradient boosting</text>
+<line x1="408" y1="150" x2="468" y2="150" stroke="var(--green)" stroke-width="2"/>
+<circle cx="438" cy="150" r="5" class="d-fill-green"/>
+<text x="480" y="154" class="d-label-sm">0.74 ± 0.04</text>
+<rect x="386" y="76" width="90" height="88" rx="5" fill="none" stroke="var(--yellow)" stroke-dasharray="4 4"/>
+<text x="500" y="176" class="d-fill-yellow" font-size="11" font-weight="600">these three overlap</text>
+</svg><figcaption>Five models, cross-validated, with their variation shown. The apparent ranking is real only where the intervals separate — and here the top three do not.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Two models whose confidence intervals overlap are not distinguishable, however different their means look.</p><p class="know-why">Cross-validation folds vary. A three-point difference with four points of spread on each side is consistent with the models being equally good, and reporting it as an improvement is a claim the evidence does not support.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team ships a boosted model over logistic regression on a 2.8-point gain, then spends a quarter maintaining a serving stack for it. Re-run with different fold seeds, the gap is 0.4 points. The original difference was fold assignment, not modelling.</p></blockquote>
+  <h2>What to do when nothing beats the baseline</h2>
+  <p>This happens, and it is information rather than failure. Work through it in order:</p>
+  <ul><li><strong>Is the signal there at all?</strong> Plot the strongest feature against the target. If the classes overlap almost entirely, no algorithm will separate them.</li><li><strong>Is the target well defined?</strong> "Failure within 90 days" may be recorded inconsistently, which puts a ceiling on any model.</li><li><strong>Is there a feature you have not built?</strong> Ratios, differences and time-since events frequently carry signal that raw columns do not — hours per year of age beat both hours and age on the turbine data.</li><li><strong>Is the problem framed correctly?</strong> Predicting <em>which week</em> a failure falls in may be answerable when predicting <em>whether</em> it happens is not.</li><li><strong>Is it genuinely unpredictable?</strong> A defensible finding, and much cheaper to deliver in week two than in month six.</li></ul>
+  <div class="callout matters"><span class="label">A negative result delivered early is a real deliverable</span>"We cannot predict this from the data we have, and here is what we would need" is a better outcome than six months of model-tuning that ends in the same place. The intake sheet asks for a kill condition precisely so this conversation is easy to have.</div>
+  <h2>Feature engineering, which beats model selection</h2>
+  <p>On tabular problems, a good feature usually moves the number more than a better algorithm does. The productive kinds:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Ratios and rates</div><div><div class="roadmap-title">Intensity, not totals</div><div class="roadmap-desc">Hours per year of age separates a hard-worked young turbine from a coasting old one. Neither raw column carries that.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Differences from a norm</div><div><div class="roadmap-title">Deviation, not level</div><div class="roadmap-desc">Temperature relative to the site median matters more than temperature.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Time since an event</div><div><div class="roadmap-title">Recency</div><div class="roadmap-desc">Days since last inspection, days since last fault.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Aggregates over a group</div><div><div class="roadmap-title">Context</div><div class="roadmap-desc">This turbine's vibration against its site's average.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Missingness indicators</div><div><div class="roadmap-title">Absence as signal</div><div class="roadmap-desc">Already covered in Block 1, and worth repeating because it is so often left out.</div></div></div></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/model_selection.html" target="_blank" rel="noopener">Model selection — scikit-learn</a><span class="link-note">Cross-validation, nested validation and the search utilities, with the leakage-safe patterns.</span></li><li><a href="https://developers.google.com/machine-learning/guides/rules-of-ml" target="_blank" rel="noopener">Rules of Machine Learning — Google</a><span class="link-note">Rules 1 to 20 cover exactly this ladder, from a team that learned it expensively.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Model A scores 0.74 ± 0.04 and model B scores 0.71 ± 0.04, cross-validated. What can you conclude?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A is better and should be shipped</div>
+      <div class="quiz-opt">Not much — the intervals overlap, so the difference may be fold assignment rather than modelling</div>
+      <div class="quiz-opt">The experiment needs a larger test set before any comparison</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Nothing beats your majority-class baseline. What is the first thing to check?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Whether a neural network would do better</div>
+      <div class="quiz-opt">Whether the signal exists at all — plot the strongest feature against the target and look at the overlap</div>
+      <div class="quiz-opt">Whether the cross-validation folds are large enough</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. On a tabular problem, what usually moves the score most?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Switching to a more powerful algorithm</div>
+      <div class="quiz-opt">A well-constructed feature — a ratio, a deviation from a norm, a time-since</div>
+      <div class="quiz-opt">Increasing the number of training epochs</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

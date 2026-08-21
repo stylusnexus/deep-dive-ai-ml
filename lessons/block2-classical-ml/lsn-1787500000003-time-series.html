@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Series, and Why Random Splits Lie</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 4 of 4</span>
+  <h1>Time Series, and Why Random Splits Lie</h1>
+  <p class="subtitle">The original syllabus omits this while three of its own case studies are time-series problems.</p>
+
+  <p>Predictive maintenance, demand forecasting, ride-share volume — the syllabus uses all three as examples and never teaches the thing they have in common. Every one is ordered in time, and ordered data breaks the standard workflow in a way that produces excellent scores and worthless models.</p>
+  <h2>Why the random split fails</h2>
+  <p>A random split scatters rows from every period into both halves. The model trains on Tuesday and Thursday and is tested on Wednesday — surrounded, on both sides, by data it has already seen.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Random split versus time-ordered split">
+<text x="12" y="18" class="d-fill-red" font-size="12" font-weight="600">RANDOM SPLIT — leaks the future</text>
+<line x1="12" y1="58" x2="620" y2="58" stroke="var(--border)" stroke-width="2"/>
+<g class="d-fill-accent">
+<circle cx="40" cy="58" r="6"/><circle cx="130" cy="58" r="6"/><circle cx="200" cy="58" r="6"/>
+<circle cx="330" cy="58" r="6"/><circle cx="440" cy="58" r="6"/><circle cx="560" cy="58" r="6"/>
+</g>
+<g class="d-fill-red">
+<circle cx="85" cy="58" r="6"/><circle cx="265" cy="58" r="6"/><circle cx="385" cy="58" r="6"/><circle cx="500" cy="58" r="6"/>
+</g>
+<text x="12" y="84" class="d-label-sm">blue = train, red = test. Every test point sits between two training points.</text>
+<line x1="12" y1="104" x2="628" y2="104" stroke="var(--border)"/>
+<text x="12" y="130" class="d-fill-green" font-size="12" font-weight="600">TIME-ORDERED SPLIT — matches production</text>
+<line x1="12" y1="164" x2="620" y2="164" stroke="var(--border)" stroke-width="2"/>
+<g class="d-fill-accent">
+<circle cx="40" cy="164" r="6"/><circle cx="100" cy="164" r="6"/><circle cx="160" cy="164" r="6"/>
+<circle cx="220" cy="164" r="6"/><circle cx="280" cy="164" r="6"/><circle cx="340" cy="164" r="6"/>
+</g>
+<line x1="378" y1="140" x2="378" y2="188" stroke="var(--yellow)" stroke-width="2" stroke-dasharray="4 4"/>
+<g class="d-fill-red">
+<circle cx="420" cy="164" r="6"/><circle cx="480" cy="164" r="6"/><circle cx="540" cy="164" r="6"/><circle cx="600" cy="164" r="6"/>
+</g>
+<text x="12" y="196" class="d-label-sm">train on the past, test on the future — the only split that answers the question you are actually asking</text>
+</svg><figcaption>The random split lets the model interpolate between points it has already learned. Production never offers that; it only ever asks about the future.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A random split on time-ordered data trains on the future and tests on the past.</p><p class="know-why">Real deployment only ever asks about the future. A model validated by interpolating between known points has been asked an easier question than the one it will face, and the gap between the two shows up as a launch-day collapse.</p><p class="know-eg"><span class="know-eg-label">For example</span>A demand model scores 0.91 R-squared on a random split and 0.62 when re-validated on a time-ordered one. Nothing changed but the split. The first number was measuring how well it could fill gaps in a period it had already learned.</p></blockquote>
+  <h2>Walk-forward validation</h2>
+  <p>The time-series equivalent of cross-validation. Train on everything up to a point, test on what comes next, then move the boundary forward and repeat. You get several estimates, each of which is honest about direction.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Expanding window</div><div><div class="roadmap-title">Train set grows each fold</div><div class="roadmap-desc">Uses all history. The default when older data stays relevant.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Sliding window</div><div><div class="roadmap-title">Fixed-length train set that moves</div><div class="roadmap-desc">Discards old data deliberately. Right when the process changes and history becomes misleading.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Gap between train and test</div><div><div class="roadmap-title">Often necessary</div><div class="roadmap-desc">If your prediction is used a week ahead, leave a week's gap — otherwise you are testing with information the deployed model will not have.</div></div></div></div>
+  <div class="callout matters"><span class="label">The gap is the part people leave out</span>You predict failures 90 days ahead. If your test period starts the day after your training period ends, the model is being scored on a task it will never be given — it had data up to yesterday and is predicting tomorrow, when in production it will have data from 90 days ago. Insert the gap and the honest score is usually noticeably lower.</div>
+  <h2>Features that only exist in time series</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Lags</div><div><div class="roadmap-title">The value n periods ago</div><div class="roadmap-desc">Yesterday's reading, last week's total. Frequently the single strongest predictor, and the one to build first.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Rolling statistics</div><div><div class="roadmap-title">Mean, max, standard deviation over a window</div><div class="roadmap-desc">A seven-day rolling mean smooths noise; a rolling standard deviation captures instability, which is often the real signal.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Differences</div><div><div class="roadmap-title">Change since last period</div><div class="roadmap-desc">Converts a level into a movement, which is usually what matters.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Time since an event</div><div><div class="roadmap-title">Days since last fault or service</div><div class="roadmap-desc">Encodes recency directly rather than hoping the model infers it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Calendar features</div><div><div class="roadmap-title">Day of week, month, holiday</div><div class="roadmap-desc">Cheap, and they capture seasonality no lag will.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">Every rolling feature is a leakage opportunity</span>A rolling mean computed over the whole series before splitting includes future values in every row. The window must only ever look backwards, and the calculation must happen inside the fold. This is the single commonest bug in time-series pipelines, and it produces a beautiful score.</div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Any feature computed across the whole series before splitting has put the future into your training rows.</p><p class="know-why">Rolling means, normalisations, target encodings and imputations all aggregate over rows. Compute them before the split and each training row carries information from dates after it — invisible in the metrics and fatal in production.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team normalises a sensor column by its overall mean and standard deviation, then splits by time. Every training row is now scaled using statistics that include the test period. The model looks excellent, ships, and degrades immediately — the scaler it needs at inference cannot see the future it was calibrated against.</p></blockquote>
+  <h2>What to check before modelling</h2>
+  <ul><li><strong>Plot it.</strong> Trend, seasonality, level shifts and obvious breaks are visible in one chart and invisible in summary statistics.</li><li><strong>Check the sampling.</strong> Irregular intervals, missing periods and duplicated timestamps all break lag features silently.</li><li><strong>Look for regime changes.</strong> A sensor recalibration or a process change means older data may be actively misleading, which is the argument for a sliding window.</li><li><strong>Establish the naive baseline.</strong> "Tomorrow equals today" is remarkably hard to beat on many series, and it is the number your model must clear.</li></ul>
+  <div class="callout insight"><span class="label">The naive forecast is the majority-class baseline of time series</span>Predicting that the next value equals the last one — or the value from the same day last week, for seasonal data — costs nothing and beats a surprising number of models. Compute it first, and if your model cannot clear it, you have learned that early and cheaply.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/cross_validation.html#time-series-split" target="_blank" rel="noopener">Time series splitting — scikit-learn</a><span class="link-note">TimeSeriesSplit, which implements walk-forward validation with the correct ordering.</span></li><li><a href="https://otexts.com/fpp3/" target="_blank" rel="noopener">Forecasting: Principles and Practice</a><span class="link-note">Hyndman and Athanasopoulos, free online. The standard reference, and unusually readable.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why does a random split inflate scores on time-ordered data?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Random splits always produce optimistic estimates</div>
+      <div class="quiz-opt">Test points sit between training points, so the model interpolates rather than forecasting — an easier task than production asks</div>
+      <div class="quiz-opt">Time series have more autocorrelation than tabular data</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Your model will be used to predict 90 days ahead. What must your validation include?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A larger test set to cover the period</div>
+      <div class="quiz-opt">A 90-day gap between the end of training and the start of testing, matching the information the deployed model will have</div>
+      <div class="quiz-opt">Only the most recent 90 days as training data</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. You compute a rolling mean over the full series, then split by time. What went wrong?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Rolling means should be computed after modelling</div>
+      <div class="quiz-opt">Every training row now includes information from dates after it — the future is in your training data</div>
+      <div class="quiz-opt">The window length was probably too long</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. What is the naive baseline for a time series?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The mean of the training period</div>
+      <div class="quiz-opt">The next value equals the last one, or the same period last season</div>
+      <div class="quiz-opt">A linear trend fitted to the whole series</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

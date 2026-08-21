@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neural Networks, in Keras and in PyTorch</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 3 of 4</span>
+  <h1>Neural Networks, in Keras and in PyTorch</h1>
+  <p class="subtitle">The same network written twice — and an honest account of when it is the wrong tool.</p>
+
+  <p>The original syllabus specifies TensorFlow and Keras. Most current research and tooling is PyTorch. You do not have to choose, because Keras 3 runs on either — and seeing the same network expressed both ways is the fastest route to understanding what the framework is actually doing.</p>
+  <h2>Keras 3 is multi-backend, and that is not marketing</h2>
+  <p>One environment variable selects the engine underneath. The model code does not change:</p>
+  <pre><code>import os
+os.environ[&quot;KERAS_BACKEND&quot;] = &quot;tensorflow&quot;    # or &quot;torch&quot;, or &quot;jax&quot;
+import keras
+
+model = keras.Sequential([
+    keras.layers.Input((6,)),
+    keras.layers.Dense(16, activation=&quot;relu&quot;),
+    keras.layers.Dense(1, activation=&quot;sigmoid&quot;),
+])
+model.compile(optimizer=&quot;adam&quot;, loss=&quot;binary_crossentropy&quot;, metrics=[&quot;accuracy&quot;])
+model.fit(X, y, epochs=3)</code></pre>
+  <p>Run verbatim on this course's environment, that identical code trains under both backends. It is worth doing yourself once, because the result also demonstrates something the documentation glosses over.</p>
+  <div class="callout insight"><span class="label">The two runs are not bit-identical, and that is expected</span>The same code, the same seed, the same data: final loss 0.6694 under TensorFlow and 0.6799 under PyTorch. Random number generation and floating-point operation ordering differ between backends. This is a useful thing to meet early — reproducibility in deep learning is approximate, and any evaluation you build must tolerate small differences rather than assert equality.</div>
+  <h2>The same network in raw PyTorch</h2>
+  <p>Worth writing once, because it makes visible what Keras is doing for you:</p>
+  <pre><code>import torch, torch.nn as nn
+
+model = nn.Sequential(nn.Linear(6, 16), nn.ReLU(), nn.Linear(16, 1))
+loss_fn = nn.BCEWithLogitsLoss()
+opt = torch.optim.Adam(model.parameters())
+
+for epoch in range(3):
+    for xb, yb in loader:            # you write the batching
+        opt.zero_grad()              # you clear the gradients
+        loss = loss_fn(model(xb), yb)
+        loss.backward()              # you trigger backprop
+        opt.step()                   # you apply the update</code></pre>
+  <p>Keras's <code>fit</code> is that loop, plus batching, metrics, callbacks, early stopping and progress reporting. Nothing more mysterious than that.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Keras fit compared with a manual PyTorch training loop">
+<rect x="12" y="26" width="290" height="150" rx="7" class="d-box-accent"/>
+<text x="28" y="50" class="d-label-b">Keras</text>
+<rect x="28" y="62" width="258" height="30" rx="4" class="d-box"/>
+<text x="42" y="82" class="d-label-sm">model.fit(X, y, epochs=3)</text>
+<text x="28" y="116" class="d-label-sm">batching, gradient clearing, backprop,</text>
+<text x="28" y="134" class="d-label-sm">optimiser step, metrics, callbacks —</text>
+<text x="28" y="152" class="d-label-sm">all inside that one call</text>
+<rect x="338" y="26" width="290" height="150" rx="7" class="d-box"/>
+<text x="354" y="50" class="d-label-b">PyTorch</text>
+<rect x="354" y="62" width="258" height="24" rx="4" class="d-box"/>
+<text x="366" y="79" class="d-label-sm">opt.zero_grad()</text>
+<rect x="354" y="90" width="258" height="24" rx="4" class="d-box"/>
+<text x="366" y="107" class="d-label-sm">loss = loss_fn(model(xb), yb)</text>
+<rect x="354" y="118" width="258" height="24" rx="4" class="d-box"/>
+<text x="366" y="135" class="d-label-sm">loss.backward()</text>
+<rect x="354" y="146" width="258" height="24" rx="4" class="d-box-good"/>
+<text x="366" y="163" class="d-label-sm">opt.step()</text>
+</svg><figcaption>The same four operations either way. Keras writes the loop for you; PyTorch hands you the pieces. Neither is more powerful — one is more convenient and the other more visible.</figcaption></figure>
+  <h2>Which to use</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Keras</div><div><div class="roadmap-title">Standard architectures, fast</div><div class="roadmap-desc">Sequential models, transfer learning, anything where the training loop is conventional. Less code, fewer bugs.</div></div></div><div class="roadmap-item"><div class="roadmap-num">PyTorch directly</div><div><div class="roadmap-title">Research and custom loops</div><div class="roadmap-desc">Custom losses, unusual training schedules, multi-model setups, and nearly all published research code.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Keras on the torch backend</div><div><div class="roadmap-title">Both</div><div class="roadmap-desc">Keras convenience with a PyTorch ecosystem underneath. A genuinely good default for this course.</div></div></div></div>
+  <h2>The honest part: neural networks and tabular data</h2>
+  <p>The syllabus builds toward a neural network on the turbine data, so this needs saying plainly. <strong>On tabular problems, gradient-boosted trees usually win.</strong> Not occasionally — consistently, across published comparisons and in practice.</p>
+  <ul><li><strong>Trees handle mixed types natively.</strong> Categorical and numeric together, no scaling, no encoding decisions.</li><li><strong>Trees are robust to irrelevant features.</strong> A network has to learn to ignore them, which costs data.</li><li><strong>Trees need far less data.</strong> Neural networks are data-hungry, and most business tables are not large.</li><li><strong>Trees train in seconds.</strong> The iteration speed alone changes what you can try.</li><li><strong>Trees give usable feature importances</strong> without extra machinery.</li></ul>
+  <p>Neural networks earn their place on images, audio, text and sequences — anywhere the raw input has structure the model should learn its own features from. A table of engineered columns is the case where that advantage does not apply, because you already did the feature engineering.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">On tabular data, start with gradient-boosted trees and treat a neural network as the thing you have to justify.</p><p class="know-why">Networks earn their advantage where the model should discover its own features from raw structure — pixels, waveforms, tokens. A table of engineered columns is precisely the case where that advantage does not exist, and the costs remain.</p><p class="know-eg"><span class="know-eg-label">For example</span>The turbine project has six engineered features and 6,000 rows. A random forest trains in under a second and needs no scaling. A network needs normalisation, an architecture choice, a learning rate, an epoch budget and early stopping — and lands in the same place. Build it to learn how, then ship the forest.</p></blockquote>
+  <h2>If you are building one anyway</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Normalise the inputs</div><div><div class="roadmap-title">Non-negotiable</div><div class="roadmap-desc">Unscaled features make the loss surface pathological. This is the commonest cause of a network that will not train.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Start small</div><div><div class="roadmap-title">One or two hidden layers</div><div class="roadmap-desc">Depth is for structured raw input. On tabular data, depth mostly buys overfitting.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Overfit one batch first</div><div><div class="roadmap-title">Ninety seconds</div><div class="roadmap-desc">Proves the loop is wired before you tune anything.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Early stopping on validation</div><div><div class="roadmap-title">Always</div><div class="roadmap-desc">Networks will fit noise indefinitely if you let them.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Class weights for imbalance</div><div><div class="roadmap-title">Same as elsewhere</div><div class="roadmap-desc">The rare class needs to cost more, or the network learns to predict the majority.</div></div></div></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://keras.io/getting_started/" target="_blank" rel="noopener">Keras 3 — multi-backend</a><span class="link-note">Backend selection, and what changes and does not when you switch.</span></li><li><a href="https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html" target="_blank" rel="noopener">PyTorch — training loop basics</a><span class="link-note">The manual loop written out and explained, step by step.</span></li></ul></div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Hands-On Machine Learning with Scikit-Learn and PyTorch</span><span class="bk-a">Aurelien Geron</span><span class="bk-n">The neural network chapters, with the same architectures built both ways.</span></li><li><span class="bk-t">AI and Machine Learning for Coders in PyTorch</span><span class="bk-a">Laurence Moroney</span><span class="bk-n">On your shelf. Written by the author of the Keras-era edition, so the framing of the transition is unusually clear.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. The same Keras code trains under two backends and produces slightly different losses. What does that indicate?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A bug in one of the backends</div>
+      <div class="quiz-opt">Normal behaviour — random number generation and floating-point ordering differ, so reproducibility is approximate</div>
+      <div class="quiz-opt">The seed was not set correctly</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. What does Keras&#x27;s fit() do that a manual PyTorch loop makes you write?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It uses a different optimisation algorithm</div>
+      <div class="quiz-opt">Batching, gradient clearing, backpropagation, the optimiser step, metrics and callbacks</div>
+      <div class="quiz-opt">It automatically selects the architecture</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why do gradient-boosted trees usually beat neural networks on tabular data?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Trees are mathematically more expressive</div>
+      <div class="quiz-opt">Networks earn their advantage by learning features from raw structure, and an engineered table has none left to learn</div>
+      <div class="quiz-opt">Neural networks cannot handle categorical features at all</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Your network&#x27;s loss will not move from its starting value. What should you do first?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Lower the learning rate and train longer</div>
+      <div class="quiz-opt">Try to overfit a single batch — if it cannot, the bug is in the loop or the data, not the hyperparameters</div>
+      <div class="quiz-opt">Add more layers to increase capacity</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

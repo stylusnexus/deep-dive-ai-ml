@@ -47,11 +47,16 @@ alarms; at 0.7 you catch 44% with 77. Choosing a row is a business decision.
 ## Block 2 · Classical ML — 2 weeks
 *Original: Module 02, plus time series which they omit*
 
-- Linear regression · decision trees · k-means · ensembles
-- Neural networks in **Keras 3** (same code runs on TF or Torch backends), then the same net in raw PyTorch once
-- Time series — because three of the original's own case studies are time-series problems
+- The confusion matrix, precision and recall, ROC and AUC, and when AUC misleads ✅
+- The model ladder: baseline → one rule → logistic → forest → boosting, compared honestly ✅
+- Neural networks in **Keras 3** and raw PyTorch, with an honest account of when they are wrong ✅
+- Time series — because three of the original's own case studies are time-series problems ✅
 
-~7 notebooks lift from `ML-For-Beginners` (MIT); ensembles, neural nets and time series are new.
+4 lessons in `lessons/block2-classical-ml/` and 2 notebooks in
+`notebooks/02-classical-ml/`, both verified executing end to end.
+
+**Still to build:** the wind-turbine project as a standalone deliverable, and
+notebooks for the neural-network and time-series lessons.
 
 **Exit:** Project 1 — wind turbine failure prediction — runs end to end.
 

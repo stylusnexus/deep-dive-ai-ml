@@ -18,10 +18,43 @@
       "title": "The Confusion Matrix and What Comes Out of It",
       "file": "lsn-1787500000000-confusion-matrix-and-metrics.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787500000001",
+      "title": "From Baseline to Model",
+      "file": "lsn-1787500000001-baseline-to-model.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787500000002",
+      "title": "Neural Networks, in Keras and in PyTorch",
+      "file": "lsn-1787500000002-neural-networks-both-ways.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787500000003",
+      "title": "Time Series, and Why Random Splits Lie",
+      "file": "lsn-1787500000003-time-series.html",
+      "source": "skill"
     }
   ],
   "completion": {
     "lsn-1787500000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787500000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787500000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787500000003": {
       "viewed": false,
       "completed": false,
       "starred": false
