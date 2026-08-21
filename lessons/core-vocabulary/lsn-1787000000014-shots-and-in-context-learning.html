@@ -200,6 +200,20 @@
   <h2>The word &#x27;learning&#x27; is doing something unusual here</h2>
   <p>Nothing is learned in the training sense. No weight changes, and the model retains nothing after the call. The examples condition the model's next-token distribution for that request only — closer to demonstration than instruction, and completely forgotten the moment the context is gone.</p>
   <div class="callout insight"><span class="label">Why this matters practically</span>Few-shot examples cost tokens on every request, forever. Ten good examples might be 800 tokens. At a million calls that's 800 million tokens you pay for repeatedly — the point at which fine-tuning stops looking expensive. This is the calculation Block 7 opens with.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 190" role="img" aria-label="Few-shot cost against fine-tuning cost as volume grows">
+<line x1="60" y1="150" x2="600" y2="150" class="d-arrow"/>
+<line x1="60" y1="150" x2="60" y2="24" class="d-arrow"/>
+<text x="6" y="90" class="d-label-sm">cost</text>
+<text x="270" y="176" class="d-label-sm">call volume →</text>
+<path d="M62 146 L590 34" stroke="var(--accent)" stroke-width="2.5" fill="none"/>
+<text x="428" y="30" class="d-accent">few-shot: pays on every call</text>
+<path d="M62 96 L590 88" stroke="var(--green)" stroke-width="2.5" fill="none"/>
+<text x="424" y="112" class="d-fill-green" font-size="12" font-weight="600">fine-tune: pays once</text>
+<circle cx="298" cy="92" r="6" class="d-fill-yellow"/>
+<line x1="298" y1="30" x2="298" y2="150" stroke="var(--yellow)" stroke-width="1.4" stroke-dasharray="4 4"/>
+<text x="212" y="24" class="d-fill-yellow" font-size="11" font-weight="600">the crossover</text>
+<text x="70" y="130" class="d-label-sm">ten examples is roughly 800 tokens, every request</text>
+</svg><figcaption>Examples cost tokens on every call, forever. Fine-tuning costs once. Where those lines cross is the decision, and it arrives sooner than people expect.</figcaption></figure>
   <h2>What examples are actually good at</h2>
   <p>The counter-intuitive finding from the research: for many tasks, the <em>format</em> and <em>label space</em> of your examples matter more than whether the labels are correct. Examples show the model what a valid answer looks like — the shape, the vocabulary, the granularity. That's why they fix formatting problems so reliably and reasoning problems so unreliably.</p>
   <ul><li><strong>Excellent for:</strong> output format, tone, label vocabulary, granularity, handling edge cases you name.</li><li><strong>Weak for:</strong> teaching genuinely new knowledge, or complex multi-step reasoning the model can't already do.</li></ul>

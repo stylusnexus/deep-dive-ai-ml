@@ -245,6 +245,27 @@ LESSONS = [
     ]),
     ("callout", "matters", "Instrumentation is free; treatments are not", "Adding logging leaves the request to the model byte-identical, so it cannot change the result and needs no flag or A/B. Anything that changes what the model <em>sees</em> is a treatment and must be measured. Keeping this line sharp is what lets you fix your observability mid-investigation without invalidating it."),
 
+    ("figure", "Dependency order, not importance order. Each step is worthless until the one above it holds — which is why step 0 is both the one people skip and the one that invalidates everything below it.", '''<svg viewBox="0 0 640 235" role="img" aria-label="The measurement procedure in dependency order"><defs><marker id="hm" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="14" width="450" height="34" rx="5" class="d-box-warn"/>
+<text x="28" y="30" class="d-label-b">0 · Prove the instrument</text>
+<text x="28" y="44" class="d-label-sm">fails before the work, passes after it</text>
+<text x="476" y="30" class="d-fill-red" font-size="11" font-weight="600">skip this and</text>
+<text x="476" y="46" class="d-fill-red" font-size="11" font-weight="600">everything below</text>
+<text x="476" y="62" class="d-fill-red" font-size="11" font-weight="600">is noise</text>
+<path d="M237 48 L237 62" class="d-arrow-accent" marker-end="url(#hm)"/>
+<rect x="12" y="62" width="450" height="30" rx="5" class="d-box"/>
+<text x="28" y="82" class="d-label-sm"><tspan class="d-label-b">1 · Fix the target</tspan> — metric and threshold, before the run</text>
+<path d="M237 92 L237 106" class="d-arrow-accent" marker-end="url(#hm)"/>
+<rect x="12" y="106" width="450" height="30" rx="5" class="d-box"/>
+<text x="28" y="126" class="d-label-sm"><tspan class="d-label-b">2 · Baseline</tspan> — whole set, repeated, recorded</text>
+<path d="M237 136 L237 150" class="d-arrow-accent" marker-end="url(#hm)"/>
+<rect x="12" y="150" width="450" height="30" rx="5" class="d-box"/>
+<text x="28" y="170" class="d-label-sm"><tspan class="d-label-b">3 · One treatment</tspan> — or a screen, with its cost stated aloud</text>
+<path d="M237 180 L237 194" class="d-arrow-accent" marker-end="url(#hm)"/>
+<rect x="12" y="194" width="450" height="34" rx="5" class="d-box-good"/>
+<text x="28" y="210" class="d-label-b">4 · Read it, then 5 · revert the fix</text>
+<text x="28" y="224" class="d-label-sm">did the number go back? if not, you learned the wrong lesson</text>
+</svg>'''),
     ("h2", "1 · Write the number down before you run"),
     ("p", "State the hypothesis as a prediction with a value: <em>“this should take edit-attempt rate from 0.25 to above 0.5.”</em> A hypothesis that predicts no particular number cannot be wrong, and one that cannot be wrong is not being tested. Written afterwards, any result confirms it."),
 
@@ -319,6 +340,28 @@ LESSONS = [
 
     ("callout", "insight", "Look at what that pair of test sets is doing", "FAIL_TO_PASS and PASS_TO_PASS together are exactly the instrument invariant from lesson 3, implemented. The task must fail before the work and pass after it, and the system must not break anything else to get there. An agent that changes nothing fails FAIL_TO_PASS; an agent that guts the suite fails PASS_TO_PASS. Doing nothing and solving it cannot score the same. Most homemade benchmarks omit the second half and quietly reward vandalism."),
 
+    ("figure", "One task, end to end. The two test sets are the instrument invariant made concrete — one proves the work happened, the other proves nothing else broke.", '''<svg viewBox="0 0 640 205" role="img" aria-label="Anatomy of a SWE-bench task"><defs><marker id="sb" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="14" width="180" height="60" rx="6" class="d-box"/>
+<text x="26" y="36" class="d-label-b">Given</text>
+<text x="26" y="54" class="d-label-sm">repo at base_commit</text>
+<text x="26" y="68" class="d-label-sm">plus the issue text</text>
+<path d="M192 44 L232 44" class="d-arrow-accent" marker-end="url(#sb)"/>
+<rect x="232" y="14" width="160" height="60" rx="6" class="d-box-accent"/>
+<text x="246" y="36" class="d-label-b">System under test</text>
+<text x="246" y="58" class="d-label-sm">produces a patch</text>
+<path d="M392 44 L432 44" class="d-arrow-accent" marker-end="url(#sb)"/>
+<rect x="432" y="14" width="196" height="60" rx="6" class="d-box"/>
+<text x="446" y="36" class="d-label-b">Graded in a container</text>
+<text x="446" y="58" class="d-label-sm">repo and deps at that commit</text>
+<rect x="12" y="94" width="300" height="56" rx="6" class="d-box-good"/>
+<text x="28" y="116" class="d-label-b">FAIL_TO_PASS must now pass</text>
+<text x="28" y="136" class="d-label-sm">an agent that changes nothing fails here</text>
+<rect x="328" y="94" width="300" height="56" rx="6" class="d-box-good"/>
+<text x="344" y="116" class="d-label-b">PASS_TO_PASS must stay passing</text>
+<text x="344" y="136" class="d-label-sm">an agent that guts the suite fails here</text>
+<text x="12" y="176" class="d-label-sm">Together they mean doing nothing and solving it cannot score the same. Most homemade benchmarks omit</text>
+<text x="12" y="194" class="d-label-sm">the second half, and quietly reward vandalism.</text>
+</svg>'''),
     ("h2", "The four variants, and which number people quote"),
     ("terms", [
       ("SWE-bench", "2,294 test instances", "The full set, twelve Python repositories. Plus a 225-instance dev split."),

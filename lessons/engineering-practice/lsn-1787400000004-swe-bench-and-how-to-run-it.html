@@ -177,6 +177,14 @@
     .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
     .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
   }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
 </style>
 
 </head>
@@ -191,6 +199,28 @@
   <p>Each instance is a real GitHub issue and the real pull request that closed it. The system under test gets the repository at the commit <em>before</em> the fix, plus the issue text. It must produce a patch. Nothing else.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">repo + base_commit</div><div><div class="roadmap-title">The starting state</div><div class="roadmap-desc">The repository exactly as it stood before anyone fixed this.</div></div></div><div class="roadmap-item"><div class="roadmap-num">problem_statement</div><div><div class="roadmap-title">The issue text</div><div class="roadmap-desc">What a human maintainer was given. Often incomplete, sometimes misleading — which is the point.</div></div></div><div class="roadmap-item"><div class="roadmap-num">FAIL_TO_PASS</div><div><div class="roadmap-title">The tests that must start passing</div><div class="roadmap-desc">Drawn from the real PR's tests. These fail at base_commit and pass after the genuine fix.</div></div></div><div class="roadmap-item"><div class="roadmap-num">PASS_TO_PASS</div><div><div class="roadmap-title">The tests that must keep passing</div><div class="roadmap-desc">Everything already green. This is what stops 'delete the failing test' from scoring.</div></div></div><div class="roadmap-item"><div class="roadmap-num">patch / test_patch</div><div><div class="roadmap-title">The reference answer</div><div class="roadmap-desc">Held back during the run and used only to validate the fixture.</div></div></div></div>
   <div class="callout insight"><span class="label">Look at what that pair of test sets is doing</span>FAIL_TO_PASS and PASS_TO_PASS together are exactly the instrument invariant from lesson 3, implemented. The task must fail before the work and pass after it, and the system must not break anything else to get there. An agent that changes nothing fails FAIL_TO_PASS; an agent that guts the suite fails PASS_TO_PASS. Doing nothing and solving it cannot score the same. Most homemade benchmarks omit the second half and quietly reward vandalism.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 205" role="img" aria-label="Anatomy of a SWE-bench task"><defs><marker id="sb" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="14" width="180" height="60" rx="6" class="d-box"/>
+<text x="26" y="36" class="d-label-b">Given</text>
+<text x="26" y="54" class="d-label-sm">repo at base_commit</text>
+<text x="26" y="68" class="d-label-sm">plus the issue text</text>
+<path d="M192 44 L232 44" class="d-arrow-accent" marker-end="url(#sb)"/>
+<rect x="232" y="14" width="160" height="60" rx="6" class="d-box-accent"/>
+<text x="246" y="36" class="d-label-b">System under test</text>
+<text x="246" y="58" class="d-label-sm">produces a patch</text>
+<path d="M392 44 L432 44" class="d-arrow-accent" marker-end="url(#sb)"/>
+<rect x="432" y="14" width="196" height="60" rx="6" class="d-box"/>
+<text x="446" y="36" class="d-label-b">Graded in a container</text>
+<text x="446" y="58" class="d-label-sm">repo and deps at that commit</text>
+<rect x="12" y="94" width="300" height="56" rx="6" class="d-box-good"/>
+<text x="28" y="116" class="d-label-b">FAIL_TO_PASS must now pass</text>
+<text x="28" y="136" class="d-label-sm">an agent that changes nothing fails here</text>
+<rect x="328" y="94" width="300" height="56" rx="6" class="d-box-good"/>
+<text x="344" y="116" class="d-label-b">PASS_TO_PASS must stay passing</text>
+<text x="344" y="136" class="d-label-sm">an agent that guts the suite fails here</text>
+<text x="12" y="176" class="d-label-sm">Together they mean doing nothing and solving it cannot score the same. Most homemade benchmarks omit</text>
+<text x="12" y="194" class="d-label-sm">the second half, and quietly reward vandalism.</text>
+</svg><figcaption>One task, end to end. The two test sets are the instrument invariant made concrete — one proves the work happened, the other proves nothing else broke.</figcaption></figure>
   <h2>The four variants, and which number people quote</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">SWE-bench</div><div><div class="roadmap-title">2,294 test instances</div><div class="roadmap-desc">The full set, twelve Python repositories. Plus a 225-instance dev split.</div></div></div><div class="roadmap-item"><div class="roadmap-num">SWE-bench Lite</div><div><div class="roadmap-title">300 instances</div><div class="roadmap-desc">Filtered toward self-contained problems. Cheaper to run, easier — do not compare its scores to the others.</div></div></div><div class="roadmap-item"><div class="roadmap-num">SWE-bench Verified</div><div><div class="roadmap-title">500 instances</div><div class="roadmap-desc">Human-validated with OpenAI Preparedness to remove tasks that were underspecified or impossible. This is the number almost everyone reports, including lesson 2.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Multimodal / Multilingual</div><div><div class="roadmap-title">Beyond Python</div><div class="roadmap-desc">Multimodal keeps its test split private and is graded through a cloud CLI — a deliberate defence against contamination.</div></div></div></div>
   <div class="callout pitfall"><span class="label">The comparison people get wrong</span>A Lite score and a Verified score are not the same measurement, and neither is comparable to the full set. If a vendor quotes 'SWE-bench' without saying which, the number is uninterpretable. Ask. This is lesson 4's step 1 — write down what you are measuring before you run — applied to reading someone else's claim.</div>

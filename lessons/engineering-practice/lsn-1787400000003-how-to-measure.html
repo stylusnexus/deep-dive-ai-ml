@@ -177,6 +177,14 @@
     .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
     .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
   }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
 </style>
 
 </head>
@@ -191,6 +199,27 @@
   <p>Both honesty invariants, checked <em>before</em> the experiment, not after the results confuse you.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Outcome honesty</div><div><div class="roadmap-title">Can it tell success from inaction?</div><div class="roadmap-desc">At the starting state the check must FAIL. With the known-good change applied it must PASS. Run both directions explicitly — a vacuous pass is invisible otherwise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Process honesty</div><div><div class="roadmap-title">Did it record what happened?</div><div class="roadmap-desc">Confirm the harness logs the model’s reasoning and its tool arguments, then read one full trace end to end. Absence of an explanation in the log is not evidence there was none.</div></div></div></div>
   <div class="callout matters"><span class="label">Instrumentation is free; treatments are not</span>Adding logging leaves the request to the model byte-identical, so it cannot change the result and needs no flag or A/B. Anything that changes what the model <em>sees</em> is a treatment and must be measured. Keeping this line sharp is what lets you fix your observability mid-investigation without invalidating it.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 235" role="img" aria-label="The measurement procedure in dependency order"><defs><marker id="hm" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="14" width="450" height="34" rx="5" class="d-box-warn"/>
+<text x="28" y="30" class="d-label-b">0 · Prove the instrument</text>
+<text x="28" y="44" class="d-label-sm">fails before the work, passes after it</text>
+<text x="476" y="30" class="d-fill-red" font-size="11" font-weight="600">skip this and</text>
+<text x="476" y="46" class="d-fill-red" font-size="11" font-weight="600">everything below</text>
+<text x="476" y="62" class="d-fill-red" font-size="11" font-weight="600">is noise</text>
+<path d="M237 48 L237 62" class="d-arrow-accent" marker-end="url(#hm)"/>
+<rect x="12" y="62" width="450" height="30" rx="5" class="d-box"/>
+<text x="28" y="82" class="d-label-sm"><tspan class="d-label-b">1 · Fix the target</tspan> — metric and threshold, before the run</text>
+<path d="M237 92 L237 106" class="d-arrow-accent" marker-end="url(#hm)"/>
+<rect x="12" y="106" width="450" height="30" rx="5" class="d-box"/>
+<text x="28" y="126" class="d-label-sm"><tspan class="d-label-b">2 · Baseline</tspan> — whole set, repeated, recorded</text>
+<path d="M237 136 L237 150" class="d-arrow-accent" marker-end="url(#hm)"/>
+<rect x="12" y="150" width="450" height="30" rx="5" class="d-box"/>
+<text x="28" y="170" class="d-label-sm"><tspan class="d-label-b">3 · One treatment</tspan> — or a screen, with its cost stated aloud</text>
+<path d="M237 180 L237 194" class="d-arrow-accent" marker-end="url(#hm)"/>
+<rect x="12" y="194" width="450" height="34" rx="5" class="d-box-good"/>
+<text x="28" y="210" class="d-label-b">4 · Read it, then 5 · revert the fix</text>
+<text x="28" y="224" class="d-label-sm">did the number go back? if not, you learned the wrong lesson</text>
+</svg><figcaption>Dependency order, not importance order. Each step is worthless until the one above it holds — which is why step 0 is both the one people skip and the one that invalidates everything below it.</figcaption></figure>
   <h2>1 · Write the number down before you run</h2>
   <p>State the hypothesis as a prediction with a value: <em>“this should take edit-attempt rate from 0.25 to above 0.5.”</em> A hypothesis that predicts no particular number cannot be wrong, and one that cannot be wrong is not being tested. Written afterwards, any result confirms it.</p>
   <h2>2 · Baseline, whole set, repeats</h2>
