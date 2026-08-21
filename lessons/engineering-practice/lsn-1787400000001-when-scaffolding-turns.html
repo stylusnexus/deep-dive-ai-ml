@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>When the Scaffolding Turns on You</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 2 of 4</span>
+  <h1>When the Scaffolding Turns on You</h1>
+  <p class="subtitle">Each of the three artifacts has a characteristic way of becoming actively harmful.</p>
+
+  <p>All three artifacts are usually presented as unambiguous goods: write more docs, record more decisions, build more tooling. Each has a specific failure mode, and in each case the harmful version is <em>indistinguishable from the useful version at a glance</em>. That is what makes them worth teaching.</p>
+  <h2>The harness talks to the model, and can lie to it</h2>
+  <p>A harness is usually debugged as though it were ordinary software: does it crash, does it return the right value. But an agent harness has a second output almost nobody audits — <strong>everything it says to the model</strong>. Tool results, error messages, injected guidance, the prompt itself. All of it is text the model reasons from, and none of it is covered by your tests.</p>
+  <p>Five defects found in one afternoon in a single production agent harness, none of which failed a test, threw an exception, or appeared in any metric:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">“You already read this file”</div><div><div class="roadmap-title">False</div><div class="roadmap-desc">The dedup key was the file path and ignored the requested line range. The model was paging a long file — the only way to read it — and every page after the first was reported as a repeat. It fired 21 times in one run, against 3 firings for every other message combined.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“Before changing code, inspect”</div><div><div class="roadmap-title">Unsatisfiable</div><div class="roadmap-desc">No exit criterion. A compliant model obeys it indefinitely.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“[clipped: original bytes 68671]”</div><div><div class="roadmap-title">True but unactionable</div><div class="roadmap-desc">Tool results were clipped to a character budget, head-only. The read tool put “read again from line N” at the end of its output, so the one actionable sentence was always the first thing cut.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“Its edits are already on disk”</div><div><div class="roadmap-title">False</div><div class="roadmap-desc">Said to the second attempt regardless of whether the first had written anything. When the first wrote nothing, the second opened by hunting for work that never happened — and said so in its reasoning.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“…use search to explore”</div><div><div class="roadmap-title">True, wrongly placed</div><div class="roadmap-desc">Appended last, in the highest-recency position, directly after a message demanding an immediate edit.</div></div></div></div>
+  <div class="callout warning"><span class="label">The general form</span>Not one of these was a logic bug. Every one was <em>speech</em> — the harness saying something to the model that was false, unsatisfiable, or true-but-useless. If your harness generates text the model reads, that text is part of your system and needs the same scrutiny as a return value.</div>
+  <p>The sharpest version of this: a harness can <strong>suppress a capability the model already has</strong>. The failure then looks exactly like a model limitation, and every reasonable next step — a bigger model, more turns, better retrieval — is aimed at the wrong thing.</p>
+  <h2>A recipe with a stale first step is worse than no recipe</h2>
+  <p>A recipe's value is concentrated in its <em>first</em> instruction, because that is the one followed under pressure by someone who does not yet understand the problem. A first step that points the wrong way does not merely waste time; it lends institutional authority to the wrong hypothesis.</p>
+  <p>A real triage table entry read: <em>“Model reads forever, never edits → count reads versus edits → the lever is the read budget.”</em> Four sections below, the same document listed that budget as its own worst tarpit — eleven separate commits of tuning it, with a stated lesson that tuning it for one model breaks another. The recipe was sending every reader straight to the lever the document itself said not to reach for.</p>
+  <div class="callout matters"><span class="label">The asymmetry</span>A missing runbook makes you think. A confidently wrong runbook makes you stop thinking, at exactly the moment you were about to. Audit the first step of every recipe you own more often than the rest of it.</div>
+  <h2>ADRs ossify</h2>
+  <p>An ADR records a decision <em>and the evidence that forced it</em>. The decision persists in the document; the evidence decays in the world. When the two separate, the ADR becomes a rule enforced past its reason — and because it is written down and was once correct, it is unusually hard to argue with.</p>
+  <p>The Bullpen project spent months describing itself as a <em>cascader</em>: a system that tries a local model and escalates to progressively larger ones. That was a genuine, well-reasoned decision. Measurement later falsified the premise it rested on, and the project became a local agent that occasionally escalates. The architecture docs kept saying cascader, so new work kept being designed against a system that no longer existed.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Retrospective justification</div><div><div class="roadmap-title">The common one</div><div class="roadmap-desc">An ADR written after the fact to legitimise a choice already made. It reads identically to a real one and contains no decision.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Consequence amnesia</div><div><div class="roadmap-title">The costly one</div><div class="roadmap-desc">The “consequences” section is where an ADR states what it is giving up. Teams write it, then never re-read it when that cost starts being paid.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Status theatre</div><div><div class="roadmap-title">The wasteful one</div><div class="roadmap-desc">Every change gets an ADR, so nothing is signal. If it does not forbid a sensible-looking future change, it is not a decision.</div></div></div></div>
+  <h2>The unifying diagnosis</h2>
+  <p>All three failures share a shape: <strong>an artifact that was true when written, still asserting itself after its truth expired.</strong> The harness message that was accurate before the file grew. The recipe step that was right before the lever was exhausted. The ADR that was correct before the measurement came back.</p>
+  <p>Which is why none of the three is self-correcting, and why the next lesson is about the only thing that corrects them.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.swebench.com/" target="_blank" rel="noopener">SWE-bench</a><span class="link-note">Agentic coding benchmark. Compare leaderboard entries that share a model but differ in scaffold — the spread is the harness effect.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">Argues for the simplest scaffold that works, partly because scaffolding is where these failures hide.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. An agent harness returns “(no matches)” from its search tool when the query was case-sensitive and the file used different casing. Why is this worse than an error?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It isn&#x27;t — an empty result is honest</div>
+      <div class="quiz-opt">“No matches” is indistinguishable from a true negative, so the model correctly concludes the code doesn&#x27;t exist and stops looking</div>
+      <div class="quiz-opt">It wastes a turn</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Your triage doc&#x27;s first step for a symptom points at a fix that has failed eleven times. What is the cost?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Some wasted time, but the reader will figure it out</div>
+      <div class="quiz-opt">The doc lends authority to the wrong hypothesis at the moment the reader is least able to challenge it</div>
+      <div class="quiz-opt">None, as long as the rest of the doc is correct</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Which of these is the strongest sign an ADR has ossified?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It is more than a year old</div>
+      <div class="quiz-opt">The measurement that justified it has since been contradicted, but the document still reads as current</div>
+      <div class="quiz-opt">It was written by someone who has left</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

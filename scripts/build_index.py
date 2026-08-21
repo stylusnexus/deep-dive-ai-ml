@@ -65,6 +65,8 @@ for topic, heading, note in [
      "What each algorithm does and where it breaks. Your statistics course covers the maths; this covers the machinery."),
     ("block1-data-eda", "Block 1 · Python, Data and EDA",
      "Real tabular data, read properly. Paired with four runnable notebooks in <code>notebooks/01-python-eda/</code>."),
+    ("engineering-practice", "Block 0 · Engineering Practice",
+     "The three artifacts an LLM project accumulates — harness, recipes, decision records — how each one turns harmful, and the measurement procedure that corrects them."),
 ]:
     html_, n = section(topic, heading, note); secs.append(html_); total += n
 

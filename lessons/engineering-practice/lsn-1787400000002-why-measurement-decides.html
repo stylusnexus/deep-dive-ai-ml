@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Measurement Decides</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 3 of 4</span>
+  <h1>Why Measurement Decides</h1>
+  <p class="subtitle">The only thing that corrects a harness, a recipe or a decision is a number that disagrees with it.</p>
+
+  <p>Everything in the previous lesson failed the same way: an artifact stayed confident after its truth expired. None of the three can notice this about itself. A harness cannot tell you its own message is misleading; a recipe cannot tell you its first step is stale; an ADR cannot tell you its evidence was overturned. Only a measurement can.</p>
+  <h2>Plausible mechanisms are not findings</h2>
+  <p>The failure mode is not laziness. It is the opposite — it is a good engineer reasoning carefully from a mechanism that makes sense, and shipping it. Some real examples, each of which sounded correct and was wrong:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">“Mean-centering will sharpen the router”</div><div><div class="roadmap-title">Regressed, twice</div><div class="roadmap-desc">Standard practice for embedding similarity. Accuracy fell from 88% to 70% on the first attempt and 92% to 66% on the second.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“More exemplars will help classification”</div><div><div class="roadmap-title">Regressed</div><div class="roadmap-desc">True only when paired with a different aggregation method. Alone, it made things worse.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“This model class can’t drive tool loops”</div><div><div class="roadmap-title">False</div><div class="roadmap-desc">A property of one model-and-runtime combination, generalised into a law that shaped months of architecture.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“The cheap tier is weak at agentic work, skip it”</div><div><div class="roadmap-title">False</div><div class="roadmap-desc">It edited fine. The harness was strangling it with a read budget tuned for a different model.</div></div></div></div>
+  <div class="callout warning"><span class="label">The rule that falls out of this</span>If you are about to write “this should improve X”, stop and write the measurement that would prove it instead. The sentence is the same length. One of them can be wrong without anyone noticing.</div>
+  <h2>The instrument lies before the result does</h2>
+  <p>There is a failure worse than a wrong conclusion: a conclusion drawn from an instrument that cannot distinguish success from doing nothing. It produces confident numbers, they move when you change things, and every one of them is noise.</p>
+  <p>A benchmark of eight coding tasks was used for months to decide model and architecture questions. An audit found that <strong>six of the eight passed their own verification at the starting commit</strong> — before any work was done. The tests that proved the feature had been added by the very change the agent was being asked to reproduce, so they were absent at the start, so the test suite passed vacuously. An agent that edited nothing scored the same as one that solved the task.</p>
+  <p>Every architectural conclusion drawn from that board had to be thrown out, including a headline result that a whole escalation mechanism produced zero benefit. It produced zero <em>measured</em> benefit, because the instrument could not see benefit.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 240" role="img" aria-label="Diagram of the two honesty invariants for a test fixture"><rect x="30" y="40" width="250" height="70" rx="8" class="d-box"/><text x="52" y="68" class="d-label-b">At the starting commit</text><text x="52" y="90" class="d-label-sm">feature absent → verify MUST FAIL</text><rect x="360" y="40" width="250" height="70" rx="8" class="d-box"/><text x="382" y="68" class="d-label-b">With the known-good fix</text><text x="382" y="90" class="d-label-sm">feature present → verify MUST PASS</text><rect x="30" y="150" width="580" height="60" rx="8" class="d-box-accent"/><text x="52" y="176" class="d-label-b">If either half is untrue</text><text x="52" y="196" class="d-label-sm">“did nothing” and “solved it” score identically, and every number the instrument produces is noise</text></svg><figcaption>An honest fixture must fail before the work and pass after it. Fail either half and the instrument cannot tell the two columns apart.</figcaption></figure>
+  <h2>Two kinds of honesty</h2>
+  <p>The invariant above is <strong>outcome honesty</strong> — can the instrument tell success from inaction? There is a second one, checked far less often. <strong>Process honesty</strong>: did the instrument record what the system actually did and said, or only whether it succeeded?</p>
+  <p>Two completely different failures score identically under outcome metrics alone:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Never understood the task</div><div><div class="roadmap-title">edit_attempted = false</div><div class="roadmap-desc">Needs better grounding, retrieval, or task framing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Understood it and would not act</div><div><div class="roadmap-title">edit_attempted = false</div><div class="roadmap-desc">Needs a prompt or tool change. Grounding is already fine, and every grounding fix will measure flat.</div></div></div></div>
+  <p>In the case that opened this module, nine consecutive experiments were run against the second failure using fixes aimed at the first — because the reasoning that would have distinguished them was being parsed off the API response and discarded on every tool-calling turn. One trace, once logging was restored, answered what nine experiments had not.</p>
+  <div class="callout insight"><span class="label">The older name for this</span>Reading what a subject says while working, rather than only scoring the outcome, is <strong>think-aloud protocol analysis</strong> — formalised by Ericsson and Simon in the 1980s for human problem-solving. The machine-learning analogue is the distinction between <em>process supervision</em> and <em>outcome supervision</em>: scoring the steps rather than the final answer.</div>
+  <div class="callout warning"><span class="label">And the caveat that keeps it honest</span>Verbalised reasoning is evidence, not ground truth. A model’s stated chain of thought does not always reflect the computation that produced its answer, so a trace can be sincere and still misleading. Treat it as a witness statement: extremely valuable, independently checkable, occasionally wrong.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2305.20050" target="_blank" rel="noopener">Let’s Verify Step by Step (Lightman et al., 2023)</a><span class="link-note">The process- versus outcome-supervision result: step-level feedback outperforms final-answer feedback.</span></li><li><a href="https://mitpress.mit.edu/9780262550239/protocol-analysis/" target="_blank" rel="noopener">Protocol Analysis: Verbal Reports as Data — Ericsson &amp; Simon</a><span class="link-note">The human-factors ancestor. Worth knowing that this method is forty years old before presenting it as new.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Your eval score improves 12 points after a change. What is the first thing to check?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Whether the improvement holds at n=3</div>
+      <div class="quiz-opt">Whether the instrument fails at the starting state — an eval that passes before the work cannot measure the work</div>
+      <div class="quiz-opt">Whether the change is fast enough for production</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. An agent scores edit_attempted=false on a task. What does that tell you about the cause?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The model lacked the capability</div>
+      <div class="quiz-opt">Almost nothing — it cannot distinguish “never understood” from “understood and would not act”, which need opposite fixes</div>
+      <div class="quiz-opt">The task was too hard</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why is a model&#x27;s stated reasoning still worth logging, given it may not reflect the real computation?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It is guaranteed to be accurate for reasoning models</div>
+      <div class="quiz-opt">It is checkable evidence you otherwise do not have — and its absence guarantees you are guessing</div>
+      <div class="quiz-opt">It improves the model&#x27;s accuracy</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>
