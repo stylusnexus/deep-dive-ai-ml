@@ -27,6 +27,7 @@ BLURBS = {
  "latency-and-caching": "Prefill versus decode, warm and cold states, the cache prefix rule, and why the model is rarely the slow part.",
  "session-lifecycle": "A model has no memory — everything that looks like it is re-sent context, and all of it decays.",
  "rungs-and-experiments": "A ladder of progressively more assistance, where a task starts passing tells you what was wrong.",
+ "confusion-matrix-and-metrics": "Four numbers, and every classification metric is built from them — plus what AUC actually means and when it misleads.",
  "the-map": "AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it's an architecture, not a model. Read this first.",
  "agent-loop-and-harness": "The two most-confused words in any agent codebase — and why most agent failures are harness failures, not model failures.",
  "tokens-context-and-kv-cache": "Why a model 'forgets', why long conversations get expensive quadratically, and what prompt caching is actually caching.",
@@ -82,6 +83,8 @@ for topic, heading, note in [
      "What each algorithm does and where it breaks. Your statistics course covers the maths; this covers the machinery."),
     ("block1-data-eda", "Block 1 · Python, Data and EDA",
      "Real tabular data, read properly. Paired with four runnable notebooks in <code>notebooks/01-python-eda/</code>."),
+    ("block2-classical-ml", "Block 2 · Predictive Modelling",
+     "Classical machine learning done properly — the metrics, the models, and knowing when a neural network is the wrong answer."),
     ("engineering-practice", "Block 0 · Engineering Practice",
      "The three artifacts an LLM project accumulates — harness, recipes, decision records — how each one turns harmful, and the measurement procedure that corrects them."),
 ]:

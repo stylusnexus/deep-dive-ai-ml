@@ -419,7 +419,7 @@ LESSONS = [
 
     ("h2", "k-NN: no training at all"),
     ("p", "<strong>k-nearest neighbours</strong> doesn't build a model. To predict, it finds the k most similar training examples and takes their majority vote or average. All the work happens at prediction time, which makes training instant and inference expensive — the opposite profile from everything else here."),
-    ("callout", "insight", "You already know this algorithm", "RAG is k-NN. Embed the query, find the nearest stored vectors, use them. The retrieval step in Block 3 is exactly this algorithm, run over embeddings instead of tabular features — which is why the failure modes below transfer directly."),
+    ("callout", "insight", "You already know this algorithm", "retrieval-augmented generation (RAG) is k-NN. Embed the query, find the nearest stored vectors, use them. The retrieval step in Block 3 is exactly this algorithm, run over embeddings instead of tabular features — which is why the failure modes below transfer directly."),
 
     ("h2", "The curse of dimensionality"),
     ("p", "As dimensions increase, points spread out and the distances between them converge. In very high dimensions the nearest and farthest neighbours of a point end up almost equidistant — so \"nearest\" carries progressively less meaning."),
@@ -440,7 +440,7 @@ LESSONS = [
 <text x="404" y="116" class="d-label-sm">roughly equally far away</text>
 </svg>'''),
 
-    ("p", "This is why embeddings are typically a few hundred to a couple of thousand dimensions rather than tens of thousands, why dimensionality reduction (PCA, UMAP) is worth knowing, and why hybrid retrieval — combining vector similarity with keyword matching — outperforms pure vector search on many real corpora. Pure distance is a weaker signal than it looks."),
+    ("p", "This is why embeddings are typically a few hundred to a couple of thousand dimensions rather than tens of thousands, why dimensionality reduction (principal component analysis (PCA), uniform manifold approximation and projection (UMAP)) is worth knowing, and why hybrid retrieval — combining vector similarity with keyword matching — outperforms pure vector search on many real corpora. Pure distance is a weaker signal than it looks."),
 
     ("h2", "Choosing k, honestly"),
     ("p", "Two standard methods, and the honest caveat that neither is decisive."),
@@ -453,7 +453,7 @@ LESSONS = [
 
     ("h2", "When k-means is the wrong shape"),
     ("ul", [
-      "<strong>Elongated or curved groups.</strong> k-means draws straight boundaries around round blobs. DBSCAN follows density instead and finds arbitrary shapes.",
+      "<strong>Elongated or curved groups.</strong> k-means draws straight boundaries around round blobs. density-based spatial clustering of applications with noise (DBSCAN) follows density instead and finds arbitrary shapes.",
       "<strong>Very different group sizes.</strong> A large cluster tends to get split while a small one gets absorbed.",
       "<strong>Outliers.</strong> Every point must join a cluster, so a few extreme values drag a centre toward them. DBSCAN can label points as noise; k-means cannot.",
       "<strong>Unknown k.</strong> If k is genuinely unknown, hierarchical clustering gives you the whole tree of possible groupings to cut where you like.",
@@ -588,7 +588,7 @@ LESSONS = [
 
     ("h2", "Exact search, and when it's fine"),
     ("p", "Compare the query against every stored vector and keep the best matches. It's exhaustive, perfectly accurate, and linear in the number of vectors. For under roughly 100,000 vectors this is genuinely fine on modern hardware — often single-digit milliseconds."),
-    ("callout", "matters", "Don't optimise this early", "Most RAG corpora are far smaller than people assume. A few thousand documents chunked into tens of thousands of vectors is comfortably exact-search territory. Reach for approximate indexing when you've measured that you need it, not because the tutorial used it."),
+    ("callout", "matters", "Don't optimise this early", "Most retrieval-augmented generation (RAG) corpora are far smaller than people assume. A few thousand documents chunked into tens of thousands of vectors is comfortably exact-search territory. Reach for approximate indexing when you've measured that you need it, not because the tutorial used it."),
 
     ("h2", "Approximate nearest neighbour"),
     ("p", "Above that scale, <strong>ANN</strong> algorithms trade a small amount of accuracy for a large amount of speed. They don't guarantee finding the true nearest neighbours — they find <em>most</em> of them, most of the time."),
@@ -671,7 +671,7 @@ LESSONS = [
 {
   "slug": "ranking-and-hybrid-retrieval",
   "title": "Ranking and Hybrid Retrieval",
-  "subtitle": "BM25, reciprocal rank fusion and rerankers — why pure vector search is rarely the best answer.",
+  "subtitle": "Best Matching 25 (BM25), reciprocal rank fusion and rerankers — why pure vector search is rarely the best answer.",
   "body": [
     ("p", "The context-engineering lesson concluded that ranking matters more than recall — that getting the right chunk into the first position beats retrieving more chunks. This lesson is the algorithms that do the ranking."),
 
@@ -737,7 +737,7 @@ LESSONS = [
 
     ("books", [
       ("Mining of Massive Datasets", "Leskovec, Rajaraman & Ullman",
-       "Chapter 5 on link analysis and ranking. Older than BM25's current use in RAG and still the clearest account of what ranking is doing."),
+       "Chapter 5 on link analysis and ranking. Older than BM25's current use in retrieval-augmented generation (RAG) and still the clearest account of what ranking is doing."),
       ("Enterprise RAG", "Manning MEAP",
        "Chunking strategies and hybrid retrieval in a production framing, which is where this lesson's practical advice comes from."),
     ]),
@@ -802,7 +802,7 @@ LESSONS = [
     ("know",
      'Overfitting announces itself as a gap; leakage lifts both curves together.',
      'That is what makes leakage the more dangerous of the two. The train-versus-validation gap you would normally use to spot a problem shows nothing, because the leak is present in both halves.',
-     'A churn model reaches 0.99 AUC and validation agrees. The feature list includes account_closed_date, populated only for customers who already churned. Every metric is excellent and the model is worthless, because at prediction time that field is empty for everyone you care about.'),
+     'A churn model reaches 0.99 area under the curve (AUC) and validation agrees. The feature list includes account_closed_date, populated only for customers who already churned. Every metric is excellent and the model is worthless, because at prediction time that field is empty for everyone you care about.'),
     ("h2", "The forms it takes"),
     ("terms", [
       ("Target leakage", "A feature encodes the answer", "Predicting customer churn using 'cancellation_date'. Predicting failure using 'maintenance_ticket_raised'. The feature only exists because the outcome already happened."),

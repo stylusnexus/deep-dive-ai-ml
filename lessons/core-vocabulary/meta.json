@@ -153,19 +153,19 @@
     },
     {
       "id": "lsn-1787000000023",
-      "title": "Building an MCP Server",
+      "title": "Building an Model Context Protocol (MCP) Server",
       "file": "lsn-1787000000023-building-an-mcp-server.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000024",
-      "title": "MCP: The Danger Surface",
+      "title": "Model Context Protocol (MCP): The Danger Surface",
       "file": "lsn-1787000000024-mcp-dangers.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000025",
-      "title": "Local Hardware: CUDA, Metal and What Actually Constrains You",
+      "title": "Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You",
       "file": "lsn-1787000000025-local-hardware-limits.html",
       "source": "skill"
     },

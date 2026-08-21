@@ -329,7 +329,7 @@ LESSONS = [
     ("terms", [
       ("Invented methods", "Plausible, non-existent APIs", "A pandas method that sounds exactly right and doesn't exist. Easy to catch — it errors."),
       ("Silently wrong logic", "Runs, wrong answer", "The dangerous one. A groupby on the wrong key, a merge that drops rows, an off-by-one on a date window. No error, plausible output."),
-      ("Confident domain claims", "Statistics stated as fact", "\"A VIF above 5 indicates multicollinearity\" — the sort of threshold that's conventional rather than true, delivered with certainty."),
+      ("Confident domain claims", "Statistics stated as fact", "\"A variance inflation factor (VIF) above 5 indicates multicollinearity\" — the sort of threshold that's conventional rather than true, delivered with certainty."),
       ("Context it cannot have", "About your specific data", "It hasn't seen your rows. Any claim about what your data contains is inference from the column names."),
     ]),
     ("callout", "pitfall", "The failure that actually costs you", "Not the hallucinated function — that errors immediately. It's the merge that silently drops 400 rows because the join key had different whitespace on each side. The code runs, the output looks fine, and your analysis is wrong. **After every AI-suggested transform, check the row count and the null counts.** Two lines, and it catches most of this."),

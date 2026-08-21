@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Confusion Matrix and What Comes Out of It</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 1 of 1</span>
+  <h1>The Confusion Matrix and What Comes Out of It</h1>
+  <p class="subtitle">Four numbers, and every classification metric you will ever meet is built from them.</p>
+
+  <p>Almost every argument about model quality is really an argument about which of four numbers matters most. Get the four straight and the metrics stop being a vocabulary test.</p>
+  <h2>The four cells</h2>
+  <figure class="diagram"><svg viewBox="0 0 640 235" role="img" aria-label="The confusion matrix with its four cells">
+<text x="250" y="20" class="d-label-sm">predicted</text>
+<text x="196" y="42" class="d-label-sm">negative</text>
+<text x="368" y="42" class="d-label-sm">positive</text>
+<text x="16" y="100" class="d-label-sm">actual</text>
+<text x="16" y="122" class="d-label-sm">negative</text>
+<text x="16" y="182" class="d-label-sm">actual</text>
+<text x="16" y="204" class="d-label-sm">positive</text>
+<rect x="150" y="54" width="160" height="72" rx="6" class="d-box-good"/>
+<text x="166" y="80" class="d-label-b">True negative</text>
+<text x="166" y="100" class="d-label-sm">healthy, called healthy</text>
+<text x="166" y="118" class="d-fill-green" font-size="11" font-weight="600">correct</text>
+<rect x="322" y="54" width="160" height="72" rx="6" class="d-box-warn"/>
+<text x="338" y="80" class="d-label-b">False positive</text>
+<text x="338" y="100" class="d-label-sm">healthy, called failing</text>
+<text x="338" y="118" class="d-fill-red" font-size="11" font-weight="600">false alarm · wasted call-out</text>
+<rect x="150" y="136" width="160" height="72" rx="6" class="d-box-warn"/>
+<text x="166" y="162" class="d-label-b">False negative</text>
+<text x="166" y="182" class="d-label-sm">failing, called healthy</text>
+<text x="166" y="200" class="d-fill-red" font-size="11" font-weight="600">missed case</text>
+<rect x="322" y="136" width="160" height="72" rx="6" class="d-box-good"/>
+<text x="338" y="162" class="d-label-b">True positive</text>
+<text x="338" y="182" class="d-label-sm">failing, called failing</text>
+<text x="338" y="200" class="d-fill-green" font-size="11" font-weight="600">caught it</text>
+<text x="500" y="86" class="d-label-sm">precision reads</text>
+<text x="500" y="102" class="d-label-sm">this column</text>
+<text x="500" y="170" class="d-label-sm">recall reads</text>
+<text x="500" y="186" class="d-label-sm">this row</text>
+</svg><figcaption>Every classification metric in this lesson is a ratio of these four numbers. Learn the grid once and the formulas stop needing memorisation.</figcaption></figure>
+  <h2>The metrics, and the question each answers</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Accuracy</div><div><div class="roadmap-title">All correct, over everything</div><div class="roadmap-desc">Meaningless when one class dominates. Always compare it against the majority-class baseline before saying it aloud.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Precision</div><div><div class="roadmap-title">Of what I flagged, how much was real</div><div class="roadmap-desc">Reads the predicted-positive column. Low precision means wasted effort chasing false alarms.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Recall (sensitivity)</div><div><div class="roadmap-title">Of what was real, how much did I catch</div><div class="roadmap-desc">Reads the actual-positive row. Low recall means missed cases.</div></div></div><div class="roadmap-item"><div class="roadmap-num">F1</div><div><div class="roadmap-title">The harmonic mean of the two</div><div class="roadmap-desc">One number when you must have one. It hides the trade-off rather than resolving it, so report the pair alongside.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Specificity</div><div><div class="roadmap-title">Of the genuinely negative, how many did I leave alone</div><div class="roadmap-desc">The mirror of recall. Matters when false alarms are the expensive error.</div></div></div></div>
+  <div class="callout matters"><span class="label">Precision and recall are not properties of the model</span>They are properties of the model <em>at a chosen threshold</em>. The same model can be tuned to catch 93% of failures with 770 false alarms, or 44% with 77. Quoting a precision figure without the threshold it was measured at is quoting half a result.</div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Precision reads a column of the matrix; recall reads a row.</p><p class="know-why">Precision asks what fraction of your positive predictions were correct — it divides by everything you flagged. Recall asks what fraction of the real positives you found — it divides by everything that was actually positive. Different denominators, which is why they trade against each other.</p><p class="know-eg"><span class="know-eg-label">For example</span>A turbine model flags 392 machines, of which 124 genuinely fail. Precision is 124/392 = 32% — most call-outs are wasted. There were 187 real failures, so recall is 124/187 = 66% — a third were missed. Same model, same run, two very different complaints from two different departments.</p></blockquote>
+  <h2>ROC and the area under it</h2>
+  <p>A classifier outputs probabilities, so it is really a family of classifiers — one for every threshold. The <strong>ROC curve</strong> — receiver operating characteristic, a name inherited from radar operators in the 1940s — plots how the model behaves across all of them.</p>
+  <p>The vertical axis is the true positive rate, which is recall. The horizontal axis is the false positive rate, the fraction of genuine negatives wrongly flagged. Sweeping the threshold from strict to permissive traces a curve from the bottom-left corner to the top-right.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 220" role="img" aria-label="ROC curves for a good model, a weak model and random guessing">
+<line x1="70" y1="180" x2="70" y2="24" class="d-arrow"/>
+<line x1="70" y1="180" x2="330" y2="180" class="d-arrow"/>
+<text x="8" y="80" class="d-label-sm">true positive</text>
+<text x="8" y="96" class="d-label-sm">rate (recall)</text>
+<text x="110" y="204" class="d-label-sm">false positive rate</text>
+<line x1="70" y1="180" x2="330" y2="24" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="248" y="120" class="d-label-sm">random</text>
+<path d="M70 180 Q86 74 160 48 Q240 30 330 24" stroke="var(--green)" stroke-width="2.5" fill="none"/>
+<text x="150" y="40" class="d-fill-green" font-size="11" font-weight="600">good · AUC 0.91</text>
+<path d="M70 180 Q120 128 190 96 Q260 62 330 24" stroke="var(--yellow)" stroke-width="2.5" fill="none"/>
+<text x="196" y="120" class="d-fill-yellow" font-size="11" font-weight="600">weak · 0.68</text>
+<circle cx="132" cy="66" r="5" class="d-fill-accent"/>
+<text x="142" y="70" class="d-label-sm">one threshold</text>
+<rect x="368" y="30" width="260" height="150" rx="7" class="d-box"/>
+<text x="384" y="52" class="d-label-b">Reading the number</text>
+<text x="384" y="74" class="d-label-sm">1.00 — perfect separation</text>
+<text x="384" y="94" class="d-label-sm">0.90 — strong</text>
+<text x="384" y="114" class="d-label-sm">0.70 — modest</text>
+<text x="384" y="134" class="d-label-sm">0.50 — no better than guessing</text>
+<text x="384" y="162" class="d-label-sm">below 0.50 — check for a flipped label</text>
+</svg><figcaption>Each point is one threshold. A model that separates the classes well bows toward the top-left, catching most real cases before it starts raising many false alarms. The diagonal is random guessing.</figcaption></figure>
+  <p><strong>AUC</strong> — area under the curve — collapses that whole curve into one number between 0 and 1. It has an interpretation worth remembering: it is the probability that the model scores a randomly chosen positive case higher than a randomly chosen negative one. An AUC of 0.91 means it gets that ordering right 91 times in 100.</p>
+  <div class="callout insight"><span class="label">Why AUC is useful and why it is not enough</span>It is threshold-free, so it measures ranking ability rather than any particular operating point — which makes it good for comparing models before you have chosen a threshold. That same property is its weakness: it says nothing about whether the threshold you will actually deploy is any good, and it is optimistic on heavily imbalanced data because the false positive rate has an enormous denominator.</div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">AUC is the probability that the model ranks a random positive above a random negative.</p><p class="know-why">It measures ordering, not decisions. That makes it the right tool for comparing two models before a threshold exists, and the wrong tool for judging whether a deployed system is behaving acceptably.</p><p class="know-eg"><span class="know-eg-label">For example</span>Two fraud models both score 0.87 AUC. One is usable and one is not — at the threshold that catches 80% of fraud, the first raises 200 false alarms a day and the second raises 4,000. The AUC could not have told you that, because it averaged over thresholds you would never choose.</p></blockquote>
+  <h2>When to use the precision-recall curve instead</h2>
+  <p>On heavily imbalanced data, prefer a precision-recall curve. The reason is the denominator: the false positive rate divides by the number of genuine negatives, and when negatives outnumber positives a hundred to one, even a large absolute number of false alarms produces a small false positive rate. The ROC curve looks reassuring while your team drowns in call-outs.</p>
+  <p>The precision-recall curve has no such comfort. Precision divides by what you flagged, so false alarms hurt it directly and visibly.</p>
+  <h2>Regression metrics, briefly</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">MAE</div><div><div class="roadmap-title">Mean absolute error</div><div class="roadmap-desc">Average distance from the truth, in the original units. Robust to outliers and easy to explain to anyone.</div></div></div><div class="roadmap-item"><div class="roadmap-num">RMSE</div><div><div class="roadmap-title">Root mean squared error</div><div class="roadmap-desc">Penalises large errors disproportionately. Use it when one big miss is worse than several small ones.</div></div></div><div class="roadmap-item"><div class="roadmap-num">R-squared</div><div><div class="roadmap-title">Proportion of variance explained</div><div class="roadmap-desc">Comparable across problems, and easy to over-read — a high value on a trivially predictable target means nothing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">MAPE</div><div><div class="roadmap-title">Mean absolute percentage error</div><div class="roadmap-desc">Percentage terms, so it travels well between stakeholders. Breaks badly when true values approach zero.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">Report the error in units someone can act on</span>"RMSE 0.34" means nothing to an operations manager. "On average we are out by about four days, and occasionally by three weeks" is the same information in a form that supports a decision. Translate before presenting, every time.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/model_evaluation.html" target="_blank" rel="noopener">Model evaluation — scikit-learn</a><span class="link-note">Every metric above with its formula and API, plus the ones this lesson leaves out.</span></li><li><a href="https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html" target="_blank" rel="noopener">Precision-recall — scikit-learn</a><span class="link-note">Worked curves, and the argument for preferring them to ROC on imbalanced data.</span></li></ul></div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Hands-On Machine Learning with Scikit-Learn and PyTorch</span><span class="bk-a">Aurelien Geron</span><span class="bk-n">Chapter 3 builds the confusion matrix, the precision-recall trade-off and ROC from scratch on a real dataset.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Precision and recall differ in what, fundamentally?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Precision is for balanced data and recall for imbalanced</div>
+      <div class="quiz-opt">Their denominators — precision divides by what you flagged, recall by what was actually positive</div>
+      <div class="quiz-opt">Precision is computed on training data and recall on test data</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. What does an AUC of 0.91 actually mean?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The model is correct 91% of the time</div>
+      <div class="quiz-opt">It ranks a randomly chosen positive above a randomly chosen negative 91 times in 100</div>
+      <div class="quiz-opt">91% of positives are caught at the default threshold</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why prefer a precision-recall curve on heavily imbalanced data?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It is faster to compute</div>
+      <div class="quiz-opt">The ROC false positive rate divides by a huge number of negatives, so it looks reassuring while false alarms pile up</div>
+      <div class="quiz-opt">ROC curves cannot be computed when classes are imbalanced</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Someone quotes a model&#x27;s precision as 82%. What is missing?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The recall figure</div>
+      <div class="quiz-opt">The threshold it was measured at — precision is a property of the model at an operating point, not of the model</div>
+      <div class="quiz-opt">The size of the test set</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

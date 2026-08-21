@@ -236,7 +236,7 @@
 <text x="66" y="176" class="d-label-sm">start</text>
 <text x="580" y="176" class="d-label-sm">end</text>
 </svg><figcaption>Attention over position is U-shaped. Burying the one paragraph that matters in the middle of a large context is a reliable way to make a model appear to have missed it.</figcaption></figure>
-  <div class="callout insight"><span class="label">The practical consequence</span>Put the instruction and the single most relevant material at the start or the end — never the middle. If retrieval returns twelve chunks and one is the answer, ranking matters more than recall. Retrieving more and hoping is the most common RAG mistake there is.</div>
+  <div class="callout insight"><span class="label">The practical consequence</span>Put the instruction and the single most relevant material at the start or the end — never the middle. If retrieval returns twelve chunks and one is the answer, ranking matters more than recall. Retrieving more and hoping is the most common retrieval-augmented generation (RAG) mistake there is.</div>
   <h2>Distractors cost more than empty space</h2>
   <p>Irrelevant-but-plausible context actively degrades answers. A retrieved passage about the 2023 policy, sitting next to the 2026 one, doesn't get politely ignored — it competes. Precision in retrieval beats volume, which is why Block 3 spends time on ranking and filtering rather than on cramming the window.</p>
   <h2>The context budget</h2>

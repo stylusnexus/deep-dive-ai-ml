@@ -150,7 +150,7 @@ LESSONS = [
       ("Grows with context", "Linearly", "Double the conversation and you double the cache."),
       ("Grows with batch", "Linearly again", "Serving four users concurrently means four caches resident at once."),
       ("Independent of the weights", "A separate budget", "A model that loads with room to spare can still die on a long prompt, and nothing about the weights explains why."),
-      ("Shrunk by GQA", "Often 4-8x", "Sharing key-value projections across query-head groups is why long context became affordable."),
+      ("Shrunk by grouped-query attention (GQA)", "Often 4-8x", "Sharing key-value projections across query-head groups is why long context became affordable."),
     ]),
 
     ("know",
@@ -266,7 +266,7 @@ LESSONS = [
     ("p", "<strong>Ollama</strong> is how most people run a model locally for the first time, and it is what any cheap-first architecture rests on. It is also a stack of three things that get conflated."),
 
     ("h2", "llama.cpp is the engine; Ollama is the car"),
-    ("p", "<code>llama.cpp</code> is a C++ inference engine that runs GGUF models efficiently on consumer hardware, including Apple Silicon via Metal. It's the thing doing the actual arithmetic."),
+    ("p", "<code>llama.cpp</code> is a C++ inference engine that runs GPT-Generated Unified Format (GGUF) models efficiently on consumer hardware, including Apple Silicon via Metal. It's the thing doing the actual arithmetic."),
     ("p", "<strong>Ollama</strong> wraps it in something usable: a model registry (<code>ollama pull</code>), a local HTTP server with an OpenAI-compatible API, automatic memory management, and model switching. Your code talks HTTP to Ollama; Ollama talks to llama.cpp; llama.cpp talks to the GPU."),
     ("callout", "insight", "Why the API compatibility matters", "Because Ollama speaks an OpenAI-shaped API, the same client code can point at a local 7B model or a hosted frontier model by changing a base URL. That interchangeability is precisely what makes cheap-first routing implementable at all."),
 
@@ -311,7 +311,7 @@ LESSONS = [
     ("callout", "pitfall", "The habit this should build", "When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck. Two premature speed claims were made on that project from partial data before the real one was confirmed by cache-hit telemetry. A number measured on the wrong phase is not a small error — it points your optimisation work at the wrong layer entirely."),
 
     ("h2", "The thing to keep straight"),
-    ("p", "Ollama is a convenience layer, not a requirement. <code>llama.cpp</code> serves models directly; vLLM and TGI are production-grade alternatives with better batching for concurrent users. Ollama optimises for one developer on one machine, and is a poor fit for serving many users at once. Block 8 covers what changes when you need the latter."),
+    ("p", "Ollama is a convenience layer, not a requirement. <code>llama.cpp</code> serves models directly; vLLM and Text Generation Inference (TGI) are production-grade alternatives with better batching for concurrent users. Ollama optimises for one developer on one machine, and is a poor fit for serving many users at once. Block 8 covers what changes when you need the latter."),
 
     ("know",
      'When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck.',
@@ -348,7 +348,7 @@ LESSONS = [
   "title": "Embeddings, Vectors and Semantic Routing",
   "subtitle": "How a machine decides two things 'mean' something similar — and where that fails.",
   "body": [
-    ("p", "<strong>Semantic routing</strong> depends entirely on <strong>embeddings</strong>, and so does RAG in Block 3 — so this concept pays for itself twice. It is also the cheapest classifier you will ever deploy."),
+    ("p", "<strong>Semantic routing</strong> depends entirely on <strong>embeddings</strong>, and so does retrieval-augmented generation (RAG) in Block 3 — so this concept pays for itself twice. It is also the cheapest classifier you will ever deploy."),
 
     ("h2", "An embedding is a list of numbers standing in for meaning"),
     ("p", "An embedding model takes text and returns a fixed-length list of numbers — a <strong>vector</strong>, typically a few hundred to a couple of thousand values. The useful property is that texts with similar meanings produce vectors that point in similar directions, even when they share no words at all."),
@@ -391,7 +391,7 @@ LESSONS = [
       "<strong>Jargon and identifiers.</strong> Internal names, error codes, and file paths often carry no useful semantics. Keyword search beats embeddings here — which is why serious retrieval combines both.",
       "<strong>Chunking artefacts.</strong> An embedding represents whatever text you gave it. Split a document badly and you get vectors representing half-thoughts.",
     ]),
-    ("callout", "pitfall", "The baseline you should always run", "Before reaching for a vector database, try keyword search — BM25 or plain Postgres full-text. On short, jargon-heavy, identifier-rich corpora it frequently wins, and it costs nothing to test. This is the intake sheet's 'dumb baseline' question applied to retrieval."),
+    ("callout", "pitfall", "The baseline you should always run", "Before reaching for a vector database, try keyword search — Best Matching 25 (BM25) or plain Postgres full-text. On short, jargon-heavy, identifier-rich corpora it frequently wins, and it costs nothing to test. This is the intake sheet's 'dumb baseline' question applied to retrieval."),
 
     ("h2", "Vector stores"),
     ("p", "A <strong>vector database</strong> stores vectors alongside their source text and finds nearest neighbours quickly. Block 3 uses <code>pgvector</code> — the Postgres extension — because it means one database rather than two, and because at the scale you'll work at, the specialist stores buy speed you don't need."),
@@ -654,7 +654,7 @@ LESSONS = [
     ("p", "A score alone is nearly useless six weeks later. Record the model and quantization, the harness version or commit, the sampling settings, the date, and the per-task outcomes rather than only the total. Without those, a changed number tells you something moved but not what."),
 
     ("h2", "Where this goes next"),
-    ("p", "You now have the vocabulary the rest of the program assumes: the loop and the harness around it, tokens and context, weights and quantization, local serving, embeddings and retrieval, tool calls and MCP, routing and sampling, and evaluation. Block 1 starts on data. Every block from here re-uses these terms rather than introducing parallel ones."),
+    ("p", "You now have the vocabulary the rest of the program assumes: the loop and the harness around it, tokens and context, weights and quantization, local serving, embeddings and retrieval, tool calls and Model Context Protocol (MCP), routing and sampling, and evaluation. Block 1 starts on data. Every block from here re-uses these terms rather than introducing parallel ones."),
 
     ("know",
      'Twenty real tasks from your own work, with known-good outcomes, is the most valuable evaluation asset you can own.',
@@ -897,7 +897,7 @@ LESSONS = [
     ("callout", "pitfall", "The cost nobody budgets for", "Parallel agents multiply token spend, and each one re-sends its own growing context. A fan-out of five is not five times one agent's cost; it is more, because coordination and summarisation are extra turns. Measure it before scaling out — the pattern that reads as efficient on a diagram is frequently the most expensive thing in the system."),
 
     ("links", [
-      ('OWASP Top 10 for LLM Applications', 'https://owasp.org/www-project-top-10-for-large-language-model-applications/',
+      ('OWASP (Open Worldwide Application Security Project) Top 10 for LLM Applications', 'https://owasp.org/www-project-top-10-for-large-language-model-applications/',
        'The reference list of agent and LLM attack classes. Block 6 works through it.'),
       ('Simon Willison on prompt injection', 'https://simonwillison.net/tags/prompt-injection/',
        "The clearest running commentary on why this isn't solved by better prompting."),
@@ -978,7 +978,7 @@ LESSONS = [
     ("h2", "DPO: the same goal, less machinery"),
     ("p", "<strong>Direct Preference Optimization</strong> skips the separate reward model and RL stage, training directly on preference pairs — this answer was preferred to that one. Simpler, cheaper, more stable, and now the common default for smaller-scale alignment work. Your <code>LLMS_from_Scratch</code> copy covers it in ch07, so Block 7 uses it in practice."),
 
-    ("h2", "RLAIF and Constitutional AI"),
+    ("h2", "reinforcement learning from AI feedback (RLAIF) and Constitutional AI"),
     ("p", "Human ranking is slow and expensive. <strong>RLAIF</strong> replaces the human rater with a model. <strong>Constitutional AI</strong> is a specific form: the model critiques and revises its own outputs against a written set of principles — a constitution — and that self-critique produces the preference data. It's how Claude is trained, and it turns alignment into something partly legible: you can read the principles."),
 
     ("h2", "Where feedback goes wrong"),
@@ -1068,7 +1068,7 @@ LESSONS = [
 <text x="580" y="176" class="d-label-sm">end</text>
 </svg>'''),
 
-    ("callout", "insight", "The practical consequence", "Put the instruction and the single most relevant material at the start or the end — never the middle. If retrieval returns twelve chunks and one is the answer, ranking matters more than recall. Retrieving more and hoping is the most common RAG mistake there is."),
+    ("callout", "insight", "The practical consequence", "Put the instruction and the single most relevant material at the start or the end — never the middle. If retrieval returns twelve chunks and one is the answer, ranking matters more than recall. Retrieving more and hoping is the most common retrieval-augmented generation (RAG) mistake there is."),
 
     ("h2", "Distractors cost more than empty space"),
     ("p", "Irrelevant-but-plausible context actively degrades answers. A retrieved passage about the 2023 policy, sitting next to the 2026 one, doesn't get politely ignored — it competes. Precision in retrieval beats volume, which is why Block 3 spends time on ranking and filtering rather than on cramming the window."),
@@ -1170,7 +1170,7 @@ LESSONS = [
 <text x="28" y="112" class="d-label-sm">provider validates against your schema — the usual right answer</text>
 <rect x="12" y="26" width="450" height="42" rx="6" class="d-box-good"/>
 <text x="28" y="46" class="d-label-b">4. Constrained decoding</text>
-<text x="28" y="62" class="d-label-sm">invalid tokens made impossible at sampling time — llama.cpp GBNF</text>
+<text x="28" y="62" class="d-label-sm">invalid tokens made impossible at sampling time — llama.cpp GGML Backus-Naur Form (GBNF)</text>
 <text x="480" y="52" class="d-fill-green" font-size="11" font-weight="600">strongest</text>
 </svg>'''),
 
@@ -1433,7 +1433,7 @@ LESSONS = [
     ("h2", "Handling imbalance during training"),
     ("terms", [
       ("Class weights", "Penalise minority errors more", "One parameter in most libraries. Try this first — it's nearly free."),
-      ("Oversampling / SMOTE", "Duplicate or synthesise minority rows", "Fit only on the training split. Doing it before the split is textbook leakage."),
+      ("Oversampling / synthetic minority over-sampling technique (SMOTE)", "Duplicate or synthesise minority rows", "Fit only on the training split. Doing it before the split is textbook leakage."),
       ("Undersampling", "Discard majority rows", "Fast, throws away real data. Reasonable when the majority class is enormous."),
       ("Threshold tuning", "Change nothing, move the cut-off", "Frequently the most effective option, and the most often skipped."),
     ]),
@@ -1449,7 +1449,7 @@ LESSONS = [
 
     ("links", [
       ("Precision-recall (scikit-learn)", "https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html",
-       "Worked curves, plus why PR curves beat ROC on heavily imbalanced data."),
+       "Worked curves, plus why PR curves beat receiver operating characteristic (ROC) on heavily imbalanced data."),
       ("imbalanced-learn", "https://imbalanced-learn.org/stable/",
        "SMOTE and the resampling family, with pipeline integration that avoids the leakage trap."),
     ]),
@@ -1752,7 +1752,7 @@ LESSONS = [
     ("h2", "The name this family goes by now"),
     ("p", "Everything in this lesson is <strong>test-time compute</strong> — spending more computation at inference rather than more parameters at training. It is now one of the two main axes of capability improvement alongside scale, and it is the axis you control without training anything."),
     ("p", "It works for the reason the whole lesson works: extra passes reach answers a single pass cannot, provided something filters or aggregates across them. The scaling is real and not free — cost grows with the compute you spend, so the engineering question is where on that curve your task sits, not whether more is better."),
-    ("callout", "warning", "Where the frontier moved", "Recent work applies these loops to retrieval itself — retrieve, reason about what came back, decide what is still missing, retrieve again. That fixes multi-hop questions a single retrieval cannot answer, and introduces its own failure: repeated near-identical retrievals burning turns and tokens without adding information. De-duplicating what has already been retrieved, and contextualising results before reasoning over them, are the current mitigations. Same lesson, new surface — a loop needs external signal and a termination condition, and retrieval loops are no exception."),
+    ("callout", "warning", "Where the frontier moved", "Recent work applies these loops to retrieval itself — retrieval-augmented generation (RAG) as a loop rather than a single shot — retrieve, reason about what came back, decide what is still missing, retrieve again. That fixes multi-hop questions a single retrieval cannot answer, and introduces its own failure: repeated near-identical retrievals burning turns and tokens without adding information. De-duplicating what has already been retrieved, and contextualising results before reasoning over them, are the current mitigations. Same lesson, new surface — a loop needs external signal and a termination condition, and retrieval loops are no exception."),
 
     ("h2", "Choosing a loop"),
     ("p", "Match the loop to whether the task has a checkable outcome. Code, structured output and retrieval have verifiers, so verifier-guided retry is available and should be the default. Open-ended prose has none, so you're left with self-consistency or best-of-N, and you should expect smaller gains for more tokens. If a task has no external signal at all, extra iterations mostly buy latency."),
@@ -1801,10 +1801,10 @@ LESSONS = [
 
     ("h2", "The training loops that work"),
     ("terms", [
-      ("RLHF", "Humans rank, model learns", "The loop from the feedback lesson. Human judgement enters at ranking; the reward model then stands in for people at scale."),
-      ("Rejection sampling / STaR", "Keep only what verified", "Generate many attempts, keep the ones reaching a correct answer, fine-tune on those. The model bootstraps from its own successes — the filter is what makes it work."),
+      ("reinforcement learning from human feedback (RLHF)", "Humans rank, model learns", "The loop from the feedback lesson. Human judgement enters at ranking; the reward model then stands in for people at scale."),
+      ("Rejection sampling / Self-Taught Reasoner (STaR)", "Keep only what verified", "Generate many attempts, keep the ones reaching a correct answer, fine-tune on those. The model bootstraps from its own successes — the filter is what makes it work."),
       ("Self-play", "Compete against yourself", "The AlphaGo-style loop. Needs a game with a definite winner, which is why it transfers to code and maths and not to essays."),
-      ("Constitutional / RLAIF", "Model critiques itself against principles", "A written constitution supplies the outside signal in place of a human rater, which is what stops it being pure self-reference."),
+      ("Constitutional / reinforcement learning from AI feedback (RLAIF)", "Model critiques itself against principles", "A written constitution supplies the outside signal in place of a human rater, which is what stops it being pure self-reference."),
       ("Distillation flywheel", "Big model teaches small", "The teacher is the external signal. Covered in its own lesson."),
     ]),
     ("callout", "insight", "The same rule, one level up", "Every training loop above works for the reason inference loops work: something outside the model's own opinion decides what gets kept. A verifier in STaR. A human in RLHF. A game result in self-play. A written constitution in RLAIF. Remove the filter and you have a model training on its own unfiltered output — which is the next section."),
@@ -1928,7 +1928,7 @@ LESSONS = [
     ("p", "The reason this matters is the deterministic-first argument arriving in a new place. Extracting fields from a PDF form is not a language problem — it is parsing. A bundled script does it exactly, every time, without the file entering the context window at all. The model orchestrates; the script computes. You get reliability where reliability is available and judgement where it is not."),
     ("callout", "matters", "Decide explicitly which role each script plays", "\"Run this\" and \"read this to understand the convention\" are different instructions with different costs, and a script that is ambiguous between them gets used wrongly in both directions. Say which, in the SKILL.md body, for every script you bundle."),
 
-    ("h2", "Skill, tool, or MCP server?"),
+    ("h2", "Skill, tool, or Model Context Protocol (MCP) server?"),
     ("terms", [
       ("Tool", "A single capability", "One function with a schema. \"Send an email.\" The unit of what the agent can do."),
       ("MCP server", "An external integration", "A connection to a system that lives outside your codebase, spoken in a standard protocol so it works across clients."),
@@ -2085,7 +2085,7 @@ LESSONS = [
 },
 {
   "slug": "building-an-mcp-server",
-  "title": "Building an MCP Server",
+  "title": "Building an Model Context Protocol (MCP) Server",
   "subtitle": "The full capability set, the two transports, and the design decisions that make a server usable rather than merely working.",
   "body": [
     ("p", "The tool-calls lesson covered what MCP standardises and why. This one is how you build one, what it can actually do beyond exposing functions, and the choices that decide whether an agent uses your server well or badly."),
@@ -2181,7 +2181,7 @@ LESSONS = [
 },
 {
   "slug": "mcp-dangers",
-  "title": "MCP: The Danger Surface",
+  "title": "Model Context Protocol (MCP): The Danger Surface",
   "subtitle": "Named attack classes from the specification itself — and why the protocol says it cannot enforce its own security principles.",
   "body": [
     ("p", "The specification is unusually candid about this. It states plainly that MCP \"enables powerful capabilities through arbitrary data access and code execution paths\", and that the protocol <strong>cannot enforce its security principles at the protocol level</strong> — implementors have to. That sentence is the whole lesson: the safety of an MCP setup lives in the client, the server and your configuration, not in the standard."),
@@ -2198,7 +2198,7 @@ LESSONS = [
       ("Confused deputy", "For proxy servers", "A server proxying a third-party API with a static client ID, plus dynamic client registration, plus a consent cookie, lets an attacker obtain authorization codes without the user ever seeing a consent screen."),
       ("Token passthrough", "Explicitly forbidden", "A server accepting a token that was not issued to it and forwarding it downstream. Breaks rate limiting, breaks the audit trail, and turns the server into an exfiltration proxy for anyone with a stolen token."),
       ("Session hijacking", "For HTTP transports", "A guessed or stolen session ID used to impersonate a client — or worse, to inject a malicious event that the legitimate client later receives and acts on."),
-      ("SSRF via discovery", "The subtle one", "A malicious server returns metadata URLs pointing at internal addresses. The client obligingly fetches them — cloud metadata endpoints, localhost services — and credentials leak outward through error messages."),
+      ("server-side request forgery (SSRF) via discovery", "The subtle one", "A malicious server returns metadata URLs pointing at internal addresses. The client obligingly fetches them — cloud metadata endpoints, localhost services — and credentials leak outward through error messages."),
       ("Scope inflation", "Quiet and cumulative", "A server publishing every scope it might ever need, granted up front. One stolen token then reaches everything, and revoking it breaks every workflow at once."),
     ]),
 
@@ -2250,7 +2250,7 @@ LESSONS = [
        "The source for every attack class above, with attack flows and required mitigations."),
       ("MCP authorization", "https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization",
        "The authorization model, and why token passthrough is forbidden rather than merely discouraged."),
-      ("OWASP Top 10 for LLM Applications", "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+      ("OWASP (Open Worldwide Application Security Project) Top 10 for LLM Applications", "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
        "The wider taxonomy these attacks sit inside."),
     ]),
 
@@ -2276,7 +2276,7 @@ LESSONS = [
 },
 {
   "slug": "local-hardware-limits",
-  "title": "Local Hardware: CUDA, Metal and What Actually Constrains You",
+  "title": "Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You",
   "subtitle": "Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.",
   "body": [
     ("p", "\"Can I run this locally?\" has a more interesting answer than most people expect, and it is rarely about raw speed. Three things decide it — how much memory the accelerator can address, how fast it can read that memory, and whether the software stack supports your chip at all. The third one is where most attempts actually fail."),
@@ -2291,7 +2291,7 @@ LESSONS = [
 <path d="M142 51 L186 51" class="d-arrow"/>
 <text x="146" y="42" class="d-label-sm">PCIe</text>
 <rect x="186" y="28" width="110" height="46" rx="6" class="d-box-warn"/>
-<text x="200" y="48" class="d-label-b">VRAM</text>
+<text x="200" y="48" class="d-label-b">video memory (VRAM)</text>
 <text x="200" y="64" class="d-label-sm">8-80 GB, fast</text>
 <text x="12" y="98" class="d-label-sm">Model must fit in VRAM. Spill to system RAM and throughput collapses.</text>
 <text x="12" y="116" class="d-label-sm">Bandwidth ~1000 GB/s on a high-end card.</text>
@@ -2322,7 +2322,7 @@ LESSONS = [
      'A model that does not fit in addressable memory does not run at any speed. A model that fits but runs slowly still runs. So check that it fits before comparing tokens per second — and remember that addressable means VRAM on a discrete card, not total system RAM.',
      "A 24GB card is several times faster than a 128GB Apple Silicon machine per token. It cannot load a 4-bit 70B model at all, which needs about 35GB. The slower machine runs it comfortably. Faster is irrelevant when the answer is 'will not load'."),
     ("h2", "The software stack is where things really break"),
-    ("p", "CUDA is not merely a driver — it is the ecosystem nearly all ML tooling was written against. Kernels, quantisation libraries, training frameworks, and a great many research repositories assume it. Apple's Metal has genuine support in PyTorch through MPS and in dedicated runtimes, and the coverage is not equal."),
+    ("p", "CUDA is not merely a driver — it is the ecosystem nearly all ML tooling was written against. Kernels, quantisation libraries, training frameworks, and a great many research repositories assume it. Apple's Metal has genuine support in PyTorch through Metal Performance Shaders (MPS) and in dedicated runtimes, and the coverage is not equal."),
     ("terms", [
       ("Works well on Metal", "Inference, LoRA on small-to-mid models", "llama.cpp, MLX, Ollama, LM Studio, PyTorch MPS for most common operations."),
       ("Works with friction", "Training, custom kernels", "An operation with no MPS implementation silently falls back to CPU. The run completes and takes twenty times longer, with nothing announcing why."),
@@ -2334,7 +2334,7 @@ LESSONS = [
     ("know",
      "What blocks you is usually neither memory nor speed — it is library support.",
      "CUDA is not merely a driver; it is the ecosystem nearly all ML tooling was written against. Kernels, quantisation libraries and research repositories assume it. Check the library before you check the chip.",
-     "You have 128GB and a model that needs 40. It still will not run, because the quantisation library in the loading path ships hand-written CUDA kernels with no Metal equivalent. No amount of memory helps. The same weights in GGUF, served through llama.cpp, load in seconds."),
+     "You have 128GB and a model that needs 40. It still will not run, because the quantisation library in the loading path ships hand-written CUDA kernels with no Metal equivalent. No amount of memory helps. The same weights in GPT-Generated Unified Format (GGUF), served through llama.cpp, load in seconds."),
     ("h2", "What each setup is genuinely good for"),
     ("terms", [
       ("Apple Silicon, high memory", "Large models, inference, light fine-tuning", "128GB runs quantised 70B models and LoRA on 7B-13B locally, with the data never leaving the machine. Slower per token than a datacentre card and capable of things a consumer card is not."),
@@ -2419,7 +2419,7 @@ LESSONS = [
     ("know",
      "Time to first token and tokens per second are different problems with different fixes.",
      "TTFT is prefill and scales with what you sent. Throughput is decode and barely moves with prompt length. Optimising the wrong one produces no perceptible change while looking like diligent work.",
-     "A RAG endpoint takes four seconds before anything appears, then streams quickly. Swapping to a model with 40% higher throughput changes almost nothing, because the four seconds was prefill on 8,000 tokens of retrieved context. Retrieving five chunks instead of twenty halves it."),
+     "A retrieval-augmented generation (RAG) endpoint takes four seconds before anything appears, then streams quickly. Swapping to a model with 40% higher throughput changes almost nothing, because the four seconds was prefill on 8,000 tokens of retrieved context. Retrieving five chunks instead of twenty halves it."),
 
     ("h2", "The cost curve in a conversation"),
     ("p", "The whole conversation is re-sent every turn, so prefill grows with the transcript. Turn twenty prefills roughly twenty times what turn one did, and it happens on every single turn — which is why long agent sessions get slower and more expensive in a way that feels disproportionate."),

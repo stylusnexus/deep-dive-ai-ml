@@ -64,7 +64,7 @@ LESSONS = [
        'On harness design: when a loop is warranted and when a fixed workflow beats one.'),
     ]),
     ("quiz", [
-      ("You write down: “Retrieval uses BM25 plus embeddings, reranked. We rejected pure vector search because recall on exact identifiers was 41% worse.” Which artifact is this?",
+      ("You write down: “Retrieval uses Best Matching 25 (BM25) plus embeddings, reranked. We rejected pure vector search because recall on exact identifiers was 41% worse.” Which artifact is this?",
        ["A recipe — it describes how the system works",
         "An ADR — it records a choice, the alternative rejected, and the evidence",
         "Harness — it defines what the system does at runtime"],
@@ -108,7 +108,7 @@ LESSONS = [
     ("callout", "matters", "The asymmetry", "A missing runbook makes you think. A confidently wrong runbook makes you stop thinking, at exactly the moment you were about to. Audit the first step of every recipe you own more often than the rest of it."),
 
     ("h2", "ADRs ossify"),
-    ("p", "An ADR records a decision <em>and the evidence that forced it</em>. The decision persists in the document; the evidence decays in the world. When the two separate, the ADR becomes a rule enforced past its reason — and because it is written down and was once correct, it is unusually hard to argue with."),
+    ("p", "An architecture decision record (ADR) records a decision <em>and the evidence that forced it</em>. The decision persists in the document; the evidence decays in the world. When the two separate, the ADR becomes a rule enforced past its reason — and because it is written down and was once correct, it is unusually hard to argue with."),
     ("p", "One agent project spent months describing itself as a <em>cascader</em>: a system that tries a local model and escalates to progressively larger ones. That was a genuine, well-reasoned decision. Measurement later falsified the premise it rested on, and the project became a local agent that occasionally escalates. The architecture docs kept saying cascader, so new work kept being designed against a system that no longer existed."),
     ("terms", [
       ("Retrospective justification", "The common one", "An ADR written after the fact to legitimise a choice already made. It reads identically to a real one and contains no decision."),
@@ -176,7 +176,7 @@ LESSONS = [
   "title": "Why Measurement Decides",
   "subtitle": "The only thing that corrects a harness, a recipe or a decision is a number that disagrees with it.",
   "body": [
-    ("p", "Everything in the previous lesson failed the same way: an artifact stayed confident after its truth expired. None of the three can notice this about itself. A harness cannot tell you its own message is misleading; a recipe cannot tell you its first step is stale; an ADR cannot tell you its evidence was overturned. Only a measurement can."),
+    ("p", "Everything in the previous lesson failed the same way: an artifact stayed confident after its truth expired. None of the three can notice this about itself. A harness cannot tell you its own message is misleading; a recipe cannot tell you its first step is stale; an architecture decision record (ADR) cannot tell you its evidence was overturned. Only a measurement can."),
 
     ("h2", "Plausible mechanisms are not findings"),
     ("p", "The failure mode is not laziness. It is the opposite — it is a good engineer reasoning carefully from a mechanism that makes sense, and shipping it. Some real examples, each of which sounded correct and was wrong:"),
@@ -296,7 +296,7 @@ LESSONS = [
     ("terms", [
       ("Before", "Instrument honest? Prediction written with a number? Baseline defined? Guardrail named?", "All four, or do not start."),
       ("During", "Whole set, n \u2265 3, one variable, machine bookended.", "Deviations are fine if you say so in the result."),
-      ("After", "Interval not fraction. Guardrail checked. Fix reverted and the number moved back.", "Then it is a finding, and only then does it belong in a recipe or an ADR."),
+      ("After", "Interval not fraction. Guardrail checked. Fix reverted and the number moved back.", "Then it is a finding, and only then does it belong in a recipe or an architecture decision record (ADR)."),
     ]),
     ("callout", "matters", "Why this belongs in a module about documentation", "A recipe or an ADR built on an unmeasured result does not just fail \u2014 it hardens. It gets cited, followed, and defended long after the thing it claims was quietly falsified. Measurement is not a separate discipline from writing things down; it is the thing that earns you the right to."),
 
@@ -745,7 +745,7 @@ swebench report my-run-01 -d verified"""),
       ("Agent or workflow?", "Did you decide the sequence?", "If you know the steps, write the steps. An agent is for when the sequence genuinely cannot be known in advance."),
       ("Prompt or tool?", "Can the model tell it complied?", "A mechanically checkable rule belongs in a tool as a precondition. Refusal beats hope."),
       ("Judge or verifier?", "Is there something checkable?", "A typechecker is narrower than a model judge and it is not an opinion. Where a real check exists, take it."),
-      ("Embeddings or keywords?", "Is the text jargon-heavy?", "BM25 beats vector search outright on identifiers, error codes and rare terms, at a fraction of the cost."),
+      ("Embeddings or keywords?", "Is the text jargon-heavy?", "Best Matching 25 (BM25) beats vector search outright on identifiers, error codes and rare terms, at a fraction of the cost."),
     ]),
     ("callout", "insight", "The pattern", "Every one of those is the same question at a different altitude: <em>is there a bounded, checkable mechanism that does this job?</em> When there is, it wins on cost, latency, testability and the ability to explain what happened — and it does not drift, hallucinate, or change behaviour when a provider updates a model behind an alias."),
 
@@ -874,7 +874,7 @@ swebench report my-run-01 -d verified"""),
 
     ("h2", "The question that decides"),
     ("callout", "matters", "How many times will intent need to survive being forgotten?", "That is the whole test. A script you write and run once: never — vibe it. A feature built across four sessions, by two people and an agent, that someone will modify next quarter: many times, and every one of those is an opportunity for intent to drift. The spec is not documentation overhead. It is the mechanism by which intent survives a context window ending."),
-    ("p", "Notice this is the same argument as the ADR from the artifacts lesson, applied forward instead of backward. An ADR records why a decision was made so nobody re-litigates it. A spec records what is being built so nobody re-derives it. Both exist because a model's context does not persist and a person's memory is worse than they think."),
+    ("p", "Notice this is the same argument as the architecture decision record (ADR) from the artifacts lesson, applied forward instead of backward. An ADR records why a decision was made so nobody re-litigates it. A spec records what is being built so nobody re-derives it. Both exist because a model's context does not persist and a person's memory is worse than they think."),
 
     ("h2", "Why it works better with agents than it ever did with people"),
     ("p", "Specification-first is an old idea with a poor track record — waterfall's central failure was that specs went stale the moment implementation began, and nobody read them. Two things changed:"),

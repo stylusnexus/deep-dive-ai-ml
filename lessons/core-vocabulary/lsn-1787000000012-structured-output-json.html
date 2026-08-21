@@ -234,7 +234,7 @@
 <text x="28" y="112" class="d-label-sm">provider validates against your schema — the usual right answer</text>
 <rect x="12" y="26" width="450" height="42" rx="6" class="d-box-good"/>
 <text x="28" y="46" class="d-label-b">4. Constrained decoding</text>
-<text x="28" y="62" class="d-label-sm">invalid tokens made impossible at sampling time — llama.cpp GBNF</text>
+<text x="28" y="62" class="d-label-sm">invalid tokens made impossible at sampling time — llama.cpp GGML Backus-Naur Form (GBNF)</text>
 <text x="480" y="52" class="d-fill-green" font-size="11" font-weight="600">strongest</text>
 </svg><figcaption>Each rung constrains the model more and leaves less to chance. Use the highest rung your provider supports, and validate anyway.</figcaption></figure>
   <p>Rung 4 deserves a note because it's the one people don't know about. When you control the sampler — as <code>llama.cpp</code> does locally — you can mask out any token that would make the output invalid before it's ever sampled. The model is not asked to comply; non-compliance is unrepresentable. A local serving lane can use this; hosted APIs generally expose rung 3 instead.</p>

@@ -73,7 +73,7 @@ LESSONS = [
 <path d="M192 42 L226 42" class="d-arrow-accent" marker-end="url(#ma)"/>
 <rect x="226" y="16" width="180" height="52" rx="7" class="d-box-accent"/>
 <text x="240" y="38" class="d-label-b">Block 3</text>
-<text x="240" y="56" class="d-label-sm">GenAI · LLMs and RAG</text>
+<text x="240" y="56" class="d-label-sm">GenAI · LLMs and retrieval-augmented generation (RAG)</text>
 <path d="M406 42 L440 42" class="d-arrow-accent" marker-end="url(#ma)"/>
 <rect x="440" y="16" width="188" height="52" rx="7" class="d-box-warn"/>
 <text x="454" y="38" class="d-label-b">Block 4</text>
@@ -198,7 +198,7 @@ LESSONS = [
       ("*.gguf", "Weights, quantized and packaged", "Config, tokenizer and quantized weights in one self-contained file for local serving."),
       ("chat template", "Turn structure", "How system, user and assistant turns are formatted into one string. Get this wrong and quality drops for no visible reason."),
     ]),
-    ("callout", "matters", "What each technique actually touches", "Prompting changes the input only. Fine-tuning adjusts the weights — usually the feed-forward layers most. LoRA freezes the original weights and trains small add-on matrices alongside them. Quantization stores the same weights in fewer bits. RAG changes nothing about the model at all; it changes what's in the context. Knowing which layer of the machine each one touches tells you which problem each can and cannot solve."),
+    ("callout", "matters", "What each technique actually touches", "Prompting changes the input only. Fine-tuning adjusts the weights — usually the feed-forward layers most. LoRA freezes the original weights and trains small add-on matrices alongside them. Quantization stores the same weights in fewer bits. retrieval-augmented generation (RAG) changes nothing about the model at all; it changes what's in the context. Knowing which layer of the machine each one touches tells you which problem each can and cannot solve."),
 
     ("h2", "The size numbers, made concrete"),
     ("p", "A 7-billion-parameter model has roughly 32 blocks, a hidden size around 4096, 32 attention heads, and a vocabulary near 32,000. At 16-bit precision the weights alone are about 14GB — most of it in the feed-forward layers. Every one of those parameters is touched for every token generated, which is why local inference is memory-bandwidth bound and why quantization speeds things up as well as shrinking them."),
@@ -209,7 +209,7 @@ LESSONS = [
       ("Build a Large Language Model (From Scratch)", "https://github.com/rasbt/LLMs-from-scratch",
        "You have this locally. Chapters 2–4 build the tokenizer, the attention block and the full model in PyTorch."),
       ("Hugging Face model file formats", "https://huggingface.co/docs/hub/gguf",
-       "What each file in a model repository is for, and how GGUF packages them."),
+       "What each file in a model repository is for, and how GPT-Generated Unified Format (GGUF) packages them."),
     ]),
 
     ("quiz", [

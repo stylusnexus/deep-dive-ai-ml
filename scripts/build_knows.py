@@ -6,10 +6,13 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 STYLE = (ROOT / "scripts" / "_index_style.html").read_text()
 
 sections, total = [], 0
-for topic in ["orientation", "core-vocabulary", "algorithms", "engineering-practice", "block1-data-eda"]:
+ORDER = ["orientation", "core-vocabulary", "algorithms", "engineering-practice"]
+topics = [t for t in ORDER if (ROOT / "lessons" / t).exists()]
+topics += sorted(d.name for d in (ROOT / "lessons").iterdir()
+                 if d.is_dir() and d.name not in ORDER)   # blocks, in order, as they are added
+
+for topic in topics:
     d = ROOT / "lessons" / topic
-    if not d.exists():
-        continue
     meta = json.loads((d / "meta.json").read_text())
     items = []
     for l in meta["lessons"]:

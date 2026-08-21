@@ -1,0 +1,30 @@
+{
+  "title": "Block 2 \u00b7 Predictive Modelling",
+  "topic": "block2-classical-ml",
+  "icon": "\ud83d\udcc8",
+  "description": "Classical machine learning done properly \u2014 reading a confusion matrix, choosing a threshold, comparing models honestly, and knowing when a neural network is the wrong answer.",
+  "tags": [
+    "ai",
+    "ml",
+    "evaluation"
+  ],
+  "colorScheme": "cyan",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-08-21",
+  "lessons": [
+    {
+      "id": "lsn-1787500000000",
+      "title": "The Confusion Matrix and What Comes Out of It",
+      "file": "lsn-1787500000000-confusion-matrix-and-metrics.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1787500000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}
