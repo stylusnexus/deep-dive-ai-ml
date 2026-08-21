@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipes, ADRs and the Harness</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 1 of 4</span>
+  <h1>Recipes, ADRs and the Harness</h1>
+  <p class="subtitle">Three things every LLM project grows, answering three different questions.</p>
+
+  <p>Build an LLM system for more than a few weeks and you will accumulate three kinds of writing that are not code. They get confused constantly, including by people who write all three, because they overlap in subject matter. They do not overlap in <em>purpose</em>, and keeping them apart is what makes each one useful.</p>
+  <h2>The three, and the question each answers</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The harness</div><div><div class="roadmap-title">What the system does</div><div class="roadmap-desc">Prompts, tool definitions, loop control, budgets, the evaluation rig. Everything around the model. It is <em>executed</em>, so it is true by construction — whatever it says is what happens.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A recipe</div><div><div class="roadmap-title">How you work</div><div class="roadmap-desc">A reusable method: the trigger that tells you it applies, the procedure, and a worked example. A runbook, a debugging protocol, an eval procedure. It is <em>followed</em>, so it is only as good as its first step.</div></div></div><div class="roadmap-item"><div class="roadmap-num">An ADR</div><div><div class="roadmap-title">Why it is this way</div><div class="roadmap-desc">An architecture decision record: the context that forced a choice, the choice, and the consequences accepted. It is <em>consulted</em>, so its value decays with the evidence that produced it.</div></div></div></div>
+  <p>The test for which one you are writing is simple. If a machine executes it, it is harness. If a person follows it step by step, it is a recipe. If someone reads it to understand why they can't do the obvious thing, it is an ADR.</p>
+  <h2>They form a cycle, not a hierarchy</h2>
+  <figure class="diagram"><svg viewBox="0 0 660 320" role="img" aria-label="Cycle diagram: harness produces evidence, recipes interpret it, ADRs constrain the harness"><defs><marker id="ep1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="250" y="20" width="170" height="66" rx="10" class="d-box-accent"/>
+<text x="300" y="48" class="d-label-b">HARNESS</text>
+<text x="266" y="68" class="d-label-sm">what the system does</text>
+<rect x="30" y="210" width="180" height="66" rx="10" class="d-box"/>
+<text x="80" y="238" class="d-label-b">RECIPES</text>
+<text x="52" y="258" class="d-label-sm">how you find things out</text>
+<rect x="450" y="210" width="180" height="66" rx="10" class="d-box"/>
+<text x="510" y="238" class="d-label-b">ADRs</text>
+<text x="466" y="258" class="d-label-sm">why it is this way</text>
+<path d="M255 86 L150 210" class="d-arrow-accent" marker-end="url(#ep1)"/>
+<path d="M225 250 L450 250" class="d-arrow-accent" marker-end="url(#ep1)"/>
+<path d="M520 210 L410 86" class="d-arrow-accent" marker-end="url(#ep1)"/>
+<text x="120" y="150" class="d-label-sm">produces traces</text>
+<text x="120" y="166" class="d-label-sm">and numbers</text>
+<text x="280" y="242" class="d-label-sm">a finding worth keeping</text>
+<text x="280" y="290" class="d-label-sm">becomes a decision</text>
+<text x="500" y="150" class="d-label-sm">constrains what</text>
+<text x="500" y="166" class="d-label-sm">the harness may do</text>
+</svg><figcaption>Each artifact produces the evidence the next one needs. Break any edge and the other two drift.</figcaption></figure>
+  <p>The harness runs and produces evidence — traces, scores, failures. A recipe is what turns that evidence into a finding rather than an anecdote. A finding that will outlive the person who found it becomes an ADR. And the ADR constrains the next harness change, so the cycle closes.</p>
+  <h2>A worked example, end to end</h2>
+  <p>A local coding agent kept failing one benchmark task. It read the code, ran the failing tests, correctly derived the fix in its own reasoning — and then asked to read one more file. Every time. Nine different scaffolding changes were tried against it and none moved the number.</p>
+  <p>The <strong>recipe</strong> that broke it open was a procedure, not an idea: <em>before running another experiment, confirm the harness is recording what the model said, then read one trace end to end.</em> It was not. Reasoning was being parsed off the API response and discarded on every turn that also called a tool — which was nearly all of them. Nine experiments had been run against a system that could not report on itself.</p>
+  <p>With logging restored, the trace showed the model obeying the first line of its own system prompt: <em>“Before changing code, inspect the real repo structure and relevant files.”</em> That instruction has no exit criterion. There is always one more file. A compliant model can satisfy it forever without ever being wrong.</p>
+  <p>The <strong>harness</strong> change was a deletion, and the <strong>ADR</strong> was the general rule that made the deletion obviously right rather than a guess: <em>prompts set direction, tools set limits.</em> A rule a machine can check belongs in the tool, where reading one file satisfies it permanently. A rule that cannot be checked belongs in the prompt, and must never be something the work waits on.</p>
+  <div class="callout insight"><span class="label">Why the ADR was worth writing</span>Without it, the fix reads as “someone deleted a sentence from a prompt.” The next person adds it back, reasonably, because inspecting before editing is obviously good practice. The ADR is what makes the deletion survive.</div>
+  <h2>The test for whether an ADR is doing work</h2>
+  <p>A decision record earns its place when it stops a future change that would otherwise look sensible. If you cannot name the reasonable-seeming thing it forbids, you have written a status update.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.cognitect.com/blog/2011/11/15/documenting-architecture-decisions" target="_blank" rel="noopener">Documenting Architecture Decisions — Michael Nygard (2011)</a><span class="link-note">The original ADR write-up. Short, and still the clearest statement of what belongs in one.</span></li><li><a href="https://adr.github.io/" target="_blank" rel="noopener">adr.github.io</a><span class="link-note">Templates and tooling that grew up around the idea.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">On harness design: when a loop is warranted and when a fixed workflow beats one.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. You write down: “Retrieval uses BM25 plus embeddings, reranked. We rejected pure vector search because recall on exact identifiers was 41% worse.” Which artifact is this?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A recipe — it describes how the system works</div>
+      <div class="quiz-opt">An ADR — it records a choice, the alternative rejected, and the evidence</div>
+      <div class="quiz-opt">Harness — it defines what the system does at runtime</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why does the ADR in the worked example matter more than the code change it justified?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Because deleting a prompt line is a large change that needs review</div>
+      <div class="quiz-opt">Because without it, re-adding the instruction looks like good practice and the fix silently reverts</div>
+      <div class="quiz-opt">Because ADRs are required before merging</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. An instruction in a system prompt says “thoroughly review all relevant context before answering.” What is structurally wrong with it?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It is too vague for the model to parse</div>
+      <div class="quiz-opt">It has no exit criterion — the model can never determine it has complied, so it can obey forever</div>
+      <div class="quiz-opt">It should be phrased more politely</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

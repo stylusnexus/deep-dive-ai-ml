@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Measure</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 4 of 4</span>
+  <h1>How to Measure</h1>
+  <p class="subtitle">A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.</p>
+
+  <p>This is deliberately a sequence rather than a checklist. Each step assumes the previous one passed, and running them out of order is how you get numbers that look rigorous and mean nothing.</p>
+  <h2>0 · Prove the instrument before you trust it</h2>
+  <p>Both honesty invariants, checked <em>before</em> the experiment, not after the results confuse you.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Outcome honesty</div><div><div class="roadmap-title">Can it tell success from inaction?</div><div class="roadmap-desc">At the starting state the check must FAIL. With the known-good change applied it must PASS. Run both directions explicitly — a vacuous pass is invisible otherwise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Process honesty</div><div><div class="roadmap-title">Did it record what happened?</div><div class="roadmap-desc">Confirm the harness logs the model’s reasoning and its tool arguments, then read one full trace end to end. Absence of an explanation in the log is not evidence there was none.</div></div></div></div>
+  <div class="callout matters"><span class="label">Instrumentation is free; treatments are not</span>Adding logging leaves the request to the model byte-identical, so it cannot change the result and needs no flag or A/B. Anything that changes what the model <em>sees</em> is a treatment and must be measured. Keeping this line sharp is what lets you fix your observability mid-investigation without invalidating it.</div>
+  <h2>1 · Write the number down before you run</h2>
+  <p>State the hypothesis as a prediction with a value: <em>“this should take edit-attempt rate from 0.25 to above 0.5.”</em> A hypothesis that predicts no particular number cannot be wrong, and one that cannot be wrong is not being tested. Written afterwards, any result confirms it.</p>
+  <h2>2 · Baseline, whole set, repeats</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Against a baseline</div><div><div class="roadmap-title">Change off, same conditions</div><div class="roadmap-desc">A number with nothing to compare to is a measurement of your setup, not your change.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The whole set</div><div><div class="roadmap-title">Never one case</div><div class="roadmap-desc">One case has proved +1.00 where the full set said +0.00. Cherry-picking does not require dishonesty, only relief.</div></div></div><div class="roadmap-item"><div class="roadmap-num">At least three repeats</div><div><div class="roadmap-title">These systems are stochastic</div><div class="roadmap-desc">Report mean and spread, not a single run.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Read the interval, not the fraction</div><div><div class="roadmap-title">1-of-3 is not a result</div><div class="roadmap-desc">At n=3, “1 of 3 versus 0 of 3” sits comfortably inside noise. Compute a credible interval and look at its width before claiming anything.</div></div></div></div>
+  <h2>3 · One treatment at a time — or a screen, knowingly</h2>
+  <p>Four changes shipped together give one number and no attribution. The disciplined default is one variable per run.</p>
+  <p>There is one legitimate exception, and it must be a deliberate choice rather than a shortcut: a <strong>screening run</strong>. Bundle everything, run once, and use the result as a gate. A null is highly informative — four independent fixes together failed to move a binary outcome, so the cause is elsewhere — and you learned that for one run instead of four. A positive earns you the budget to bisect. What you must not do is bundle for speed and then report the win as though you knew which change caused it.</p>
+  <h2>4 · Pick a guardrail before you look</h2>
+  <p>Name in advance the metric that must <em>not</em> get worse, and the threshold that rejects the change even if the primary metric improves. Chosen afterwards, a guardrail is a rationalisation. A faster agent that introduces more broken builds is not a better agent, and you will not notice unless you decided to look.</p>
+  <h2>5 · Revert the fix</h2>
+  <p>When something improves, put the old behaviour back and confirm the number falls again. This catches the case where the improvement came from something else you changed in the same window — a cache reset, a restarted server, a different machine load. It is the cheapest step here and the most often skipped.</p>
+  <div class="callout insight"><span class="label">Control the machine too</span>For anything timing-sensitive, run one known case first and last. If the bookends disagree by more than about a third, the whole grid is void — the machine changed under you. A clean-looking finding about context-length limits was once refuted by exactly this: performance had decayed across the session, not at any threshold.</div>
+  <h2>The short version</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Before</div><div><div class="roadmap-title">Instrument honest? Prediction written with a number? Baseline defined? Guardrail named?</div><div class="roadmap-desc">All four, or do not start.</div></div></div><div class="roadmap-item"><div class="roadmap-num">During</div><div><div class="roadmap-title">Whole set, n ≥ 3, one variable, machine bookended.</div><div class="roadmap-desc">Deviations are fine if you say so in the result.</div></div></div><div class="roadmap-item"><div class="roadmap-num">After</div><div><div class="roadmap-title">Interval not fraction. Guardrail checked. Fix reverted and the number moved back.</div><div class="roadmap-desc">Then it is a finding, and only then does it belong in a recipe or an ADR.</div></div></div></div>
+  <div class="callout matters"><span class="label">Why this belongs in a module about documentation</span>A recipe or an ADR built on an unmeasured result does not just fail — it hardens. It gets cited, followed, and defended long after the thing it claims was quietly falsified. Measurement is not a separate discipline from writing things down; it is the thing that earns you the right to.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.swebench.com/" target="_blank" rel="noopener">SWE-bench</a><span class="link-note">Useful for the exercise below: find two leaderboard entries with the same base model and different scaffolds.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">On keeping the scaffold small enough that you can still attribute a result to it.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. You ship four prompt fixes together and the score improves. What may you claim?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">That all four helped</div>
+      <div class="quiz-opt">That the bundle helped, and nothing about which fix did it, unless you bisect</div>
+      <div class="quiz-opt">That the largest of the four was responsible</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why revert a fix that appears to have worked?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">To confirm the code is reversible</div>
+      <div class="quiz-opt">To rule out that something else changed in the same window — a cache, a restart, machine load</div>
+      <div class="quiz-opt">It is only needed for performance work</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. A screening run of five bundled changes comes back null. What have you learned?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Nothing — the run was wasted</div>
+      <div class="quiz-opt">Something valuable: none of the five is sufficient even together, so the cause is elsewhere — learned in one run instead of five</div>
+      <div class="quiz-opt">That the changes should be tried individually anyway</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

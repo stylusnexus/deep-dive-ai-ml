@@ -1,0 +1,64 @@
+{
+  "title": "Recipes, Decisions and Harnesses",
+  "topic": "engineering-practice",
+  "icon": "\ud83e\uddea",
+  "description": "The three artifacts every serious LLM project accumulates \u2014 the harness it runs inside, the recipes it works by, the decisions it records \u2014 how they reinforce each other, how each one turns harmful, and how to measure whether any of it is true.",
+  "tags": [
+    "ai",
+    "practice",
+    "evaluation",
+    "agents"
+  ],
+  "colorScheme": "amber",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-08-21",
+  "lessons": [
+    {
+      "id": "lsn-1787400000000",
+      "title": "Recipes, ADRs and the Harness",
+      "file": "lsn-1787400000000-three-artifacts.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000001",
+      "title": "When the Scaffolding Turns on You",
+      "file": "lsn-1787400000001-when-scaffolding-turns.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000002",
+      "title": "Why Measurement Decides",
+      "file": "lsn-1787400000002-why-measurement-decides.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000003",
+      "title": "How to Measure",
+      "file": "lsn-1787400000003-how-to-measure.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1787400000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}
