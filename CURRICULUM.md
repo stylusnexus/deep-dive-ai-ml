@@ -55,10 +55,12 @@ alarms; at 0.7 you catch 44% with 77. Choosing a row is a business decision.
 4 lessons in `lessons/block2-classical-ml/` and 2 notebooks in
 `notebooks/02-classical-ml/`, both verified executing end to end.
 
-**Still to build:** the wind-turbine project as a standalone deliverable, and
-notebooks for the neural-network and time-series lessons.
+4 lessons, 4 notebooks and the project, all verified running end to end.
 
-**Exit:** Project 1 — wind turbine failure prediction — runs end to end.
+**Exit:** Project 1 — wind turbine failure prediction — runs end to end. ✅
+`python src/train.py` produces a report naming the baseline, the leakage audit,
+a threshold-free model comparison with an honest verdict on whether the winner is
+demonstrably better, and a threshold chosen from costs.
 
 ---
 

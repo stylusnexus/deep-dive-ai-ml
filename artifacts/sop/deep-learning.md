@@ -4,6 +4,8 @@ Use with [`training.md`](training.md), which still applies.
 
 ## Setup
 - [ ] ☠ A simpler model tried first and beaten — trees usually win on tabular data
+- [ ] ☠ If the data is tabular, the network is the option you must **justify**, not the default
+- [ ] Backend chosen deliberately, and the environment variable set **before** importing Keras
 - [ ] Enough data for the capacity, or transfer learning used instead of scratch
 - [ ] Inputs normalised; images and text preprocessed consistently between train and inference
 - [ ] Device confirmed (MPS on Apple Silicon) — silent CPU fallback wastes hours
@@ -25,6 +27,11 @@ Use with [`training.md`](training.md), which still applies.
 - [ ] Early stopping in place
 - [ ] Dropout / weight decay tuned against validation, not vibes
 - [ ] Augmentation applied to train only, never to validation or test
+
+## Reproducibility
+- [ ] Understood that runs are **not** bit-identical across backends, hardware or library versions
+- [ ] Tests and evaluations tolerate small numeric differences rather than asserting equality
+- [ ] A claimed improvement smaller than run-to-run variation is treated as unproven until repeated
 
 ## Smells
 - Loss NaN → learning rate too high; drop 10× before anything else

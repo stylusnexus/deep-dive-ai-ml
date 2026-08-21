@@ -71,6 +71,8 @@ you reach for when something is already wrong. Don't mix it into normal flow.
 **GATE — an unvalidated instrument makes every later number noise.**
 
 ### Phase 4 · Build
+- [ ] ☠ Models compared threshold-free, on identical folds, with spread reported
+- [ ] ☠ Ordered data split by time, with a gap matching the prediction horizon
 - [ ] One change at a time, or a bundled screen with its cost stated out loud
 - [ ] Preprocessing inside a pipeline, so leakage is structurally hard
 - [ ] Seeds and versions pinned; run recorded with model, config, date, per-item outcomes

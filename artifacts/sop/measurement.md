@@ -42,6 +42,12 @@ If either half is untrue, stop. Everything below produces noise.
 - [ ] Sample size big enough for the difference to mean anything
 - [ ] Guardrail checked before declaring a win
 
+## 4b · Turn the number into a decision
+- [ ] ☠ Threshold chosen from the **costs of each error type**, not left at the 0.5 default
+- [ ] Decision table produced: at each threshold, what is caught, what is missed, what it costs
+- [ ] Error reported in units someone can act on — "out by about four days" beats "RMSE 0.34"
+- [ ] Stated what would make you distrust this result in six months
+
 ## 5 · Revert the fix ☠
 - [ ] ☠ Change removed and re-run — did the number go back?
 

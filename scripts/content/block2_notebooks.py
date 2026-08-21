@@ -329,4 +329,382 @@ imp"""),
 3. Drop the strongest feature from `imp` and re-run the ladder. How much of the
    performance was that one column?"""),
 ]),
+("03-neural-networks.ipynb", [
+("md", """# 03 · Neural Networks, Both Backends
+
+Two things happen here. You build the same network in Keras and in raw PyTorch,
+and you run the Keras version under both backends to see for yourself that the
+code is genuinely portable — and that the results are not bit-identical.
+
+Then you compare it against the boosted tree from notebook 02, honestly."""),
+("code", _SETUP),
+("code", _PIPE),
+("md", """## The Keras version
+
+One environment variable chooses the engine. Set it **before** importing keras —
+this is the part people get wrong, because the backend is fixed at import."""),
+("code", """import os
+os.environ["KERAS_BACKEND"] = "tensorflow"      # must be set before the import below
+
+import keras
+print("keras", keras.__version__, "| backend:", keras.backend.backend())"""),
+("code", """from sklearn.metrics import average_precision_score, recall_score
+
+prep = make_prep().fit(X_train)
+Xtr = prep.transform(X_train); Xte = prep.transform(X_test)
+Xtr = np.asarray(Xtr.todense() if hasattr(Xtr, "todense") else Xtr, dtype="float32")
+Xte = np.asarray(Xte.todense() if hasattr(Xte, "todense") else Xte, dtype="float32")
+ytr = y_train.values.astype("float32"); yte = y_test.values.astype("float32")
+print("features after preprocessing:", Xtr.shape[1])"""),
+("md", """### Normalisation is not optional
+
+`make_prep()` already scales the numeric columns. That is the single most common
+reason a network refuses to train — unscaled features make the loss surface
+pathological, and no learning rate rescues it."""),
+("code", """def build(seed=0):
+    keras.utils.set_random_seed(seed)
+    m = keras.Sequential([
+        keras.layers.Input((Xtr.shape[1],)),
+        keras.layers.Dense(32, activation="relu"),
+        keras.layers.Dropout(0.2),
+        keras.layers.Dense(16, activation="relu"),
+        keras.layers.Dense(1, activation="sigmoid"),
+    ])
+    m.compile(optimizer=keras.optimizers.Adam(1e-3),
+              loss="binary_crossentropy", metrics=["accuracy"])
+    return m
+
+build().summary()"""),
+("md", """## First: prove the loop works
+
+Before tuning anything, overfit a single small batch. A correctly wired network
+memorises eight examples trivially. If it cannot, the bug is in the wiring, the
+data or the loss — and no hyperparameter will find it.
+
+This takes seconds and it is the highest-value ninety seconds in deep learning."""),
+("code", """tiny = build()
+h = tiny.fit(Xtr[:8], ytr[:8], epochs=200, verbose=0)
+print(f"loss on 8 examples after 200 epochs: {h.history['loss'][-1]:.5f}")
+print("✅ loop is wired" if h.history['loss'][-1] < 0.05
+      else "❌ cannot overfit 8 rows — stop and debug the loop, not the hyperparameters")"""),
+("md", """## Now train properly
+
+Class weights, because the rare class must cost more. Early stopping, because a
+network will fit noise indefinitely if you let it."""),
+("code", """cw = {0: 1.0, 1: float((ytr == 0).sum() / (ytr == 1).sum())}
+print("class weights:", {k: round(v, 2) for k, v in cw.items()})
+
+model = build()
+hist = model.fit(Xtr, ytr, validation_split=0.2, epochs=200, batch_size=64,
+                 class_weight=cw, verbose=0,
+                 callbacks=[keras.callbacks.EarlyStopping(patience=15, restore_best_weights=True,
+                                                          monitor="val_loss")])
+print(f"stopped after {len(hist.history['loss'])} epochs")"""),
+("code", """fig, ax = plt.subplots(figsize=(9, 4.5))
+ax.plot(hist.history["loss"], label="training loss", lw=2)
+ax.plot(hist.history["val_loss"], label="validation loss", lw=2)
+best = int(np.argmin(hist.history["val_loss"]))
+ax.axvline(best, ls="--", color="crimson", label=f"best epoch = {best}")
+ax.set_xlabel("epoch"); ax.set_ylabel("loss")
+ax.set_title("Where the two curves separate is where it starts memorising")
+ax.legend(); plt.tight_layout()"""),
+("md", """## The same code, the other backend
+
+Restarting the kernel to change backend is tedious, so run it as a subprocess.
+The point is that **the model code is byte-identical** — only the environment
+variable differs."""),
+("code", """import subprocess, sys, textwrap, json
+
+SCRIPT = textwrap.dedent('''
+    import os, sys, json
+    os.environ["KERAS_BACKEND"] = sys.argv[1]
+    import numpy as np, keras
+    X = np.load(sys.argv[2]); y = np.load(sys.argv[3])
+    keras.utils.set_random_seed(0)
+    m = keras.Sequential([
+        keras.layers.Input((X.shape[1],)),
+        keras.layers.Dense(32, activation="relu"),
+        keras.layers.Dropout(0.2),
+        keras.layers.Dense(16, activation="relu"),
+        keras.layers.Dense(1, activation="sigmoid"),
+    ])
+    m.compile(optimizer=keras.optimizers.Adam(1e-3), loss="binary_crossentropy")
+    h = m.fit(X, y, epochs=5, batch_size=64, verbose=0)
+    print(json.dumps({"backend": keras.backend.backend(),
+                      "final_loss": round(float(h.history["loss"][-1]), 6)}))
+''')
+
+tmp = Path("/tmp"); np.save(tmp/"Xtr.npy", Xtr); np.save(tmp/"ytr.npy", ytr)
+(tmp/"backend_test.py").write_text(SCRIPT)
+
+for backend in ["tensorflow", "torch"]:
+    r = subprocess.run([sys.executable, str(tmp/"backend_test.py"), backend,
+                        str(tmp/"Xtr.npy"), str(tmp/"ytr.npy")],
+                       capture_output=True, text=True)
+    line = [l for l in r.stdout.splitlines() if l.startswith("{")]
+    print(json.loads(line[-1]) if line else f"{backend}: not available in this environment")"""),
+("md", """### Read that carefully
+
+Same architecture, same seed, same data — and the final losses differ.
+
+Random number generation and floating-point operation ordering are not identical
+across backends. **Reproducibility in deep learning is approximate.** Any test or
+evaluation you write must tolerate small differences rather than assert equality,
+and any claim that a change "improved" something by a fraction of a percent needs
+repeats before you believe it."""),
+("md", """## The same network in raw PyTorch
+
+Keras's `fit` is this loop. Writing it once makes that concrete."""),
+("code", """import torch, torch.nn as nn
+from torch.utils.data import TensorDataset, DataLoader
+
+torch.manual_seed(0)
+net = nn.Sequential(nn.Linear(Xtr.shape[1], 32), nn.ReLU(), nn.Dropout(0.2),
+                    nn.Linear(32, 16), nn.ReLU(), nn.Linear(16, 1))
+loss_fn = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([cw[1]]))
+opt = torch.optim.Adam(net.parameters(), lr=1e-3)
+
+loader = DataLoader(TensorDataset(torch.tensor(Xtr), torch.tensor(ytr).unsqueeze(1)),
+                    batch_size=64, shuffle=True)
+
+for epoch in range(30):
+    net.train()
+    for xb, yb in loader:
+        opt.zero_grad()                       # 1 · clear last step's gradients
+        loss = loss_fn(net(xb), yb)           # 2 · forward pass and loss
+        loss.backward()                       # 3 · backpropagate
+        opt.step()                            # 4 · apply the update
+print(f"final batch loss: {loss.item():.4f}")"""),
+("md", """Four lines, and they are exactly what `fit()` does for you. Everything else
+Keras adds — batching, metrics, callbacks, early stopping, progress bars — is
+convenience around those four."""),
+("md", """## The honest comparison
+
+Against the boosted tree from notebook 02, on the same test set, threshold-free."""),
+("code", """from sklearn.ensemble import HistGradientBoostingClassifier
+
+gb = Pipeline([("prep", make_prep()),
+               ("clf", HistGradientBoostingClassifier(max_depth=4, learning_rate=0.06,
+                                                      max_iter=300, early_stopping=True,
+                                                      class_weight="balanced", random_state=0))])
+gb.fit(X_train, y_train)
+
+nn_proba = model.predict(Xte, verbose=0).ravel()
+gb_proba = gb.predict_proba(X_test)[:, 1]
+
+import time
+comparison = pd.DataFrame([
+  {"model": "neural network (Keras)",
+   "average_precision": round(average_precision_score(yte, nn_proba), 3),
+   "recall@0.5": round(recall_score(yte, (nn_proba >= 0.5).astype(int)), 3)},
+  {"model": "gradient boosting",
+   "average_precision": round(average_precision_score(yte, gb_proba), 3),
+   "recall@0.5": round(recall_score(yte, (gb_proba >= 0.5).astype(int)), 3)},
+])
+comparison"""),
+("md", """### What to make of that
+
+If the tree matches or beats the network — which on tabular data it usually does —
+that is the result, not a failure of your network. The network needed
+normalisation, an architecture, a learning rate, an epoch budget, dropout and
+early stopping. The tree needed none of those.
+
+**Build the network to learn how. Ship the one that is cheaper to operate.**
+
+---
+
+## Your turn
+
+1. Remove the scaling step from the pipeline and retrain the network. How badly
+   does it break? Now do the same to the boosted tree.
+2. Set `class_weight` to `None` in both. Which model's recall moves more, and why?
+3. Add two more hidden layers. Does validation loss improve, or does the gap
+   between the curves just widen sooner?"""),
+]),
+
+("04-time-series.ipynb", [
+("md", """# 04 · Time Series and Walk-Forward Validation
+
+A different dataset: `turbine_daily.csv`, two years of daily readings for forty
+turbines. It has trend, weekly seasonality, a regime change, a telemetry gap, and
+failures preceded by a rising run-up.
+
+The task: predict whether a turbine will fail in the next 7 days.
+
+You will build it wrong first — with a random split — see the excellent score,
+then do it properly and watch the number fall to something honest."""),
+("code", _SETUP),
+("code", """ts = pd.read_csv(ROOT / "data" / "turbine_daily.csv", parse_dates=["date"])
+ts = ts.sort_values(["turbine_id", "date"]).reset_index(drop=True)
+print(f"{len(ts):,} rows | {ts['turbine_id'].nunique()} turbines")
+print(f"{ts['date'].min().date()} to {ts['date'].max().date()}")
+ts.head()"""),
+("md", """## Always plot it first
+
+Trend, seasonality, level shifts and gaps are visible in one chart and invisible
+in `describe()`."""),
+("code", """fig, axes = plt.subplots(2, 1, figsize=(13, 7), sharex=True)
+for tid in ["T000", "T007", "T019"]:
+    sub = ts[ts["turbine_id"] == tid]
+    axes[0].plot(sub["date"], sub["vibration_mm_s"], lw=1, label=tid)
+axes[0].set_ylabel("vibration mm/s"); axes[0].legend(); axes[0].set_title("Three turbines")
+
+daily = ts.groupby("date")["vibration_mm_s"].mean()
+axes[1].plot(daily.index, daily.values, lw=1.2, color="darkorange")
+axes[1].set_ylabel("fleet mean"); axes[1].set_title("Fleet average — look for the step")
+plt.tight_layout()"""),
+("md", """### Two things that chart shows
+
+**A step change** partway through — a sensor recalibration. Data before and after
+are not on the same scale, which is an argument for a sliding window rather than
+an expanding one.
+
+**A gap** where six turbines stopped reporting for a fortnight. Lag features
+computed naively across that gap will silently compare readings two weeks apart
+as though they were consecutive."""),
+("code", """gaps = (ts.groupby("turbine_id")["date"].apply(lambda d: d.diff().dt.days.max()))
+print("largest gap between consecutive readings, per turbine:")
+print(gaps.value_counts().to_string())
+print("\\nTurbines with a gap longer than one day:", (gaps > 1).sum())"""),
+("md", """## Build the target and the features
+
+Target: does this turbine fail within the next 7 days?
+
+Features must only ever look **backwards**. Every rolling window below is
+computed within a turbine and shifted, so today's row never contains today's
+value or any future one."""),
+("code", """g = ts.groupby("turbine_id", group_keys=False)
+
+# target: failure in the NEXT 7 days (looks forward — this is the label, not a feature)
+ts["target"] = (g["failure"]
+                .apply(lambda s: s.iloc[::-1].rolling(7, min_periods=1).max().iloc[::-1])
+                .astype(int))
+
+# features: backwards only. shift(1) so today's reading is excluded.
+for col in ["vibration_mm_s", "gearbox_temp_c", "power_output_kw"]:
+    prev = g[col].shift(1)
+    ts[f"{col}_lag1"]   = prev
+    ts[f"{col}_roll7"]  = prev.groupby(ts["turbine_id"]).rolling(7,  min_periods=3).mean().values
+    ts[f"{col}_roll30"] = prev.groupby(ts["turbine_id"]).rolling(30, min_periods=7).mean().values
+    ts[f"{col}_std7"]   = prev.groupby(ts["turbine_id"]).rolling(7,  min_periods=3).std().values
+
+ts["vib_dev_from_norm"] = ts["vibration_mm_s_lag1"] - ts["vibration_mm_s_roll30"]
+ts["dow"] = ts["date"].dt.dayofweek
+
+FEATS = sorted({c for c in ts.columns if c.endswith(("_lag1","_roll7","_roll30","_std7"))} | {"vib_dev_from_norm", "dow"})
+data = ts.dropna(subset=FEATS).reset_index(drop=True)
+print(f"{len(data):,} usable rows, {len(FEATS)} features, target rate {data['target'].mean():.3%}")"""),
+("md", """## The wrong way, so you can see the size of the lie"""),
+("code", """from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.metrics import average_precision_score
+from sklearn.model_selection import train_test_split
+
+Xr, yr = data[FEATS], data["target"]
+Xtr_r, Xte_r, ytr_r, yte_r = train_test_split(Xr, yr, test_size=0.25, random_state=0, stratify=yr)
+
+m_random = HistGradientBoostingClassifier(max_depth=4, learning_rate=0.06, max_iter=250,
+                                          class_weight="balanced", random_state=0).fit(Xtr_r, ytr_r)
+ap_random = average_precision_score(yte_r, m_random.predict_proba(Xte_r)[:, 1])
+print(f"RANDOM split  → average precision {ap_random:.3f}")
+print(f"(random-guessing baseline is {yr.mean():.3f})")"""),
+("md", """## The right way — split by time, with a gap
+
+Two corrections. Train on the past and test on the future. And leave a **gap**
+matching the horizon you are predicting: the target looks 7 days ahead, so
+training rows within 7 days of the test period would share outcome information
+with it."""),
+("code", """cut = pd.Timestamp(data["date"].quantile(0.75))
+gap_days = 7
+
+GAP = np.timedelta64(gap_days, "D")   # pd.Timedelta(days=) warns under numpy 2.5
+train = data[data["date"] <  cut - GAP]
+test  = data[data["date"] >= cut]
+
+print(f"train: {train['date'].min().date()} to {train['date'].max().date()}  ({len(train):,} rows)")
+print(f"gap  : {gap_days} days")
+print(f"test : {test['date'].min().date()} to {test['date'].max().date()}  ({len(test):,} rows)")
+
+m_time = HistGradientBoostingClassifier(max_depth=4, learning_rate=0.06, max_iter=250,
+                                        class_weight="balanced", random_state=0
+                                        ).fit(train[FEATS], train["target"])
+ap_time = average_precision_score(test["target"], m_time.predict_proba(test[FEATS])[:, 1])
+
+print(f"\\nRANDOM split → {ap_random:.3f}")
+print(f"TIME split   → {ap_time:.3f}")
+print(f"\\nThe random split was optimistic by {ap_random - ap_time:+.3f}.")
+print("Nothing about the model changed. Only the question it was asked.")"""),
+("md", """## Walk-forward validation
+
+One time split is one estimate. Walk the boundary forward and you get several,
+which tells you whether performance is stable or drifting."""),
+("code", """from sklearn.model_selection import TimeSeriesSplit
+
+dates = np.sort(data["date"].unique())
+folds, rows = TimeSeriesSplit(n_splits=5), []
+
+for i, (tr_idx, te_idx) in enumerate(folds.split(dates), 1):
+    tr_end, te_start, te_end = dates[tr_idx[-1]], dates[te_idx[0]], dates[te_idx[-1]]
+    tr = data[data["date"] <= pd.Timestamp(tr_end) - GAP]
+    te = data[(data["date"] >= te_start) & (data["date"] <= te_end)]
+    if te["target"].sum() < 3:
+        continue
+    mdl = HistGradientBoostingClassifier(max_depth=4, learning_rate=0.06, max_iter=250,
+                                         class_weight="balanced", random_state=0
+                                         ).fit(tr[FEATS], tr["target"])
+    rows.append({"fold": i,
+                 "train_to": pd.Timestamp(tr_end).date(),
+                 "test_from": pd.Timestamp(te_start).date(),
+                 "n_test": len(te), "positives": int(te["target"].sum()),
+                 "avg_precision": round(average_precision_score(
+                     te["target"], mdl.predict_proba(te[FEATS])[:, 1]), 3)})
+wf = pd.DataFrame(rows)
+display(wf)
+print(f"\\nmean {wf['avg_precision'].mean():.3f}   sd {wf['avg_precision'].std():.3f}")"""),
+("code", """fig, ax = plt.subplots(figsize=(9, 4.5))
+ax.plot(wf["fold"], wf["avg_precision"], marker="o", lw=2, label="walk-forward folds")
+ax.axhline(data["target"].mean(), ls="--", color="grey", label="random baseline")
+ax.axhline(ap_random, ls=":", color="crimson", label=f"random split (optimistic) {ap_random:.3f}")
+ax.set_xlabel("fold (later = further into the future)"); ax.set_ylabel("average precision")
+ax.set_title("Performance across time, honestly measured")
+ax.legend(); plt.tight_layout()"""),
+("md", """### Reading the folds
+
+If later folds are consistently worse, the process is drifting and you need to
+retrain more often — or the regime change is hurting you and a sliding window
+would beat an expanding one.
+
+If they scatter without trend, that spread **is** your uncertainty. A single time
+split would have given you one number from that spread and no way to know how
+lucky it was."""),
+("md", """## The naive baseline
+
+The majority-class baseline of time series: predict that tomorrow looks like
+today. Compute it before believing any model."""),
+("code", """naive = test["vibration_mm_s_lag1"] > train["vibration_mm_s_lag1"].quantile(0.90)
+ap_naive = average_precision_score(test["target"], naive.astype(float))
+
+print(f"naive (yesterday's vibration in the top decile) : {ap_naive:.3f}")
+print(f"model                                            : {ap_time:.3f}")
+print(f"random guessing                                  : {test['target'].mean():.3f}")
+print(f"\\n{'The model beats the naive rule.' if ap_time > ap_naive else 'The model does NOT beat a one-line rule — that is the finding.'}")"""),
+("md", """---
+
+## What this notebook established
+
+- Plot before modelling: the regime change and the telemetry gap are both visible
+- Rolling features must be shifted and computed within each turbine
+- A random split was optimistic, and by how much
+- The gap between train and test must match the prediction horizon
+- Walk-forward gives you a spread rather than one lucky number
+- The naive rule, computed and compared
+
+## Your turn
+
+1. Remove the `shift(1)` from the rolling features and re-run the time split.
+   The score jumps. Explain precisely which future information leaked in.
+2. Use a sliding window (drop data before the regime change) instead of an
+   expanding one. Do the later folds improve?
+3. Change the horizon from 7 days to 30. Does the task get easier or harder, and
+   does the required gap change?"""),
+]),
 ]
