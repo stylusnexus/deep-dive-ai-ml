@@ -61,6 +61,12 @@
       "title": "Models Judging Models",
       "file": "lsn-1787400000007-models-judging-models.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000008",
+      "title": "Deterministic First",
+      "file": "lsn-1787400000008-deterministic-first.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -100,6 +106,11 @@
       "starred": false
     },
     "lsn-1787400000007": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000008": {
       "viewed": false,
       "completed": false,
       "starred": false

@@ -16,6 +16,7 @@ BLURBS = {
  "confounds-you-cannot-see": "The limits, overrides and truncations that end a run silently — and get read as model capability.",
  "localising-a-failure": "Control fixtures, metric design, and why a true narrow observation keeps getting promoted to a false general one.",
  "models-judging-models": "LLM-as-judge: four documented biases, and the one failure mode that manufactures effects rather than adding noise.",
+ "deterministic-first": "A model is the most expensive, slowest, least testable component you can use — the judgement is knowing when it earns that.",
  "the-map": "AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it's an architecture, not a model. Read this first.",
  "agent-loop-and-harness": "The two words your own docs use most — and why almost every agent failure is a harness failure, not a model failure.",
  "tokens-context-and-kv-cache": "Why a model 'forgets', why long conversations get expensive quadratically, and what prompt caching is actually caching.",

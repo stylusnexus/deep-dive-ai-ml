@@ -16,7 +16,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 - Docker environments for Torch and Keras, pgvector, MLflow
 - `lessons/orientation/` — one map placing every term in the program ✅
 - `lessons/bullpen-vocabulary/` — 19 lessons: the terms recurring across Bullpen's own docs, plus overfitting, agents and danger, RLHF and human-in-the-loop, context engineering, structured output, hallucination and grounding, in-context learning, class imbalance and thresholds, drift, distillation, chain-of-thought, and loops at inference and in training ✅
-- `lessons/engineering-practice/` — 4 lessons on harnesses, recipes and ADRs, and the measurement discipline that corrects them ✅
+- `lessons/engineering-practice/` — 9 lessons: harnesses, recipes and ADRs; the measurement discipline that corrects them; SWE-bench; invisible confounds; localising a failure; LLM-as-judge; and deterministic-first ✅
 - `lessons/algorithms/` — 9 lessons on the algorithms this domain runs on, from gradient descent to HNSW and data leakage ✅
 - `lessons/engineering-practice/` — 4 lessons: the three artifacts an LLM project accumulates (harness, recipes, ADRs), how each one turns harmful, why measurement is the only thing that corrects them, and the measurement procedure itself ✅
 - Wire in the two finished courses (statistics, governance) ✅

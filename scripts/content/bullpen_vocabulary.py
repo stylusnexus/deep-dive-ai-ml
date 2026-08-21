@@ -456,6 +456,15 @@ LESSONS = [
     ]),
     ("callout", "insight", "The part worth internalising", "MCP changes the economics of integration, not what agents can do. Anything reachable over MCP was reachable before by writing custom glue. What changed is that you write the glue once instead of once per framework — which matters a great deal when you maintain several agents, as you do."),
 
+    ("h2", "When the tool library gets large"),
+    ("p", "Every tool definition sits in context on every turn. Fine for six tools; the dominant cost with sixty. A library assembled from several MCP servers can consume 55,000 to 134,000 tokens before any work starts. Three techniques address this, each with measured rather than plausible gains:"),
+    ("terms", [
+      ("Tool search", "Load definitions on demand", "Tools are deferred and discovered by search rather than loaded upfront. Reported: 85% fewer tokens (~77K to ~8.7K), and tool-selection accuracy rising from 49% to 74% on one model, 79.5% to 88.1% on a stronger one."),
+      ("Programmatic tool calling", "Orchestrate in code, not in context", "The model writes code that calls tools in a sandbox; intermediate results are processed there and never enter its context. Only the final answer does. Reported: 37% fewer tokens, with gains on knowledge-retrieval and agentic benchmarks."),
+      ("Tool use examples", "Show, do not just schema", "Concrete example calls inside the tool definition. A schema says what is structurally valid; examples convey conventions a schema cannot — date formats, id shapes, when an optional parameter matters. Reported: 72% to 90% on complex parameter handling."),
+    ]),
+    ("callout", "matters", "Notice what the accuracy numbers mean", "Loading fewer tools made selection <em>more accurate</em>, not merely cheaper. Sixty definitions in context is not a neutral cost paid in tokens — similar tool names crowd each other and the model picks wrongly. This is the context-engineering finding in another guise: more material in the window is not more capability, and precision beats volume for tools exactly as it does for retrieved documents."),
+
     ("h2", "The trust question"),
     ("p", "An MCP server runs code and can read files. Adding one is closer to adding a dependency than installing a browser extension. Your own house rule — start read-only, widen only when a task needs it, narrow again afterwards, and connect production last — is the correct posture, and Block 6 tests it against real attacks."),
 
@@ -464,6 +473,8 @@ LESSONS = [
        'The specification. The Tools / Resources / Prompts split is clearer here than anywhere else.'),
       ('Tool use overview', 'https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview',
        'How a tool call is actually shaped on the wire, with the schema conventions.'),
+      ('Advanced tool use — Anthropic', 'https://www.anthropic.com/engineering/advanced-tool-use',
+       'Tool search, programmatic tool calling and tool-use examples, with the measured results quoted above.'),
     ]),
     ("quiz", [
       ("What actually happens when a model 'uses a tool'?",
@@ -829,8 +840,15 @@ LESSONS = [
     ]),
     ("p", "This is why Block 6 exists as its own week, and why your own standing rule — unattended agents get a narrow job, scoped access, safe stopping points, and human approval before anything irreversible — is the correct posture rather than an excess of caution."),
 
-    ("h2", "Multi-agent, briefly"),
-    ("p", "Multiple agents handing work to each other buy specialisation and parallelism, and cost you observability. Every handoff is a place for context to be lost and error to compound, and a debugging session that was hard with one agent becomes considerably harder with five. Block 4 builds one properly; the honest default is to use the fewest agents that do the job."),
+    ("h2", "Multi-agent, and the one argument for it that holds"),
+    ("p", "Multiple agents handing work to each other buy specialisation and parallelism, and cost you observability. Every handoff loses context and compounds error, and a debugging session that was hard with one agent becomes considerably harder with five. The honest default remains the fewest agents that do the job."),
+    ("p", "There is one argument for them that survives scrutiny, and it is not specialisation — it is <strong>context isolation</strong>. A sub-agent explores in its own clean window and returns a distilled summary, often one to two thousand tokens. The expensive search never touches the main agent's context. That is a real constraint being solved, not an org chart being imitated."),
+    ("terms", [
+      ("Orchestrator and workers", "One plans, several execute in parallel", "Works where subtasks are genuinely independent — searching several sources at once. Fails where they need each other's intermediate results."),
+      ("Planner, generator, evaluator", "Separate the roles that conflict", "The evaluator is a different context from the generator, so it is not marking its own work. This is the judge lesson's independence requirement, expressed as architecture."),
+      ("Sub-agent as a tool", "Called, returns, disappears", "The simplest useful form, and the one to reach for first."),
+    ]),
+    ("callout", "pitfall", "The cost nobody budgets for", "Parallel agents multiply token spend, and each one re-sends its own growing context. A fan-out of five is not five times one agent's cost; it is more, because coordination and summarisation are extra turns. Measure it before scaling out — the pattern that reads as efficient on a diagram is frequently the most expensive thing in the system."),
 
     ("links", [
       ('OWASP Top 10 for LLM Applications', 'https://owasp.org/www-project-top-10-for-large-language-model-applications/',
@@ -839,6 +857,10 @@ LESSONS = [
        "The clearest running commentary on why this isn't solved by better prompting."),
       ('agent-armor', 'https://github.com/stylusnexus/agent-armor',
        "Your own defence framework — the trap taxonomy maps onto this lesson's danger surface."),
+      ('How we built our multi-agent research system — Anthropic', 'https://www.anthropic.com/engineering/multi-agent-research-system',
+       'The orchestrator-worker pattern in production, including where it did not pay off.'),
+      ('Effective harnesses for long-running agents — Anthropic', 'https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents',
+       'Planner/generator/evaluator over multi-hour sessions — the architecture, and what it costs.'),
     ]),
     ("quiz", [
       ("What actually distinguishes an agent from a workflow?",
@@ -1019,6 +1041,16 @@ LESSONS = [
       "<strong>Structured memory.</strong> Extract durable facts to a store and retrieve them when relevant, instead of carrying everything forward. More work, and what Bullpen's durable sessions and memory are for.",
     ]),
 
+    ("h2", "The three techniques for going long"),
+    ("p", "The management options above are the basics. Once an agent runs for hours rather than turns, three techniques do the heavy lifting, and they are worth knowing by name because they compose:"),
+    ("terms", [
+      ("Compaction", "Summarise and reinitiate", "As the window fills, replace the trace with a summary preserving decisions made and issues still open, then continue. Tune the compaction prompt for recall first and precision second — losing a decision is worse than carrying redundancy."),
+      ("Structured note-taking", "Persist outside the window", "The agent writes durable notes to a file and reads them back after a reset. Memory that survives compaction because it was never in the context to begin with."),
+      ("Sub-agent isolation", "Explore in a clean window", "A sub-agent does the expensive exploration in its own context and returns a condensed summary — typically one to two thousand tokens. The main agent gets the finding without the search that produced it."),
+    ]),
+    ("callout", "insight", "Clearing tool results is the cheapest win", "Of all forms of compaction, dropping old tool results is the safest and lightest-touch — they are usually the largest thing in the window, and once acted on they are rarely needed verbatim. Do this before reaching for summarisation, which risks losing something."),
+    ("p", "The framing that ties these together is an <strong>attention budget</strong>: not a storage limit but a finite capacity to attend, degrading as a gradient rather than a cliff. Good context engineering is finding the smallest set of high-signal tokens that gets the outcome — a different objective from filling the window."),
+
     ("h2", "Context rot"),
     ("p", "Long agent sessions degrade in a characteristic way: early mistakes stay in the history, get re-read every turn, and are treated as established fact. A wrong assumption at turn 3 is still shaping behaviour at turn 30. Restarting with a clean context and a short accurate summary frequently outperforms continuing — the reason a fresh session sometimes solves what a long one couldn't."),
 
@@ -1030,6 +1062,8 @@ LESSONS = [
        'The evidence for the U-shaped curve. Read it once; it changes how you order retrieved material.'),
       ('Prompt caching', 'https://docs.claude.com/en/docs/build-with-claude/prompt-caching',
        'The mechanical reason stable content goes at the front.'),
+      ('Effective context engineering for AI agents — Anthropic', 'https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents',
+       'Compaction, structured note-taking and sub-agent isolation, with the attention-budget framing used above.'),
     ]),
     ("quiz", [
       ("You retrieve twelve chunks and the answer is in chunk seven, placed mid-context. The model misses it. What's the most likely cause?",
@@ -1622,6 +1656,11 @@ LESSONS = [
     ]),
     ("callout", "matters", "The termination condition is the design", "Most loop bugs are termination bugs. \"Until the model says it's finished\" hands the stopping decision to the component least able to judge whether it succeeded — the same problem as letting a model report its own eval score. Terminate on an external check, a turn cap, or a spend cap. Preferably all three."),
 
+    ("h2", "The name this family goes by now"),
+    ("p", "Everything in this lesson is <strong>test-time compute</strong> — spending more computation at inference rather than more parameters at training. It is now one of the two main axes of capability improvement alongside scale, and it is the axis you control without training anything."),
+    ("p", "It works for the reason the whole lesson works: extra passes reach answers a single pass cannot, provided something filters or aggregates across them. The scaling is real and not free — cost grows with the compute you spend, so the engineering question is where on that curve your task sits, not whether more is better."),
+    ("callout", "warning", "Where the frontier moved", "Recent work applies these loops to retrieval itself — retrieve, reason about what came back, decide what is still missing, retrieve again. That fixes multi-hop questions a single retrieval cannot answer, and introduces its own failure: repeated near-identical retrievals burning turns and tokens without adding information. De-duplicating what has already been retrieved, and contextualising results before reasoning over them, are the current mitigations. Same lesson, new surface — a loop needs external signal and a termination condition, and retrieval loops are no exception."),
+
     ("h2", "Choosing a loop"),
     ("p", "Match the loop to whether the task has a checkable outcome. Code, structured output and retrieval have verifiers, so verifier-guided retry is available and should be the default. Open-ended prose has none, so you're left with self-consistency or best-of-N, and you should expect smaller gains for more tokens. If a task has no external signal at all, extra iterations mostly buy latency."),
 
@@ -1634,6 +1673,10 @@ LESSONS = [
        "Self-reflection that works — note that the loop carries environment feedback, not just introspection."),
       ("Tree of Thoughts (Yao et al., 2023)", "https://arxiv.org/abs/2305.10601",
        "Search over branches rather than a single chain, and the cost of doing it."),
+      ("Agentic RAG: a survey (Singh et al., 2025)", "https://arxiv.org/abs/2501.09136",
+       "Taxonomy of retrieval loops by agent count, control structure and autonomy — the map of this design space."),
+      ("Test-Time Strategies for Agentic RAG (2026)", "https://arxiv.org/abs/2603.12396",
+       "The failure modes of retrieval loops — repetitive retrieval, weak contextualisation — and the de-duplication fix."),
     ]),
 
     ("quiz", [

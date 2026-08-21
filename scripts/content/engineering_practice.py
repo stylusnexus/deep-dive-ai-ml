@@ -671,4 +671,108 @@ swebench report my-run-01 -d verified"""),
     ]),
   ],
 },
+{
+  "slug": "deterministic-first",
+  "title": "Deterministic First",
+  "subtitle": "The best AI engineering decision is frequently to use less of it.",
+  "body": [
+    ("p", "This idea has appeared five times already in this course, each time as a footnote to something else. It deserves stating on its own, because it is the highest-leverage engineering judgement in the field and it is the one most often skipped."),
+    ("p", "<strong>A model is the most expensive, slowest, least debuggable and least testable component you can put in a system.</strong> Sometimes it is the only thing that can do the job, and then it is worth every one of those costs. Frequently it is not, and reaching for it anyway is a choice you will pay for on every request forever."),
+
+    ("h2", "Where it has already come up"),
+    ("terms", [
+      ("Intake question 1", "Is this even an ML problem?", "Could a rule, a lookup, a SQL query or a person twice a day solve it? Most projects that die should die here."),
+      ("Agent or workflow?", "Did you decide the sequence?", "If you know the steps, write the steps. An agent is for when the sequence genuinely cannot be known in advance."),
+      ("Prompt or tool?", "Can the model tell it complied?", "A mechanically checkable rule belongs in a tool as a precondition. Refusal beats hope."),
+      ("Judge or verifier?", "Is there something checkable?", "A typechecker is narrower than a model judge and it is not an opinion. Where a real check exists, take it."),
+      ("Embeddings or keywords?", "Is the text jargon-heavy?", "BM25 beats vector search outright on identifiers, error codes and rare terms, at a fraction of the cost."),
+    ]),
+    ("callout", "insight", "The pattern", "Every one of those is the same question at a different altitude: <em>is there a bounded, checkable mechanism that does this job?</em> When there is, it wins on cost, latency, testability and the ability to explain what happened — and it does not drift, hallucinate, or change behaviour when a provider updates a model behind an alias."),
+
+    ("h2", "What a deterministic component gives you that a model cannot"),
+
+    ("figure", "The comparison people skip. A model wins the top row decisively and loses every row beneath it — so the question is whether you actually need the top row.", '''<svg viewBox="0 0 640 230" role="img" aria-label="Deterministic component compared against a model">
+<text x="250" y="20" class="d-accent">deterministic</text>
+<text x="440" y="20" class="d-label-b">model</text>
+<line x1="12" y1="28" x2="628" y2="28" stroke="var(--border)"/>
+<text x="12" y="50" class="d-label-sm">handles open-ended input</text>
+<text x="262" y="50" class="d-fill-red" font-size="13" font-weight="700">✗</text>
+<text x="452" y="50" class="d-fill-green" font-size="13" font-weight="700">✓</text>
+<line x1="12" y1="60" x2="628" y2="60" stroke="var(--border)" stroke-dasharray="3 3"/>
+<text x="12" y="82" class="d-label-sm">same input, same output, always</text>
+<text x="262" y="82" class="d-fill-green" font-size="13" font-weight="700">✓</text>
+<text x="452" y="82" class="d-fill-red" font-size="13" font-weight="700">✗</text>
+<text x="12" y="108" class="d-label-sm">cost per call</text>
+<text x="252" y="108" class="d-fill-green" font-size="12" font-weight="600">~0</text>
+<text x="446" y="108" class="d-fill-red" font-size="12" font-weight="600">per token</text>
+<text x="12" y="134" class="d-label-sm">latency</text>
+<text x="250" y="134" class="d-fill-green" font-size="12" font-weight="600">µs–ms</text>
+<text x="450" y="134" class="d-fill-red" font-size="12" font-weight="600">100ms–60s</text>
+<text x="12" y="160" class="d-label-sm">can be unit tested</text>
+<text x="262" y="160" class="d-fill-green" font-size="13" font-weight="700">✓</text>
+<text x="452" y="160" class="d-fill-yellow" font-size="12" font-weight="600">statistically</text>
+<text x="12" y="186" class="d-label-sm">you can say why it did that</text>
+<text x="262" y="186" class="d-fill-green" font-size="13" font-weight="700">✓</text>
+<text x="452" y="186" class="d-fill-red" font-size="13" font-weight="700">✗</text>
+<text x="12" y="212" class="d-label-sm">behaviour changes without you</text>
+<text x="262" y="212" class="d-fill-green" font-size="13" font-weight="700">✗</text>
+<text x="452" y="212" class="d-fill-red" font-size="13" font-weight="700">✓</text>
+</svg>'''),
+
+    ("h2", "The tasks people reach for a model on that don't need one"),
+    ("ul", [
+      "<strong>Extraction from structured or semi-structured text.</strong> Invoice numbers, dates, order ids in a known format. A regex is free, instant, and cannot invent a value that wasn't there.",
+      "<strong>Routing on explicit signals.</strong> If the request contains an order number, it's an order query. Rules first; a classifier for what falls through.",
+      "<strong>Validation.</strong> Schema checks, range checks, referential integrity. Never ask a model whether data is valid when you can assert it.",
+      "<strong>Deduplication and matching on identifiers.</strong> A join, not a similarity search.",
+      "<strong>Formatting and templating.</strong> If the output shape is fixed, a template with slots beats generation, and it cannot drift.",
+      "<strong>Arithmetic and aggregation.</strong> Give the model the tool; do not ask it for the number.",
+      "<strong>Anything with a lookup table.</strong> Country codes, tax rates, product mappings. A model will approximate a table it could simply have been given.",
+    ]),
+    ("callout", "matters", "The hybrid is usually the right answer", "This is not an argument for avoiding models. It is an argument for putting them where they earn their cost. Deterministic code handles the 80% that is structured, and the model handles the ambiguous remainder — which means it sees fewer calls, on harder inputs, where its judgement is actually worth paying for. Systems built this way are cheaper, faster, easier to debug, and usually more accurate, because each component is doing what it is good at."),
+
+    ("h2", "How to make the call"),
+    ("terms", [
+      ("1 · Can you write the rule?", "If yes, write it", "If you can state the logic in a sentence, it is code, not a prompt."),
+      ("2 · Is the input space bounded?", "Enumerable inputs mean rules", "Open-ended natural language is where models earn their place."),
+      ("3 · What does a wrong answer cost?", "High cost favours determinism", "Because you can test a rule exhaustively and you cannot test a model exhaustively."),
+      ("4 · Do you have to explain it?", "Regulators want mechanisms", "\"The model decided\" is not an answer to an auditor, or to a customer."),
+      ("5 · What is the volume?", "Per-call cost compounds", "A model call that is fine at a thousand a day may be untenable at a million."),
+    ]),
+
+    ("h2", "The honest counter-argument"),
+    ("p", "Rules have a real failure mode of their own: they accumulate. A routing system that starts as four clean conditions becomes two hundred over three years, each one added for a case nobody remembers, and no one dares delete any of them. That is a maintenance burden models genuinely do avoid, and it is why \"just write rules\" is not universally correct either."),
+    ("p", "The distinction worth holding: rules are right where the logic is <em>stable and stateable</em>. Models are right where it is <em>fuzzy or evolving</em>. When you find yourself writing the fortieth special case, that is the signal to reconsider — not the fourth."),
+    ("callout", "warning", "And the failure mode of this whole lesson", "Applied too enthusiastically, this becomes an argument for never using AI, which is just as wrong as reaching for it first. The test is not \"could this conceivably be done with rules\" — almost anything could, badly. It is \"does a bounded mechanism do this <em>well</em>?\" A hand-written rule system that approximates language understanding badly is worse than a model call, and considerably more work."),
+
+    ("h2", "Where this lands"),
+    ("p", "Every block of this program has a version of this decision in it, and the intake sheet asks it first for a reason. Before the model selection, before the prompt, before the fine-tune: is there a bounded mechanism that does this job? Ask it early, because the answer is easy to act on at the start of a project and very expensive to act on once the model is load-bearing."),
+
+    ("links", [
+      ('Building effective agents — Anthropic', 'https://www.anthropic.com/engineering/building-effective-agents',
+       'Opens with the same argument: find the simplest solution possible, and only increase complexity when it demonstrably improves outcomes.'),
+      ('Rules of Machine Learning — Google', 'https://developers.google.com/machine-learning/guides/rules-of-ml',
+       "Rule 1 is: do not be afraid to launch a product without machine learning. Written for classical ML and it has aged well."),
+    ]),
+
+    ("quiz", [
+      ("You need to pull order numbers out of support emails, and they always match a known format. What should you reach for?",
+       ["An LLM with a structured-output schema, for robustness to format variation",
+        "A regex — it is free, instant, and cannot invent a value that was not there",
+        "An embedding model to find the most order-number-like span"], 1),
+      ("What does a deterministic component give you that a model cannot?",
+       ["Better handling of ambiguous input",
+        "Same input to same output always, exhaustive testability, and an explanation of why it did that",
+        "Lower engineering effort in every case"], 1),
+      ("When is the rules-based approach the wrong call?",
+       ["Whenever the input is natural language",
+        "When the logic is fuzzy or evolving — the tell is finding yourself writing the fortieth special case",
+        "Whenever a model would also work"], 1),
+      ("What is the strongest form of this argument in practice?",
+       ["Avoid models wherever a rule could conceivably do the job",
+        "Handle the structured majority deterministically so the model sees fewer, harder calls where its judgement is worth paying for",
+        "Use rules for prototypes and models in production"], 1),
+    ]),
+  ],
+},
 ]

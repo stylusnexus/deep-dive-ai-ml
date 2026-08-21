@@ -112,6 +112,28 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Model collapse** — Successive generations trained on generated data lose the distribution's tails first, then narrow at the centre. Prevented by an external filter, fresh real data, and held-out evaluation the loop can't see.
 
+**Deterministic-first** — A model is the most expensive, slowest, least testable component available. The judgement is knowing when it earns that: is there a bounded, checkable mechanism that does this job well?
+
+**Compliance test (prompt vs tool)** — Can the model tell when it has complied? Mechanically checkable rules belong in tools as preconditions; prompts carry only what tools cannot check.
+
+**Confound (in evaluation)** — A limit that can end a run and does not appear in the output. Indistinguishable from the thing you were measuring.
+
+**Control fixture** — A deliberately easy task in the same domain and harness. When a board reads uniformly zero, it tells you whether the wall is capability or scaffolding.
+
+**LLM-as-judge** — Using a model to grade output. Ships with position, verbosity, self-preference and score-compression biases. The fatal case is a grader whose error correlates with the treatment — that manufactures an effect sampling cannot remove.
+
+**Attention budget** — Finite capacity to attend, degrading as a gradient rather than a cliff. The objective is the smallest set of high-signal tokens, not a full window.
+
+**Compaction** — Replacing a long trace with a summary preserving decisions and open issues. Clearing old tool results is its safest, lightest form.
+
+**Structured note-taking** — Agent writes durable notes outside the context window and reads them back after a reset.
+
+**Sub-agent isolation** — Exploration in a clean context returning a condensed summary. The one argument for multi-agent that survives scrutiny.
+
+**Tool search / programmatic tool calling** — Loading tool definitions on demand, and orchestrating tools in sandboxed code so intermediate results never enter context. Both reduce tokens *and* improve accuracy.
+
+**Test-time compute** — Spending computation at inference rather than parameters at training. The capability axis you control without training anything.
+
 ---
 
 ## Block 0 · Orientation
