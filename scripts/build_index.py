@@ -34,6 +34,7 @@ BLURBS = {
  "building-a-rag-system": "Five stages, and the two that decide whether the other three matter.",
  "measuring-retrieval": "Index recall, retrieval quality and groundedness — three numbers that fail independently.",
  "agentic-rag": "When one retrieval cannot answer the question, and the failure modes the loop brings with it.",
+ "labels-and-holdouts": "Label quality is a ceiling, and the data you refuse to look at is what makes any number believable.",
  "the-map": "AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it's an architecture, not a model. Read this first.",
  "agent-loop-and-harness": "The two most-confused words in any agent codebase — and why most agent failures are harness failures, not model failures.",
  "tokens-context-and-kv-cache": "Why a model 'forgets', why long conversations get expensive quadratically, and what prompt caching is actually caching.",

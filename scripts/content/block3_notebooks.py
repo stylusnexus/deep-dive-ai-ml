@@ -380,26 +380,37 @@ print(f"using {MODEL} at {BASE}" if BASE else "no local endpoint — using the e
     "Do not use outside knowledge."
 )
 
+FALLBACKS = []
+
+def extractive(question, passages):
+    # stand-in generator: the sentence most similar to the question, or a refusal
+    sents = [s for p in passages for s in re.split(r"(?<=[.!?])\\s+", p["text"]) if len(s) > 25]
+    if not sents:
+        return "NOT IN CONTEXT"
+    qv = encoder.encode(question, normalize_embeddings=True)
+    sv = encoder.encode(sents, normalize_embeddings=True)
+    best = int(np.argmax(sv @ qv))
+    return f"{sents[best]} [1]" if float(sv[best] @ qv) > 0.35 else "NOT IN CONTEXT"
+
 def ask_model(question, passages):
     ctx = "\\n\\n".join(f"[{i+1}] {p['text']}" for i, p in enumerate(passages))
     if not BASE:
-        # extractive stand-in: return the sentence most similar to the question
-        sents = [s for p in passages for s in re.split(r"(?<=[.!?])\\s+", p["text"]) if len(s) > 25]
-        if not sents:
-            return "NOT IN CONTEXT"
-        qv = encoder.encode(question, normalize_embeddings=True)
-        sv = encoder.encode(sents, normalize_embeddings=True)
-        best = int(np.argmax(sv @ qv))
-        return f"{sents[best]} [1]" if float(sv[best] @ qv) > 0.35 else "NOT IN CONTEXT"
-    body = _json.dumps({"model": MODEL, "temperature": 0, "max_tokens": 300,
+        return extractive(question, passages)
+    body = _json.dumps({"model": MODEL, "temperature": 0, "max_tokens": 200,
                         "messages": [{"role": "system", "content": SYSTEM},
                                      {"role": "user",
                                       "content": f"Context:\\n{ctx}\\n\\nQuestion: {question}"}]}).encode()
     req = urllib.request.Request(f"{BASE}/chat/completions", data=body,
                                  headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=180) as r:
-        out = _json.loads(r.read())["choices"][0]["message"]["content"]
-    return re.sub(r"<think>.*?</think>", "", out, flags=re.S).strip()
+    try:
+        with urllib.request.urlopen(req, timeout=90) as r:
+            out = _json.loads(r.read())["choices"][0]["message"]["content"]
+        return re.sub(r"<think>.*?</think>", "", out, flags=re.S).strip()
+    except Exception as ex:
+        # A slow or busy endpoint must not break the notebook. Fall back per call
+        # and record it — the measurement is what this notebook teaches.
+        FALLBACKS.append((question[:40], ex.__class__.__name__))
+        return extractive(question, passages)
 
 demo_q = "What is the maximum gearbox oil temperature during continuous operation?"
 print(ask_model(demo_q, retrieve(demo_q)))"""),
@@ -414,6 +425,10 @@ for e in EVAL:
                     "gold_docs": e["gold_docs"], "expected": e["answer"],
                     "context": "\\n\\n".join(p["text"] for p in passages)})
 res = pd.DataFrame(results)
+if FALLBACKS:
+    print(f"note: {len(FALLBACKS)} of {len(EVAL)} calls fell back to the extractive "
+          f"stand-in ({FALLBACKS[0][1]}). The measurement below is still valid; the")
+    print("answers for those questions are extractive rather than generated.")
 res[["qid","hops","answer"]].head(10)"""),
 ("md", """## Measurement 1 — groundedness
 

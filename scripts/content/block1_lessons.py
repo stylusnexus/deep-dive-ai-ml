@@ -391,4 +391,114 @@ LESSONS = [
     ]),
   ],
 },
+{
+  "slug": "labels-and-holdouts",
+  "title": "Labels, and What You Hold Back",
+  "subtitle": "Label quality caps model quality — and the data you refuse to look at is what makes any number believable.",
+  "body": [
+    ("p", "Every supervised model in this course learns from labels, and almost every discussion of model quality skips where those labels came from. That is the wrong way round: <strong>label quality is a ceiling</strong>. A model cannot be more consistent than the labels it was trained on, and no algorithm recovers from a target that means different things on different rows."),
+
+    ("h2", "Where labels actually come from"),
+    ("terms", [
+      ("Recorded outcomes", "The event happened", "The turbine failed, the customer churned, the invoice was paid late. Usually the best labels available, and check the recording process — a field populated by a workflow can be a leak rather than a label."),
+      ("Human annotation", "Someone judged it", "Accurate, expensive, and only as consistent as the guidelines. This is where most quality problems originate."),
+      ("Programmatic / weak supervision", "Rules generate labels", "Fast and cheap over large volumes. Encodes the rule's blind spots into the training data, permanently."),
+      ("Implicit / behavioural", "Inferred from what people did", "A click as relevance, a return as dissatisfaction. Abundant and biased by the interface — you only observe behaviour on what was shown."),
+      ("Model-generated", "Another model labelled it", "Cheap at scale, and it inherits the teacher's errors confidently. The distillation lesson's caution applies: filter with something external or you are training on an opinion."),
+    ]),
+
+    ("know",
+     "A model cannot be more consistent than its labels.",
+     "If two annotators disagree on a fifth of cases, roughly a fifth of your training signal is noise, and the ceiling on any model is set there. Tuning architecture against a noisy target is optimising below a limit you have not measured.",
+     "A support-ticket classifier plateaus at 78% accuracy across four model families. Measuring annotator agreement on a sample of 200 tickets gives 0.79 — the two annotators disagreed on a fifth of them. The model was already at the ceiling, and the fix was a clearer guideline, not a better model."),
+
+    ("h2", "Measuring label quality, which takes an afternoon"),
+    ("ul", [
+      "<strong>Double-label a sample.</strong> Two hundred items, two annotators, independently. Compute agreement — Cohen's kappa if you want the standard measure, raw agreement if you want something everyone understands.",
+      "<strong>Read the disagreements.</strong> They are not noise; they are the cases your guideline does not cover. Each one is either an ambiguous class definition or a genuinely hard example, and the two need different fixes.",
+      "<strong>Label a few yourself.</strong> Nothing exposes a vague guideline faster than trying to follow it.",
+      "<strong>Re-label a sample later.</strong> If the same annotator disagrees with their own earlier judgement, the guideline is underspecified rather than the annotator being careless.",
+    ]),
+    ("callout", "matters", "The guideline is the real artefact", "\"Label this ticket as urgent if it is urgent\" is not a guideline. \"Urgent means the customer cannot use the product and has no workaround\" is one, and it can be argued with, improved and version-controlled. Most label quality problems are guideline problems wearing a different hat, and they are far cheaper to fix at the guideline than by relabelling."),
+
+    ("h2", "Label definitions drift, and the drift is invisible"),
+    ("p", "A class definition that changed eighteen months ago leaves you with a target that means two different things depending on the row's date. The model averages across both meanings and is confidently wrong about each."),
+    ("p", "Check this by plotting the class rate over time. A step change is either a real shift in the world or a change in how the label was recorded — and you cannot tell which from the data alone. Ask whoever owns the process."),
+
+    ("h2", "What to label, when you cannot label everything"),
+    ("terms", [
+      ("Random sample first", "Always", "You need an unbiased estimate of the class balance and the difficulty before anything clever. Skip this and every later choice is made blind."),
+      ("Then the uncertain cases", "Active learning", "Label what the current model is least sure about. Far more informative per item than random, once you have a model to be unsure with."),
+      ("And the rare class", "Deliberately", "Under a 2% positive rate, random sampling of a thousand items gives you twenty positives. Over-sample the rare class for labelling, and remember you did when you compute rates."),
+      ("Never only the easy ones", "The temptation", "Annotators work faster on clear cases, so an unmanaged queue quietly produces a training set of easy examples and a model that fails on everything hard."),
+    ]),
+
+    ("h2", "Holding data back"),
+    ("p", "The other half of this, and the more familiar one. The principle behind every split in this course is one sentence: <strong>keep some data where the optimiser cannot see it.</strong> Everything else is detail about which optimiser and which data."),
+    ("figure", "Three roles, and the discipline is entirely about the third. Every look at the test set converts a little of it into validation data, and the conversion is irreversible.", '''<svg viewBox="0 0 640 200" role="img" aria-label="Train, validation and test roles">
+<rect x="12" y="30" width="330" height="46" rx="6" class="d-box-good"/>
+<text x="28" y="52" class="d-label-b">Train  ~70%</text>
+<text x="28" y="68" class="d-label-sm">the model fits this, and only this</text>
+<rect x="352" y="30" width="130" height="46" rx="6" class="d-box-accent"/>
+<text x="366" y="52" class="d-label-b">Validation ~15%</text>
+<text x="366" y="68" class="d-label-sm">tune against this</text>
+<rect x="492" y="30" width="136" height="46" rx="6" class="d-box-warn"/>
+<text x="506" y="52" class="d-label-b">Test ~15%</text>
+<text x="506" y="68" class="d-label-sm">look once, at the end</text>
+<text x="12" y="108" class="d-label-sm">Every decision you make after seeing the test score — a hyperparameter, a feature, a threshold, a model family —</text>
+<text x="12" y="126" class="d-label-sm">moves a little of the test set into the validation role. After thirty such decisions it is not a held-out set any more,</text>
+<text x="12" y="144" class="d-label-sm">it is a validation set you are still calling a test set.</text>
+<rect x="12" y="160" width="616" height="30" rx="5" class="d-box"/>
+<text x="28" y="180" class="d-label-sm">The same principle: prompt examples, eval sets, benchmark tasks. Hold some back, everywhere.</text>
+</svg>'''),
+
+    ("know",
+     "The test set is spent by looking at it, and it cannot be refilled.",
+     "Each decision made after seeing the test score leaks a little of it into your choices. The set does not become invalid at any single point, it degrades continuously — which is why the discipline is to look once, at the end, rather than to look sparingly.",
+     "A team checks the test score after each of thirty tuning rounds, choosing what to try next based on it. The final reported figure is 4 points above what the model achieves in production. Nothing was cheated; the test set had quietly become a validation set thirty decisions earlier."),
+
+    ("h2", "Where the same discipline applies, and is usually skipped"),
+    ("ul", [
+      "<strong>Prompt examples.</strong> Tuning few-shot examples against the same cases you evaluate on is leakage by hand. Hold examples back.",
+      "<strong>Eval sets for generative systems.</strong> The twenty-item rule needs a twenty-first item you have never looked at, or you will fit the twenty.",
+      "<strong>Benchmark tasks.</strong> Tuning a scaffold against every task in a suite is the same failure at project scale.",
+      "<strong>Label guidelines.</strong> If you refine the guideline by examining the cases the model gets wrong, your evaluation is now partly a measure of the guideline you fitted to it.",
+    ]),
+    ("callout", "pitfall", "Nested cross-validation, for when you must tune and estimate", "If you use cross-validation to choose hyperparameters, the resulting score is optimistic — the folds informed the choice. Nested cross-validation puts a tuning loop inside each outer fold, so the outer estimate never saw the choices. It costs many times more compute and it is the honest answer when the number will be reported to someone who will act on it."),
+
+    ("h2", "The connection worth carrying forward"),
+    ("p", "Label quality sets the ceiling. Holdouts tell you where you are against it. Neither is a modelling technique, both are cheap, and skipping either produces confident numbers that do not survive contact with production — which is the failure this entire course is arranged around preventing."),
+
+    ("links", [
+      ("Cross-validation — scikit-learn", "https://scikit-learn.org/stable/modules/cross_validation.html",
+       "Nested cross-validation and the grouped and time-ordered variants, with the leakage-safe patterns."),
+      ("Rules of Machine Learning — Google", "https://developers.google.com/machine-learning/guides/rules-of-ml",
+       "Rules 2 to 7 cover instrumentation and label design before any modelling."),
+    ]),
+
+    ("books", [
+      ("Designing Machine Learning Systems", "Chip Huyen",
+       "Chapter 4 covers label sources, weak supervision, active learning and class imbalance in a production framing."),
+    ]),
+
+    ("quiz", [
+      ("Four model families all plateau at the same accuracy. What should you measure before trying a fifth?",
+       ["Whether the features are sufficiently engineered",
+        "Annotator agreement — the labels may be setting a ceiling the models have already reached",
+        "Whether the training set is large enough"], 1),
+      ("Why is a vague label guideline a bigger problem than a careless annotator?",
+       ["Guidelines are harder to change than staffing",
+        "It produces inconsistent labels systematically, and the fix is far cheaper at the guideline than by relabelling",
+        "Annotators can be retrained but guidelines cannot"], 1),
+      ("You check the test score after each of thirty tuning rounds. What has happened?",
+       ["Nothing, provided you did not train on it",
+        "It has degraded into a validation set — each decision made after seeing it leaked a little of it into your choices",
+        "The score is valid but the confidence interval is wider"], 1),
+      ("When labelling under a 2% positive rate, what should you do?",
+       ["Label a large random sample and accept the imbalance",
+        "Take a random sample first for an unbiased estimate, then deliberately over-sample the rare class — and remember you did when computing rates",
+        "Label only cases the current model flags as positive"], 1),
+    ]),
+  ],
+},
 ]

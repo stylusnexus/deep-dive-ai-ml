@@ -75,7 +75,18 @@ demonstrably better, and a threshold chosen from costs.
   routed to rather than made the default ✅
 - Structured outputs and tool calling
 
-3 lessons in `lessons/block3-retrieval/`. Notebooks and Project 2 still to build.
+3 lessons in `lessons/block3-retrieval/`, 3 notebooks in `notebooks/03-retrieval/`,
+and Project 2 in `projects/p2-financial-rag/`.
+
+The corpus is synthetic on purpose: every fact lives in exactly one document, so
+the gold labels are genuinely correct and recall@k is measurable rather than
+estimated. It plants three multi-hop chains that single-shot retrieval provably
+cannot answer, and one question the corpus cannot answer at all.
+
+**Exit:** Project 2 — grounded document assistant — runs end to end. ✅
+`python src/rag.py` reports four numbers separately (index recall, retrieval
+quality, groundedness, correctness) and states plainly which question types the
+system cannot handle.
 
 **Exit:** Project 2 — financial report assistant answers cited questions over a real 10-K.
 

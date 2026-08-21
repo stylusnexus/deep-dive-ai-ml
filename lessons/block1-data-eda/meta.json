@@ -42,6 +42,12 @@
       "title": "AI-Assisted Analysis, and Where It Lies to You",
       "file": "lsn-1787300000004-ai-assisted-analysis.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787300000005",
+      "title": "Labels, and What You Hold Back",
+      "file": "lsn-1787300000005-labels-and-holdouts.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -66,6 +72,11 @@
       "starred": false
     },
     "lsn-1787300000004": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787300000005": {
       "viewed": false,
       "completed": false,
       "starred": false

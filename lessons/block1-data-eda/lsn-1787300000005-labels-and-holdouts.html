@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labels, and What You Hold Back</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 6 of 6</span>
+  <h1>Labels, and What You Hold Back</h1>
+  <p class="subtitle">Label quality caps model quality — and the data you refuse to look at is what makes any number believable.</p>
+
+  <p>Every supervised model in this course learns from labels, and almost every discussion of model quality skips where those labels came from. That is the wrong way round: <strong>label quality is a ceiling</strong>. A model cannot be more consistent than the labels it was trained on, and no algorithm recovers from a target that means different things on different rows.</p>
+  <h2>Where labels actually come from</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Recorded outcomes</div><div><div class="roadmap-title">The event happened</div><div class="roadmap-desc">The turbine failed, the customer churned, the invoice was paid late. Usually the best labels available, and check the recording process — a field populated by a workflow can be a leak rather than a label.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Human annotation</div><div><div class="roadmap-title">Someone judged it</div><div class="roadmap-desc">Accurate, expensive, and only as consistent as the guidelines. This is where most quality problems originate.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Programmatic / weak supervision</div><div><div class="roadmap-title">Rules generate labels</div><div class="roadmap-desc">Fast and cheap over large volumes. Encodes the rule's blind spots into the training data, permanently.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Implicit / behavioural</div><div><div class="roadmap-title">Inferred from what people did</div><div class="roadmap-desc">A click as relevance, a return as dissatisfaction. Abundant and biased by the interface — you only observe behaviour on what was shown.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Model-generated</div><div><div class="roadmap-title">Another model labelled it</div><div class="roadmap-desc">Cheap at scale, and it inherits the teacher's errors confidently. The distillation lesson's caution applies: filter with something external or you are training on an opinion.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A model cannot be more consistent than its labels.</p><p class="know-why">If two annotators disagree on a fifth of cases, roughly a fifth of your training signal is noise, and the ceiling on any model is set there. Tuning architecture against a noisy target is optimising below a limit you have not measured.</p><p class="know-eg"><span class="know-eg-label">For example</span>A support-ticket classifier plateaus at 78% accuracy across four model families. Measuring annotator agreement on a sample of 200 tickets gives 0.79 — the two annotators disagreed on a fifth of them. The model was already at the ceiling, and the fix was a clearer guideline, not a better model.</p></blockquote>
+  <h2>Measuring label quality, which takes an afternoon</h2>
+  <ul><li><strong>Double-label a sample.</strong> Two hundred items, two annotators, independently. Compute agreement — Cohen's kappa if you want the standard measure, raw agreement if you want something everyone understands.</li><li><strong>Read the disagreements.</strong> They are not noise; they are the cases your guideline does not cover. Each one is either an ambiguous class definition or a genuinely hard example, and the two need different fixes.</li><li><strong>Label a few yourself.</strong> Nothing exposes a vague guideline faster than trying to follow it.</li><li><strong>Re-label a sample later.</strong> If the same annotator disagrees with their own earlier judgement, the guideline is underspecified rather than the annotator being careless.</li></ul>
+  <div class="callout matters"><span class="label">The guideline is the real artefact</span>"Label this ticket as urgent if it is urgent" is not a guideline. "Urgent means the customer cannot use the product and has no workaround" is one, and it can be argued with, improved and version-controlled. Most label quality problems are guideline problems wearing a different hat, and they are far cheaper to fix at the guideline than by relabelling.</div>
+  <h2>Label definitions drift, and the drift is invisible</h2>
+  <p>A class definition that changed eighteen months ago leaves you with a target that means two different things depending on the row's date. The model averages across both meanings and is confidently wrong about each.</p>
+  <p>Check this by plotting the class rate over time. A step change is either a real shift in the world or a change in how the label was recorded — and you cannot tell which from the data alone. Ask whoever owns the process.</p>
+  <h2>What to label, when you cannot label everything</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Random sample first</div><div><div class="roadmap-title">Always</div><div class="roadmap-desc">You need an unbiased estimate of the class balance and the difficulty before anything clever. Skip this and every later choice is made blind.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Then the uncertain cases</div><div><div class="roadmap-title">Active learning</div><div class="roadmap-desc">Label what the current model is least sure about. Far more informative per item than random, once you have a model to be unsure with.</div></div></div><div class="roadmap-item"><div class="roadmap-num">And the rare class</div><div><div class="roadmap-title">Deliberately</div><div class="roadmap-desc">Under a 2% positive rate, random sampling of a thousand items gives you twenty positives. Over-sample the rare class for labelling, and remember you did when you compute rates.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Never only the easy ones</div><div><div class="roadmap-title">The temptation</div><div class="roadmap-desc">Annotators work faster on clear cases, so an unmanaged queue quietly produces a training set of easy examples and a model that fails on everything hard.</div></div></div></div>
+  <h2>Holding data back</h2>
+  <p>The other half of this, and the more familiar one. The principle behind every split in this course is one sentence: <strong>keep some data where the optimiser cannot see it.</strong> Everything else is detail about which optimiser and which data.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Train, validation and test roles">
+<rect x="12" y="30" width="330" height="46" rx="6" class="d-box-good"/>
+<text x="28" y="52" class="d-label-b">Train  ~70%</text>
+<text x="28" y="68" class="d-label-sm">the model fits this, and only this</text>
+<rect x="352" y="30" width="130" height="46" rx="6" class="d-box-accent"/>
+<text x="366" y="52" class="d-label-b">Validation ~15%</text>
+<text x="366" y="68" class="d-label-sm">tune against this</text>
+<rect x="492" y="30" width="136" height="46" rx="6" class="d-box-warn"/>
+<text x="506" y="52" class="d-label-b">Test ~15%</text>
+<text x="506" y="68" class="d-label-sm">look once, at the end</text>
+<text x="12" y="108" class="d-label-sm">Every decision you make after seeing the test score — a hyperparameter, a feature, a threshold, a model family —</text>
+<text x="12" y="126" class="d-label-sm">moves a little of the test set into the validation role. After thirty such decisions it is not a held-out set any more,</text>
+<text x="12" y="144" class="d-label-sm">it is a validation set you are still calling a test set.</text>
+<rect x="12" y="160" width="616" height="30" rx="5" class="d-box"/>
+<text x="28" y="180" class="d-label-sm">The same principle: prompt examples, eval sets, benchmark tasks. Hold some back, everywhere.</text>
+</svg><figcaption>Three roles, and the discipline is entirely about the third. Every look at the test set converts a little of it into validation data, and the conversion is irreversible.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">The test set is spent by looking at it, and it cannot be refilled.</p><p class="know-why">Each decision made after seeing the test score leaks a little of it into your choices. The set does not become invalid at any single point, it degrades continuously — which is why the discipline is to look once, at the end, rather than to look sparingly.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team checks the test score after each of thirty tuning rounds, choosing what to try next based on it. The final reported figure is 4 points above what the model achieves in production. Nothing was cheated; the test set had quietly become a validation set thirty decisions earlier.</p></blockquote>
+  <h2>Where the same discipline applies, and is usually skipped</h2>
+  <ul><li><strong>Prompt examples.</strong> Tuning few-shot examples against the same cases you evaluate on is leakage by hand. Hold examples back.</li><li><strong>Eval sets for generative systems.</strong> The twenty-item rule needs a twenty-first item you have never looked at, or you will fit the twenty.</li><li><strong>Benchmark tasks.</strong> Tuning a scaffold against every task in a suite is the same failure at project scale.</li><li><strong>Label guidelines.</strong> If you refine the guideline by examining the cases the model gets wrong, your evaluation is now partly a measure of the guideline you fitted to it.</li></ul>
+  <div class="callout pitfall"><span class="label">Nested cross-validation, for when you must tune and estimate</span>If you use cross-validation to choose hyperparameters, the resulting score is optimistic — the folds informed the choice. Nested cross-validation puts a tuning loop inside each outer fold, so the outer estimate never saw the choices. It costs many times more compute and it is the honest answer when the number will be reported to someone who will act on it.</div>
+  <h2>The connection worth carrying forward</h2>
+  <p>Label quality sets the ceiling. Holdouts tell you where you are against it. Neither is a modelling technique, both are cheap, and skipping either produces confident numbers that do not survive contact with production — which is the failure this entire course is arranged around preventing.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/cross_validation.html" target="_blank" rel="noopener">Cross-validation — scikit-learn</a><span class="link-note">Nested cross-validation and the grouped and time-ordered variants, with the leakage-safe patterns.</span></li><li><a href="https://developers.google.com/machine-learning/guides/rules-of-ml" target="_blank" rel="noopener">Rules of Machine Learning — Google</a><span class="link-note">Rules 2 to 7 cover instrumentation and label design before any modelling.</span></li></ul></div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Designing Machine Learning Systems</span><span class="bk-a">Chip Huyen</span><span class="bk-n">Chapter 4 covers label sources, weak supervision, active learning and class imbalance in a production framing.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Four model families all plateau at the same accuracy. What should you measure before trying a fifth?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Whether the features are sufficiently engineered</div>
+      <div class="quiz-opt">Annotator agreement — the labels may be setting a ceiling the models have already reached</div>
+      <div class="quiz-opt">Whether the training set is large enough</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why is a vague label guideline a bigger problem than a careless annotator?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Guidelines are harder to change than staffing</div>
+      <div class="quiz-opt">It produces inconsistent labels systematically, and the fix is far cheaper at the guideline than by relabelling</div>
+      <div class="quiz-opt">Annotators can be retrained but guidelines cannot</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. You check the test score after each of thirty tuning rounds. What has happened?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Nothing, provided you did not train on it</div>
+      <div class="quiz-opt">It has degraded into a validation set — each decision made after seeing it leaked a little of it into your choices</div>
+      <div class="quiz-opt">The score is valid but the confidence interval is wider</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. When labelling under a 2% positive rate, what should you do?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Label a large random sample and accept the imbalance</div>
+      <div class="quiz-opt">Take a random sample first for an unbiased estimate, then deliberately over-sample the rare class — and remember you did when computing rates</div>
+      <div class="quiz-opt">Label only cases the current model flags as positive</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>
