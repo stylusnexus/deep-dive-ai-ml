@@ -21,11 +21,23 @@ if docker info >/dev/null 2>&1; then
   mem=$(docker info --format '{{.MemTotal}}')
   gb=$(( mem / 1073741824 ))
   ok "docker running ($(docker --version | cut -d, -f1))"
-  if [ "$gb" -lt 32 ]; then
-    warn "Docker VM memory ${gb}GB — raise to 48-64GB before Blocks 7-8 (Settings → Resources)"
+  # MemTotal is what the VM has RIGHT NOW, which can sit below the configured
+  # ceiling after a restart. Report the configured value too before warning.
+  cfg=$(python3 -c "
+import json,pathlib
+for n in ('settings-store.json','settings.json'):
+    p=pathlib.Path.home()/'Library/Group Containers/group.com.docker'/n
+    if p.exists():
+        print(int(json.loads(p.read_text()).get('MemoryMiB',0))//1024); break
+else: print(0)" 2>/dev/null || echo 0)
+  if [ "${cfg:-0}" -gt 0 ]; then
+    ok "Docker memory ${gb}GB live / ${cfg}GB configured"
+    [ "$cfg" -lt 16 ] && warn "configured ceiling ${cfg}GB is low — raise in Settings → Resources"
   else
-    ok "Docker VM memory ${gb}GB"
+    ok "Docker VM memory ${gb}GB live"
   fi
+  # Model serving happens on the host via Ollama/MPS, not in a container —
+  # Docker on macOS is CPU-only, so container RAM is not the constraint people assume.
 else
   bad "docker not running"
 fi

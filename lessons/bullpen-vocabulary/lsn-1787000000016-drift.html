@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drift: Why Deployment Isn&#x27;t the End</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 17 of 19</span>
+  <h1>Drift: Why Deployment Isn&#x27;t the End</h1>
+  <p class="subtitle">The model didn't change. The world did.</p>
+
+  <p>A model deployed in March performs beautifully. By September it's noticeably worse, and nobody has touched it. Nothing broke — the world moved and the model didn't. This is <strong>drift</strong>, and it's why deployment is the start of a model's life rather than the finish.</p>
+  <h2>Two kinds, with different fixes</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Data drift</div><div><div class="roadmap-title">The inputs change</div><div class="roadmap-desc">New customer demographics, a new sensor with different calibration, seasonal shifts. The relationship between input and output still holds — you're just seeing inputs the model wasn't trained on.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Concept drift</div><div><div class="roadmap-title">The relationship changes</div><div class="roadmap-desc">What counted as fraud last year doesn't this year, because fraudsters adapted. The same input now maps to a different correct output. Harder, and retraining on recent data is the only real answer.</div></div></div></div>
+  <div class="callout insight"><span class="label">Why the distinction pays off</span>Data drift often needs nothing more than retraining on recent data, or sometimes just recalibration. Concept drift means your labels have changed meaning — historical training data is now actively misleading, and you may need to discard or reweight it. Diagnosing which one you have decides whether you retrain on everything or only on what's recent.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Model performance decaying over time with drift detection">
+<line x1="60" y1="150" x2="600" y2="150" class="d-arrow"/>
+<line x1="60" y1="150" x2="60" y2="24" class="d-arrow"/>
+<text x="4" y="88" class="d-label-sm">accuracy</text>
+<text x="290" y="178" class="d-label-sm">months since deployment →</text>
+<path d="M75 44 Q180 48 280 62 Q400 84 590 122" stroke="var(--accent)" stroke-width="2.5" fill="none"/>
+<line x1="60" y1="44" x2="600" y2="44" stroke="var(--green)" stroke-width="1.4" stroke-dasharray="4 4"/>
+<text x="480" y="38" class="d-fill-green" font-size="11" font-weight="600">launch performance</text>
+<line x1="60" y1="106" x2="600" y2="106" stroke="var(--red)" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="440" y="100" class="d-fill-red" font-size="11" font-weight="600">acceptable floor</text>
+<circle cx="484" cy="106" r="5" class="d-fill-red"/>
+<text x="366" y="132" class="d-label-sm">breach — but you found out</text>
+<text x="366" y="148" class="d-label-sm">months late</text>
+<circle cx="280" cy="62" r="5" class="d-fill-yellow"/>
+<path d="M280 62 L280 30" stroke="var(--yellow)" stroke-width="1.4"/>
+<text x="188" y="24" class="d-fill-yellow" font-size="11" font-weight="600">input distribution shifts here</text>
+</svg><figcaption>Performance decays quietly and monitoring input distributions warns you before outcomes do — which matters when ground-truth labels arrive weeks late, as they usually do.</figcaption></figure>
+  <h2>The monitoring problem</h2>
+  <p>You usually can't measure accuracy in production, because ground truth arrives late or never. Whether a loan defaults takes months. Whether a maintenance prediction was right takes until the part fails or doesn't. So you monitor proxies that are available immediately:</p>
+  <ul><li><strong>Input distributions.</strong> Are the features arriving now shaped like the training data? Population Stability Index, or a KS test per feature.</li><li><strong>Prediction distribution.</strong> Your fraud model flagged 2% for six months and now flags 7%. Something changed, even if you don't yet know what.</li><li><strong>Confidence distribution.</strong> Predictions clustering near the threshold instead of the extremes means the model is less sure than it was.</li><li><strong>Delayed ground truth.</strong> When labels do arrive, backfill and score properly. Late is still worth having.</li><li><strong>Data quality.</strong> Null rates, new categorical values, unit changes. An upstream team renaming a field looks exactly like drift and is far more common.</li></ul>
+  <div class="callout pitfall"><span class="label">The most common cause isn&#x27;t drift at all</span>Before concluding the world changed, check whether an upstream pipeline changed. A schema alteration, a unit switch from Celsius to Fahrenheit, a newly-added category, a join that silently started dropping rows — these produce identical symptoms and are much more likely. Check the data before retraining the model.</div>
+  <h2>Drift for generative systems</h2>
+  <p>The concept transfers, in forms specific to LLM work: your provider silently updates the model behind a version alias and outputs change; your retrieval corpus grows and previously-reliable chunks stop ranking; users learn what the system does well and ask harder questions over time. Pin model versions where you can, and re-run your eval set on a schedule rather than only when something looks wrong.</p>
+  <h2>What to build</h2>
+  <p>A monitored model needs a baseline snapshot of training-input distributions, scheduled comparison against live traffic, alert thresholds that someone actually receives, a retraining path that can be executed without heroics, and a rollback. Block 8 builds this, because a model you can't retrain safely is one you'll be afraid to touch precisely when you need to.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://docs.evidentlyai.com/" target="_blank" rel="noopener">Evidently AI: drift detection</a><span class="link-note">Open-source drift and data-quality monitoring, with the statistical tests explained.</span></li><li><a href="https://developers.google.com/machine-learning/guides/rules-of-ml" target="_blank" rel="noopener">Google: ML production rules</a><span class="link-note">Rules 8, 27 and onward cover freshness and monitoring. Worth reading in full at some point.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Fraud patterns change because fraudsters adapt to your model. Which kind of drift is that?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Data drift — the inputs look different</div>
+      <div class="quiz-opt">Concept drift — the relationship between input and correct output has changed</div>
+      <div class="quiz-opt">Neither; that&#x27;s overfitting</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why monitor input distributions rather than accuracy in production?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Input distributions are more accurate</div>
+      <div class="quiz-opt">Ground truth usually arrives late or never, so input shift is the signal available immediately</div>
+      <div class="quiz-opt">Accuracy can&#x27;t be computed on streaming data</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Model performance drops sharply overnight. What should you check before retraining?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">Whether an upstream pipeline changed — schema, units, new categories, dropped rows</div>
+      <div class="quiz-opt">Whether the model needs more parameters</div>
+      <div class="quiz-opt">Whether the learning rate was too high originally</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

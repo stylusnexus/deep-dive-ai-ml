@@ -29,6 +29,12 @@ BLURBS = {
  "vector-search-algorithms": "HNSW, IVF, and the recall you quietly trade for speed without ever measuring it.",
  "ranking-and-hybrid-retrieval": "BM25, reciprocal rank fusion and rerankers — why pure vector search is rarely best.",
  "data-leakage": "The failure that inflates training and validation together, so nothing looks wrong until production.",
+ "hallucination-and-grounding": "Why a model states falsehoods confidently, and why telling it not to achieves nothing.",
+ "shots-and-in-context-learning": "Zero-, few- and many-shot — what examples are genuinely good at, and when to stop paying for them.",
+ "class-imbalance-and-thresholds": "Why 99% accuracy can mean a model that learned nothing, and why 0.5 is just a convention.",
+ "drift": "The model didn't change, the world did — and why you monitor inputs when ground truth arrives late.",
+ "distillation": "Training a small model to imitate a large one, and the licensing trap that catches people.",
+ "chain-of-thought-and-reasoning": "Why thinking out loud works, and why the chain is not an audit trail.",
 }
 
 def section(topic, heading, note):

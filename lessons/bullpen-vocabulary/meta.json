@@ -90,6 +90,42 @@
       "title": "Structured Output: JSON You Can Actually Parse",
       "file": "lsn-1787000000012-structured-output-json.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000013",
+      "title": "Hallucination and Grounding",
+      "file": "lsn-1787000000013-hallucination-and-grounding.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000014",
+      "title": "Zero-shot, Few-shot and In-Context Learning",
+      "file": "lsn-1787000000014-shots-and-in-context-learning.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000015",
+      "title": "Class Imbalance and Choosing a Threshold",
+      "file": "lsn-1787000000015-class-imbalance-and-thresholds.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000016",
+      "title": "Drift: Why Deployment Isn't the End",
+      "file": "lsn-1787000000016-drift.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000017",
+      "title": "Distillation",
+      "file": "lsn-1787000000017-distillation.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000018",
+      "title": "Chain-of-Thought and Reasoning Tokens",
+      "file": "lsn-1787000000018-chain-of-thought-and-reasoning.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -154,6 +190,36 @@
       "starred": false
     },
     "lsn-1787000000012": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000013": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000014": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000015": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000016": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000017": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000018": {
       "viewed": false,
       "completed": false,
       "starred": false

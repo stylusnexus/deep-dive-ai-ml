@@ -66,6 +66,38 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Regularisation** — Penalising complexity (L1/L2) or dropping random units (dropout) so the model can't memorise as easily.
 
+**Hallucination** — Confidently stated falsehood. Not a bug: the model samples plausible text and has no internal flag separating knowing from pattern-matching. Fluency carries no information about accuracy.
+
+**Grounding** — Tying output to supplied sources rather than to parameters. What RAG is for, and the most effective mitigation — but not a guarantee.
+
+**Groundedness** — Whether an answer is actually supported by what was retrieved. Measured separately from whether the answer is correct.
+
+**Zero-shot / few-shot / many-shot** — How many examples you put in the prompt. Few-shot (2–10) is the workhorse.
+
+**In-context learning** — Changing behaviour via prompt examples without changing weights. Nothing persists after the call. Good at format and label space, weak at new knowledge and hard reasoning.
+
+**Class imbalance** — One class dominates, so accuracy becomes misleading. Always compute what "always guess the majority class" scores before reporting any accuracy figure.
+
+**Decision threshold** — The cut-off turning a probability into an action. 0.5 is a convention inherited from balanced problems, not an answer. Moving it trades precision against recall directly.
+
+**SMOTE / class weights / resampling** — Ways to handle imbalance. Resample inside the pipeline after the split — doing it before is textbook leakage.
+
+**Data drift** — The inputs change; the input-output relationship still holds. Usually fixed by retraining on recent data.
+
+**Concept drift** — The relationship itself changes, so historical training data becomes misleading. Harder.
+
+**Population Stability Index / KS test** — Statistics for detecting input distribution shift when ground-truth labels arrive too late to measure accuracy directly.
+
+**Distillation** — Training a small student model to reproduce a large teacher's behaviour. The teacher's full probability distribution ("dark knowledge") carries more signal than hard labels.
+
+**Chain-of-thought** — Prompting the model to produce intermediate steps. Works because it allocates more computation and lets the model build on its own partial results — not because it becomes smarter.
+
+**Self-consistency** — Sampling several reasoning chains and taking the majority answer. Buys accuracy with tokens.
+
+**Reasoning tokens** — Tokens a reasoning model generates before answering, often hidden and always billed. Cost tracks problem difficulty rather than visible output length.
+
+**Faithfulness (of reasoning)** — Whether a stated chain is the actual reason for the answer. Frequently it isn't — treat chains as a debugging aid, never as an audit trail.
+
 ---
 
 ## Block 0 · Orientation
