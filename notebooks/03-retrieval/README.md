@@ -33,3 +33,27 @@ the question embeds close to one and not the other.
 
 That is not a tuning problem. It is the limit that agentic retrieval exists to
 address, and seeing it measured is the point of notebook 02.
+
+## What notebook 03 produced
+
+The diagnosis table populated all four cells on a ten-question set, which is
+unusually clean for a teaching artefact:
+
+| diagnosis | count |
+|---|---|
+| grounded + correct | 4 |
+| grounded + **wrong** → retrieval problem | 3 |
+| ungrounded + wrong → generation problem | 2 |
+| ungrounded + **right** → answering from memory (warning) | 1 |
+
+The three in row two are the multi-hop questions. The model faithfully used what
+it was given and was given only half of what it needed — which is what the
+lesson means by *grounded and wrong is a retrieval problem*.
+
+The refusal test passes. Note what the output shows: retrieval still returned
+four chunks, because similarity is relative and something always comes back. The
+refusal came entirely from the prompt handling the empty case.
+
+Five of ten generation calls fell back to the extractive stand-in on a timeout,
+which the notebook reports. The measurement is unaffected; the prose of those
+answers is extractive rather than generated.

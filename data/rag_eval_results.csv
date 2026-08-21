@@ -1,0 +1,217 @@
+qid,hops,question,answer,retrieved_docs,gold_docs,expected,context,groundedness,correct,diagnosis
+q01,1,What is the maximum gearbox oil temperature during continuous operation?,"## Gearbox temperature
+
+The gearbox oil temperature must not exceed 82 degrees Celsius during
+continuous operation. [1]","['inc-2026-014', 'ops-std-04', 'site-ard', 'site-bat']",['ops-std-04'],82 degrees Celsius.,"## Gearbox temperature
+
+The gearbox oil temperature must not exceed 82 degrees Celsius during
+continuous operation. Between 82 and 90 degrees the turbine enters
+derated operation automatically. Above 90 degrees the turbine performs a
+controlled shutdown.
+
+## Summary
+
+Turbine WHL-031 performed a controlled shutdown after gearbox oil
+temperature reached 91.4 degrees Celsius. The turbine had been in derated
+operation for approximately six hours prior to shutdown.
+
+## Operating envelope
+
+Turbines at Beinn an Tuirc operate under the standard envelope defined in
+OPS-STD-04 unless a site variance is recorded. Gearbox temperature is
+logged every fifteen minutes and reported daily to the regional desk.
+
+## Operating envelope
+
+Turbines at Ardrossan operate under the standard envelope defined in
+OPS-STD-04 unless a site variance is recorded. Gearbox temperature is
+logged every fifteen minutes and reported daily to the regional desk.",1.0,False,grounded + WRONG  -> retrieval problem
+q02,1,How often must a turbine older than twelve years be inspected?,"## Routine inspection
+
+Every turbine receives a routine inspection every 180 days. [1]","['maint-pol-11', 'ops-std-04', 'proc-restart-07']",['maint-pol-11'],Every 90 days.,"## Routine inspection
+
+Every turbine receives a routine inspection every 180 days. The interval
+reduces to 90 days for any turbine older than twelve years.
+
+## Post-alert inspection
+
+A Level 2 vibration alert requires inspection within 14 days. A Level 3
+alert requires inspection before the turbine is returned to service.
+
+## Restriction
+
+A turbine that has shut down twice within 30 days may not be returned to
+service without regional engineering approval.
+
+## Vibration
+
+Nacelle vibration above 0.55 mm/s RMS sustained for more than thirty
+minutes triggers a Level 2 alert. Above 0.80 mm/s the turbine shuts down
+immediately and requires physical inspection before restart.",1.0,True,grounded + correct
+q03,1,What caused the shutdown of turbine WHL-031?,"## Summary
+
+Turbine WHL-031 performed a controlled shutdown after gearbox oil
+temperature reached 91.4 degrees Celsius. [1]","['inc-2026-014', 'ops-std-04', 'proc-restart-07']",['inc-2026-014'],"A partially blocked oil cooler, caused by an incorrectly seated filter seal.","## Summary
+
+Turbine WHL-031 performed a controlled shutdown after gearbox oil
+temperature reached 91.4 degrees Celsius. The turbine had been in derated
+operation for approximately six hours prior to shutdown.
+
+# Incident Report 2026-014
+
+Date: 14 March 2026. Site: Whitelee. Turbine: WHL-031.
+
+## Restriction
+
+A turbine that has shut down twice within 30 days may not be returned to
+service without regional engineering approval.
+
+## Vibration
+
+Nacelle vibration above 0.55 mm/s RMS sustained for more than thirty
+minutes triggers a Level 2 alert. Above 0.80 mm/s the turbine shuts down
+immediately and requires physical inspection before restart.",1.0,False,grounded + WRONG  -> retrieval problem
+q04,1,Which site had the highest failure rate in Q2 2026?,"Clyde had the highest site failure rate in Q2 2026, at 5.9 failures per hundred turbines [1][2].","['inc-2026-014', 'inc-2026-021', 'perf-2026-q2']",['perf-2026-q2'],"Clyde, at 5.9 failures per hundred turbines.","## Failure rate
+
+The fleet failure rate for the quarter was 3.1 failures per hundred
+turbines. Clyde recorded the highest site failure rate at 5.9 per hundred
+turbines. Ardrossan recorded 2.4 and Whitelee 2.1.
+
+# Fleet Performance Summary — Q2 2026
+
+# Incident Report 2026-021
+
+Date: 2 June 2026. Site: Clyde. Turbine: CLY-008.
+
+# Incident Report 2026-014
+
+Date: 14 March 2026. Site: Whitelee. Turbine: WHL-031.",0.889,True,grounded + correct
+q05,2,Who is the site manager responsible for the site with the highest Q2 failure rate?,,"['perf-2026-q2', 'proc-restart-07', 'site-bat', 'site-whl']","['perf-2026-q2', 'site-cly']",S. Tran — Clyde had the highest failure rate and S. Tran manages Clyde.,"## Failure rate
+
+The fleet failure rate for the quarter was 3.1 failures per hundred
+turbines. Clyde recorded the highest site failure rate at 5.9 per hundred
+turbines. Ardrossan recorded 2.4 and Whitelee 2.1.
+
+# Whitelee Site Profile
+
+Site code: WHL. Region: Central.
+Operational turbines: 68.
+Site manager: M. Lindqvist.
+
+# Beinn an Tuirc Site Profile
+
+Site code: BAT. Region: West.
+Operational turbines: 29.
+Site manager: R. Achebe.
+
+## Sequence
+
+1. Confirm the originating fault has been cleared and logged.
+2. Complete the inspection required by MAINT-POL-11 for the alert level.
+3. Obtain written release from the site manager.
+4. Restart under supervision and monitor for two hours at reduced output.",0.0,False,ungrounded + wrong -> generation problem
+q06,2,Was the inspection deferral before incident 2026-021 permitted under policy at the time?,"The preceding routine inspection had been deferred by 28 days
+under the single-deferral provision. [1]","['inc-2026-021', 'maint-pol-11']","['inc-2026-021', 'maint-pol-11']","Yes — a single deferral of up to 30 days was permitted, and 28 days was used.","## Deferral
+
+A routine inspection may be deferred once, by no more than 30 days, with
+written approval from the site manager. A post-alert inspection may not
+be deferred under any circumstances.
+
+## Root cause
+
+Blade root bolt tension had relaxed below specification on two of three
+blades. The preceding routine inspection had been deferred by 28 days
+under the single-deferral provision.
+
+# Incident Report 2026-021
+
+Date: 2 June 2026. Site: Clyde. Turbine: CLY-008.
+
+## Corrective action
+
+Deferral is no longer permitted for turbines with an open Level 2 alert.",1.0,True,grounded + correct
+q07,2,"What vibration level triggers immediate shutdown, and how soon must inspection follow?",,"['inc-2026-021', 'maint-pol-11', 'ops-std-04', 'proc-restart-07']","['ops-std-04', 'maint-pol-11']",0.80 mm/s RMS triggers immediate shutdown; a Level 3 alert requires inspection before return to service.,"## Vibration
+
+Nacelle vibration above 0.55 mm/s RMS sustained for more than thirty
+minutes triggers a Level 2 alert. Above 0.80 mm/s the turbine shuts down
+immediately and requires physical inspection before restart.
+
+## Summary
+
+Nacelle vibration on CLY-008 exceeded 0.80 mm/s RMS, triggering an
+immediate shutdown. Vibration had been rising steadily for eleven days
+prior, crossing the Level 2 threshold on 22 May.
+
+## Post-alert inspection
+
+A Level 2 vibration alert requires inspection within 14 days. A Level 3
+alert requires inspection before the turbine is returned to service.
+
+## Applicability
+
+This procedure applies after any automatic shutdown, including overspeed,
+vibration and thermal shutdowns.",0.0,False,ungrounded + wrong -> generation problem
+q08,1,How many operational turbines are there at Whitelee?,"According to the Whitelee Site Profile, there are **68** operational turbines at Whitelee [1].","['inc-2026-014', 'perf-2026-q2', 'site-whl']",['site-whl'],68.,"# Whitelee Site Profile
+
+Site code: WHL. Region: Central.
+Operational turbines: 68.
+Site manager: M. Lindqvist.
+
+## Operating envelope
+
+Turbines at Whitelee operate under the standard envelope defined in
+OPS-STD-04 unless a site variance is recorded. Gearbox temperature is
+logged every fifteen minutes and reported daily to the regional desk.
+
+## Failure rate
+
+The fleet failure rate for the quarter was 3.1 failures per hundred
+turbines. Clyde recorded the highest site failure rate at 5.9 per hundred
+turbines. Ardrossan recorded 2.4 and Whitelee 2.1.
+
+# Incident Report 2026-014
+
+Date: 14 March 2026. Site: Whitelee. Turbine: WHL-031.",0.75,False,grounded + WRONG  -> retrieval problem
+q09,1,What approval is needed to return a turbine to service after two shutdowns in 30 days?,"## Restriction
+
+A turbine that has shut down twice within 30 days may not be returned to
+service without regional engineering approval. [1]","['inc-2026-014', 'maint-pol-11', 'proc-restart-07']",['proc-restart-07'],Regional engineering approval.,"## Restriction
+
+A turbine that has shut down twice within 30 days may not be returned to
+service without regional engineering approval.
+
+## Post-alert inspection
+
+A Level 2 vibration alert requires inspection within 14 days. A Level 3
+alert requires inspection before the turbine is returned to service.
+
+# PROC-RESTART-07 — Return to Service After Shutdown
+
+## Summary
+
+Turbine WHL-031 performed a controlled shutdown after gearbox oil
+temperature reached 91.4 degrees Celsius. The turbine had been in derated
+operation for approximately six hours prior to shutdown.",1.0,True,grounded + correct
+q10,0,What is the average lifespan of a gearbox bearing?,NOT IN CONTEXT,"['inc-2026-014', 'maint-pol-11', 'ops-std-04', 'site-bat']",[],NOT IN CORPUS — the system should refuse rather than answer.,"## Routine inspection
+
+Every turbine receives a routine inspection every 180 days. The interval
+reduces to 90 days for any turbine older than twelve years.
+
+## Gearbox temperature
+
+The gearbox oil temperature must not exceed 82 degrees Celsius during
+continuous operation. Between 82 and 90 degrees the turbine enters
+derated operation automatically. Above 90 degrees the turbine performs a
+controlled shutdown.
+
+## Summary
+
+Turbine WHL-031 performed a controlled shutdown after gearbox oil
+temperature reached 91.4 degrees Celsius. The turbine had been in derated
+operation for approximately six hours prior to shutdown.
+
+## Operating envelope
+
+Turbines at Beinn an Tuirc operate under the standard envelope defined in
+OPS-STD-04 unless a site variance is recorded. Gearbox temperature is
+logged every fifteen minutes and reported daily to the regional desk.",,True,ungrounded + right -> answering from memory (warning)
