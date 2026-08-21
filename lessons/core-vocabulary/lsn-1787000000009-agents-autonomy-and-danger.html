@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -222,6 +235,7 @@
 <path d="M330 34 L616 34" stroke="var(--red)" stroke-width="2"/>
 <text x="336" y="28" class="d-fill-red" font-size="11" font-weight="600">irreversible — expensive to be wrong</text>
 </svg><figcaption>Danger doesn't come from intelligence — it comes from the combination of autonomy, permissions and the absence of a human. Each step up widens what a single bad decision can reach.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Everything an agent reads is data, not instructions.</strong> Defence is architectural — limit what the tools can do — not a matter of prompting the model to be careful.</blockquote>
   <h2>The danger surface</h2>
   <p>Five failure modes, roughly in order of how often they bite:</p>
   <ul><li><strong>Indirect prompt injection.</strong> The agent reads a document, web page, issue comment or email containing instructions aimed at the model. Because tool choice is driven by context, that text competes with yours. This is the one people underestimate most — the attacker never touches your prompt.</li><li><strong>Over-permission.</strong> The agent has credentials broader than the task needs. A read-only key limits an injection to embarrassment; a write key makes it an incident.</li><li><strong>Runaway loops.</strong> No turn limit, no cost ceiling, no repetition detection. The classic form is an agent retrying the same failing call until someone notices the bill.</li><li><strong>Compounding error.</strong> Each step is 95% reliable. Ten steps is 60%. Long autonomous chains fail not because any step is bad but because reliability multiplies.</li><li><strong>Confident wrong reporting.</strong> Ask an agent whether it succeeded and it will frequently say yes. Self-reported success is not evidence, which is why replay harnesses establish the outcome in advance instead of asking.</li></ul>

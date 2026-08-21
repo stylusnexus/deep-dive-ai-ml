@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -204,6 +217,7 @@
   <p>A benchmark of eight coding tasks was used for months to decide model and architecture questions. An audit found that <strong>six of the eight passed their own verification at the starting commit</strong> — before any work was done. The tests that proved the feature had been added by the very change the agent was being asked to reproduce, so they were absent at the start, so the test suite passed vacuously. An agent that edited nothing scored the same as one that solved the task.</p>
   <p>Every architectural conclusion drawn from that board had to be thrown out, including a headline result that a whole escalation mechanism produced zero benefit. It produced zero <em>measured</em> benefit, because the instrument could not see benefit.</p>
   <figure class="diagram"><svg viewBox="0 0 640 240" role="img" aria-label="Diagram of the two honesty invariants for a test fixture"><rect x="30" y="40" width="250" height="70" rx="8" class="d-box"/><text x="52" y="68" class="d-label-b">At the starting commit</text><text x="52" y="90" class="d-label-sm">feature absent → verify MUST FAIL</text><rect x="360" y="40" width="250" height="70" rx="8" class="d-box"/><text x="382" y="68" class="d-label-b">With the known-good fix</text><text x="382" y="90" class="d-label-sm">feature present → verify MUST PASS</text><rect x="30" y="150" width="580" height="60" rx="8" class="d-box-accent"/><text x="52" y="176" class="d-label-b">If either half is untrue</text><text x="52" y="196" class="d-label-sm">“did nothing” and “solved it” score identically, and every number the instrument produces is noise</text></svg><figcaption>An honest fixture must fail before the work and pass after it. Fail either half and the instrument cannot tell the two columns apart.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>An instrument that cannot tell success from inaction produces noise, not numbers.</strong> Prove it fails before the work and passes after it, before you trust anything it tells you.</blockquote>
   <h2>Two kinds of honesty</h2>
   <p>The invariant above is <strong>outcome honesty</strong> — can the instrument tell success from inaction? There is a second one, checked far less often. <strong>Process honesty</strong>: did the instrument record what the system actually did and said, or only whether it succeeded?</p>
   <p>Two completely different failures score identically under outcome metrics alone:</p>

@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -220,6 +233,7 @@
   <div class="callout pitfall"><span class="label">What this means for you</span>Treat a chain as a debugging aid and a verification surface, not as an audit trail. It's genuinely useful — you can check the intermediate steps, spot where a calculation went wrong, and catch a wrong premise. But do not present it to a regulator, a customer, or a colleague as the reason the system decided something. It is what the model said about its reasoning, which is not the same object.</div>
   <h2>Where this reappears</h2>
   <p>Block 4's agents reason before choosing tools, and a visible chain is often the only way to debug why the wrong tool was called. Block 5 measures whether the chain actually supports the conclusion, which is a distinct question from whether the conclusion is right. And rationale distillation from the previous lesson trains a small model on these chains — one of the more effective ways to move reasoning capability downward.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Chain-of-thought is not the model becoming smarter — it is the model being given room to compute.</strong> Which is why it helps on multi-step problems and does nothing for recall.</blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener">Chain-of-Thought Prompting (Wei et al., 2022)</a><span class="link-note">The paper that established the effect and its scale dependence.</span></li><li><a href="https://arxiv.org/abs/2203.11171" target="_blank" rel="noopener">Self-Consistency (Wang et al., 2022)</a><span class="link-note">Sampling multiple chains and taking the majority — trading tokens for accuracy.</span></li><li><a href="https://arxiv.org/abs/2307.13702" target="_blank" rel="noopener">Measuring Faithfulness in Chain-of-Thought (Lanham et al., 2023)</a><span class="link-note">The evidence that stated reasoning often isn't the actual reason. Read before trusting a chain as an explanation.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

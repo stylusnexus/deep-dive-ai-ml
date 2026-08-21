@@ -194,6 +194,7 @@ LESSONS = [
     ("p", "Every architectural conclusion drawn from that board had to be thrown out, including a headline result that a whole escalation mechanism produced zero benefit. It produced zero <em>measured</em> benefit, because the instrument could not see benefit."),
     ("figure", "An honest fixture must fail before the work and pass after it. Fail either half and the instrument cannot tell the two columns apart.", '''<svg viewBox="0 0 640 240" role="img" aria-label="Diagram of the two honesty invariants for a test fixture"><rect x="30" y="40" width="250" height="70" rx="8" class="d-box"/><text x="52" y="68" class="d-label-b">At the starting commit</text><text x="52" y="90" class="d-label-sm">feature absent \u2192 verify MUST FAIL</text><rect x="360" y="40" width="250" height="70" rx="8" class="d-box"/><text x="382" y="68" class="d-label-b">With the known-good fix</text><text x="382" y="90" class="d-label-sm">feature present \u2192 verify MUST PASS</text><rect x="30" y="150" width="580" height="60" rx="8" class="d-box-accent"/><text x="52" y="176" class="d-label-b">If either half is untrue</text><text x="52" y="196" class="d-label-sm">“did nothing” and “solved it” score identically, and every number the instrument produces is noise</text></svg>'''),
 
+    ("know", "<strong>An instrument that cannot tell success from inaction produces noise, not numbers.</strong> Prove it fails before the work and passes after it, before you trust anything it tells you."),
     ("h2", "Two kinds of honesty"),
     ("p", "The invariant above is <strong>outcome honesty</strong> — can the instrument tell success from inaction? There is a second one, checked far less often. <strong>Process honesty</strong>: did the instrument record what the system actually did and said, or only whether it succeeded?"),
     ("p", "Two completely different failures score identically under outcome metrics alone:"),
@@ -406,6 +407,8 @@ swebench report my-run-01 -d verified"""),
     ]),
     ("callout", "matters", "Why this beats the public number for you", "A benchmark built from your own merged PRs is in your language, your codebase, your conventions, and nobody has optimised against it. It is the twenty-item rule from the eval-battery lesson, applied to code, and it is what a replay harness does — running real closed pull requests so the outcome is established before the agent starts, which makes its self-report irrelevant."),
 
+    ("know", '<strong>A benchmark must make doing nothing and solving it score differently.</strong> FAIL_TO_PASS proves the work happened; PASS_TO_PASS proves nothing else broke. Most homemade benchmarks omit the second half and quietly reward vandalism.'),
+
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',
        'Leaderboards for each variant. Read which variant a number refers to before comparing anything.'),
@@ -447,6 +450,7 @@ swebench report my-run-01 -d verified"""),
 
     ("callout", "matters", "The definition worth memorising", "<strong>A limit that can end a run and cannot be seen is not a guard, it is a confound.</strong> The distinction isn't whether the limit is reasonable — most of them are. It is whether its firing appears anywhere in the output you read afterwards. An invisible guard doesn't just stop the run; it stops it while looking exactly like the thing you were trying to measure."),
 
+    ("know", "<strong>A limit that can end a run and cannot be seen is not a guard, it is a confound.</strong> An invisible terminator does not merely stop the run — it stops it while looking exactly like the thing you were trying to measure."),
     ("h2", "A worked case: six mechanisms, one symptom"),
     ("p", "Nine runs of a local coding agent on one issue produced zero edits. The obvious reading was that the model wouldn't commit a change. The runs were in fact terminated by <strong>six different mechanisms</strong>, none of which appeared in the output:"),
     ("terms", [
@@ -667,6 +671,7 @@ swebench report my-run-01 -d verified"""),
 
     ("callout", "warning", "Ask this before trusting any judge comparison", "Not \"how accurate is the judge?\" but <strong>\"is the judge's error correlated with the thing I changed?\"</strong> If one variant produces longer answers and your judge rewards length, you have a verbosity bias masquerading as an improvement. If one variant is more verbose because it explains itself more, you cannot tell those apart from the score alone. Extra samples will not save you — bias does not average out."),
 
+    ("know", "<strong>Ask not how accurate your grader is, but whether its error correlates with what you changed.</strong> Noise costs you power. Bias that tracks the treatment invents an effect, and more sampling will not remove it."),
     ("h2", "A judge that is silently off is worse than no judge"),
     ("p", "On the same project, one configuration default meant the verifier was nil. That single value disabled turn-end verification, the fix-attempt loop and per-edit feedback simultaneously — and nothing said so. The system continued producing results that looked like verified results."),
     ("p", "No judge at all is an obvious gap. A judge that has quietly stopped running is a number that carries authority it has not earned. Assert that your grader ran, on every run, and fail loudly when it did not."),
@@ -762,6 +767,7 @@ swebench report my-run-01 -d verified"""),
 <text x="452" y="212" class="d-fill-red" font-size="13" font-weight="700">✓</text>
 </svg>'''),
 
+    ("know", "<strong>A model is the most expensive, slowest, least debuggable and least testable component you can put in a system.</strong> Sometimes it is the only thing that can do the job. Frequently it is not."),
     ("h2", "The tasks people reach for a model on that don't need one"),
     ("ul", [
       "<strong>Extraction from structured or semi-structured text.</strong> Invoice numbers, dates, order ids in a known format. A regex is free, instant, and cannot invent a value that wasn't there.",
@@ -879,6 +885,8 @@ swebench report my-run-01 -d verified"""),
     ("h2", "The honest position"),
     ("p", "The methodology is young, the tooling is proliferating faster than the evidence, and much of what is written about it is advocacy. Treat claims about productivity gains the way you would treat any unmeasured claim in this course — as a hypothesis with a plausible mechanism. The mechanism here is sound, which is a reason to try it, not a reason to believe a number."),
     ("p", "The defensible version is modest and probably enough: when intent must survive multiple sessions, write it down before generating; keep it in version control; keep it current or delete it. Everything past that is tooling preference."),
+
+    ("know", '<strong>An agent cannot tell a decision you made from a sentence you wrote carelessly.</strong> Every under-specified area becomes an invented answer, delivered confidently. Vagueness surfaces as working code, not as questions.'),
 
     ("links", [
       ("GitHub Spec Kit", "https://github.com/github/spec-kit",

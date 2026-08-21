@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -231,6 +244,7 @@
   <p>Long agent sessions degrade in a characteristic way: early mistakes stay in the history, get re-read every turn, and are treated as established fact. A wrong assumption at turn 3 is still shaping behaviour at turn 30. Restarting with a clean context and a short accurate summary frequently outperforms continuing — the reason a fresh session sometimes solves what a long one couldn't.</p>
   <h2>Why this is a named discipline now</h2>
   <p>"Prompt engineering" described writing a good instruction. <strong>Context engineering</strong> describes deciding what the model sees at all — retrieval, ranking, compaction, tool-result shaping, ordering, and budget. In an agent, that's most of the harness, which is another way of arriving at the conclusion you'd already reached: the constraint is usually the harness, not the model.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Put the instruction and the most relevant material at the start or the end — never the middle.</strong> Attention over long context is U-shaped, so ranking matters more than recall.</blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noopener">Lost in the Middle (Liu et al., 2023)</a><span class="link-note">The evidence for the U-shaped curve. Read it once; it changes how you order retrieved material.</span></li><li><a href="https://docs.claude.com/en/docs/build-with-claude/prompt-caching" target="_blank" rel="noopener">Prompt caching</a><span class="link-note">The mechanical reason stable content goes at the front.</span></li><li><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener">Effective context engineering for AI agents — Anthropic</a><span class="link-note">Compaction, structured note-taking and sub-agent isolation, with the attention-budget framing used above.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

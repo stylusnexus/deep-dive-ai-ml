@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -224,6 +237,7 @@
   <p><strong>GGUF</strong> (GPT-Generated Unified Format) is the file format that holds quantized weights plus the metadata needed to run them — tokenizer, architecture, prompt template. It's the format <code>llama.cpp</code> and Ollama consume. One file, self-describing, no Python environment required.</p>
   <p>This is distinct from Hugging Face's <code>safetensors</code>, which stores full-precision weights for training and fine-tuning. The usual pipeline: fine-tune in safetensors, convert to GGUF, quantize, serve.</p>
   <div class="callout pitfall"><span class="label">Your orphaned 95GB</span>Your own audit found roughly 95GB of local weights that nothing actually serves — a very common outcome. Quantized models are cheap to download and easy to forget. Before pulling another, check what's already on disk.</div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Prefer the bigger model, more heavily quantized.</strong> A 4-bit 70B almost always beats a 16-bit 13B of similar file size. Precision is the cheaper thing to give up.</blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://huggingface.co/docs/hub/gguf" target="_blank" rel="noopener">GGUF on the Hugging Face Hub</a><span class="link-note">Format reference, and the quantization table naming every Q-variant.</span></li><li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a><span class="link-note">The engine. The README's quantization section is the primary source for the trade-offs here.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

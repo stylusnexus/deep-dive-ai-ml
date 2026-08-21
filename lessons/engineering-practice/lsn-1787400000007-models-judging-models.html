@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -221,6 +234,7 @@
 <text x="286" y="152" class="d-label-sm">the "effect" is the bias</text>
 </svg><figcaption>Noise that is even across conditions costs you power. Bias that tracks the condition you are testing invents an effect, and no amount of extra sampling removes it.</figcaption></figure>
   <div class="callout warning"><span class="label">Ask this before trusting any judge comparison</span>Not "how accurate is the judge?" but <strong>"is the judge's error correlated with the thing I changed?"</strong> If one variant produces longer answers and your judge rewards length, you have a verbosity bias masquerading as an improvement. If one variant is more verbose because it explains itself more, you cannot tell those apart from the score alone. Extra samples will not save you — bias does not average out.</div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Ask not how accurate your grader is, but whether its error correlates with what you changed.</strong> Noise costs you power. Bias that tracks the treatment invents an effect, and more sampling will not remove it.</blockquote>
   <h2>A judge that is silently off is worse than no judge</h2>
   <p>On the same project, one configuration default meant the verifier was nil. That single value disabled turn-end verification, the fix-attempt loop and per-edit feedback simultaneously — and nothing said so. The system continued producing results that looked like verified results.</p>
   <p>No judge at all is an obvious gap. A judge that has quietly stopped running is a number that carries authority it has not earned. Assert that your grader ran, on every run, and fail loudly when it did not.</p>

@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -225,6 +238,7 @@
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">A filter that isn&#x27;t the model</div><div><div class="roadmap-title">Non-negotiable</div><div class="roadmap-desc">Tests, execution results, human review, a verified answer key. Something with an opinion the model can't manufacture.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Fresh real data each round</div><div><div class="roadmap-title">Anchors the tails</div><div class="roadmap-desc">Mixing genuine data with generated data substantially slows collapse. Purely synthetic loops are the dangerous case.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Held-out evaluation</div><div><div class="roadmap-title">Untouched by the loop</div><div class="roadmap-desc">The loop must not be able to see the set that judges it, or it will optimise it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Diversity monitoring</div><div><div class="roadmap-title">Watch the tails</div><div class="roadmap-desc">Track output variety across generations, not just quality. Collapse shows up as narrowing before it shows up as being wrong.</div></div></div></div>
   <h2>Where this lands for you</h2>
   <p>You will not pretrain a foundation model. You will very plausibly fine-tune on data a model generated — that's the distillation recipe from Block 7, and it's a good recipe. The difference between the version that works and the version that quietly degrades is entirely the filter. Generate widely, keep only what passes something external, mix in real data, and evaluate on a set the loop never saw.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Something outside the model's own opinion must decide what gets kept.</strong> A verifier, a human, a game result, a written constitution. Remove the filter and you are training on your own unfiltered output.</blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.nature.com/articles/s41586-024-07566-y" target="_blank" rel="noopener">AI models collapse when trained on recursively generated data (Nature, 2024)</a><span class="link-note">The primary result. Successive generations lose the tails first, then the centre.</span></li><li><a href="https://arxiv.org/abs/2305.17493" target="_blank" rel="noopener">The Curse of Recursion (Shumailov et al., 2023)</a><span class="link-note">The longer preprint, with the mechanism worked through and more model families.</span></li><li><a href="https://arxiv.org/abs/2203.14465" target="_blank" rel="noopener">STaR: Bootstrapping Reasoning With Reasoning (Zelikman et al., 2022)</a><span class="link-note">A self-training loop that works, because generations are filtered by whether they reached the right answer.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

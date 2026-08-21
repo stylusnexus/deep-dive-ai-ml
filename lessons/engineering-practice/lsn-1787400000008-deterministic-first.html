@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -227,6 +240,7 @@
 <text x="262" y="212" class="d-fill-green" font-size="13" font-weight="700">✗</text>
 <text x="452" y="212" class="d-fill-red" font-size="13" font-weight="700">✓</text>
 </svg><figcaption>The comparison people skip. A model wins the top row decisively and loses every row beneath it — so the question is whether you actually need the top row.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>A model is the most expensive, slowest, least debuggable and least testable component you can put in a system.</strong> Sometimes it is the only thing that can do the job. Frequently it is not.</blockquote>
   <h2>The tasks people reach for a model on that don&#x27;t need one</h2>
   <ul><li><strong>Extraction from structured or semi-structured text.</strong> Invoice numbers, dates, order ids in a known format. A regex is free, instant, and cannot invent a value that wasn't there.</li><li><strong>Routing on explicit signals.</strong> If the request contains an order number, it's an order query. Rules first; a classifier for what falls through.</li><li><strong>Validation.</strong> Schema checks, range checks, referential integrity. Never ask a model whether data is valid when you can assert it.</li><li><strong>Deduplication and matching on identifiers.</strong> A join, not a similarity search.</li><li><strong>Formatting and templating.</strong> If the output shape is fixed, a template with slots beats generation, and it cannot drift.</li><li><strong>Arithmetic and aggregation.</strong> Give the model the tool; do not ask it for the number.</li><li><strong>Anything with a lookup table.</strong> Country codes, tax rates, product mappings. A model will approximate a table it could simply have been given.</li></ul>
   <div class="callout matters"><span class="label">The hybrid is usually the right answer</span>This is not an argument for avoiding models. It is an argument for putting them where they earn their cost. Deterministic code handles the 80% that is structured, and the model handles the ambiguous remainder — which means it sees fewer calls, on harder inputs, where its judgement is actually worth paying for. Systems built this way are cheaper, faster, easier to debug, and usually more accurate, because each component is doing what it is good at.</div>

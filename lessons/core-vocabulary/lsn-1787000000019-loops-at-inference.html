@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -197,6 +210,7 @@
   <p>The single most common way to improve an LLM system is to stop calling the model once. Sample several times, critique and revise, retry on failure, search over branches. All of these are loops, and they are the main lever you have that doesn't involve changing the model.</p>
   <p>They also fail in a way worth naming up front, because it predicts which ones work.</p>
   <div class="callout insight"><span class="label">The rule that governs all of it</span>A loop improves the result only if <strong>signal enters from outside the loop</strong>. A compiler, a test suite, a schema validator, a retrieval hit, or the independence of separate samples — something that isn't the model's own opinion. A loop with no external signal mostly amplifies whatever the model already believed, including its errors. Every result below is explained by that one sentence.</div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>A loop improves the result only if signal enters from outside the loop.</strong> A test, a compiler, a schema, or the independence of separate samples. A loop with no external signal mostly amplifies what the model already believed, including its errors.</blockquote>
   <h2>The control flow</h2>
   <p>Strip the branding and there are four shapes. What differs is who decides to go round again.</p>
   <figure class="diagram"><svg viewBox="0 0 640 240" role="img" aria-label="Four inference-time loop shapes"><defs><marker id="fa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>

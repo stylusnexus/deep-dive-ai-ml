@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -223,6 +236,7 @@
   <h2>Sentinel values</h2>
   <p>Some systems write a placeholder rather than a null when a reading fails: <code>9999</code>, <code>-1</code>, <code>0</code>, <code>1900-01-01</code>. These are missing values in disguise, and because they're numeric they silently pollute every statistic.</p>
   <p>In the Block 1 data, 22 rotor-speed readings are exactly 9999.0. Left in place they drag the column mean from 14.4 to 53.3 — a nearly fourfold distortion from 22 rows in six thousand. The tell is a repeated, round, physically implausible value.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>A numeric-looking column that loads as text is a question, not a detail.</strong> It means something non-numeric is in there. Ten seconds of reading dtypes routinely saves an afternoon.</blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://pandas.pydata.org/docs/user_guide/basics.html#dtypes" target="_blank" rel="noopener">pandas dtypes</a><span class="link-note">What each type is, and how missing values force type changes.</span></li><li><a href="https://vita.had.co.nz/papers/tidy-data.pdf" target="_blank" rel="noopener">Tidy Data (Wickham, 2014)</a><span class="link-note">The paper that defined what a well-shaped table looks like. Still the clearest statement of it.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

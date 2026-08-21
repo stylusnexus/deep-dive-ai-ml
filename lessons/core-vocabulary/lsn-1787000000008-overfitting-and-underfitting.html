@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -260,6 +273,7 @@
   <p>The same failure follows you through the whole program under different names:</p>
   <ul><li><strong>Fine-tuning (Block 7).</strong> Train too long on a small dataset and the model parrots your examples, losing the general ability that made it useful. Held-out evaluation before and after is non-negotiable.</li><li><strong>Benchmarks (Block 5).</strong> Contaminated benchmarks are overfitting at industry scale — the test set leaked into training, so the score measures memory. Your own twenty-item eval set is a private held-out set, which is precisely why it's worth more than a public leaderboard.</li><li><strong>Prompt engineering (Block 3).</strong> Tuning a prompt against the same five examples until it's perfect on them is overfitting by hand. Hold some examples back.</li></ul>
   <div class="callout matters"><span class="label">The transferable idea</span>Any time you tune something against results you can see, you risk fitting the measurement rather than the thing being measured. The defence is always the same: keep some data where you can't look at it.</div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Any time you tune against results you can see, you risk fitting the measurement rather than the thing measured.</strong> The defence never changes: keep some data where you cannot look at it.</blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/cross_validation.html" target="_blank" rel="noopener">Cross-validation (scikit-learn)</a><span class="link-note">The canonical reference, with the diagrams. You'll use this directly in Block 2.</span></li><li><a href="https://developers.google.com/machine-learning/crash-course/overfitting/overfitting" target="_blank" rel="noopener">Google ML Crash Course: overfitting</a><span class="link-note">Generalisation, regularisation and early stopping, worked through interactively.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

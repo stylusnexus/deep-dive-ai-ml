@@ -99,6 +99,7 @@ you reach for when something is already wrong. Don't mix it into normal flow.
 | [`fine-tuning.md`](fine-tuning.md) | Adapting an existing model to your task |
 | [`generative-ai.md`](generative-ai.md) | Prompting, RAG, structured output |
 | [`llm-engineering.md`](llm-engineering.md) | Agents, tools, loops, production |
+| [`hardware.md`](hardware.md) | Deciding whether a model can run on the machine in front of you |
 | [`mcp.md`](mcp.md) | Connecting someone else's MCP server, or shipping your own |
 | [`measurement.md`](measurement.md) | Any time you need a number you can trust |
 | [`incident.md`](incident.md) | **Non-normal.** Something is already wrong |

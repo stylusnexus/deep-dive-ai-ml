@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -220,6 +233,7 @@
 <text x="424" y="166" class="d-fill-red" font-size="11" font-weight="600">no gap — nothing looks wrong</text>
 </g>
 </svg><figcaption>Overfitting announces itself as a gap. Leakage lifts both curves together, so the usual diagnostic shows nothing wrong.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Overfitting announces itself as a gap; leakage lifts both curves together.</strong> A surprisingly good result on a hard problem is more likely a leak than a breakthrough — treat it as a bug report.</blockquote>
   <h2>The forms it takes</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Target leakage</div><div><div class="roadmap-title">A feature encodes the answer</div><div class="roadmap-desc">Predicting customer churn using 'cancellation_date'. Predicting failure using 'maintenance_ticket_raised'. The feature only exists because the outcome already happened.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Train-test contamination</div><div><div class="roadmap-title">The same rows in both sets</div><div class="roadmap-desc">Duplicates, near-duplicates, or the same customer appearing under two IDs. Very common in scraped or merged data.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Preprocessing leakage</div><div><div class="roadmap-title">Fitting on all the data</div><div class="roadmap-desc">Scaling or imputing before splitting means your training set has seen the test set's statistics. Subtle, extremely common.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Temporal leakage</div><div><div class="roadmap-title">Training on the future</div><div class="roadmap-desc">Random splits on time-ordered data let the model learn from events after the ones it predicts. Split by time instead.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Group leakage</div><div><div class="roadmap-title">Related rows split apart</div><div class="roadmap-desc">Multiple readings from one turbine, or several notes on one patient, spread across train and test.</div></div></div></div>
   <div class="callout pitfall"><span class="label">The tell</span>A model that seems too good — 0.99 AUC on a hard problem — is far more likely to be leaking than to be brilliant. Treat a surprisingly good result as a bug report, not a success. The intake sheet's baseline question helps here: if your baseline also scores 0.97, something is wrong with the data, not right with your modelling.</div>

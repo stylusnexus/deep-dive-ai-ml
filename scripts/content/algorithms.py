@@ -90,6 +90,8 @@ LESSONS = [
        "The practical counterpart — training loops, optimisers and schedules with code you can run."),
     ]),
 
+    ("know", '<strong>Overfit a single batch before anything else.</strong> A correctly-wired network drives eight examples to near-zero loss trivially. If it cannot, the bug is in the loop or the data, and no hyperparameter will find it.'),
+
     ("links", [
       ("Google ML Crash Course: gradient descent", "https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent",
        "Interactive treatment of step size and convergence."),
@@ -461,6 +463,8 @@ LESSONS = [
        "Chapter 7 on clustering at scale, including what changes when the data does not fit in memory."),
     ]),
 
+    ("know", '<strong>Clusters are always returned, whether or not they exist.</strong> k-means partitions; it does not detect structure. Check that the same k on shuffled data looks meaningfully worse before believing a clustering.'),
+
     ("links", [
       ("Clustering (scikit-learn)", "https://scikit-learn.org/stable/modules/clustering.html",
        "k-means alongside DBSCAN and hierarchical clustering, with a comparison chart of what each finds."),
@@ -789,6 +793,7 @@ LESSONS = [
 </g>
 </svg>'''),
 
+    ("know", "<strong>Overfitting announces itself as a gap; leakage lifts both curves together.</strong> A surprisingly good result on a hard problem is more likely a leak than a breakthrough — treat it as a bug report."),
     ("h2", "The forms it takes"),
     ("terms", [
       ("Target leakage", "A feature encodes the answer", "Predicting customer churn using 'cancellation_date'. Predicting failure using 'maintenance_ticket_raised'. The feature only exists because the outcome already happened."),

@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -197,6 +210,7 @@
   <p>Lesson 3 asked whether your instrument can tell success from inaction. This lesson is about the layer beneath that: whether anything <em>else</em> ended the run, and whether you would know.</p>
   <p>The failure has a shape. A run stops early. The output shows no error. You attribute the result to the model — because the model is the only component you were thinking about — and you design your next experiment against that attribution. Then you do it eight more times.</p>
   <div class="callout matters"><span class="label">The definition worth memorising</span><strong>A limit that can end a run and cannot be seen is not a guard, it is a confound.</strong> The distinction isn't whether the limit is reasonable — most of them are. It is whether its firing appears anywhere in the output you read afterwards. An invisible guard doesn't just stop the run; it stops it while looking exactly like the thing you were trying to measure.</div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>A limit that can end a run and cannot be seen is not a guard, it is a confound.</strong> An invisible terminator does not merely stop the run — it stops it while looking exactly like the thing you were trying to measure.</blockquote>
   <h2>A worked case: six mechanisms, one symptom</h2>
   <p>Nine runs of a local coding agent on one issue produced zero edits. The obvious reading was that the model wouldn't commit a change. The runs were in fact terminated by <strong>six different mechanisms</strong>, none of which appeared in the output:</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">A read-budget nudge</div><div><div class="roadmap-title">set to 3 by a task classifier</div><div class="roadmap-desc">Fired before the model reached the edit.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A phase transition</div><div><div class="roadmap-title">clamped the pre-edit limit to 4</div><div class="roadmap-desc">Silently overwrote the operator's setting.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decomposition</div><div><div class="roadmap-title">reassigned the nudge to 3 for the rest of the run</div><div class="roadmap-desc">A third writer to the same number.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A whole-run wall clock</div><div><div class="roadmap-title">separate from the per-call timeout</div><div class="roadmap-desc">Nothing in the log named it when it fired.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The wrong model</div><div><div class="roadmap-title">the flag used a different config key</div><div class="roadmap-desc">Six runs credited to a 30B were served by a 9B.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A nil verifier</div><div><div class="roadmap-title">one config default was false</div><div class="roadmap-desc">Which disabled turn-end verification, the fix-attempt loop and per-edit feedback at once.</div></div></div></div>

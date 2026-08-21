@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -236,6 +249,7 @@
   <div class="callout matters"><span class="label">The practical rule</span>If a bigger model would fix it, it's a model problem. If better prompting, better tool results, or more turns would fix it, it's a harness problem. Most of the time it's the harness — which is good news, because the harness is the part you control.</div>
   <h2>The loop, end to end</h2>
   <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">1</div><div><div class="roadmap-title">A request arrives</div><div class="roadmap-desc">The interface hands it to the harness.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2</div><div><div class="roadmap-title">The harness assembles context</div><div class="roadmap-desc">System prompt, session history, retrieved repo context, available tool definitions.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3</div><div><div class="roadmap-title">The loop starts</div><div class="roadmap-desc">Model responds. Wants a tool? Run it, append the result, go again.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">The loop ends</div><div class="roadmap-desc">Model answers without requesting a tool, or hits the turn limit, or escalates.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5</div><div><div class="roadmap-title">The harness persists</div><div class="roadmap-desc">Session and memory are written down so the next turn has history.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>If a bigger model would fix it, it is a model problem. If better prompting, better tool results or more turns would fix it, it is a harness problem.</strong> Most of the time it is the harness — which is good news, because the harness is the part you control.</blockquote>
   <h2>The word you&#x27;ll see elsewhere</h2>
   <p><strong>Harness</strong> is also used for an <em>evaluation</em> harness — the rig that runs a model against a test set. Most projects use it in both senses, which is a real ambiguity in the field rather than a misunderstanding on your part. Context disambiguates: an agent harness runs one task for a user, an eval harness runs many tasks for a score.</p>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents</a><span class="link-note">Anthropic's engineering write-up on when a loop is warranted and when a fixed workflow is better.</span></li></ul></div>

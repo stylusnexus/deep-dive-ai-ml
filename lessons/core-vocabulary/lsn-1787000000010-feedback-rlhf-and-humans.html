@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -236,6 +249,7 @@
   <div class="callout matters"><span class="label">The rule that follows</span>Match the position to reversibility, not to how much you trust the model. Reversible and cheap: out of the loop is fine. Irreversible or outward-facing — sending, publishing, deleting, paying, merging — a human approves first, however good the model has been so far.</div>
   <h2>Where this reappears</h2>
   <p>Block 4 places approval gates in a multi-agent system. Block 5 confronts model-as-judge, which is RLAIF's evaluation twin and carries the same circularity risk. Block 7 runs DPO on a real preference set. The vocabulary is the same throughout.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Match the human's position to reversibility, not to how much you trust the model.</strong> Reversible and cheap: out of the loop is fine. Irreversible or outward-facing: a human approves first, however well it has behaved so far.</blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noopener">InstructGPT (Ouyang et al., 2022)</a><span class="link-note">The RLHF pipeline paper. Figure 2 is the diagram in this lesson, done properly.</span></li><li><a href="https://arxiv.org/abs/2305.18290" target="_blank" rel="noopener">Direct Preference Optimization (Rafailov et al., 2023)</a><span class="link-note">Why the reward model and RL stage can be collapsed into one step.</span></li><li><a href="https://arxiv.org/abs/2212.08073" target="_blank" rel="noopener">Constitutional AI (Bai et al., 2022)</a><span class="link-note">Self-critique against written principles, and how Claude is trained.</span></li><li><a href="https://huggingface.co/docs/trl" target="_blank" rel="noopener">TRL documentation</a><span class="link-note">The library you'll actually run DPO with in Block 7.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

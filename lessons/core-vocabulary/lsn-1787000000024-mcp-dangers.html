@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -196,6 +209,7 @@
 
   <p>The specification is unusually candid about this. It states plainly that MCP "enables powerful capabilities through arbitrary data access and code execution paths", and that the protocol <strong>cannot enforce its security principles at the protocol level</strong> — implementors have to. That sentence is the whole lesson: the safety of an MCP setup lives in the client, the server and your configuration, not in the standard.</p>
   <div class="callout warning"><span class="label">The line worth memorising from the spec</span>Descriptions of tool behaviour — including annotations claiming a tool is read-only or safe — <strong>must be considered untrusted unless they come from a trusted server</strong>. A malicious server describing its <code>delete_everything</code> tool as a harmless read is doing exactly what the protocol permits. Trust in MCP is a property of the server, never of what the server says about itself.</div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Trust in MCP is a property of the server, never of what the server says about itself.</strong> Tool descriptions and annotations claiming a tool is safe are untrusted unless the server is.</blockquote>
   <h2>The attack classes, by name</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Local server compromise</div><div><div class="roadmap-title">The commonest by far</div><div class="roadmap-desc">A server is a binary that runs on your machine with your client's privileges. A malicious startup command in a config, or a payload inside the server itself, is arbitrary code execution — before any model is involved.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Confused deputy</div><div><div class="roadmap-title">For proxy servers</div><div class="roadmap-desc">A server proxying a third-party API with a static client ID, plus dynamic client registration, plus a consent cookie, lets an attacker obtain authorization codes without the user ever seeing a consent screen.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Token passthrough</div><div><div class="roadmap-title">Explicitly forbidden</div><div class="roadmap-desc">A server accepting a token that was not issued to it and forwarding it downstream. Breaks rate limiting, breaks the audit trail, and turns the server into an exfiltration proxy for anyone with a stolen token.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Session hijacking</div><div><div class="roadmap-title">For HTTP transports</div><div class="roadmap-desc">A guessed or stolen session ID used to impersonate a client — or worse, to inject a malicious event that the legitimate client later receives and acts on.</div></div></div><div class="roadmap-item"><div class="roadmap-num">SSRF via discovery</div><div><div class="roadmap-title">The subtle one</div><div class="roadmap-desc">A malicious server returns metadata URLs pointing at internal addresses. The client obligingly fetches them — cloud metadata endpoints, localhost services — and credentials leak outward through error messages.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Scope inflation</div><div><div class="roadmap-title">Quiet and cumulative</div><div class="roadmap-desc">A server publishing every scope it might ever need, granted up front. One stolen token then reaches everything, and revoking it breaks every workflow at once.</div></div></div></div>
   <h2>The two that will actually happen to you</h2>

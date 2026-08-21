@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -226,6 +239,7 @@
   <h2>When k-means is the wrong shape</h2>
   <ul><li><strong>Elongated or curved groups.</strong> k-means draws straight boundaries around round blobs. DBSCAN follows density instead and finds arbitrary shapes.</li><li><strong>Very different group sizes.</strong> A large cluster tends to get split while a small one gets absorbed.</li><li><strong>Outliers.</strong> Every point must join a cluster, so a few extreme values drag a centre toward them. DBSCAN can label points as noise; k-means cannot.</li><li><strong>Unknown k.</strong> If k is genuinely unknown, hierarchical clustering gives you the whole tree of possible groupings to cut where you like.</li></ul>
   <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">A Programmer&#x27;s Guide to Data Mining</span><span class="bk-a">Ron Zacharski</span><span class="bk-n">Free online. The nearest-neighbour and similarity chapters build the intuition slowly, which is what this material needs.</span></li><li><span class="bk-t">Mining of Massive Datasets</span><span class="bk-a">Leskovec, Rajaraman &amp; Ullman</span><span class="bk-n">Chapter 7 on clustering at scale, including what changes when the data does not fit in memory.</span></li></ul></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Clusters are always returned, whether or not they exist.</strong> k-means partitions; it does not detect structure. Check that the same k on shuffled data looks meaningfully worse before believing a clustering.</blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/clustering.html" target="_blank" rel="noopener">Clustering (scikit-learn)</a><span class="link-note">k-means alongside DBSCAN and hierarchical clustering, with a comparison chart of what each finds.</span></li><li><a href="https://scikit-learn.org/stable/modules/neighbors.html" target="_blank" rel="noopener">Nearest neighbours (scikit-learn)</a><span class="link-note">k-NN, distance metrics, and the tree structures that make it tractable.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

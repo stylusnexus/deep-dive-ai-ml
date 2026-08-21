@@ -87,6 +87,9 @@ def render_block(b):
         _, caption, svg = b
         return (f'  <figure class="diagram">{svg}'
                 f"<figcaption>{caption}</figcaption></figure>")
+    if kind == "know":
+        return (f'  <blockquote class="know"><span class="know-label">Worth knowing</span>'
+                f"{b[1]}</blockquote>")
     if kind == "books":
         items = "".join(
             f'<li><span class="bk-t">{E(t)}</span>'

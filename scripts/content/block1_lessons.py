@@ -53,6 +53,8 @@ LESSONS = [
     ("p", "Some systems write a placeholder rather than a null when a reading fails: <code>9999</code>, <code>-1</code>, <code>0</code>, <code>1900-01-01</code>. These are missing values in disguise, and because they're numeric they silently pollute every statistic."),
     ("p", "In the Block 1 data, 22 rotor-speed readings are exactly 9999.0. Left in place they drag the column mean from 14.4 to 53.3 — a nearly fourfold distortion from 22 rows in six thousand. The tell is a repeated, round, physically implausible value."),
 
+    ("know", '<strong>A numeric-looking column that loads as text is a question, not a detail.</strong> It means something non-numeric is in there. Ten seconds of reading dtypes routinely saves an afternoon.'),
+
     ("links", [
       ("pandas dtypes", "https://pandas.pydata.org/docs/user_guide/basics.html#dtypes",
        "What each type is, and how missing values force type changes."),
@@ -193,6 +195,7 @@ LESSONS = [
     ("p", "Vibration readings are missing on about 7% of turbines. Comparing those rows against the rest: the missing group has a failure rate of 24% against 14.9% for the rest. Missingness is strongly associated with the outcome."),
     ("p", "The mechanism is physical — the sensors fail most on the turbines shaking hardest. So the missing values are disproportionately the <em>high</em> ones. Fill them with the median and you replace the most alarming readings in the dataset with typical ones, systematically hiding the risk you were hired to detect."),
 
+    ("know", "<strong>Why a value is missing matters more than how many are missing.</strong> Under MNAR the median fill replaces your most alarming readings with typical ones, hiding exactly the risk you were hired to find."),
     ("h2", "The move that turns a problem into a feature"),
     ("p", "Add a binary column recording that the value was missing, before filling anything. It costs one column and preserves the signal that the imputation is about to destroy. In the Block 1 pipeline, that flag ends up among the more predictive features — the absence of data <em>is</em> data."),
     ("callout", "matters", "The order that matters", "Record the flag, then impute — and impute inside a pipeline, after the split. Fitting an imputer on the full dataset means the training data has seen the test set's statistics. It's one of the most common leaks in practice precisely because it doesn't feel like model fitting."),
@@ -355,6 +358,8 @@ LESSONS = [
 
     ("h2", "The connection to everything else"),
     ("p", "This is the same principle as the rest of the program arriving early: verify rather than trust, hold something back that the optimiser can't see, and don't let the thing producing the work also be the thing judging it. Blocks 5 and 6 formalise it. Here it's just good practice."),
+
+    ("know", '<strong>Let it write the code. Do not let it make the decisions.</strong> Every entry on your cleaning-decisions list should be one you can defend, and “the model suggested it” is not a defence.'),
 
     ("links", [
       ("Building effective agents", "https://www.anthropic.com/engineering/building-effective-agents",

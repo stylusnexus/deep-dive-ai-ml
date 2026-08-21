@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -226,6 +239,7 @@
   <h2>The Block 1 case</h2>
   <p>Vibration readings are missing on about 7% of turbines. Comparing those rows against the rest: the missing group has a failure rate of 24% against 14.9% for the rest. Missingness is strongly associated with the outcome.</p>
   <p>The mechanism is physical — the sensors fail most on the turbines shaking hardest. So the missing values are disproportionately the <em>high</em> ones. Fill them with the median and you replace the most alarming readings in the dataset with typical ones, systematically hiding the risk you were hired to detect.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Why a value is missing matters more than how many are missing.</strong> Under MNAR the median fill replaces your most alarming readings with typical ones, hiding exactly the risk you were hired to find.</blockquote>
   <h2>The move that turns a problem into a feature</h2>
   <p>Add a binary column recording that the value was missing, before filling anything. It costs one column and preserves the signal that the imputation is about to destroy. In the Block 1 pipeline, that flag ends up among the more predictive features — the absence of data <em>is</em> data.</p>
   <div class="callout matters"><span class="label">The order that matters</span>Record the flag, then impute — and impute inside a pipeline, after the split. Fitting an imputer on the full dataset means the training data has seen the test set's statistics. It's one of the most common leaks in practice precisely because it doesn't feel like model fitting.</div>

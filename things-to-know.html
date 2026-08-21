@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Things to Know</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #34d399; --accent2: #6c8fff;
+    --text: #e2e8f0; --muted: #94a3b8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  .eyebrow { color: var(--muted); font-size: 0.85em; letter-spacing: 0.08em; text-transform: uppercase; }
+  h1 { font-size: 2.1em; margin: 10px 0 8px; line-height: 1.2; }
+  .lede { color: var(--muted); font-size: 1.08em; margin: 0 0 32px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 40px; }
+  .chip {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 999px;
+    padding: 4px 14px; font-size: 0.82em; color: var(--muted);
+  }
+  ol.lessons { list-style: none; counter-reset: lsn; padding: 0; margin: 0; }
+  ol.lessons li { counter-increment: lsn; margin-bottom: 12px; }
+  a.card {
+    display: block; text-decoration: none; color: inherit; position: relative;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 22px 18px 68px; transition: border-color .15s, background .15s, transform .15s;
+  }
+  a.card:hover { border-color: var(--accent); background: var(--surface2); transform: translateY(-1px); }
+  a.card::before {
+    content: counter(lsn); position: absolute; left: 20px; top: 18px;
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--accent); font-weight: 700; font-size: 0.95em;
+    display: flex; align-items: center; justify-content: center;
+  }
+  a.card:hover::before { border-color: var(--accent); }
+  .card h2 { font-size: 1.05em; margin: 0 0 4px; line-height: 1.35; color: var(--text); }
+  .card p { margin: 0; color: var(--muted); font-size: 0.92em; line-height: 1.55; }
+  .aside {
+    margin-top: 44px; background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2); border-radius: 8px; padding: 18px 22px;
+  }
+  .aside h3 { margin: 0 0 8px; font-size: 0.95em; }
+  .aside p { margin: 0 0 10px; color: var(--muted); font-size: 0.92em; }
+  .aside p:last-child { margin-bottom: 0; }
+  .aside a { color: var(--accent2); }
+  footer { margin-top: 40px; color: var(--muted); font-size: 0.85em; border-top: 1px solid var(--border); padding-top: 20px; }
+  @media (max-width: 480px) {
+    body { padding: 32px 16px 60px; }
+    h1 { font-size: 1.7em; }
+    a.card { padding: 16px 16px 16px 60px; }
+    a.card::before { left: 14px; }
+  }
+</style>
+
+<style>
+  ul.knows { list-style: none; padding: 0; }
+  ul.knows li {
+    margin: 0 0 20px; padding: 16px 18px; background: var(--surface);
+    border-left: 3px solid var(--accent2); border-radius: 6px;
+  }
+  ul.knows li a { display: block; font-size: 0.72em; text-transform: uppercase;
+                   letter-spacing: 0.09em; font-weight: 700; text-decoration: none;
+                   color: var(--accent2); opacity: 0.95; margin-bottom: 2px; }
+  ul.knows li a:hover { text-decoration: underline; }
+  ul.knows li p { margin: 8px 0 0; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<p class="eyebrow">📌 Revision sheet</p>
+<h1>Things to Know</h1>
+<p class="lede">Every compressed, load-bearing line from the course, collected. 31 of them. Each links back to the lesson that earns it — read this before an interview, a vendor call, or a design review.</p>
+
+<h2>🎯 Core Vocabulary: The Terms Every LLM System Uses</h2>
+<ul class="knows">
+  <li><a href="lessons/core-vocabulary/lsn-1787000000000-agent-loop-and-harness.html">The Agent Loop and the Harness</a><p><strong>If a bigger model would fix it, it is a model problem. If better prompting, better tool results or more turns would fix it, it is a harness problem.</strong> Most of the time it is the harness — which is good news, because the harness is the part you control.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000002-weights-gguf-quantization.html">Weights, GGUF and Quantization</a><p><strong>Prefer the bigger model, more heavily quantized.</strong> A 4-bit 70B almost always beats a 16-bit 13B of similar file size. Precision is the cheaper thing to give up.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000003-serving-locally.html">Serving Locally: Ollama, llama.cpp and tok/s</a><p><strong>When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck.</strong> A figure measured on the wrong phase points your optimisation work at the wrong layer entirely.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000004-embeddings-and-retrieval.html">Embeddings, Vectors and Semantic Routing</a><p><strong>Try keyword search before you reach for a vector database.</strong> On short, jargon-heavy, identifier-rich text it frequently wins, and it costs nothing to test. This is the dumb-baseline question applied to retrieval.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000005-tool-calls-and-mcp.html">Tool Calls and MCP</a><p><strong>The model chooses what to run, and its choice is influenced by every piece of text in its context — including text that arrived from outside.</strong> That is why tool descriptions are prompt engineering and why retrieved content is an attack surface.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000007-eval-battery.html">The Eval Battery</a><p><strong>Twenty real tasks from your own work, with known-good outcomes, is the most valuable evaluation asset you can own.</strong> Small enough to build in an afternoon, specific enough that no vendor has optimised for it.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000008-overfitting-and-underfitting.html">Overfitting and Underfitting</a><p><strong>Any time you tune against results you can see, you risk fitting the measurement rather than the thing measured.</strong> The defence never changes: keep some data where you cannot look at it.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000009-agents-autonomy-and-danger.html">Agents, Autonomy and the Danger Surface</a><p><strong>Everything an agent reads is data, not instructions.</strong> Defence is architectural — limit what the tools can do — not a matter of prompting the model to be careful.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000010-feedback-rlhf-and-humans.html">Reinforcement, Feedback and Humans in the Loop</a><p><strong>Match the human's position to reversibility, not to how much you trust the model.</strong> Reversible and cheap: out of the loop is fine. Irreversible or outward-facing: a human approves first, however well it has behaved so far.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000011-context-engineering.html">Context Engineering: What Goes In Decides What Comes Out</a><p><strong>Put the instruction and the most relevant material at the start or the end — never the middle.</strong> Attention over long context is U-shaped, so ranking matters more than recall.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000012-structured-output-json.html">Structured Output: JSON You Can Actually Parse</a><p><strong>Valid JSON is not correct JSON.</strong> Schema validation catches shape. Only your own checks catch sense — a perfectly-formed object can carry an invented ID and a confidence score attached to a guess.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000013-hallucination-and-grounding.html">Hallucination and Grounding</a><p><strong>Fluency and accuracy are independent.</strong> Confident phrasing carries no information about correctness, because confident phrasing is what the training data looks like. The model seeming sure is never evidence.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000015-class-imbalance-and-thresholds.html">Class Imbalance and Choosing a Threshold</a><p><strong>Compute the trivial baseline before reporting any accuracy figure.</strong> If your model is at 99.2% and always-guess-the-majority scores 99.1%, you have not built anything.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000018-chain-of-thought-and-reasoning.html">Chain-of-Thought and Reasoning Tokens</a><p><strong>Chain-of-thought is not the model becoming smarter — it is the model being given room to compute.</strong> Which is why it helps on multi-step problems and does nothing for recall.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000019-loops-at-inference.html">Loops at Inference: Control Flow, Limits and Dangers</a><p><strong>A loop improves the result only if signal enters from outside the loop.</strong> A test, a compiler, a schema, or the independence of separate samples. A loop with no external signal mostly amplifies what the model already believed, including its errors.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000020-loops-in-training.html">Loops in Training: Flywheels and Model Collapse</a><p><strong>Something outside the model's own opinion must decide what gets kept.</strong> A verifier, a human, a game result, a written constitution. Remove the filter and you are training on your own unfiltered output.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000024-mcp-dangers.html">MCP: The Danger Surface</a><p><strong>Trust in MCP is a property of the server, never of what the server says about itself.</strong> Tool descriptions and annotations claiming a tool is safe are untrusted unless the server is.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000025-local-hardware-limits.html">Local Hardware: CUDA, Metal and What Actually Constrains You</a><p><strong>Capacity is a hard wall; bandwidth is only a slope.</strong> A model that does not fit does not run at any speed. A model that fits but runs slowly still runs. Check that it fits before you compare tokens per second.</p></li>
+  <li><a href="lessons/core-vocabulary/lsn-1787000000025-local-hardware-limits.html">Local Hardware: CUDA, Metal and What Actually Constrains You</a><p><strong>What blocks you is usually neither memory nor speed — it is library support.</strong> CUDA-only kernels do not run on Metal regardless of how much memory you have. Check the library before you check the chip.</p></li>
+</ul>
+<h2>⚙️ Algorithms That Matter Here</h2>
+<ul class="knows">
+  <li><a href="lessons/algorithms/lsn-1787100000000-gradient-descent-and-backprop.html">Gradient Descent and Backpropagation</a><p><strong>Overfit a single batch before anything else.</strong> A correctly-wired network drives eight examples to near-zero loss trivially. If it cannot, the bug is in the loop or the data, and no hyperparameter will find it.</p></li>
+  <li><a href="lessons/algorithms/lsn-1787100000004-clustering-and-knn.html">k-Means, k-NN and the Curse of Dimensionality</a><p><strong>Clusters are always returned, whether or not they exist.</strong> k-means partitions; it does not detect structure. Check that the same k on shuffled data looks meaningfully worse before believing a clustering.</p></li>
+  <li><a href="lessons/algorithms/lsn-1787100000008-data-leakage.html">Data Leakage</a><p><strong>Overfitting announces itself as a gap; leakage lifts both curves together.</strong> A surprisingly good result on a hard problem is more likely a leak than a breakthrough — treat it as a bug report.</p></li>
+</ul>
+<h2>🧪 Recipes, Decisions and Harnesses</h2>
+<ul class="knows">
+  <li><a href="lessons/engineering-practice/lsn-1787400000002-why-measurement-decides.html">Why Measurement Decides</a><p><strong>An instrument that cannot tell success from inaction produces noise, not numbers.</strong> Prove it fails before the work and passes after it, before you trust anything it tells you.</p></li>
+  <li><a href="lessons/engineering-practice/lsn-1787400000004-swe-bench-and-how-to-run-it.html">SWE-bench, and How to Actually Run It</a><p><strong>A benchmark must make doing nothing and solving it score differently.</strong> FAIL_TO_PASS proves the work happened; PASS_TO_PASS proves nothing else broke. Most homemade benchmarks omit the second half and quietly reward vandalism.</p></li>
+  <li><a href="lessons/engineering-practice/lsn-1787400000005-confounds-you-cannot-see.html">Confounds You Cannot See</a><p><strong>A limit that can end a run and cannot be seen is not a guard, it is a confound.</strong> An invisible terminator does not merely stop the run — it stops it while looking exactly like the thing you were trying to measure.</p></li>
+  <li><a href="lessons/engineering-practice/lsn-1787400000007-models-judging-models.html">Models Judging Models</a><p><strong>Ask not how accurate your grader is, but whether its error correlates with what you changed.</strong> Noise costs you power. Bias that tracks the treatment invents an effect, and more sampling will not remove it.</p></li>
+  <li><a href="lessons/engineering-practice/lsn-1787400000008-deterministic-first.html">Deterministic First</a><p><strong>A model is the most expensive, slowest, least debuggable and least testable component you can put in a system.</strong> Sometimes it is the only thing that can do the job. Frequently it is not.</p></li>
+  <li><a href="lessons/engineering-practice/lsn-1787400000009-spec-driven-development.html">Vibe Coding and Spec-Driven Development</a><p><strong>An agent cannot tell a decision you made from a sentence you wrote carelessly.</strong> Every under-specified area becomes an invented answer, delivered confidently. Vagueness surfaces as working code, not as questions.</p></li>
+</ul>
+<h2>🔍 Block 1 · Python, Data and EDA</h2>
+<ul class="knows">
+  <li><a href="lessons/block1-data-eda/lsn-1787300000000-tabular-data-and-dtypes.html">Tabular Data and the Lies dtypes Tell</a><p><strong>A numeric-looking column that loads as text is a question, not a detail.</strong> It means something non-numeric is in there. Ten seconds of reading dtypes routinely saves an afternoon.</p></li>
+  <li><a href="lessons/block1-data-eda/lsn-1787300000002-missing-data-mechanisms.html">Missing Data: The Mechanism Matters More Than the Amount</a><p><strong>Why a value is missing matters more than how many are missing.</strong> Under MNAR the median fill replaces your most alarming readings with typical ones, hiding exactly the risk you were hired to find.</p></li>
+  <li><a href="lessons/block1-data-eda/lsn-1787300000004-ai-assisted-analysis.html">AI-Assisted Analysis, and Where It Lies to You</a><p><strong>Let it write the code. Do not let it make the decisions.</strong> Every entry on your cleaning-decisions list should be one you can defend, and “the model suggested it” is not a defence.</p></li>
+</ul>
+
+</body>
+</html>

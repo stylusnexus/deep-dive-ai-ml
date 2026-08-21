@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -225,6 +238,7 @@
   <div class="callout pitfall"><span class="label">Never trust it because it parsed</span>Valid JSON is not correct JSON. A perfectly-formed object can contain an invented product ID, a date that doesn't exist, or a confidence score of 0.99 attached to a guess. Schema validation catches shape. Only your own checks catch sense — which is the same lesson as Block 5's: the thing being evaluated cannot be the thing that grades it.</div>
   <h2>Where this connects</h2>
   <p>This is the mechanism under tool calling from lesson 6 — a tool call <em>is</em> schema-constrained structured output, which is why providers that support tool calling support structured output essentially for free. It's also what makes deterministic grading possible in Block 5: an output that validates against a schema is machine-checkable without a judge.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Valid JSON is not correct JSON.</strong> Schema validation catches shape. Only your own checks catch sense — a perfectly-formed object can carry an invented ID and a confidence score attached to a guess.</blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://platform.openai.com/docs/guides/structured-outputs" target="_blank" rel="noopener">Structured outputs (OpenAI)</a><span class="link-note">Rung 3 of the ladder, documented — schema-constrained generation and its limits.</span></li><li><a href="https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md" target="_blank" rel="noopener">GBNF grammars in llama.cpp</a><span class="link-note">Rung 4. Constrained decoding, where invalid output is made unrepresentable.</span></li><li><a href="https://docs.pydantic.dev" target="_blank" rel="noopener">Pydantic</a><span class="link-note">Validation that checks values, not just shape. The repair loop hangs off its error messages.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

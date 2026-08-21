@@ -185,6 +185,19 @@
   .bk-t { display: block; font-weight: 600; color: var(--text); }
   .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
   .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
 </style>
 
 </head>
@@ -222,6 +235,7 @@
   <p>A score alone is nearly useless six weeks later. Record the model and quantization, the harness version or commit, the sampling settings, the date, and the per-task outcomes rather than only the total. Without those, a changed number tells you something moved but not what.</p>
   <h2>Where this goes next</h2>
   <p>You now have the vocabulary the rest of the program assumes: the loop and the harness around it, tokens and context, weights and quantization, local serving, embeddings and retrieval, tool calls and MCP, routing and sampling, and evaluation. Block 1 starts on data. Every block from here re-uses these terms rather than introducing parallel ones.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Twenty real tasks from your own work, with known-good outcomes, is the most valuable evaluation asset you can own.</strong> Small enough to build in an afternoon, specific enough that no vendor has optimised for it.</blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://developers.google.com/machine-learning/crash-course/overfitting/overfitting" target="_blank" rel="noopener">Google ML Crash Course: overfitting</a><span class="link-note">Short, visual treatment of held-out evaluation if you want a second angle.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
