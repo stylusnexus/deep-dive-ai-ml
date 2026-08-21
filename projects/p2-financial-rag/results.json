@@ -3,25 +3,25 @@
     "qid": "q01",
     "hops": 1,
     "retrieval_recall": 1.0,
-    "groundedness": 1.0,
+    "groundedness": 0.875,
     "correct": false,
-    "answer": "## Gearbox temperature  The gearbox oil temperature must not exceed 82 degrees Celsius during continuous opera"
+    "answer": "The maximum gearbox oil temperature during continuous operation is **82 degrees Celsius** [1]."
   },
   {
     "qid": "q02",
     "hops": 1,
     "retrieval_recall": 1.0,
-    "groundedness": 1.0,
-    "correct": true,
-    "answer": "## Routine inspection  Every turbine receives a routine inspection every 180 days. [1]"
+    "groundedness": 0.667,
+    "correct": false,
+    "answer": "A turbine older than twelve years must be inspected every **90 days** [1]."
   },
   {
     "qid": "q03",
     "hops": 1,
     "retrieval_recall": 1.0,
-    "groundedness": 1.0,
+    "groundedness": 0.909,
     "correct": false,
-    "answer": "## Summary  Turbine WHL-031 performed a controlled shutdown after gearbox oil temperature reached 91.4 degrees"
+    "answer": "Turbine WHL-031 performed a controlled shutdown after its gearbox oil temperature reached 91.4 degrees Celsius"
   },
   {
     "qid": "q04",
@@ -43,33 +43,33 @@
     "qid": "q06",
     "hops": 2,
     "retrieval_recall": 1.0,
-    "groundedness": 1.0,
-    "correct": true,
-    "answer": "The preceding routine inspection had been deferred by 28 days under the single-deferral provision. [1]"
+    "groundedness": 0.0,
+    "correct": false,
+    "answer": ""
   },
   {
     "qid": "q07",
     "hops": 2,
     "retrieval_recall": 1.0,
-    "groundedness": 1.0,
+    "groundedness": 0.0,
     "correct": false,
-    "answer": "## Post-alert inspection  A Level 2 vibration alert requires inspection within 14 days. [1]"
+    "answer": ""
   },
   {
     "qid": "q08",
     "hops": 1,
     "retrieval_recall": 1.0,
-    "groundedness": 1.0,
+    "groundedness": 0.75,
     "correct": false,
-    "answer": "## Operating envelope  Turbines at Whitelee operate under the standard envelope defined in OPS-STD-04 unless a"
+    "answer": "According to the Whitelee Site Profile, there are **68** operational turbines at Whitelee [1]."
   },
   {
     "qid": "q09",
     "hops": 1,
     "retrieval_recall": 1.0,
-    "groundedness": 1.0,
+    "groundedness": 0.786,
     "correct": true,
-    "answer": "## Restriction  A turbine that has shut down twice within 30 days may not be returned to service without regio"
+    "answer": "According to the context, a turbine that has shut down twice within 30 days may not be returned to service wit"
   },
   {
     "qid": "q10",

@@ -54,6 +54,14 @@ CALLOUT_VARIANTS = set(re.findall(r"\.callout\.([a-z]+)", STYLE))
 
 def render_block(b):
     kind = b[0]
+    # prose blocks are emitted as raw HTML, so a stray backtick renders literally
+    if kind in ("p", "h2", "h3"):
+        assert "`" not in b[1], f"backtick in prose (use <code>): {b[1][:60]}"
+    if kind == "callout":
+        assert "`" not in b[3], f"backtick in callout (use <code>): {b[2]}"
+    if kind == "know":
+        for part in b[1:]:
+            assert "`" not in part, f"backtick in know block (use <code>): {part[:60]}"
     if kind == "h2":
         return f"  <h2>{E(b[1])}</h2>"
     if kind == "h3":

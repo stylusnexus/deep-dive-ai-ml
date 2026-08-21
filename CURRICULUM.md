@@ -97,9 +97,12 @@ system cannot handle.
 
 Built in **LangGraph / LangChain / LangSmith**, matching the original. The Microsoft agents course is Azure/AutoGen-based and lifts as reading only, not code.
 
-- Single-agent loops: reasoning, memory, tools
-- Multi-agent systems and handoffs
-- Human-in-the-loop and escalation
+- Single-agent loops: the loop written by hand before any framework ✅
+- What a graph runtime buys, and what it costs ✅
+- Multi-agent systems, handoffs, and approval gates that actually halt ✅
+- Telemetry and instrumentation — the trace is the only evidence ✅
+
+4 lessons in `lessons/block4-agentic/`. Notebooks and Project 3 still to build.
 
 **Exit:** Project 3 — multi-agent delivery-exception handler runs with human approval, traced in LangSmith.
 

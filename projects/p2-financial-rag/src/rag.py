@@ -77,7 +77,7 @@ def generate(question, passages, base, model, encoder, timeout=90):
     ctx = "\n\n".join(f"[{i+1}] {p['text']}" for i, p in enumerate(passages))
     if not base:
         return extractive(question, passages, encoder)
-    body = json.dumps({"model": model, "temperature": 0, "max_tokens": 200,
+    body = json.dumps({"model": model, "temperature": 0, "max_tokens": 700,
                        "messages": [{"role": "system", "content": SYSTEM},
                                     {"role": "user",
                                      "content": f"Context:\n{ctx}\n\nQuestion: {question}"}]}).encode()
@@ -86,7 +86,13 @@ def generate(question, passages, base, model, encoder, timeout=90):
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             out = json.loads(r.read())["choices"][0]["message"]["content"]
-        return re.sub(r"<think>.*?</think>", "", out, flags=re.S).strip()
+        stripped = re.sub(r"<think>.*?</think>", "", out, flags=re.S).strip()
+        if stripped:
+            return stripped
+        # A thinking model that ran out of tokens mid-thought leaves nothing after
+        # stripping. Fall back to the text after the last close tag, then to raw.
+        tail = out.rsplit("</think>", 1)[-1].strip() if "</think>" in out else ""
+        return tail or out.strip() or "NOT IN CONTEXT"
     except Exception as ex:
         # A slow or busy local endpoint must not kill the run. Degrade per call and
         # record it, so the report says which answers were generated and which were not.
@@ -106,9 +112,16 @@ def groundedness(answer: str, context: str) -> float | None:
 def is_correct(answer: str, expected: str, gold_docs: list[str]) -> bool:
     if not gold_docs:
         return answer.strip().upper().startswith("NOT IN CONTEXT")
-    key = [k for k in re.findall(r"[A-Za-z0-9\.]+", expected)
-           if len(k) > 2 and k.lower() not in {"the", "and", "for", "was", "are"}][:6]
-    return sum(k.lower() in answer.lower() for k in key) >= max(2, len(key) // 2)
+    # Tokens, without punctuation. Numbers are kept whatever their length — "82"
+    # is the entire answer to some questions, and dropping it made the check
+    # unable to pass on the questions it mattered most for.
+    STOP = {"the", "and", "for", "was", "are", "with", "that", "this", "its"}
+    key = [k for k in re.findall(r"[A-Za-z0-9]+", expected)
+           if (k.isdigit() or len(k) > 2) and k.lower() not in STOP][:6]
+    if not key:
+        return False
+    hits = sum(k.lower() in answer.lower() for k in key)
+    return hits >= max(2, (len(key) + 1) // 2)
 
 
 def md_table(rows: list[dict]) -> str:

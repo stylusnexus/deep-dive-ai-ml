@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What a Graph Runtime Buys</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 2 of 4</span>
+  <h1>What a Graph Runtime Buys</h1>
+  <p class="subtitle">The five things you wanted after writing the loop by hand — and what they cost.</p>
+
+  <p>LangGraph models an agent as a state graph: nodes that transform state, edges that decide what runs next. That framing sounds like ceremony until you match it against the list of wants from the previous lesson, at which point each piece is answering a specific problem you already had.</p>
+  <h2>The model in one paragraph</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">State</div><div><div class="roadmap-title">A typed dictionary threaded through everything</div><div class="roadmap-desc">The explicit state object the last lesson told you to add early, made structural. Every node receives it and returns updates to it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Nodes</div><div><div class="roadmap-title">Functions that transform state</div><div class="roadmap-desc">Call the model, run a tool, summarise, validate. Ordinary functions — no framework magic inside them.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Edges</div><div><div class="roadmap-title">What runs next</div><div class="roadmap-desc">Fixed, or conditional on the state. A conditional edge back to an earlier node is the loop.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Checkpointer</div><div><div class="roadmap-title">Persists state after every node</div><div class="roadmap-desc">This is the one that changes what is possible, and it is covered below.</div></div></div></div>
+  <pre><code>from langgraph.graph import StateGraph, END
+
+def call_model(state):  ...      # returns {&quot;messages&quot;: [...]}
+def run_tools(state):   ...      # returns {&quot;messages&quot;: [...]}
+
+g = StateGraph(AgentState)
+g.add_node(&quot;model&quot;, call_model)
+g.add_node(&quot;tools&quot;, run_tools)
+g.set_entry_point(&quot;model&quot;)
+g.add_conditional_edges(&quot;model&quot;, needs_tool, {&quot;tools&quot;: &quot;tools&quot;, &quot;done&quot;: END})
+g.add_edge(&quot;tools&quot;, &quot;model&quot;)     # the loop
+agent = g.compile(checkpointer=saver)</code></pre>
+  <p>That is the same loop as the previous lesson, with the control flow lifted out of a <code>for</code> statement and made data. Which is what makes the rest possible.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 215" role="img" aria-label="An agent as a state graph"><defs><marker id="g4" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="30" width="88" height="34" rx="5" class="d-box"/><text x="30" y="52" class="d-label-sm">START</text>
+<path d="M100 47 L134 47" class="d-arrow-accent" marker-end="url(#g4)"/>
+<rect x="134" y="30" width="112" height="34" rx="5" class="d-box-accent"/><text x="158" y="52" class="d-label-sm">model node</text>
+<path d="M246 47 L280 47" class="d-arrow-accent" marker-end="url(#g4)"/>
+<polygon points="280,47 340,24 400,47 340,70" class="d-box"/>
+<text x="304" y="51" class="d-label-sm">tool call?</text>
+<path d="M400 47 L440 47" class="d-arrow-accent" marker-end="url(#g4)"/>
+<rect x="440" y="30" width="112" height="34" rx="5" class="d-box"/><text x="466" y="52" class="d-label-sm">tools node</text>
+<path d="M496 64 L496 92 L190 92 L190 66" class="d-arrow-accent" marker-end="url(#g4)"/>
+<text x="266" y="108" class="d-label-sm">conditional edge back: this is the loop</text>
+<path d="M340 70 L340 128" class="d-arrow-accent" marker-end="url(#g4)"/>
+<rect x="300" y="128" width="80" height="30" rx="5" class="d-box-good"/><text x="326" y="148" class="d-label-sm">END</text>
+<rect x="12" y="168" width="616" height="40" rx="6" class="d-box-warn"/>
+<text x="28" y="192" class="d-label-sm">Checkpointer saves state after every node — which is what makes pausing, resuming and inspecting possible.</text>
+</svg><figcaption>The same loop, with control flow lifted out of a for-statement and made data. That is what lets something else — a checkpointer, a human, a debugger — get between the steps.</figcaption></figure>
+  <h2>The five things it buys</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Resumption</div><div><div class="roadmap-title">State is saved after every node</div><div class="roadmap-desc">A crash on turn nine resumes at turn nine rather than replaying eight turns of model calls. On a long run this is the difference between an annoyance and a lost afternoon.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Interrupts</div><div><div class="roadmap-title">Pause before a node, resume later</div><div class="roadmap-desc">The approval gate that actually halts. Covered properly in the next lesson, and it is the strongest single argument for the framework.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Branching</div><div><div class="roadmap-title">Conditional edges</div><div class="roadmap-desc">Route by task type without a growing thicket of if-statements inside one function.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Parallelism</div><div><div class="roadmap-title">Independent nodes run together</div><div class="roadmap-desc">Two retrievals that do not depend on each other take one node's worth of wall clock rather than two.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Inspectability</div><div><div class="roadmap-title">The state history is a record</div><div class="roadmap-desc">What the state was at every step of a run that finished yesterday. This is the trajectory log from the operating lesson, produced by construction rather than by discipline.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Checkpointing is the feature; everything else is convenience.</p><p class="know-why">Branching, parallelism and typed state are all things you could write yourself in an afternoon. Persisting state after every node — so a run can be interrupted, inspected, resumed on another machine, or paused for a human — is genuinely hard to retrofit, and it is what makes approval gates and long-running agents possible at all.</p><p class="know-eg"><span class="know-eg-label">For example</span>A three-hour agent run crashes at hour two on a transient API error. Without checkpointing you re-run from the start and pay for every model call again. With it you resume from the last completed node. The same mechanism is what lets the run stop and wait for a human overnight.</p></blockquote>
+  <h2>What it costs</h2>
+  <ul><li><strong>Indirection.</strong> A stack trace now runs through framework code. When something misbehaves you are debugging your logic and its runtime at once.</li><li><strong>A version surface.</strong> The API has moved repeatedly and will again. That is a maintenance cost you have signed up for.</li><li><strong>Conceptual overhead for simple cases.</strong> A two-node graph is more code and more concepts than a <code>while</code> loop, and no better.</li><li><strong>Easy over-modelling.</strong> Graphs invite nodes. A twelve-node graph where three would do is harder to reason about than the loop it replaced.</li></ul>
+  <div class="callout matters"><span class="label">Take the framework when you need the checkpointer</span>If your agent runs for seconds, never pauses, and does one thing, the hand-written loop is better — fewer dependencies, a stack trace you own, and nothing to keep up with. Reach for the graph when you need to pause, resume, branch meaningfully, or inspect a finished run. That is a decision about requirements, not about sophistication.</div>
+  <h2>The state design decision</h2>
+  <p>The one thing worth getting right up front, because it is expensive to change later: what goes in the state, and how updates combine.</p>
+  <pre><code>from typing import Annotated, TypedDict
+from operator import add
+
+class AgentState(TypedDict):
+    messages: Annotated[list, add]     # nodes append; updates are concatenated
+    plan: str                          # nodes replace; last write wins
+    findings: Annotated[list, add]     # append
+    turn: int                          # replace
+    approved: bool</code></pre>
+  <p>The annotation decides how two updates to the same key combine. <code>add</code> concatenates, which is what you want for anything accumulating. No annotation means replacement, which is what you want for a current value. Getting this wrong produces a bug that looks like the agent forgetting things — because it is.</p>
+  <h2>Where it fits with everything else</h2>
+  <p>The graph does not change what an agent is. The loop is the same loop, the model still only emits text, and <code>execute</code> is still the entire blast radius. What changes is that the control flow is now data rather than code, which is what lets something else — a checkpointer, a human, a debugger — get between the steps.</p>
+  <div class="callout pitfall"><span class="label">The framework does not supply judgement</span>Nothing here decides your termination conditions, your tool permissions, your approval gates or your budget caps. A graph with no turn limit spins exactly as a <code>while True</code> does. Every discipline from the operating and danger lessons still applies, and the framework will happily let you skip all of it.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://langchain-ai.github.io/langgraph/" target="_blank" rel="noopener">LangGraph documentation</a><span class="link-note">State, nodes, edges and the checkpointer, with the concepts in the order this lesson uses them.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">Worth re-reading here: the argument that most tasks need a workflow rather than an agent applies to graphs too.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Which LangGraph feature is genuinely hard to write yourself?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Conditional branching between nodes</div>
+      <div class="quiz-opt">Checkpointing state after every node — it is what makes resumption, interrupts and inspection possible</div>
+      <div class="quiz-opt">Typed state dictionaries</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Your agent runs for two seconds, never pauses, and does one thing. What should you use?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A graph, for consistency with future agents</div>
+      <div class="quiz-opt">The hand-written loop — fewer dependencies, a stack trace you own, nothing to keep up with</div>
+      <div class="quiz-opt">A graph, because frameworks are more reliable than custom code</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What does an Annotated[list, add] state field do that a plain list does not?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Validates the list contents</div>
+      <div class="quiz-opt">Concatenates updates from nodes rather than replacing — which is what you want for anything accumulating</div>
+      <div class="quiz-opt">Persists it to the checkpointer</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. What does adopting a graph runtime change about the agent&#x27;s blast radius?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It sandboxes tool execution automatically</div>
+      <div class="quiz-opt">Nothing — the tool executor is still the entire blast radius, and the framework supplies no judgement about limits</div>
+      <div class="quiz-opt">It adds approval gates by default</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

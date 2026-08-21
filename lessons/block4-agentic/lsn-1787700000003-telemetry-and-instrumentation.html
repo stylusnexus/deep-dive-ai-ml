@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telemetry: Making the Run Legible</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 4 of 4</span>
+  <h1>Telemetry: Making the Run Legible</h1>
+  <p class="subtitle">You cannot reproduce an agent run. The trace is the only evidence it happened the way you think.</p>
+
+  <p>Every other lesson in this course assumes you can find out what happened. That assumption is doing a great deal of work, and it is false by default. An agent run cannot be reproduced — sampling varies, retrieval varies, external state moves, and the model behind a version alias may not be the one you called yesterday.</p>
+  <p>So the trace is not a debugging convenience. It is the <strong>only artefact</strong> that survives, and gaps in it are outages of your ability to know anything.</p>
+  <h2>The vocabulary, because it is standard and worth using</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Trace</div><div><div class="roadmap-title">One end-to-end run</div><div class="roadmap-desc">Everything that happened in service of a single request, tied together by one identifier.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Span</div><div><div class="roadmap-title">One unit of work inside it</div><div class="roadmap-desc">A model call, a retrieval, a tool execution. Spans nest — a tool span sits inside the turn span that requested it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Attributes</div><div><div class="roadmap-title">Structured facts on a span</div><div class="roadmap-desc">Model name, token counts, latency, the tool's arguments. Queryable, unlike a log line.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Events</div><div><div class="roadmap-title">Timestamped things within a span</div><div class="roadmap-desc">A retry, a cache miss, a guard firing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Baggage</div><div><div class="roadmap-title">Context carried across boundaries</div><div class="roadmap-desc">The trace id following a request into a sub-agent, so the whole tree stays connected.</div></div></div></div>
+  <p>This is OpenTelemetry's model, and it is worth adopting even if you never export to a vendor, because it forces the question <em>what is a unit of work here?</em> — which is the question that makes a trace readable.</p>
+  <h2>What to record on every agent run</h2>
+  <figure class="diagram"><svg viewBox="0 0 640 235" role="img" aria-label="The span tree of one agent run">
+<rect x="12" y="16" width="616" height="26" rx="4" class="d-box-accent"/>
+<text x="26" y="34" class="d-label-sm">trace: request 8f3a — 12.4s, 4 turns, 18,400 tokens, terminated: completed</text>
+<rect x="40" y="50" width="560" height="24" rx="4" class="d-box"/>
+<text x="54" y="67" class="d-label-sm">span: turn 1 — model call, 1,900 tok, 2.1s</text>
+<rect x="68" y="80" width="510" height="24" rx="4" class="d-box"/>
+<text x="82" y="97" class="d-label-sm">span: tool retrieve_policy — args {topic: inspection}, 4 chunks, 0.3s</text>
+<rect x="40" y="112" width="560" height="24" rx="4" class="d-box"/>
+<text x="54" y="129" class="d-label-sm">span: turn 2 — model call, 4,100 tok, 3.8s</text>
+<rect x="68" y="142" width="510" height="24" rx="4" class="d-box-warn"/>
+<text x="82" y="159" class="d-label-sm">span: tool update_record — DENIED by approval gate, awaiting human</text>
+<rect x="40" y="174" width="560" height="24" rx="4" class="d-box-good"/>
+<text x="54" y="191" class="d-label-sm">span: turn 3 — model call, 6,200 tok, 4.4s → no tool requested, completed</text>
+<text x="12" y="222" class="d-label-sm">One identifier ties it together, so "the answer on Tuesday was wrong" resolves to exactly this tree.</text>
+</svg><figcaption>A trace is a tree. The value is in the leaves — arguments, results, token counts — and in the fact that the whole tree shares one identifier, so a complaint about one answer resolves to one tree.</figcaption></figure>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The manifest</div><div><div class="roadmap-title">Once per trace</div><div class="roadmap-desc">Model and version, prompt version, tool set, every budget, verification state, config hash. Without it a trace from six weeks ago cannot be interpreted.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Every model call</div><div><div class="roadmap-title">Request and response</div><div class="roadmap-desc">Including the reasoning where the provider exposes it. A harness that records only final answers cannot tell you why a run went wrong.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Every tool call</div><div><div class="roadmap-title">Arguments and result</div><div class="roadmap-desc">Truncated for storage, but present. This is where an injected instruction would be visible, and nowhere else.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Termination reason</div><div><div class="roadmap-title">Named, not inferred</div><div class="roadmap-desc">Completed, turn cap, spend cap, timeout, error, denied. The operating lesson's requirement, and the single most useful field.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Cost and latency</div><div><div class="roadmap-title">Per span and per trace</div><div class="roadmap-desc">Both drift upward silently as prompts and tool sets grow.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">You cannot reproduce an agent run, so the trace is not a convenience — it is the evidence.</p><p class="know-why">Sampling, retrieval order, external state and a floating model alias all move between runs. Re-running a failure gives you a different failure. Whatever was not recorded did not happen as far as any later investigation is concerned.</p><p class="know-eg"><span class="know-eg-label">For example</span>A customer reports a wrong answer from three weeks ago. Re-running the same question now produces a correct one, because the corpus has since been updated. Without the trace there is nothing to investigate — you cannot tell whether the system was broken, the corpus was wrong, or the model changed underneath you.</p></blockquote>
+  <h2>Logs, metrics and traces are three different things</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Logs</div><div><div class="roadmap-title">What happened, in prose</div><div class="roadmap-desc">Good for the unexpected. Terrible for answering "how often" or "how slow".</div></div></div><div class="roadmap-item"><div class="roadmap-num">Metrics</div><div><div class="roadmap-title">Aggregates over time</div><div class="roadmap-desc">Good for "is it getting worse". Useless for "why did this one fail".</div></div></div><div class="roadmap-item"><div class="roadmap-num">Traces</div><div><div class="roadmap-title">One run in full</div><div class="roadmap-desc">Good for "what happened to this request". Expensive to keep for everything.</div></div></div></div>
+  <div class="callout matters"><span class="label">Sample traces, keep all failures</span>Full traces on every run gets expensive fast on a system with any volume. The usual compromise is a low sample rate for successes and one hundred percent for anything that errored, hit a cap, was denied at a gate, or was overridden by a human. Those are the runs you will want, and they are a small fraction of the total.</div>
+  <h2>Instrumenting an agent specifically</h2>
+  <p>General application tracing misses the things that matter here. Add these deliberately:</p>
+  <ul><li><strong>The prompt, versioned.</strong> Not "a prompt was used" — which one, by hash or version. Prompts change more often than code and are rarely in the trace.</li><li><strong>The retrieved chunk ids.</strong> Not the text, the identifiers. When an answer is wrong, the first question is what was retrieved, and this makes it a lookup rather than an investigation.</li><li><strong>Guard and gate firings.</strong> Every budget, nudge, clamp and approval, whether it fired or not. This is the confounds lesson made operational — a limit that ends a run and does not appear in the trace is indistinguishable from the model failing.</li><li><strong>What each summarisation dropped.</strong> In a multi-agent or compacting system, the seams are where findings vanish, and nothing records them by default.</li><li><strong>Human interventions.</strong> Overridden, corrected, abandoned, approved. The most honest quality signal you have, and it only exists if you record it.</li></ul>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Instrument every guard, including the ones that did not fire.</p><p class="know-why">A guard that silently terminates a run is indistinguishable from a model that gave up. Recording only the firings is not enough either — you need to know the effective value of every limit, after all the code that can modify it has run, or a null result is ambiguous between the treatment failing and the treatment never happening.</p><p class="know-eg"><span class="know-eg-label">For example</span>Nine runs are attributed to model capability. They were ended by six different mechanisms — a read budget, a phase clamp, a decomposition reassignment, a wall clock, a routing bug, and a config default that disabled verification. None appeared in the output. A run manifest naming every effective limit would have resolved it on run one.</p></blockquote>
+  <h2>Making it useful, not just present</h2>
+  <ul><li><strong>One identifier, end to end.</strong> Propagate it into sub-agents and tool calls, or you have several disconnected trees and no way to relate them.</li><li><strong>Structured attributes, not prose.</strong> <code>tokens_in=1900</code> is queryable; "used about 1900 tokens" is not.</li><li><strong>Redact at the boundary.</strong> Traces contain user input and tool arguments, which means they contain personal data. Decide what is scrubbed before you turn recording on, not after.</li><li><strong>Read three traces a week.</strong> Whole ones, chosen at random. Aggregates hide the failures worth finding, and nothing substitutes for reading what actually happened.</li></ul>
+  <div class="callout pitfall"><span class="label">Telemetry you never read is a storage bill</span>The failure mode here is not under-instrumentation, it is instrumenting thoroughly and then only ever looking at the dashboard. The dashboard shows you the shape of what you already thought to measure. The individual traces are where you find the thing you did not.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://opentelemetry.io/docs/concepts/signals/traces/" target="_blank" rel="noopener">OpenTelemetry — traces</a><span class="link-note">Traces, spans and attributes, and why the model is worth adopting even without a vendor.</span></li><li><a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener">Effective harnesses for long-running agents</a><span class="link-note">The operational surface a long-running agent creates, and what has to be visible in it.</span></li></ul></div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">LLMOps</span><span class="bk-a">on your shelf</span><span class="bk-n">The monitoring and observability chapters cover exporting this to a platform, and the cost trade-offs of sampling.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why is a trace the only evidence an agent run happened as you think?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Because logs are usually deleted after 30 days</div>
+      <div class="quiz-opt">Because agent runs cannot be reproduced — sampling, retrieval and external state all move, so re-running gives a different failure</div>
+      <div class="quiz-opt">Because model providers do not retain request history</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why record guards that did not fire, not just the ones that did?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">To measure how often each guard is close to firing</div>
+      <div class="quiz-opt">Because a null result is otherwise ambiguous between the treatment failing and the treatment never having engaged</div>
+      <div class="quiz-opt">Because unfired guards indicate dead configuration</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What is the usual sampling compromise for traces?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Sample uniformly at a rate the budget allows</div>
+      <div class="quiz-opt">A low rate for successes, and everything for runs that errored, hit a cap, were denied or were overridden</div>
+      <div class="quiz-opt">Full traces for the first month, then metrics only</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. What does a dashboard fail to show you?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Aggregate trends over time</div>
+      <div class="quiz-opt">The failures you did not think to measure — those are found by reading individual traces</div>
+      <div class="quiz-opt">Latency percentiles</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

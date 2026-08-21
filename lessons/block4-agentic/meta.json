@@ -1,0 +1,63 @@
+{
+  "title": "Block 4 \u00b7 Agentic AI",
+  "topic": "block4-agentic",
+  "icon": "\ud83e\udd16",
+  "description": "Building the agent loop by hand before reaching for a framework, then what a graph runtime buys, then multi-agent systems and the approval gates that actually halt.",
+  "tags": [
+    "ai",
+    "agents",
+    "langgraph"
+  ],
+  "colorScheme": "amber",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-08-21",
+  "lessons": [
+    {
+      "id": "lsn-1787700000000",
+      "title": "The Agent Loop, By Hand",
+      "file": "lsn-1787700000000-the-loop-by-hand.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787700000001",
+      "title": "What a Graph Runtime Buys",
+      "file": "lsn-1787700000001-what-a-graph-buys.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787700000002",
+      "title": "Multi-Agent Systems and Gates That Actually Halt",
+      "file": "lsn-1787700000002-multi-agent-and-approval.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787700000003",
+      "title": "Telemetry: Making the Run Legible",
+      "file": "lsn-1787700000003-telemetry-and-instrumentation.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1787700000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787700000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787700000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787700000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}
