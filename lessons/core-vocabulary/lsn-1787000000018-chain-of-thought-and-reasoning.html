@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Routing, Escalation and Sampling Controls</title>
+<title>Chain-of-Thought and Reasoning Tokens</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -182,69 +182,58 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 7 of 21</span>
-  <h1>Routing, Escalation and Sampling Controls</h1>
-  <p class="subtitle">The idea Bullpen is built on — plus temperature and top-k, which decide how a model picks words.</p>
+  <span class="pill">Lesson 19 of 21</span>
+  <h1>Chain-of-Thought and Reasoning Tokens</h1>
+  <p class="subtitle">Why letting a model think out loud works — and why its explanation isn't necessarily its reason.</p>
 
-  <p><strong>Escalation</strong> appears 44 times in Bullpen's docs. It is not a feature of the project; it is the project's whole argument.</p>
-  <h2>Predict versus try</h2>
-  <p>Commercial model routers try to <em>predict</em>, from your prompt, which model will handle it best. Bullpen's premise is that this is unreliable — models produce confident wrong answers, and so do the classifiers predicting them.</p>
-  <p>The inversion: try the cheap local model, <em>watch what happens</em>, and escalate only when the result actually fails. Prediction is replaced by observation. You pay a little latency on hard tasks in exchange for not paying frontier prices on easy ones.</p>
-  <div class="callout insight"><span class="label">Why this only works with a verifier</span>Escalation-on-failure requires knowing that something failed. Where failure is checkable — code doesn't compile, tests fail, output doesn't match a schema, tool call malformed — the strategy is sound. Where quality is subjective, there's no signal to escalate on, and you're back to guessing. Check what your failure detector actually detects before trusting a routing scheme.</div>
-  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Escalation flow"><defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker><marker id="aa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
-<rect x="12" y="76" width="120" height="48" rx="7" class="d-box"/>
-<text x="46" y="105" class="d-label-b">Request</text>
-<path d="M132 100 L176 100" class="d-arrow" marker-end="url(#a)"/>
-<rect x="176" y="76" width="130" height="48" rx="7" class="d-box-good"/>
-<text x="200" y="98" class="d-label-b">Local model</text>
-<text x="208" y="115" class="d-label-sm">free, fast</text>
-<path d="M306 100 L350 100" class="d-arrow" marker-end="url(#a)"/>
-<polygon points="350,100 412,72 474,100 412,128" class="d-box-accent"/>
-<text x="378" y="96" class="d-label-sm">verifier</text>
-<text x="374" y="112" class="d-label-sm">passed?</text>
-<path d="M474 100 L560 100" class="d-arrow" marker-end="url(#a)"/>
-<text x="492" y="92" class="d-accent">yes</text>
-<rect x="560" y="78" width="68" height="44" rx="7" class="d-box-good"/>
-<text x="576" y="105" class="d-label">done</text>
-<path d="M412 128 L412 168 L560 168" class="d-arrow" marker-end="url(#a)"/>
-<text x="424" y="162" class="d-fill-red" font-size="12" font-weight="600">no</text>
-<rect x="560" y="146" width="68" height="44" rx="7" class="d-box-warn"/>
-<text x="572" y="166" class="d-label">escalate</text>
-<text x="572" y="182" class="d-label-sm">paid</text>
-<text x="12" y="36" class="d-label-sm">Compilation, tests, schema validation and malformed tool calls are all checkable — those make good verifiers.</text>
-<text x="12" y="52" class="d-label-sm">"Is this prose any good?" is not, so there is nothing to route on.</text>
-</svg><figcaption>Observation replaces prediction. The verifier is load-bearing — remove it and there is no signal to escalate on, which is why subjective tasks can't use this pattern.</figcaption></figure>
-  <h2>What escalation costs</h2>
-  <ul><li><strong>Latency.</strong> A failed local attempt is time spent before the real answer starts.</li><li><strong>Tokens.</strong> You pay for the failed attempt too, though local attempts are near-free.</li><li><strong>Complexity.</strong> Two lanes, two sets of failure modes, and a decision layer that can itself be wrong.</li></ul>
-  <p>The trade is worth it when most tasks are easy — which, for coding assistance, they are. Routing is an economic bet on the shape of your workload, so it's worth measuring that shape rather than assuming it.</p>
-  <h2>Temperature and top-k: how the next word gets picked</h2>
-  <p>At each step the model produces a probability across every token in its vocabulary. Sampling controls decide how that distribution gets turned into one choice.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Temperature</div><div><div class="roadmap-title">Flattens or sharpens the distribution</div><div class="roadmap-desc">0 means always take the most likely token — deterministic and repetitive. Around 0.7 is a conversational default. Above ~1.2, coherence degrades.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-k</div><div><div class="roadmap-title">Consider only the k most likely tokens</div><div class="roadmap-desc">Discards the long tail of nonsense before sampling.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-p</div><div><div class="roadmap-title">Consider the smallest set summing to probability p</div><div class="roadmap-desc">Adapts to the distribution's shape — more choices when the model is unsure, fewer when it's confident. Usually preferred over top-k.</div></div></div></div>
-  <div class="callout matters"><span class="label">The practical setting</span>For anything parsed by code — tool calls, structured output, classification, routing — use temperature 0 or very close. You want repeatability, not creativity. Save higher temperatures for prose where variation is the point. A surprising share of 'the agent is flaky' bugs are just an unnecessarily high temperature on a structured task.</div>
-  <h2>Determinism, honestly</h2>
-  <p>Temperature 0 makes sampling deterministic but does not guarantee identical outputs across runs. Batching, hardware differences, and floating-point non-associativity introduce variation, especially with hosted providers. Design evaluations to tolerate small differences rather than assuming byte-identical replies.</p>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2406.18665" target="_blank" rel="noopener">RouteLLM (Ong et al., 2024)</a><span class="link-note">The predict-which-model approach Bullpen deliberately inverts. Useful for arguing with.</span></li><li><a href="https://github.com/stylusnexus/bullpen" target="_blank" rel="noopener">Bullpen: docs/routing-strategy.md (private)</a><span class="link-note">Your own strategy doc — the escalation criteria in prose.</span></li></ul></div>
+  <p>Ask a model a multi-step question and it answers immediately, often wrongly. Ask it to work through the steps and accuracy improves markedly on the same question with the same model. That's <strong>chain-of-thought</strong>, and the mechanism behind it is more interesting than the trick.</p>
+  <h2>Why thinking out loud helps</h2>
+  <p>A model does a roughly fixed amount of computation per token generated. Demanding an immediate answer to a problem needing five steps allocates one token's worth of computation to five steps of work. Generating intermediate steps gives the model more forward passes, and — crucially — each step it writes becomes part of the context for the next, so it can build on its own partial results.</p>
+  <div class="callout insight"><span class="label">The reframing worth keeping</span>Chain-of-thought is not the model becoming smarter. It's the model being given room to compute. The generated tokens are working memory made visible — which is also why it helps far more on arithmetic, logic and multi-step planning than on recall, where there's nothing to work through.</div>
+  <h2>The variants</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Zero-shot CoT</div><div><div class="roadmap-title">&quot;Think step by step&quot;</div><div class="roadmap-desc">One line, no examples, and a real improvement on reasoning tasks. Among the highest-value prompt changes available.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Few-shot CoT</div><div><div class="roadmap-title">Examples that show the working</div><div class="roadmap-desc">Demonstrate the reasoning style you want, not just the answers.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Self-consistency</div><div><div class="roadmap-title">Sample several chains, take the majority</div><div class="roadmap-desc">Costs several times more and reliably beats a single chain. Buying accuracy with tokens.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reasoning models</div><div><div class="roadmap-title">Trained to reason before answering</div><div class="roadmap-desc">The model produces an extended internal chain, sometimes hidden, before its visible answer. Reasoning effort becomes a parameter you set.</div></div></div></div>
+  <h2>Reasoning tokens change the cost model</h2>
+  <p>With reasoning models you pay for tokens you may never see. A short answer can sit on top of thousands of hidden reasoning tokens, all billed. Cost stops tracking visible output length and starts tracking problem difficulty — which is a different budgeting exercise, and one that surprises people the first time.</p>
+  <p>It also changes when to reach for what. Simple extraction, classification and formatting don't benefit from reasoning and just cost more slowly. The gains concentrate in genuinely multi-step problems — which is a routing decision, and exactly the kind of judgement escalation logic has to encode.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 180" role="img" aria-label="When chain-of-thought helps and when it does not">
+<text x="12" y="18" class="d-fill-green" font-size="12" font-weight="600">CLEAR GAIN</text>
+<rect x="12" y="28" width="290" height="26" rx="4" class="d-box-good"/><text x="26" y="46" class="d-label-sm">multi-step arithmetic and logic</text>
+<rect x="12" y="60" width="290" height="26" rx="4" class="d-box-good"/><text x="26" y="78" class="d-label-sm">planning across several constraints</text>
+<rect x="12" y="92" width="290" height="26" rx="4" class="d-box-good"/><text x="26" y="110" class="d-label-sm">debugging, root-cause tracing</text>
+<text x="338" y="18" class="d-fill-red" font-size="12" font-weight="600">PAYS FOR NOTHING</text>
+<rect x="338" y="28" width="290" height="26" rx="4" class="d-box-warn"/><text x="352" y="46" class="d-label-sm">factual recall — no steps to take</text>
+<rect x="338" y="60" width="290" height="26" rx="4" class="d-box-warn"/><text x="352" y="78" class="d-label-sm">classification and extraction</text>
+<rect x="338" y="92" width="290" height="26" rx="4" class="d-box-warn"/><text x="352" y="110" class="d-label-sm">reformatting, translation</text>
+<text x="12" y="150" class="d-label-sm">Reasoning tokens are billed whether or not you see them, so the wrong mode costs money and latency</text>
+<text x="12" y="166" class="d-label-sm">without improving anything. Route by task shape.</text>
+</svg><figcaption>Extra tokens buy accuracy on multi-step problems and buy nothing on recall or formatting. Matching the mode to the task is the actual skill.</figcaption></figure>
+  <h2>The part people get wrong</h2>
+  <p>A chain-of-thought is not an explanation of how the model reached its answer. It's more text, generated by the same next-token process, that happens to look like reasoning. Models can produce a flawed chain and a correct answer, or a plausible chain that rationalises an answer they were always going to give. Research on unfaithful reasoning shows models omitting the cue that actually determined their output while presenting a tidy chain that doesn't mention it.</p>
+  <div class="callout pitfall"><span class="label">What this means for you</span>Treat a chain as a debugging aid and a verification surface, not as an audit trail. It's genuinely useful — you can check the intermediate steps, spot where a calculation went wrong, and catch a wrong premise. But do not present it to a regulator, a customer, or a colleague as the reason the system decided something. It is what the model said about its reasoning, which is not the same object.</div>
+  <h2>Where this reappears</h2>
+  <p>Block 4's agents reason before choosing tools, and a visible chain is often the only way to debug why the wrong tool was called. Block 5 measures whether the chain actually supports the conclusion, which is a distinct question from whether the conclusion is right. And rationale distillation from the previous lesson trains a small model on these chains — one of the more effective ways to move reasoning capability downward.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener">Chain-of-Thought Prompting (Wei et al., 2022)</a><span class="link-note">The paper that established the effect and its scale dependence.</span></li><li><a href="https://arxiv.org/abs/2203.11171" target="_blank" rel="noopener">Self-Consistency (Wang et al., 2022)</a><span class="link-note">Sampling multiple chains and taking the majority — trading tokens for accuracy.</span></li><li><a href="https://arxiv.org/abs/2307.13702" target="_blank" rel="noopener">Measuring Faithfulness in Chain-of-Thought (Lanham et al., 2023)</a><span class="link-note">The evidence that stated reasoning often isn't the actual reason. Read before trusting a chain as an explanation.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. Why does Bullpen try a local model first rather than predicting which model to use?</p>
+    <p class="quiz-q">1. Why does &#x27;think step by step&#x27; improve accuracy on multi-step problems?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Local models are usually better than frontier models</div>
-      <div class="quiz-opt">Prediction is unreliable; observing an actual failure is a stronger signal than guessing in advance</div>
-      <div class="quiz-opt">It avoids sending data to third parties</div>
+      <div class="quiz-opt">It activates a reasoning module inside the model</div>
+      <div class="quiz-opt">It gives the model more forward passes, and each written step becomes context it can build on</div>
+      <div class="quiz-opt">It reduces the temperature automatically</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. When is escalation-on-failure a poor strategy?</p>
+    <p class="quiz-q">2. You&#x27;re extracting dates from invoices. Should you use a reasoning model?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">When the local model is small</div>
-      <div class="quiz-opt">When failure isn&#x27;t detectable — subjective quality gives you no signal to escalate on</div>
-      <div class="quiz-opt">When latency matters at all</div>
+      <div class="quiz-opt">Yes — reasoning improves all tasks</div>
+      <div class="quiz-opt">No — there are no steps to work through, so you pay for reasoning tokens and gain nothing</div>
+      <div class="quiz-opt">Yes, but only with self-consistency enabled</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. Your agent&#x27;s tool calls are intermittently malformed. What should you check first?</p>
-    <div class="quiz-options" data-answer="0">
-      <div class="quiz-opt">Whether temperature is above 0 on a task that needs deterministic structured output</div>
-      <div class="quiz-opt">Whether the context window is full</div>
-      <div class="quiz-opt">Whether the model supports tool calling</div>
+    <p class="quiz-q">3. Can a chain-of-thought be presented as the reason a system made a decision?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Yes — it&#x27;s a direct record of the model&#x27;s reasoning process</div>
+      <div class="quiz-opt">No — it&#x27;s text generated the same way as any other, and research shows it often omits what actually drove the answer</div>
+      <div class="quiz-opt">Only for models that expose reasoning tokens</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Serving Locally: Ollama, llama.cpp and tok/s</title>
+<title>The Agent Loop and the Harness</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -182,73 +182,76 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 4 of 21</span>
-  <h1>Serving Locally: Ollama, llama.cpp and tok/s</h1>
-  <p class="subtitle">The most-mentioned tool in your codebase, and how to read a speed number.</p>
+  <span class="pill">Lesson 1 of 21</span>
+  <h1>The Agent Loop and the Harness</h1>
+  <p class="subtitle">The two words that appear most often in your own docs — and the difference between them.</p>
 
-  <p><strong>Ollama</strong> appears 45 times in Bullpen's docs — more than any other tool. It is the local-model lane the whole 'try the cheap option first' premise rests on.</p>
-  <h2>llama.cpp is the engine; Ollama is the car</h2>
-  <p><code>llama.cpp</code> is a C++ inference engine that runs GGUF models efficiently on consumer hardware, including Apple Silicon via Metal. It's the thing doing the actual arithmetic.</p>
-  <p><strong>Ollama</strong> wraps it in something usable: a model registry (<code>ollama pull</code>), a local HTTP server with an OpenAI-compatible API, automatic memory management, and model switching. Your code talks HTTP to Ollama; Ollama talks to llama.cpp; llama.cpp talks to the GPU.</p>
-  <div class="callout insight"><span class="label">Why the API compatibility matters</span>Because Ollama speaks an OpenAI-shaped API, the same client code can point at a local 7B model or a hosted frontier model by changing a base URL. That interchangeability is precisely what makes Bullpen's routing idea implementable at all.</div>
-  <figure class="diagram"><svg viewBox="0 0 640 250" role="img" aria-label="Local serving stack"><defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker><marker id="aa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
-<rect x="160" y="12" width="320" height="40" rx="6" class="d-box-accent"/>
-<text x="180" y="37" class="d-label-b">Your code</text>
-<text x="330" y="37" class="d-label-sm">HTTP, OpenAI-shaped</text>
-<path d="M320 52 L320 76" class="d-arrow-accent" marker-end="url(#aa)"/>
-<rect x="160" y="76" width="320" height="40" rx="6" class="d-box"/>
-<text x="180" y="101" class="d-label-b">Ollama</text>
-<text x="290" y="101" class="d-label-sm">registry · memory · model switching</text>
-<path d="M320 116 L320 140" class="d-arrow" marker-end="url(#a)"/>
-<rect x="160" y="140" width="320" height="40" rx="6" class="d-box"/>
-<text x="180" y="165" class="d-label-b">llama.cpp</text>
-<text x="300" y="165" class="d-label-sm">the actual arithmetic</text>
-<path d="M320 180 L320 204" class="d-arrow" marker-end="url(#a)"/>
-<rect x="160" y="204" width="320" height="36" rx="6" class="d-box"/>
-<text x="180" y="227" class="d-label-b">Metal / unified memory</text>
-<text x="392" y="227" class="d-label-sm">128 GB, high bandwidth</text>
-<text x="500" y="101" class="d-label-sm">swap this URL and</text>
-<text x="500" y="117" class="d-label-sm">you're on a frontier</text>
-<text x="500" y="133" class="d-label-sm">model instead</text>
-<path d="M492 96 L484 96" class="d-arrow"/>
-</svg><figcaption>Your code never talks to the model directly. Each layer down is closer to the metal — and the OpenAI-shaped API at the top is what makes the local and hosted lanes interchangeable.</figcaption></figure>
-  <h2>Reading tokens per second</h2>
-  <p><strong>tok/s</strong> is the throughput measure, but a single number hides two very different things:</p>
-  <ul><li><strong>Prefill</strong> — processing your prompt. Parallel, fast, often hundreds or thousands of tok/s.</li><li><strong>Decode</strong> — generating the answer, one token at a time. Sequential, slower, and what you actually feel while waiting.</li></ul>
-  <p>Quoted tok/s almost always means decode. Useful reference points: below ~10 tok/s feels sluggish; 20–30 tok/s reads at about conversational speed; above 50 the text arrives faster than you read it.</p>
-  <div class="callout matters"><span class="label">The other number</span>Time-to-first-token is often what determines whether something feels responsive, and it's dominated by prefill — so it scales with prompt length. A long retrieved context makes the model feel slow before it has generated anything at all.</div>
-  <h2>What decides your speed</h2>
-  <p>Local inference is usually <em>memory-bandwidth bound</em>, not compute bound. Every generated token requires reading the entire set of active weights from memory. This is why Apple Silicon performs well: unified memory has high bandwidth, and there's no copying between system and GPU memory.</p>
-  <p>It's also why quantization speeds things up as well as shrinking them — fewer bits per weight means less memory traffic per token. A Q4 model isn't just smaller than Q8, it's meaningfully faster.</p>
-  <h2>A worked correction: when the headline number is the wrong number</h2>
-  <p>A widely-repeated claim held that one serving runtime was roughly three times faster than another for the same model. The figure was real — and it was a <em>decode</em> throughput measurement, around 130 tokens per second against 43.</p>
-  <p>Measured on an actual agent loop, the end-to-end gain was nothing like 3×. A coding agent re-sends a growing context every turn, so per-iteration time is dominated by prefill, not decode. Real decode on that loop was 20–25 tok/s, and each iteration spent 40–130 seconds re-processing the prompt. The benchmark measured the half of the work that wasn't the bottleneck.</p>
-  <div class="callout insight"><span class="label">What actually moved it</span>Not the runtime and not the quantization — <strong>prefix-KV reuse</strong>, so each turn only processes the tokens that are genuinely new. On the same fixture that took 7–17 minutes, a serving engine with true prefix matching brought it to about 1.3 minutes, roughly tenfold, with cache hit rate at 1.00 and no loss of quality. Same weights throughout. The lever was in the serving layer's caching, which no tokens-per-second figure would ever have surfaced.</div>
-  <div class="callout pitfall"><span class="label">The habit this should build</span>When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck. Two premature speed claims were made on that project from partial data before the real one was confirmed by cache-hit telemetry. A number measured on the wrong phase is not a small error — it points your optimisation work at the wrong layer entirely.</div>
-  <h2>The thing to keep straight</h2>
-  <p>Ollama is a convenience layer, not a requirement. <code>llama.cpp</code> serves models directly; vLLM and TGI are production-grade alternatives with better batching for concurrent users. Ollama optimises for one developer on one machine — exactly Bullpen's case, and a poor fit for serving many users at once. Block 8 covers what changes when you need the latter.</p>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a><span class="link-note">Model registry and the local OpenAI-compatible server.</span></li><li><a href="https://docs.vllm.ai" target="_blank" rel="noopener">vLLM documentation</a><span class="link-note">What you move to when one developer becomes many concurrent users — the contrast is instructive.</span></li></ul></div>
+  <p><strong>Agent loop</strong> and <strong>harness</strong> are the two most-used words in any agent codebase, and two of the most routinely confused. Separating them is worth doing first, because almost every diagnosis later in this course depends on the distinction.</p>
+  <h2>The agent loop is a while-loop</h2>
+  <p>Strip away the branding and an AI agent is a loop that runs until something says stop:</p>
+  <pre><code>while not done:
+    response = model(conversation)
+    if response.wants_to_use_a_tool:
+        result = run_tool(response.tool_call)
+        conversation.append(result)
+    else:
+        done = True</code></pre>
+  <p>That is the whole idea. The model cannot <em>do</em> anything — it emits text. When that text is a request to run a tool, something outside the model runs the tool and appends the result to the conversation. Then the model gets another turn. The loop is what turns a text predictor into something that appears to act.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 300" role="img" aria-label="Diagram of an agent loop inside a harness"><defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker><marker id="aa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="12" width="400" height="276" rx="10" class="d-box"/>
+<text x="28" y="38" class="d-accent">HARNESS</text>
+<text x="28" y="56" class="d-label-sm">prompt assembly · tool registry · turn limit · persistence</text>
+<rect x="40" y="76" width="150" height="42" rx="6" class="d-box-accent"/>
+<text x="60" y="102" class="d-label">1. Build context</text>
+<rect x="40" y="146" width="150" height="42" rx="6" class="d-box-accent"/>
+<text x="60" y="172" class="d-label">2. Call model</text>
+<rect x="40" y="216" width="150" height="42" rx="6" class="d-box-accent"/>
+<text x="52" y="236" class="d-label">3. Tool requested?</text>
+<text x="52" y="252" class="d-label-sm">run it, append result</text>
+<path d="M115 118 L115 146" class="d-arrow-accent" marker-end="url(#aa)"/>
+<path d="M115 188 L115 216" class="d-arrow-accent" marker-end="url(#aa)"/>
+<path d="M205 237 L240 237 L240 97 L205 97" class="d-arrow-accent" marker-end="url(#aa)"/>
+<text x="250" y="160" class="d-label-sm">loop until</text>
+<text x="250" y="176" class="d-label-sm">no tool needed</text>
+<rect x="470" y="146" width="150" height="60" rx="8" class="d-box"/>
+<text x="500" y="172" class="d-label-b">MODEL</text>
+<text x="486" y="192" class="d-label-sm">text in, text out</text>
+<path d="M195 160 L470 160" class="d-arrow" marker-end="url(#a)"/>
+<path d="M470 192 L195 192" class="d-arrow" marker-end="url(#a)"/>
+<text x="300" y="152" class="d-label-sm">context</text>
+<text x="300" y="212" class="d-label-sm">text (maybe a tool request)</text>
+</svg><figcaption>The harness is the outer box. The model sits outside it and only ever returns text — the loop is what turns that text into action.</figcaption></figure>
+  <div class="callout insight"><span class="label">Why this matters</span>Almost every agent failure is a loop failure, not a model failure. The loop ran out of turns, or fed back a badly-formatted tool result, or never noticed the model was going in circles. When an agent misbehaves, look at the loop before you blame the model.</div>
+  <h2>The harness is everything around the loop</h2>
+  <p>The <strong>harness</strong> is the scaffolding: what goes into the prompt, which tools are registered, how results are formatted on the way back, how many turns are allowed, what happens on failure, how the session is persisted. The model is a component the harness calls.</p>
+  <p>The distinction has a direct diagnostic consequence. One coding-agent project spent months attributing a multi-file editing failure to model capability, then established that <em>the binding constraint was the harness, not model size</em> — the models were capable enough, and the scaffolding around them was what capped the score. That conclusion is not even expressible unless you hold the two terms apart.</p>
+  <div class="callout matters"><span class="label">The practical rule</span>If a bigger model would fix it, it's a model problem. If better prompting, better tool results, or more turns would fix it, it's a harness problem. Most of the time it's the harness — which is good news, because the harness is the part you control.</div>
+  <h2>The loop, end to end</h2>
+  <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">1</div><div><div class="roadmap-title">A request arrives</div><div class="roadmap-desc">The interface hands it to the harness.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2</div><div><div class="roadmap-title">The harness assembles context</div><div class="roadmap-desc">System prompt, session history, retrieved repo context, available tool definitions.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3</div><div><div class="roadmap-title">The loop starts</div><div class="roadmap-desc">Model responds. Wants a tool? Run it, append the result, go again.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">The loop ends</div><div class="roadmap-desc">Model answers without requesting a tool, or hits the turn limit, or escalates.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5</div><div><div class="roadmap-title">The harness persists</div><div class="roadmap-desc">Session and memory are written down so the next turn has history.</div></div></div></div>
+  <h2>The word you&#x27;ll see elsewhere</h2>
+  <p><strong>Harness</strong> is also used for an <em>evaluation</em> harness — the rig that runs a model against a test set. Most projects use it in both senses, which is a real ambiguity in the field rather than a misunderstanding on your part. Context disambiguates: an agent harness runs one task for a user, an eval harness runs many tasks for a score.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents</a><span class="link-note">Anthropic's engineering write-up on when a loop is warranted and when a fixed workflow is better.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. A local model reports 45 tok/s but the first response still takes several seconds. Why?</p>
+    <p class="quiz-q">1. An agent gets stuck repeating the same tool call five times before giving up. Where is the problem most likely to be?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The model isn&#x27;t large enough and should be swapped for a frontier model</div>
+      <div class="quiz-opt">The harness — nothing is detecting the repetition or feeding back that the approach isn&#x27;t working</div>
+      <div class="quiz-opt">The tool itself is broken and returning errors</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. What is the one thing a language model fundamentally cannot do inside an agent loop?</p>
+    <div class="quiz-options" data-answer="2">
+      <div class="quiz-opt">Produce structured output like JSON</div>
+      <div class="quiz-opt">Decide which tool would be useful</div>
+      <div class="quiz-opt">Actually execute a tool — it can only emit a request that something else runs</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. A project concludes its multi-file failure was harness, not model size. What would the alternative conclusion have been?</p>
     <div class="quiz-options" data-answer="0">
-      <div class="quiz-opt">The 45 tok/s figure is decode speed; the delay is prefill, processing your long prompt</div>
-      <div class="quiz-opt">The model is loading from disk on every request</div>
-      <div class="quiz-opt">tok/s figures are marketing numbers with no real meaning</div>
-    </div>
-    <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. Why does a 4-bit model generate faster than the same model at 8-bit?</p>
-    <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">It has fewer parameters to consider</div>
-      <div class="quiz-opt">Inference is memory-bandwidth bound, so fewer bits per weight means less memory traffic per token</div>
-      <div class="quiz-opt">Lower precision arithmetic is faster on the GPU</div>
-    </div>
-    <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. Why is Ollama a poor choice for serving a model to many concurrent users?</p>
-    <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">It can&#x27;t run large models</div>
-      <div class="quiz-opt">It&#x27;s optimised for a single developer on one machine; vLLM or TGI handle concurrent batching properly</div>
-      <div class="quiz-opt">It doesn&#x27;t expose an HTTP API</div>
+      <div class="quiz-opt">That the models lacked the capability, and only a bigger model would move the number</div>
+      <div class="quiz-opt">That the tools were badly written</div>
+      <div class="quiz-opt">That the test itself was measuring the wrong thing</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

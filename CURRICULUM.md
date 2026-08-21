@@ -15,7 +15,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 - Docker environments for Torch and Keras, pgvector, MLflow
 - `lessons/orientation/` — one map placing every term in the program ✅
-- `lessons/bullpen-vocabulary/` — 19 lessons: the terms recurring across Bullpen's own docs, plus overfitting, agents and danger, RLHF and human-in-the-loop, context engineering, structured output, hallucination and grounding, in-context learning, class imbalance and thresholds, drift, distillation, chain-of-thought, and loops at inference and in training ✅
+- `lessons/core-vocabulary/` — 21 lessons: the vocabulary an LLM system is built from, plus overfitting, agents and danger, RLHF and human-in-the-loop, context engineering, structured output, hallucination and grounding, in-context learning, class imbalance and thresholds, drift, distillation, chain-of-thought, and loops at inference and in training ✅
 - `lessons/engineering-practice/` — 9 lessons: harnesses, recipes and ADRs; the measurement discipline that corrects them; SWE-bench; invisible confounds; localising a failure; LLM-as-judge; and deterministic-first ✅
 - `lessons/algorithms/` — 9 lessons on the algorithms this domain runs on, from gradient descent to HNSW and data leakage ✅
 - `lessons/engineering-practice/` — 4 lessons: the three artifacts an LLM project accumulates (harness, recipes, ADRs), how each one turns harmful, why measurement is the only thing that corrects them, and the measurement procedure itself ✅
@@ -57,12 +57,19 @@ alarms; at 0.7 you catch 44% with 77. Choosing a row is a business decision.
 
 ---
 
-## Block 3 · GenAI & RAG — 1.5 weeks
-*Original: Module 03*
+## Block 3 · Retrieval and Agentic RAG — 1.5 weeks
+*Original: Module 03, extended — the original stops at single-shot retrieval*
 
 - LLMs and prompt engineering
 - Embeddings, chunking, vector search against real pgvector — not an in-memory list
-- Retrieval quality: what actually makes RAG fail
+- Hybrid retrieval: BM25 and vectors fused by rank; rerankers over the shortlist
+- Retrieval quality: what actually makes RAG fail, and measuring index recall
+- **Agentic RAG** — retrieval as a loop: retrieve, reason about what came back,
+  decide what is still missing, retrieve again. Fixes multi-hop questions a single
+  retrieval cannot answer, and brings its own failures: repetitive retrieval burning
+  turns without adding information, and weak contextualisation of what was returned.
+  De-duplication against what has already been retrieved, and a real termination
+  condition, are the mitigations
 - Structured outputs and tool calling
 
 **Exit:** Project 2 — financial report assistant answers cited questions over a real 10-K.
@@ -113,7 +120,7 @@ Built in **LangGraph / LangChain / LangSmith**, matching the original. The Micro
 - Dataset construction, and how little data you actually need
 - LoRA / QLoRA vs full fine-tune, locally on the M4 Max
 - Evaluating before and after against a held-out set
-- Quantization for serving — lands directly on Bullpen's GGUF and Q4_K_M
+- Quantization for serving — lands directly on a production agent's GGUF and Q4_K_M
 
 Spine: `LLMS_from_Scratch` ch05–07 (Apache 2.0) plus the installed HF training skills.
 

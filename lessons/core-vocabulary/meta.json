@@ -1,12 +1,12 @@
 {
-  "title": "Bullpen Vocabulary: The Terms Your Own Codebase Uses",
-  "topic": "bullpen-vocabulary",
+  "title": "Core Vocabulary: The Terms Every LLM System Uses",
+  "topic": "core-vocabulary",
   "icon": "\ud83c\udfaf",
-  "description": "The fourteen terms that recur across Bullpen's docs, taught against the system you built rather than someone else's toy example.",
+  "description": "The vocabulary an LLM system is actually built from \u2014 each term taught through the failure it explains, drawn from production postmortems rather than from definitions.",
   "tags": [
     "ai",
     "vocabulary",
-    "bullpen"
+    "foundations"
   ],
   "colorScheme": "blue",
   "starred": false,

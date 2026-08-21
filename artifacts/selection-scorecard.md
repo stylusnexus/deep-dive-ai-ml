@@ -7,7 +7,7 @@ Score each line 1–5, but the score isn't the output — the **notes** are.
 A decision you can defend out loud is the deliverable.
 
 Calibrate on decisions you've already made (Render, Neon + Prisma, local
-models in Bullpen) before using it on ones you haven't. You know those
+models with escalation) before using it on ones you haven't. You know those
 answers, which is what makes them useful for testing the rubric.
 
 ---
@@ -85,7 +85,7 @@ Complete these three first — you already know the answers, so they calibrate t
 
 - [ ] Why Render over Vercel/Fly/AWS for the Stylus services
 - [ ] Why Neon + Prisma over Supabase for newer projects
-- [ ] Why local models first in Bullpen, escalating only on failure
+- [ ] Why local models first with escalation only on failure, rather than a hosted model by default
 
 Then two live ones where you don't know the answer yet:
 

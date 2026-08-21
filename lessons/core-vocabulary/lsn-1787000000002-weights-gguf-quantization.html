@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chain-of-Thought and Reasoning Tokens</title>
+<title>Weights, GGUF and Quantization</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -182,58 +182,62 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 19 of 21</span>
-  <h1>Chain-of-Thought and Reasoning Tokens</h1>
-  <p class="subtitle">Why letting a model think out loud works — and why its explanation isn't necessarily its reason.</p>
+  <span class="pill">Lesson 3 of 21</span>
+  <h1>Weights, GGUF and Quantization</h1>
+  <p class="subtitle">What Q4_K_M actually means, and the trade you're making when you pick it.</p>
 
-  <p>Ask a model a multi-step question and it answers immediately, often wrongly. Ask it to work through the steps and accuracy improves markedly on the same question with the same model. That's <strong>chain-of-thought</strong>, and the mechanism behind it is more interesting than the trick.</p>
-  <h2>Why thinking out loud helps</h2>
-  <p>A model does a roughly fixed amount of computation per token generated. Demanding an immediate answer to a problem needing five steps allocates one token's worth of computation to five steps of work. Generating intermediate steps gives the model more forward passes, and — crucially — each step it writes becomes part of the context for the next, so it can build on its own partial results.</p>
-  <div class="callout insight"><span class="label">The reframing worth keeping</span>Chain-of-thought is not the model becoming smarter. It's the model being given room to compute. The generated tokens are working memory made visible — which is also why it helps far more on arithmetic, logic and multi-step planning than on recall, where there's nothing to work through.</div>
-  <h2>The variants</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Zero-shot CoT</div><div><div class="roadmap-title">&quot;Think step by step&quot;</div><div class="roadmap-desc">One line, no examples, and a real improvement on reasoning tasks. Among the highest-value prompt changes available.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Few-shot CoT</div><div><div class="roadmap-title">Examples that show the working</div><div class="roadmap-desc">Demonstrate the reasoning style you want, not just the answers.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Self-consistency</div><div><div class="roadmap-title">Sample several chains, take the majority</div><div class="roadmap-desc">Costs several times more and reliably beats a single chain. Buying accuracy with tokens.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reasoning models</div><div><div class="roadmap-title">Trained to reason before answering</div><div class="roadmap-desc">The model produces an extended internal chain, sometimes hidden, before its visible answer. Reasoning effort becomes a parameter you set.</div></div></div></div>
-  <h2>Reasoning tokens change the cost model</h2>
-  <p>With reasoning models you pay for tokens you may never see. A short answer can sit on top of thousands of hidden reasoning tokens, all billed. Cost stops tracking visible output length and starts tracking problem difficulty — which is a different budgeting exercise, and one that surprises people the first time.</p>
-  <p>It also changes when to reach for what. Simple extraction, classification and formatting don't benefit from reasoning and just cost more slowly. The gains concentrate in genuinely multi-step problems — which is a routing decision, and exactly the kind of judgement Bullpen's escalation logic encodes.</p>
-  <figure class="diagram"><svg viewBox="0 0 640 180" role="img" aria-label="When chain-of-thought helps and when it does not">
-<text x="12" y="18" class="d-fill-green" font-size="12" font-weight="600">CLEAR GAIN</text>
-<rect x="12" y="28" width="290" height="26" rx="4" class="d-box-good"/><text x="26" y="46" class="d-label-sm">multi-step arithmetic and logic</text>
-<rect x="12" y="60" width="290" height="26" rx="4" class="d-box-good"/><text x="26" y="78" class="d-label-sm">planning across several constraints</text>
-<rect x="12" y="92" width="290" height="26" rx="4" class="d-box-good"/><text x="26" y="110" class="d-label-sm">debugging, root-cause tracing</text>
-<text x="338" y="18" class="d-fill-red" font-size="12" font-weight="600">PAYS FOR NOTHING</text>
-<rect x="338" y="28" width="290" height="26" rx="4" class="d-box-warn"/><text x="352" y="46" class="d-label-sm">factual recall — no steps to take</text>
-<rect x="338" y="60" width="290" height="26" rx="4" class="d-box-warn"/><text x="352" y="78" class="d-label-sm">classification and extraction</text>
-<rect x="338" y="92" width="290" height="26" rx="4" class="d-box-warn"/><text x="352" y="110" class="d-label-sm">reformatting, translation</text>
-<text x="12" y="150" class="d-label-sm">Reasoning tokens are billed whether or not you see them, so the wrong mode costs money and latency</text>
-<text x="12" y="166" class="d-label-sm">without improving anything. Route by task shape.</text>
-</svg><figcaption>Extra tokens buy accuracy on multi-step problems and buy nothing on recall or formatting. Matching the mode to the task is the actual skill.</figcaption></figure>
-  <h2>The part people get wrong</h2>
-  <p>A chain-of-thought is not an explanation of how the model reached its answer. It's more text, generated by the same next-token process, that happens to look like reasoning. Models can produce a flawed chain and a correct answer, or a plausible chain that rationalises an answer they were always going to give. Research on unfaithful reasoning shows models omitting the cue that actually determined their output while presenting a tidy chain that doesn't mention it.</p>
-  <div class="callout pitfall"><span class="label">What this means for you</span>Treat a chain as a debugging aid and a verification surface, not as an audit trail. It's genuinely useful — you can check the intermediate steps, spot where a calculation went wrong, and catch a wrong premise. But do not present it to a regulator, a customer, or a colleague as the reason the system decided something. It is what the model said about its reasoning, which is not the same object.</div>
-  <h2>Where this reappears</h2>
-  <p>Block 4's agents reason before choosing tools, and a visible chain is often the only way to debug why the wrong tool was called. Block 5 measures whether the chain actually supports the conclusion, which is a distinct question from whether the conclusion is right. And rationale distillation from the previous lesson trains a small model on these chains — one of the more effective ways to move reasoning capability downward.</p>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener">Chain-of-Thought Prompting (Wei et al., 2022)</a><span class="link-note">The paper that established the effect and its scale dependence.</span></li><li><a href="https://arxiv.org/abs/2203.11171" target="_blank" rel="noopener">Self-Consistency (Wang et al., 2022)</a><span class="link-note">Sampling multiple chains and taking the majority — trading tokens for accuracy.</span></li><li><a href="https://arxiv.org/abs/2307.13702" target="_blank" rel="noopener">Measuring Faithfulness in Chain-of-Thought (Lanham et al., 2023)</a><span class="link-note">The evidence that stated reasoning often isn't the actual reason. Read before trusting a chain as an explanation.</span></li></ul></div>
+  <p><strong>GGUF</strong> and <strong>Q4_K_M</strong> describe how a model is stored on disk. That choice affects the day-to-day experience of local inference more than almost anything else, and the notation looks impenetrable until you realise it is four separate facts stuck together.</p>
+  <h2>Weights, briefly</h2>
+  <p>A trained model is a large pile of numbers — the <strong>weights</strong> or <em>parameters</em>. "7B" means seven billion of them. Stored at full precision (16 bits each), seven billion numbers is about 14GB. A 70B model is about 140GB, which is why it won't fit on most machines at full precision.</p>
+  <h2>Quantization is lossy compression for weights</h2>
+  <p><strong>Quantization</strong> stores each weight in fewer bits — 8, 5, 4, sometimes 2 — instead of 16. Four-bit quantization cuts the file roughly to a quarter: that 70B model drops from ~140GB to ~40GB and becomes something your 128GB machine runs comfortably.</p>
+  <p>The cost is precision. Each weight is stored approximately. In practice, 4-bit quantization of a large model degrades quality surprisingly little — usually far less than dropping to a smaller model of the same file size. That trade is the entire reason local inference is practical.</p>
+  <div class="callout matters"><span class="label">The rule of thumb worth memorising</span>A 4-bit quantized 70B model almost always beats a 16-bit 13B model, despite similar file sizes. Prefer the bigger model, more heavily quantized.</div>
+  <h2>Reading Q4_K_M</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Q</div><div><div class="roadmap-title">Quantized</div><div class="roadmap-desc">As opposed to full-precision F16 or F32.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">Four bits per weight</div><div class="roadmap-desc">The main lever. Lower means smaller and faster, but less precise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">K</div><div><div class="roadmap-title">K-quant method</div><div class="roadmap-desc">A smarter scheme that varies precision across parts of the model instead of applying one rate everywhere.</div></div></div><div class="roadmap-item"><div class="roadmap-num">M</div><div><div class="roadmap-title">Medium</div><div class="roadmap-desc">Within K-quants: S (small), M (medium), L (large). Larger keeps more precision in the layers that matter most.</div></div></div></div>
+  <p>So <strong>Q4_K_M</strong> is a four-bit K-quant at medium size — the default recommendation for most local models, and a sensible one. Q5_K_M is slightly better and slightly bigger; Q8_0 is near-lossless and roughly twice the size; Q2 is usually where quality visibly breaks.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Model size by quantization level">
+<text x="12" y="20" class="d-label-b">A 70B model on disk</text>
+<rect x="120" y="34" width="500" height="24" rx="4" class="d-fill-muted" opacity="0.55"/>
+<text x="12" y="51" class="d-label">F16</text>
+<text x="628" y="51" class="d-label-sm" text-anchor="end">~140 GB</text>
+<rect x="120" y="70" width="250" height="24" rx="4" class="d-fill-accent" opacity="0.6"/>
+<text x="12" y="87" class="d-label">Q8_0</text>
+<text x="380" y="87" class="d-label-sm">~70 GB · near-lossless</text>
+<rect x="120" y="106" width="156" height="24" rx="4" class="d-fill-green" opacity="0.75"/>
+<text x="12" y="123" class="d-label">Q5_K_M</text>
+<text x="286" y="123" class="d-label-sm">~44 GB</text>
+<rect x="120" y="142" width="125" height="24" rx="4" class="d-fill-green" opacity="0.9"/>
+<text x="12" y="159" class="d-label">Q4_K_M</text>
+<text x="255" y="159" class="d-label-sm">~35 GB · the usual default</text>
+<text x="12" y="190" class="d-label-sm">Q = quantized · 4 = bits per weight · K = k-quant method · M = medium size within that family</text>
+</svg><figcaption>Same 70B model at four precisions. Four-bit is the usual default because the quality loss is small and the size reduction is what makes the model runnable at all.</figcaption></figure>
+  <h2>GGUF is the container</h2>
+  <p><strong>GGUF</strong> (GPT-Generated Unified Format) is the file format that holds quantized weights plus the metadata needed to run them — tokenizer, architecture, prompt template. It's the format <code>llama.cpp</code> and Ollama consume. One file, self-describing, no Python environment required.</p>
+  <p>This is distinct from Hugging Face's <code>safetensors</code>, which stores full-precision weights for training and fine-tuning. The usual pipeline: fine-tune in safetensors, convert to GGUF, quantize, serve.</p>
+  <div class="callout pitfall"><span class="label">Your orphaned 95GB</span>Your own audit found roughly 95GB of local weights that nothing actually serves — a very common outcome. Quantized models are cheap to download and easy to forget. Before pulling another, check what's already on disk.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://huggingface.co/docs/hub/gguf" target="_blank" rel="noopener">GGUF on the Hugging Face Hub</a><span class="link-note">Format reference, and the quantization table naming every Q-variant.</span></li><li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a><span class="link-note">The engine. The README's quantization section is the primary source for the trade-offs here.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. Why does &#x27;think step by step&#x27; improve accuracy on multi-step problems?</p>
+    <p class="quiz-q">1. You have 40GB to spend on a local model. Which is generally the better choice?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">It activates a reasoning module inside the model</div>
-      <div class="quiz-opt">It gives the model more forward passes, and each written step becomes context it can build on</div>
-      <div class="quiz-opt">It reduces the temperature automatically</div>
+      <div class="quiz-opt">A 13B model at full 16-bit precision</div>
+      <div class="quiz-opt">A 70B model quantized to 4 bits</div>
+      <div class="quiz-opt">Two 7B models at 8-bit, used together</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. You&#x27;re extracting dates from invoices. Should you use a reasoning model?</p>
+    <p class="quiz-q">2. What does the &#x27;M&#x27; in Q4_K_M refer to?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Yes — reasoning improves all tasks</div>
-      <div class="quiz-opt">No — there are no steps to work through, so you pay for reasoning tokens and gain nothing</div>
-      <div class="quiz-opt">Yes, but only with self-consistency enabled</div>
+      <div class="quiz-opt">The model was trained on medium-sized data</div>
+      <div class="quiz-opt">Medium within the K-quant family — how much precision is retained in the layers that matter most</div>
+      <div class="quiz-opt">Memory-mapped loading</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. Can a chain-of-thought be presented as the reason a system made a decision?</p>
-    <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Yes — it&#x27;s a direct record of the model&#x27;s reasoning process</div>
-      <div class="quiz-opt">No — it&#x27;s text generated the same way as any other, and research shows it often omits what actually drove the answer</div>
-      <div class="quiz-opt">Only for models that expose reasoning tokens</div>
+    <p class="quiz-q">3. Why convert a fine-tuned model to GGUF before serving it locally?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">GGUF is the format llama.cpp and Ollama consume — self-contained, quantized, no Python environment needed</div>
+      <div class="quiz-opt">GGUF models are more accurate than safetensors</div>
+      <div class="quiz-opt">It&#x27;s required to publish to Hugging Face</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

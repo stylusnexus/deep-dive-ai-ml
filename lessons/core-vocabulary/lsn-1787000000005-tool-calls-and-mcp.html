@@ -186,7 +186,7 @@
   <h1>Tool Calls and MCP</h1>
   <p class="subtitle">How a text model comes to run your code, and what the protocol standardises.</p>
 
-  <p><strong>MCP</strong> appears 36 times in Bullpen's docs and <strong>tool calls</strong> in various spellings over 60 times. Together they're the mechanism by which a text-predicting model ends up reading your files.</p>
+  <p><strong>Tool calls</strong> and <strong>MCP</strong> are together the mechanism by which a text-predicting model ends up reading your files — and the place where most people's mental model of what a model can do turns out to be wrong.</p>
   <h2>A tool call is structured text the model emits</h2>
   <p>You give the model a list of available tools, each with a name, a description, and a schema for its arguments. When the model decides one is needed, it emits a structured request:</p>
   <pre><code>{

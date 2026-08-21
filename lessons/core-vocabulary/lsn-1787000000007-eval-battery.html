@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Embeddings, Vectors and Semantic Routing</title>
+<title>The Eval Battery</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -182,65 +182,60 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 5 of 21</span>
-  <h1>Embeddings, Vectors and Semantic Routing</h1>
-  <p class="subtitle">How a machine decides two things 'mean' something similar — and where that fails.</p>
+  <span class="pill">Lesson 8 of 21</span>
+  <h1>The Eval Battery</h1>
+  <p class="subtitle">How you know any of this works — and why the number you trust must be one you built.</p>
 
-  <p><strong>Semantic routing</strong> appears five times in Bullpen's docs, and it depends entirely on <strong>embeddings</strong>. This is also the machinery behind RAG in Block 3, so the concept pays for itself twice.</p>
-  <h2>An embedding is a list of numbers standing in for meaning</h2>
-  <p>An embedding model takes text and returns a fixed-length list of numbers — a <strong>vector</strong>, typically a few hundred to a couple of thousand values. The useful property is that texts with similar meanings produce vectors that point in similar directions, even when they share no words at all.</p>
-  <p>"How do I reset my password?" and "I'm locked out of my account" have almost no vocabulary in common. Their embeddings sit close together. That is the whole trick, and everything else is bookkeeping.</p>
-  <div class="callout insight"><span class="label">Similarity is a measurable angle</span>Closeness is usually cosine similarity — the angle between two vectors, from 1 (same direction) to -1 (opposite). It's a cheap arithmetic operation, which is why searching millions of vectors is fast.</div>
-  <figure class="diagram"><svg viewBox="0 0 640 260" role="img" aria-label="Embedding space with clusters">
-<rect x="12" y="12" width="616" height="236" rx="8" class="d-box"/>
-<circle cx="140" cy="80" r="6" class="d-fill-accent"/>
-<circle cx="176" cy="98" r="6" class="d-fill-accent"/>
-<circle cx="150" cy="118" r="6" class="d-fill-accent"/>
-<ellipse cx="156" cy="99" rx="60" ry="46" fill="none" stroke="var(--accent)" stroke-dasharray="4 4" opacity="0.6"/>
-<text x="106" y="172" class="d-label-sm">"reset my password"</text>
-<text x="106" y="188" class="d-label-sm">"locked out of my account"</text>
-<text x="106" y="204" class="d-label-sm">"can't sign in"</text>
-<circle cx="420" cy="70" r="6" class="d-fill-green"/>
-<circle cx="458" cy="88" r="6" class="d-fill-green"/>
-<ellipse cx="439" cy="79" rx="48" ry="34" fill="none" stroke="var(--green)" stroke-dasharray="4 4" opacity="0.6"/>
-<text x="392" y="140" class="d-label-sm">"where is my order"</text>
-<text x="392" y="156" class="d-label-sm">"track my delivery"</text>
-<circle cx="300" cy="212" r="6" class="d-fill-red"/>
-<circle cx="316" cy="216" r="6" class="d-fill-red"/>
-<text x="336" y="212" class="d-label-sm">"I want a refund" /</text>
-<text x="336" y="228" class="d-label-sm">"I don't want a refund" — too close</text>
-<text x="24" y="36" class="d-label-sm">similar meaning → similar direction</text>
-</svg><figcaption>Meaning becomes geometry. Phrases sharing no words land close together; the negation pair lands close too, which is exactly the failure mode to watch for.</figcaption></figure>
-  <h2>How semantic routing works in Bullpen</h2>
-  <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">1</div><div><div class="roadmap-title">Define the lanes</div><div class="roadmap-desc">Each route — a code edit, a factual lookup, a repo question — gets example phrasings.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2</div><div><div class="roadmap-title">Embed the examples</div><div class="roadmap-desc">Once, up front. Stored as vectors.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3</div><div><div class="roadmap-title">Embed the incoming turn</div><div class="roadmap-desc">One cheap embedding call, far cheaper and faster than asking an LLM to classify.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">Compare and pick</div><div class="roadmap-desc">Nearest lane wins, if it clears a confidence threshold.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5</div><div><div class="roadmap-title">Fall back</div><div class="roadmap-desc">Below threshold, ask a model to decide rather than guessing.</div></div></div></div>
-  <p>The reason to route this way rather than asking an LLM "which category is this?" is cost and latency. An embedding call is milliseconds and fractions of a cent. It runs on every single turn, so that difference compounds.</p>
-  <h2>Where embeddings fail</h2>
-  <ul><li><strong>Negation.</strong> "I want a refund" and "I don't want a refund" embed close together. Sign is meaning, and embeddings are weak at it.</li><li><strong>Jargon and identifiers.</strong> Internal names, error codes, and file paths often carry no useful semantics. Keyword search beats embeddings here — which is why serious retrieval combines both.</li><li><strong>Chunking artefacts.</strong> An embedding represents whatever text you gave it. Split a document badly and you get vectors representing half-thoughts.</li></ul>
-  <div class="callout pitfall"><span class="label">The baseline you should always run</span>Before reaching for a vector database, try keyword search — BM25 or plain Postgres full-text. On short, jargon-heavy, identifier-rich corpora it frequently wins, and it costs nothing to test. This is the intake sheet's 'dumb baseline' question applied to retrieval.</div>
-  <h2>Vector stores</h2>
-  <p>A <strong>vector database</strong> stores vectors alongside their source text and finds nearest neighbours quickly. Block 3 uses <code>pgvector</code> — the Postgres extension — because it means one database rather than two, and because at the scale you'll work at, the specialist stores buy speed you don't need.</p>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://sbert.net" target="_blank" rel="noopener">Sentence Transformers</a><span class="link-note">The practical library for embeddings, with clear docs on model choice and similarity.</span></li><li><a href="https://github.com/pgvector/pgvector" target="_blank" rel="noopener">pgvector</a><span class="link-note">The Postgres extension Block 3 uses. Read the indexing notes before loading real data.</span></li></ul></div>
+  <p>A serious agent project accumulates a <code>bench/</code> directory, a record of past runs, and a benchmarks document. That machinery is what makes any claim about the system checkable, and it is the bridge into Block 5.</p>
+  <h2>A battery is a fixed set of tasks with checkable outcomes</h2>
+  <p>Each task has an input, a way to run it, and a way to decide pass or fail <em>without a human</em>. Run the battery against a configuration and you get a score. Change one thing, re-run, compare. That's the entire method, and its value comes from the set staying fixed.</p>
+  <p>A recorded result — say 11 of 24 on multi-file editing as of a particular change — is only meaningful because the 24 did not move. A benchmark you edit between runs measures nothing.</p>
+  <h2>Why public benchmarks won&#x27;t answer your question</h2>
+  <ul><li><strong>Contamination.</strong> Popular benchmarks are in the training data. High scores may be recall, not capability.</li><li><strong>Optimisation pressure.</strong> Vendors tune for benchmarks that decide purchases. The measure stops being a measure.</li><li><strong>Task mismatch.</strong> A model's competitive-programming score says little about editing four files in your Go codebase without breaking the build.</li></ul>
+  <div class="callout matters"><span class="label">The twenty-item rule</span>The single most valuable evaluation asset you can own is about twenty real tasks from your actual work, with known-good outcomes. It's small enough to build in an afternoon and specific enough that no vendor has optimised for it. Block 5 builds yours; HF Inference Providers then runs it across many models on one bill.</div>
+  <h2>Grading, from cheapest to loosest</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Deterministic</div><div><div class="roadmap-title">Compiles, tests pass, schema validates</div><div class="roadmap-desc">Cheap, unambiguous, trustworthy. Use wherever possible.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reference match</div><div><div class="roadmap-title">Compare against a known-good answer</div><div class="roadmap-desc">Exact match, or fuzzy for prose. Brittle when many answers are valid.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Model-as-judge</div><div><div class="roadmap-title">Another model scores the output</div><div class="roadmap-desc">Flexible, and the last resort — it inherits the judge's biases and can be circular if the judge is the model under test.</div></div></div></div>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Grading methods ranked by trustworthiness">
+<rect x="12" y="16" width="440" height="44" rx="6" class="d-box-good"/>
+<text x="30" y="38" class="d-label-b">Deterministic</text>
+<text x="30" y="54" class="d-label-sm">compiles · tests pass · schema validates</text>
+<text x="470" y="44" class="d-fill-green" font-size="12" font-weight="600">most trustworthy</text>
+<rect x="12" y="72" width="440" height="44" rx="6" class="d-box"/>
+<text x="30" y="94" class="d-label-b">Reference match</text>
+<text x="30" y="110" class="d-label-sm">compare to a known-good answer · brittle when many answers are valid</text>
+<rect x="12" y="128" width="440" height="44" rx="6" class="d-box-warn"/>
+<text x="30" y="150" class="d-label-b">Model-as-judge</text>
+<text x="30" y="166" class="d-label-sm">flexible · inherits the judge's bias · circular if judge = model under test</text>
+<text x="470" y="156" class="d-fill-red" font-size="12" font-weight="600">last resort</text>
+<path d="M600 30 L600 160" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>
+</svg><figcaption>Grade as far up this ladder as the task allows. Every step down costs you certainty, and the bottom rung can be circular.</figcaption></figure>
+  <div class="callout pitfall"><span class="label">The trap the harness is named for</span>An agent asked whether it succeeded will frequently say yes. The strongest eval harnesses are built on exactly this premise — replay real closed pull requests, so the outcome is established in advance and the agent's self-report is irrelevant. Never let the thing being evaluated report its own score.</div>
+  <h2>What to record on every run</h2>
+  <p>A score alone is nearly useless six weeks later. Record the model and quantization, the harness version or commit, the sampling settings, the date, and the per-task outcomes rather than only the total. Without those, a changed number tells you something moved but not what.</p>
+  <h2>Where this goes next</h2>
+  <p>You now have the vocabulary the rest of the program assumes: the loop and the harness around it, tokens and context, weights and quantization, local serving, embeddings and retrieval, tool calls and MCP, routing and sampling, and evaluation. Block 1 starts on data. Every block from here re-uses these terms rather than introducing parallel ones.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://developers.google.com/machine-learning/crash-course/overfitting/overfitting" target="_blank" rel="noopener">Google ML Crash Course: overfitting</a><span class="link-note">Short, visual treatment of held-out evaluation if you want a second angle.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. Why route with embeddings rather than asking an LLM to classify each turn?</p>
+    <p class="quiz-q">1. Why is your own 24-task battery more informative than a public benchmark?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Embeddings are more accurate at classification</div>
-      <div class="quiz-opt">An embedding call costs milliseconds and a fraction of a cent, and it runs on every turn</div>
-      <div class="quiz-opt">LLMs cannot perform classification reliably</div>
+      <div class="quiz-opt">It&#x27;s larger and more rigorous</div>
+      <div class="quiz-opt">It&#x27;s specific to your real work and nobody has optimised against it</div>
+      <div class="quiz-opt">Public benchmarks measure the wrong models</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. A support bot keeps confusing &#x27;I want to cancel&#x27; with &#x27;I don&#x27;t want to cancel&#x27;. What&#x27;s happening?</p>
+    <p class="quiz-q">2. What&#x27;s the main risk of model-as-judge grading?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">The embedding model is broken and should be replaced</div>
-      <div class="quiz-opt">Embeddings handle negation poorly — the two phrases sit close together in vector space</div>
-      <div class="quiz-opt">The chunk size is too large</div>
+      <div class="quiz-opt">It&#x27;s too slow to run frequently</div>
+      <div class="quiz-opt">It inherits the judge&#x27;s biases, and is circular when the judge is also the model under test</div>
+      <div class="quiz-opt">It can only grade prose</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. Before building vector search over a corpus of internal error codes and file paths, what should you try first?</p>
+    <p class="quiz-q">3. A battery score moves from 11/24 to 15/24. What must have been recorded for that to mean anything?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">A larger embedding model</div>
-      <div class="quiz-opt">Keyword search — on identifier-heavy text it often beats embeddings, and it&#x27;s free to test</div>
-      <div class="quiz-opt">Splitting the documents into smaller chunks</div>
+      <div class="quiz-opt">Only the two scores — the improvement speaks for itself</div>
+      <div class="quiz-opt">Model, quantization, harness version, sampling settings, date, and per-task outcomes</div>
+      <div class="quiz-opt">The wall-clock time of each run</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

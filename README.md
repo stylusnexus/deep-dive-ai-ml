@@ -37,7 +37,6 @@ checklist for when something is already broken.
 
 1. Read [`CURRICULUM.md`](CURRICULUM.md) — the week-by-week map
 2. Run `make up` (or see [`docker/README.md`](docker/README.md)) to bring up the environments
-3. Begin with `lessons/bullpen-vocabulary/` — the vocabulary spine
 
 ## Layout
 

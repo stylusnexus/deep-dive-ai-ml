@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Structured Output: JSON You Can Actually Parse</title>
+<title>Serving Locally: Ollama, llama.cpp and tok/s</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -182,70 +182,73 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 13 of 21</span>
-  <h1>Structured Output: JSON You Can Actually Parse</h1>
-  <p class="subtitle">The gap between 'the model returned JSON' and 'the model always returns valid JSON'.</p>
+  <span class="pill">Lesson 4 of 21</span>
+  <h1>Serving Locally: Ollama, llama.cpp and tok/s</h1>
+  <p class="subtitle">The most-mentioned tool in your codebase, and how to read a speed number.</p>
 
-  <p>The moment code consumes a model's output rather than a human reading it, free text becomes a liability. Tool calls, routing decisions, extraction, classification, anything feeding a database — all need a shape that parses every time. Getting from "usually" to "always" is a specific engineering problem with a ladder of solutions.</p>
-  <h2>Why &#x27;usually&#x27; isn&#x27;t good enough</h2>
-  <p>A model that returns valid JSON 97% of the time fails three times in a hundred. Inside an agent loop making six calls per task, that's roughly one task in six broken. Reliability multiplies against you, exactly as it did with agent chains.</p>
-  <h2>The ladder</h2>
-  <figure class="diagram"><svg viewBox="0 0 640 230" role="img" aria-label="Ladder of structured output guarantees">
-<rect x="12" y="176" width="450" height="42" rx="6" class="d-box-warn"/>
-<text x="28" y="196" class="d-label-b">1. Ask nicely</text>
-<text x="28" y="212" class="d-label-sm">"respond in JSON" — no guarantee at all</text>
-<text x="480" y="202" class="d-fill-red" font-size="11" font-weight="600">weakest</text>
-<rect x="12" y="126" width="450" height="42" rx="6" class="d-box"/>
-<text x="28" y="146" class="d-label-b">2. JSON mode</text>
-<text x="28" y="162" class="d-label-sm">provider guarantees valid JSON — but not your shape</text>
-<rect x="12" y="76" width="450" height="42" rx="6" class="d-box-accent"/>
-<text x="28" y="96" class="d-label-b">3. Schema / tool definition</text>
-<text x="28" y="112" class="d-label-sm">provider validates against your schema — the usual right answer</text>
-<rect x="12" y="26" width="450" height="42" rx="6" class="d-box-good"/>
-<text x="28" y="46" class="d-label-b">4. Constrained decoding</text>
-<text x="28" y="62" class="d-label-sm">invalid tokens made impossible at sampling time — llama.cpp GBNF</text>
-<text x="480" y="52" class="d-fill-green" font-size="11" font-weight="600">strongest</text>
-</svg><figcaption>Each rung constrains the model more and leaves less to chance. Use the highest rung your provider supports, and validate anyway.</figcaption></figure>
-  <p>Rung 4 deserves a note because it's the one people don't know about. When you control the sampler — as <code>llama.cpp</code> does locally — you can mask out any token that would make the output invalid before it's ever sampled. The model is not asked to comply; non-compliance is unrepresentable. Bullpen's local lane can use this; hosted APIs generally expose rung 3 instead.</p>
-  <h2>The schema is prompt engineering</h2>
-  <p>Field names and descriptions are read by the model. <code>{"s": string}</code> and <code>{"sentiment": "positive | negative | neutral"}</code> produce measurably different results. Use explicit enums rather than free strings wherever the set of valid answers is known, and describe fields as if explaining them to someone unfamiliar — because that's exactly the situation.</p>
-  <div class="callout matters"><span class="label">Temperature 0, always, for this</span>Structured output is a task with one correct shape. Sampling variety buys nothing and costs validity. A surprising proportion of intermittent JSON failures are an unnecessarily high temperature inherited from a chat default.</div>
-  <h2>The failure modes worth knowing by sight</h2>
-  <ul><li><strong>Markdown fences.</strong> The model wraps JSON in triple backticks. Extremely common; strip before parsing.</li><li><strong>Prose either side.</strong> "Here's the JSON you asked for:" preceding the object.</li><li><strong>Truncation.</strong> The response hit the token limit mid-object. Parses as invalid, and the cause isn't the model's formatting — it's your max-tokens setting.</li><li><strong>Hallucinated enum values.</strong> Valid JSON, invalid content — a category you never defined. This is why schema validation must check values, not just parse.</li><li><strong>Type drift.</strong> <code>"42"</code> where you expected <code>42</code>, or <code>null</code> where you expected an empty list.</li></ul>
-  <h2>Validate, then repair</h2>
-  <p>Parse into a typed model — Pydantic in Python — so validation checks structure <em>and</em> values. On failure, one repair attempt that hands the model the error text is worth having; it fixes most transient mistakes. Beyond one retry you're usually looking at a schema problem, not a model problem, and retrying costs tokens without changing the outcome.</p>
-  <div class="callout pitfall"><span class="label">Never trust it because it parsed</span>Valid JSON is not correct JSON. A perfectly-formed object can contain an invented product ID, a date that doesn't exist, or a confidence score of 0.99 attached to a guess. Schema validation catches shape. Only your own checks catch sense — which is the same lesson as Block 5's: the thing being evaluated cannot be the thing that grades it.</div>
-  <h2>Where this connects</h2>
-  <p>This is the mechanism under tool calling from lesson 6 — a tool call <em>is</em> schema-constrained structured output, which is why providers that support tool calling support structured output essentially for free. It's also what makes deterministic grading possible in Block 5: an output that validates against a schema is machine-checkable without a judge.</p>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://platform.openai.com/docs/guides/structured-outputs" target="_blank" rel="noopener">Structured outputs (OpenAI)</a><span class="link-note">Rung 3 of the ladder, documented — schema-constrained generation and its limits.</span></li><li><a href="https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md" target="_blank" rel="noopener">GBNF grammars in llama.cpp</a><span class="link-note">Rung 4. Constrained decoding, where invalid output is made unrepresentable.</span></li><li><a href="https://docs.pydantic.dev" target="_blank" rel="noopener">Pydantic</a><span class="link-note">Validation that checks values, not just shape. The repair loop hangs off its error messages.</span></li></ul></div>
+  <p><strong>Ollama</strong> is how most people run a model locally for the first time, and it is what any cheap-first architecture rests on. It is also a stack of three things that get conflated.</p>
+  <h2>llama.cpp is the engine; Ollama is the car</h2>
+  <p><code>llama.cpp</code> is a C++ inference engine that runs GGUF models efficiently on consumer hardware, including Apple Silicon via Metal. It's the thing doing the actual arithmetic.</p>
+  <p><strong>Ollama</strong> wraps it in something usable: a model registry (<code>ollama pull</code>), a local HTTP server with an OpenAI-compatible API, automatic memory management, and model switching. Your code talks HTTP to Ollama; Ollama talks to llama.cpp; llama.cpp talks to the GPU.</p>
+  <div class="callout insight"><span class="label">Why the API compatibility matters</span>Because Ollama speaks an OpenAI-shaped API, the same client code can point at a local 7B model or a hosted frontier model by changing a base URL. That interchangeability is precisely what makes cheap-first routing implementable at all.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 250" role="img" aria-label="Local serving stack"><defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker><marker id="aa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="160" y="12" width="320" height="40" rx="6" class="d-box-accent"/>
+<text x="180" y="37" class="d-label-b">Your code</text>
+<text x="330" y="37" class="d-label-sm">HTTP, OpenAI-shaped</text>
+<path d="M320 52 L320 76" class="d-arrow-accent" marker-end="url(#aa)"/>
+<rect x="160" y="76" width="320" height="40" rx="6" class="d-box"/>
+<text x="180" y="101" class="d-label-b">Ollama</text>
+<text x="290" y="101" class="d-label-sm">registry · memory · model switching</text>
+<path d="M320 116 L320 140" class="d-arrow" marker-end="url(#a)"/>
+<rect x="160" y="140" width="320" height="40" rx="6" class="d-box"/>
+<text x="180" y="165" class="d-label-b">llama.cpp</text>
+<text x="300" y="165" class="d-label-sm">the actual arithmetic</text>
+<path d="M320 180 L320 204" class="d-arrow" marker-end="url(#a)"/>
+<rect x="160" y="204" width="320" height="36" rx="6" class="d-box"/>
+<text x="180" y="227" class="d-label-b">Metal / unified memory</text>
+<text x="392" y="227" class="d-label-sm">128 GB, high bandwidth</text>
+<text x="500" y="101" class="d-label-sm">swap this URL and</text>
+<text x="500" y="117" class="d-label-sm">you're on a frontier</text>
+<text x="500" y="133" class="d-label-sm">model instead</text>
+<path d="M492 96 L484 96" class="d-arrow"/>
+</svg><figcaption>Your code never talks to the model directly. Each layer down is closer to the metal — and the OpenAI-shaped API at the top is what makes the local and hosted lanes interchangeable.</figcaption></figure>
+  <h2>Reading tokens per second</h2>
+  <p><strong>tok/s</strong> is the throughput measure, but a single number hides two very different things:</p>
+  <ul><li><strong>Prefill</strong> — processing your prompt. Parallel, fast, often hundreds or thousands of tok/s.</li><li><strong>Decode</strong> — generating the answer, one token at a time. Sequential, slower, and what you actually feel while waiting.</li></ul>
+  <p>Quoted tok/s almost always means decode. Useful reference points: below ~10 tok/s feels sluggish; 20–30 tok/s reads at about conversational speed; above 50 the text arrives faster than you read it.</p>
+  <div class="callout matters"><span class="label">The other number</span>Time-to-first-token is often what determines whether something feels responsive, and it's dominated by prefill — so it scales with prompt length. A long retrieved context makes the model feel slow before it has generated anything at all.</div>
+  <h2>What decides your speed</h2>
+  <p>Local inference is usually <em>memory-bandwidth bound</em>, not compute bound. Every generated token requires reading the entire set of active weights from memory. This is why Apple Silicon performs well: unified memory has high bandwidth, and there's no copying between system and GPU memory.</p>
+  <p>It's also why quantization speeds things up as well as shrinking them — fewer bits per weight means less memory traffic per token. A Q4 model isn't just smaller than Q8, it's meaningfully faster.</p>
+  <h2>A worked correction: when the headline number is the wrong number</h2>
+  <p>A widely-repeated claim held that one serving runtime was roughly three times faster than another for the same model. The figure was real — and it was a <em>decode</em> throughput measurement, around 130 tokens per second against 43.</p>
+  <p>Measured on an actual agent loop, the end-to-end gain was nothing like 3×. A coding agent re-sends a growing context every turn, so per-iteration time is dominated by prefill, not decode. Real decode on that loop was 20–25 tok/s, and each iteration spent 40–130 seconds re-processing the prompt. The benchmark measured the half of the work that wasn't the bottleneck.</p>
+  <div class="callout insight"><span class="label">What actually moved it</span>Not the runtime and not the quantization — <strong>prefix-KV reuse</strong>, so each turn only processes the tokens that are genuinely new. On the same fixture that took 7–17 minutes, a serving engine with true prefix matching brought it to about 1.3 minutes, roughly tenfold, with cache hit rate at 1.00 and no loss of quality. Same weights throughout. The lever was in the serving layer's caching, which no tokens-per-second figure would ever have surfaced.</div>
+  <div class="callout pitfall"><span class="label">The habit this should build</span>When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck. Two premature speed claims were made on that project from partial data before the real one was confirmed by cache-hit telemetry. A number measured on the wrong phase is not a small error — it points your optimisation work at the wrong layer entirely.</div>
+  <h2>The thing to keep straight</h2>
+  <p>Ollama is a convenience layer, not a requirement. <code>llama.cpp</code> serves models directly; vLLM and TGI are production-grade alternatives with better batching for concurrent users. Ollama optimises for one developer on one machine, and is a poor fit for serving many users at once. Block 8 covers what changes when you need the latter.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a><span class="link-note">Model registry and the local OpenAI-compatible server.</span></li><li><a href="https://docs.vllm.ai" target="_blank" rel="noopener">vLLM documentation</a><span class="link-note">What you move to when one developer becomes many concurrent users — the contrast is instructive.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. A provider&#x27;s JSON mode guarantees what, exactly?</p>
-    <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">That the output matches your schema</div>
-      <div class="quiz-opt">That the output is syntactically valid JSON — but not necessarily your shape</div>
-      <div class="quiz-opt">That the values are factually correct</div>
+    <p class="quiz-q">1. A local model reports 45 tok/s but the first response still takes several seconds. Why?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">The 45 tok/s figure is decode speed; the delay is prefill, processing your long prompt</div>
+      <div class="quiz-opt">The model is loading from disk on every request</div>
+      <div class="quiz-opt">tok/s figures are marketing numbers with no real meaning</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. Why is constrained decoding stronger than schema validation after the fact?</p>
+    <p class="quiz-q">2. Why does a 4-bit model generate faster than the same model at 8-bit?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">It runs faster</div>
-      <div class="quiz-opt">Invalid tokens are masked at sampling time, so non-compliant output cannot be generated at all</div>
-      <div class="quiz-opt">It works with any provider</div>
+      <div class="quiz-opt">It has fewer parameters to consider</div>
+      <div class="quiz-opt">Inference is memory-bandwidth bound, so fewer bits per weight means less memory traffic per token</div>
+      <div class="quiz-opt">Lower precision arithmetic is faster on the GPU</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. Your JSON output fails to parse roughly 3% of the time, always cut off partway through. What&#x27;s the cause?</p>
+    <p class="quiz-q">3. Why is Ollama a poor choice for serving a model to many concurrent users?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">The model doesn&#x27;t support structured output</div>
-      <div class="quiz-opt">Responses are hitting the max-tokens limit and truncating mid-object</div>
-      <div class="quiz-opt">Temperature is too low</div>
-    </div>
-    <div class="quiz-feedback"></div>
-    <p class="quiz-q">4. A response validates perfectly against your schema but contains a product ID that doesn&#x27;t exist. What does this show?</p>
-    <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">The schema needs more fields</div>
-      <div class="quiz-opt">Schema validation checks shape, not sense — correctness needs your own checks</div>
-      <div class="quiz-opt">The model needs a lower temperature</div>
+      <div class="quiz-opt">It can&#x27;t run large models</div>
+      <div class="quiz-opt">It&#x27;s optimised for a single developer on one machine; vLLM or TGI handle concurrent batching properly</div>
+      <div class="quiz-opt">It doesn&#x27;t expose an HTTP API</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

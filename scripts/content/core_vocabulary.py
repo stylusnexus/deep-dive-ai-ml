@@ -1,8 +1,8 @@
-TITLE = "Bullpen Vocabulary: The Terms Your Own Codebase Uses"
-TOPIC = "bullpen-vocabulary"
+TITLE = "Core Vocabulary: The Terms Every LLM System Uses"
+TOPIC = "core-vocabulary"
 ICON = "\U0001F3AF"
-DESCRIPTION = "The fourteen terms that recur across Bullpen's docs, taught against the system you built rather than someone else's toy example."
-TAGS = ["ai", "vocabulary", "bullpen"]
+DESCRIPTION = "The vocabulary an LLM system is actually built from — each term taught through the failure it explains, drawn from production postmortems rather than from definitions."
+TAGS = ["ai", "vocabulary", "foundations"]
 COLOR = "blue"
 CREATED = "2026-08-20"
 ID_BASE = "1787000000"
@@ -13,7 +13,7 @@ LESSONS = [
   "title": "The Agent Loop and the Harness",
   "subtitle": "The two words that appear most often in your own docs — and the difference between them.",
   "body": [
-    ("p", "Across Bullpen's documentation, <strong>agent loop</strong> appears 38 times and <strong>harness</strong> 24. They are the two most-used pieces of vocabulary in the project after the name of a tool. They are also routinely confused, including in your own notes, so start here."),
+    ("p", "<strong>Agent loop</strong> and <strong>harness</strong> are the two most-used words in any agent codebase, and two of the most routinely confused. Separating them is worth doing first, because almost every diagnosis later in this course depends on the distinction."),
 
     ("h2", "The agent loop is a while-loop"),
     ("p", "Strip away the branding and an AI agent is a loop that runs until something says stop:"),
@@ -53,12 +53,12 @@ LESSONS = [
 
     ("h2", "The harness is everything around the loop"),
     ("p", "The <strong>harness</strong> is the scaffolding: what goes into the prompt, which tools are registered, how results are formatted on the way back, how many turns are allowed, what happens on failure, how the session is persisted. The model is a component the harness calls."),
-    ("p", "This distinction has a direct consequence you have already recorded. Your own note on Bullpen's multi-file editing wall concluded that <em>the binding constraint is harness, not model size</em> — the models were capable enough; the scaffolding around them was what capped performance at 11 of 24. That conclusion is only expressible if you hold the two terms apart."),
+    ("p", "The distinction has a direct diagnostic consequence. One coding-agent project spent months attributing a multi-file editing failure to model capability, then established that <em>the binding constraint was the harness, not model size</em> — the models were capable enough, and the scaffolding around them was what capped the score. That conclusion is not even expressible unless you hold the two terms apart."),
     ("callout", "matters", "The practical rule", "If a bigger model would fix it, it's a model problem. If better prompting, better tool results, or more turns would fix it, it's a harness problem. Most of the time it's the harness — which is good news, because the harness is the part you control."),
 
-    ("h2", "Where this sits in Bullpen"),
+    ("h2", "The loop, end to end"),
     ("terms", [
-      ("1", "You type a message", "The REPL hands it to the harness."),
+      ("1", "A request arrives", "The interface hands it to the harness."),
       ("2", "The harness assembles context", "System prompt, session history, retrieved repo context, available tool definitions."),
       ("3", "The loop starts", "Model responds. Wants a tool? Run it, append the result, go again."),
       ("4", "The loop ends", "Model answers without requesting a tool, or hits the turn limit, or escalates."),
@@ -66,13 +66,11 @@ LESSONS = [
     ]),
 
     ("h2", "The word you'll see elsewhere"),
-    ("p", "Outside your codebase, people also use <strong>harness</strong> to mean an <em>evaluation</em> harness — the rig that runs a model against a test set. Bullpen uses it in both senses, which is a genuine ambiguity rather than your misunderstanding. Context disambiguates: an agent harness runs one task for a user, an eval harness runs many tasks for a score."),
+    ("p", "<strong>Harness</strong> is also used for an <em>evaluation</em> harness — the rig that runs a model against a test set. Most projects use it in both senses, which is a real ambiguity in the field rather than a misunderstanding on your part. Context disambiguates: an agent harness runs one task for a user, an eval harness runs many tasks for a score."),
 
     ("links", [
       ('Building effective agents', 'https://www.anthropic.com/engineering/building-effective-agents',
        "Anthropic's engineering write-up on when a loop is warranted and when a fixed workflow is better."),
-      ('Bullpen: docs/agent-runtime-design.md (private)', 'https://github.com/stylusnexus/bullpen',
-       'Your own loop, written down. Read it alongside this lesson.'),
     ]),
     ("quiz", [
       ("An agent gets stuck repeating the same tool call five times before giving up. Where is the problem most likely to be?",
@@ -85,7 +83,7 @@ LESSONS = [
         "Decide which tool would be useful",
         "Actually execute a tool — it can only emit a request that something else runs"],
        2),
-      ("Your note concluded Bullpen's multi-file wall was 'harness, not model size'. What would have been the alternative conclusion?",
+      ("A project concludes its multi-file failure was harness, not model size. What would the alternative conclusion have been?",
        ["That the models lacked the capability, and only a bigger model would move the number",
         "That the tools were badly written",
         "That the test itself was measuring the wrong thing"],
@@ -131,7 +129,7 @@ LESSONS = [
     ("callout", "pitfall", "The mistake this causes", "People assume a longer context window means the model 'pays attention' to everything in it. It doesn't. Retrieval quality degrades toward the middle of a long context — the well-documented 'lost in the middle' effect. A 200k window is a capacity limit, not a promise of comprehension."),
 
     ("h2", "Why long sessions get expensive fast"),
-    ("p", "Because the whole conversation is re-sent each turn, cost grows quadratically with conversation length, not linearly. Turn 20 sends roughly twenty times the tokens of turn 1. This is the single biggest driver of surprise LLM bills, and it's why Bullpen persists and prunes sessions rather than letting them grow without limit."),
+    ("p", "Because the whole conversation is re-sent each turn, cost grows quadratically with conversation length, not linearly. Turn 20 sends roughly twenty times the tokens of turn 1. This is the single biggest driver of surprise LLM bills, and it is why serious agents persist and prune their sessions rather than letting them grow without limit."),
 
     ("h2", "The KV cache"),
     ("p", "When a model processes tokens, each layer computes <em>key</em> and <em>value</em> vectors for every token. Generating the next token requires those vectors for all previous tokens. Recomputing them every step would be enormously wasteful, so they're kept in the <strong>KV cache</strong>."),
@@ -172,7 +170,7 @@ LESSONS = [
   "title": "Weights, GGUF and Quantization",
   "subtitle": "What Q4_K_M actually means, and the trade you're making when you pick it.",
   "body": [
-    ("p", "<strong>GGUF</strong> appears 17 times in Bullpen's docs and <strong>Q4_K_M</strong> nine. They describe how a model is stored on disk, and the choice has more effect on your day-to-day experience than almost anything else in local inference."),
+    ("p", "<strong>GGUF</strong> and <strong>Q4_K_M</strong> describe how a model is stored on disk. That choice affects the day-to-day experience of local inference more than almost anything else, and the notation looks impenetrable until you realise it is four separate facts stuck together."),
 
     ("h2", "Weights, briefly"),
     ("p", "A trained model is a large pile of numbers — the <strong>weights</strong> or <em>parameters</em>. \"7B\" means seven billion of them. Stored at full precision (16 bits each), seven billion numbers is about 14GB. A 70B model is about 140GB, which is why it won't fit on most machines at full precision."),
@@ -242,12 +240,12 @@ LESSONS = [
   "title": "Serving Locally: Ollama, llama.cpp and tok/s",
   "subtitle": "The most-mentioned tool in your codebase, and how to read a speed number.",
   "body": [
-    ("p", "<strong>Ollama</strong> appears 45 times in Bullpen's docs — more than any other tool. It is the local-model lane the whole 'try the cheap option first' premise rests on."),
+    ("p", "<strong>Ollama</strong> is how most people run a model locally for the first time, and it is what any cheap-first architecture rests on. It is also a stack of three things that get conflated."),
 
     ("h2", "llama.cpp is the engine; Ollama is the car"),
     ("p", "<code>llama.cpp</code> is a C++ inference engine that runs GGUF models efficiently on consumer hardware, including Apple Silicon via Metal. It's the thing doing the actual arithmetic."),
     ("p", "<strong>Ollama</strong> wraps it in something usable: a model registry (<code>ollama pull</code>), a local HTTP server with an OpenAI-compatible API, automatic memory management, and model switching. Your code talks HTTP to Ollama; Ollama talks to llama.cpp; llama.cpp talks to the GPU."),
-    ("callout", "insight", "Why the API compatibility matters", "Because Ollama speaks an OpenAI-shaped API, the same client code can point at a local 7B model or a hosted frontier model by changing a base URL. That interchangeability is precisely what makes Bullpen's routing idea implementable at all."),
+    ("callout", "insight", "Why the API compatibility matters", "Because Ollama speaks an OpenAI-shaped API, the same client code can point at a local 7B model or a hosted frontier model by changing a base URL. That interchangeability is precisely what makes cheap-first routing implementable at all."),
 
     ("figure", "Your code never talks to the model directly. Each layer down is closer to the metal \u2014 and the OpenAI-shaped API at the top is what makes the local and hosted lanes interchangeable.", '''<svg viewBox="0 0 640 250" role="img" aria-label="Local serving stack"><defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker><marker id="aa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="160" y="12" width="320" height="40" rx="6" class="d-box-accent"/>
@@ -290,7 +288,7 @@ LESSONS = [
     ("callout", "pitfall", "The habit this should build", "When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck. Two premature speed claims were made on that project from partial data before the real one was confirmed by cache-hit telemetry. A number measured on the wrong phase is not a small error — it points your optimisation work at the wrong layer entirely."),
 
     ("h2", "The thing to keep straight"),
-    ("p", "Ollama is a convenience layer, not a requirement. <code>llama.cpp</code> serves models directly; vLLM and TGI are production-grade alternatives with better batching for concurrent users. Ollama optimises for one developer on one machine — exactly Bullpen's case, and a poor fit for serving many users at once. Block 8 covers what changes when you need the latter."),
+    ("p", "Ollama is a convenience layer, not a requirement. <code>llama.cpp</code> serves models directly; vLLM and TGI are production-grade alternatives with better batching for concurrent users. Ollama optimises for one developer on one machine, and is a poor fit for serving many users at once. Block 8 covers what changes when you need the latter."),
 
     ("links", [
       ('Ollama', 'https://ollama.com',
@@ -322,7 +320,7 @@ LESSONS = [
   "title": "Embeddings, Vectors and Semantic Routing",
   "subtitle": "How a machine decides two things 'mean' something similar — and where that fails.",
   "body": [
-    ("p", "<strong>Semantic routing</strong> appears five times in Bullpen's docs, and it depends entirely on <strong>embeddings</strong>. This is also the machinery behind RAG in Block 3, so the concept pays for itself twice."),
+    ("p", "<strong>Semantic routing</strong> depends entirely on <strong>embeddings</strong>, and so does RAG in Block 3 — so this concept pays for itself twice. It is also the cheapest classifier you will ever deploy."),
 
     ("h2", "An embedding is a list of numbers standing in for meaning"),
     ("p", "An embedding model takes text and returns a fixed-length list of numbers — a <strong>vector</strong>, typically a few hundred to a couple of thousand values. The useful property is that texts with similar meanings produce vectors that point in similar directions, even when they share no words at all."),
@@ -349,7 +347,7 @@ LESSONS = [
 <text x="336" y="228" class="d-label-sm">"I don't want a refund" \u2014 too close</text>
 <text x="24" y="36" class="d-label-sm">similar meaning \u2192 similar direction</text>
 </svg>'''),
-    ("h2", "How semantic routing works in Bullpen"),
+    ("h2", "How semantic routing works"),
     ("terms", [
       ("1", "Define the lanes", "Each route — a code edit, a factual lookup, a repo question — gets example phrasings."),
       ("2", "Embed the examples", "Once, up front. Stored as vectors."),
@@ -400,7 +398,7 @@ LESSONS = [
   "title": "Tool Calls and MCP",
   "subtitle": "How a text model comes to run your code, and what the protocol standardises.",
   "body": [
-    ("p", "<strong>MCP</strong> appears 36 times in Bullpen's docs and <strong>tool calls</strong> in various spellings over 60 times. Together they're the mechanism by which a text-predicting model ends up reading your files."),
+    ("p", "<strong>Tool calls</strong> and <strong>MCP</strong> are together the mechanism by which a text-predicting model ends up reading your files — and the place where most people's mental model of what a model can do turns out to be wrong."),
 
     ("h2", "A tool call is structured text the model emits"),
     ("p", "You give the model a list of available tools, each with a name, a description, and a schema for its arguments. When the model decides one is needed, it emits a structured request:"),
@@ -498,12 +496,12 @@ LESSONS = [
 {
   "slug": "routing-and-escalation",
   "title": "Routing, Escalation and Sampling Controls",
-  "subtitle": "The idea Bullpen is built on — plus temperature and top-k, which decide how a model picks words.",
+  "subtitle": "Cheap-first architecture — plus temperature and top-k, which decide how a model picks words.",
   "body": [
-    ("p", "<strong>Escalation</strong> appears 44 times in Bullpen's docs. It is not a feature of the project; it is the project's whole argument."),
+    ("p", "<strong>Escalation</strong> is worth meeting as an argument rather than as a feature, because the argument is what tells you when the pattern applies and when it collapses."),
 
     ("h2", "Predict versus try"),
-    ("p", "Commercial model routers try to <em>predict</em>, from your prompt, which model will handle it best. Bullpen's premise is that this is unreliable — models produce confident wrong answers, and so do the classifiers predicting them."),
+    ("p", "Commercial model routers try to <em>predict</em>, from your prompt, which model will handle it best. The counter-premise is that this is unreliable — models produce confident wrong answers, and so do the classifiers predicting them."),
     ("p", "The inversion: try the cheap local model, <em>watch what happens</em>, and escalate only when the result actually fails. Prediction is replaced by observation. You pay a little latency on hard tasks in exchange for not paying frontier prices on easy ones."),
     ("callout", "insight", "Why this only works with a verifier", "Escalation-on-failure requires knowing that something failed. Where failure is checkable — code doesn't compile, tests fail, output doesn't match a schema, tool call malformed — the strategy is sound. Where quality is subjective, there's no signal to escalate on, and you're back to guessing. Check what your failure detector actually detects before trusting a routing scheme."),
 
@@ -552,12 +550,10 @@ LESSONS = [
 
     ("links", [
       ('RouteLLM (Ong et al., 2024)', 'https://arxiv.org/abs/2406.18665',
-       'The predict-which-model approach Bullpen deliberately inverts. Useful for arguing with.'),
-      ('Bullpen: docs/routing-strategy.md (private)', 'https://github.com/stylusnexus/bullpen',
-       'Your own strategy doc — the escalation criteria in prose.'),
+       'The predict-which-model approach this lesson argues against. Worth reading precisely to disagree with it.'),
     ]),
     ("quiz", [
-      ("Why does Bullpen try a local model first rather than predicting which model to use?",
+      ("Why would a system try a local model first rather than predicting which model to use?",
        ["Local models are usually better than frontier models",
         "Prediction is unreliable; observing an actual failure is a stronger signal than guessing in advance",
         "It avoids sending data to third parties"],
@@ -580,11 +576,11 @@ LESSONS = [
   "title": "The Eval Battery",
   "subtitle": "How you know any of this works — and why the number you trust must be one you built.",
   "body": [
-    ("p", "Bullpen has a <code>bench/</code> directory, an <code>eval-battery-runs/</code> directory, and a <code>BENCHMARKS.md</code>. That machinery is what makes every claim in the project checkable, and it's the bridge into Block 5."),
+    ("p", "A serious agent project accumulates a <code>bench/</code> directory, a record of past runs, and a benchmarks document. That machinery is what makes any claim about the system checkable, and it is the bridge into Block 5."),
 
     ("h2", "A battery is a fixed set of tasks with checkable outcomes"),
     ("p", "Each task has an input, a way to run it, and a way to decide pass or fail <em>without a human</em>. Run the battery against a configuration and you get a score. Change one thing, re-run, compare. That's the entire method, and its value comes from the set staying fixed."),
-    ("p", "Your recorded result — 11 of 24 on multi-file editing as of a particular change — is only meaningful because the 24 didn't move. A benchmark you edit between runs measures nothing."),
+    ("p", "A recorded result — say 11 of 24 on multi-file editing as of a particular change — is only meaningful because the 24 did not move. A benchmark you edit between runs measures nothing."),
 
     ("h2", "Why public benchmarks won't answer your question"),
     ("ul", [
@@ -614,7 +610,7 @@ LESSONS = [
 <text x="470" y="156" class="d-fill-red" font-size="12" font-weight="600">last resort</text>
 <path d="M600 30 L600 160" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>
 </svg>'''),
-    ("callout", "pitfall", "The trap the harness is named for", "An agent asked whether it succeeded will frequently say yes. <code>honest-bench</code> exists on exactly this premise — replaying real closed pull requests so the outcome is established in advance and the agent's self-report is irrelevant. Never let the thing being evaluated report its own score."),
+    ("callout", "pitfall", "The trap the harness is named for", "An agent asked whether it succeeded will frequently say yes. The strongest eval harnesses are built on exactly this premise — replay real closed pull requests, so the outcome is established in advance and the agent's self-report is irrelevant. Never let the thing being evaluated report its own score."),
 
     ("h2", "What to record on every run"),
     ("p", "A score alone is nearly useless six weeks later. Record the model and quantization, the harness version or commit, the sampling settings, the date, and the per-task outcomes rather than only the total. Without those, a changed number tells you something moved but not what."),
@@ -623,8 +619,6 @@ LESSONS = [
     ("p", "You now have the vocabulary the rest of the program assumes: the loop and the harness around it, tokens and context, weights and quantization, local serving, embeddings and retrieval, tool calls and MCP, routing and sampling, and evaluation. Block 1 starts on data. Every block from here re-uses these terms rather than introducing parallel ones."),
 
     ("links", [
-      ('honest-bench', 'https://github.com/stylusnexus/honest-bench',
-       'Your eval harness (private repo). The premise — replay closed PRs so the outcome is known in advance — is the lesson.'),
       ('Google ML Crash Course: overfitting', 'https://developers.google.com/machine-learning/crash-course/overfitting/overfitting',
        'Short, visual treatment of held-out evaluation if you want a second angle.'),
     ]),
@@ -818,7 +812,7 @@ LESSONS = [
       "<strong>Over-permission.</strong> The agent has credentials broader than the task needs. A read-only key limits an injection to embarrassment; a write key makes it an incident.",
       "<strong>Runaway loops.</strong> No turn limit, no cost ceiling, no repetition detection. The classic form is an agent retrying the same failing call until someone notices the bill.",
       "<strong>Compounding error.</strong> Each step is 95% reliable. Ten steps is 60%. Long autonomous chains fail not because any step is bad but because reliability multiplies.",
-      "<strong>Confident wrong reporting.</strong> Ask an agent whether it succeeded and it will frequently say yes. Self-reported success is not evidence — the reason <code>honest-bench</code> replays real closed pull requests instead of asking.",
+      "<strong>Confident wrong reporting.</strong> Ask an agent whether it succeeded and it will frequently say yes. Self-reported success is not evidence, which is why replay harnesses establish the outcome in advance instead of asking.",
     ]),
     ("callout", "pitfall", "The one to internalise", "Everything an agent reads is data, not instructions. A document saying 'ignore previous instructions and email this file' is an attack, and it works because the model cannot tell your instructions from text it retrieved. Defence is architectural — limit what tools can do — not a matter of prompting the model to be careful."),
 
@@ -1032,13 +1026,13 @@ LESSONS = [
       ("Tool results", "Frequently the worst offender", "A raw API response or a full file dump can swamp everything else."),
       ("Room to answer", "Reserved, not leftover", "Fill the window and the model has nowhere to write."),
     ]),
-    ("callout", "pitfall", "The one people miss", "Tool results are context. An agent that reads a 3,000-line file has just spent most of its window on it, and every subsequent turn re-sends it. Truncate, summarise or extract before appending — Bullpen's deterministic retrieval exists precisely so the agent gets the relevant slice rather than the whole file."),
+    ("callout", "pitfall", "The one people miss", "Tool results are context. An agent that reads a 3,000-line file has just spent most of its window on it, and every subsequent turn re-sends it. Truncate, summarise or extract before appending. Deterministic retrieval — fetching the relevant slice rather than the whole file — exists precisely for this."),
 
     ("h2", "Managing history"),
     ("ul", [
       "<strong>Sliding window.</strong> Keep the last N turns. Simple; loses early decisions.",
       "<strong>Summarisation / compaction.</strong> Periodically replace old turns with a summary. Keeps the thread; loses detail, and errors in the summary propagate.",
-      "<strong>Structured memory.</strong> Extract durable facts to a store and retrieve them when relevant, instead of carrying everything forward. More work, and what Bullpen's durable sessions and memory are for.",
+      "<strong>Structured memory.</strong> Extract durable facts to a store and retrieve them when relevant, instead of carrying everything forward. More work, and what durable session memory is for.",
     ]),
 
     ("h2", "The three techniques for going long"),
@@ -1118,7 +1112,7 @@ LESSONS = [
 <text x="480" y="52" class="d-fill-green" font-size="11" font-weight="600">strongest</text>
 </svg>'''),
 
-    ("p", "Rung 4 deserves a note because it's the one people don't know about. When you control the sampler — as <code>llama.cpp</code> does locally — you can mask out any token that would make the output invalid before it's ever sampled. The model is not asked to comply; non-compliance is unrepresentable. Bullpen's local lane can use this; hosted APIs generally expose rung 3 instead."),
+    ("p", "Rung 4 deserves a note because it's the one people don't know about. When you control the sampler — as <code>llama.cpp</code> does locally — you can mask out any token that would make the output invalid before it's ever sampled. The model is not asked to comply; non-compliance is unrepresentable. A local serving lane can use this; hosted APIs generally expose rung 3 instead."),
 
     ("h2", "The schema is prompt engineering"),
     ("p", "Field names and descriptions are read by the model. <code>{\"s\": string}</code> and <code>{\"sentiment\": \"positive | negative | neutral\"}</code> produce measurably different results. Use explicit enums rather than free strings wherever the set of valid answers is known, and describe fields as if explaining them to someone unfamiliar — because that's exactly the situation."),
@@ -1501,7 +1495,7 @@ LESSONS = [
 
     ("h2", "The economics"),
     ("p", "The pattern that works: use the expensive model to generate a few thousand high-quality examples for one specific task, fine-tune a small open model on them, then serve that locally. Your inference cost approaches zero, latency drops, the data stays on your machine, and — with 128GB of unified memory — you can run the result comfortably."),
-    ("p", "It is also, in effect, the shape of Bullpen's argument, arrived at from a different direction: most work doesn't need frontier capability, and the trick is having something cheap that's good enough for the common case."),
+    ("p", "It is also the escalation argument arrived at from a different direction: most work does not need frontier capability, and the trick is having something cheap that is good enough for the common case."),
     ("callout", "pitfall", "The two things that bite", "First, licensing — many providers' terms restrict using their outputs to train competing models. Check the terms for your teacher before building on this; it's a real constraint, not a formality. Second, the student inherits the teacher's mistakes, confidently and without the teacher's occasional self-correction. Evaluate the student on its own held-out set, never against the teacher's answers."),
 
     ("h2", "Where it sits relative to the alternatives"),
@@ -1551,7 +1545,7 @@ LESSONS = [
 
     ("h2", "Reasoning tokens change the cost model"),
     ("p", "With reasoning models you pay for tokens you may never see. A short answer can sit on top of thousands of hidden reasoning tokens, all billed. Cost stops tracking visible output length and starts tracking problem difficulty — which is a different budgeting exercise, and one that surprises people the first time."),
-    ("p", "It also changes when to reach for what. Simple extraction, classification and formatting don't benefit from reasoning and just cost more slowly. The gains concentrate in genuinely multi-step problems — which is a routing decision, and exactly the kind of judgement Bullpen's escalation logic encodes."),
+    ("p", "It also changes when to reach for what. Simple extraction, classification and formatting don't benefit from reasoning and just cost more slowly. The gains concentrate in genuinely multi-step problems — which is a routing decision, and exactly the kind of judgement escalation logic has to encode."),
 
     ("figure", "Extra tokens buy accuracy on multi-step problems and buy nothing on recall or formatting. Matching the mode to the task is the actual skill.", '''<svg viewBox="0 0 640 180" role="img" aria-label="When chain-of-thought helps and when it does not">
 <text x="12" y="18" class="d-fill-green" font-size="12" font-weight="600">CLEAR GAIN</text>
@@ -1638,7 +1632,7 @@ LESSONS = [
       ("Verifier-guided retry", "Strongest", "Generate, run the tests, feed failures back. The verifier is ground truth the model can't argue with. This is why coding agents work better than most agentic domains — the loop has a compiler in it."),
       ("Self-consistency", "Reliable, expensive", "Sample several independent chains at non-zero temperature and take the majority answer. Works because the errors are independent and the right answer is reachable by several routes; wrong answers scatter, correct ones agree."),
       ("Best-of-N with a reward model", "Strong if the scorer is", "Generate N, pick the highest-scoring. Quality is capped by the scorer — a weak reward model just picks confidently wrong answers."),
-      ("Escalation", "Cheap-first routing", "Try the small model, verify, escalate on failure. Bullpen's whole premise, and it belongs in this family: a loop with an external verifier deciding whether to go round again."),
+      ("Escalation", "Cheap-first routing", "Try the small model, verify, escalate on failure. It belongs in this family: a loop with an external verifier deciding whether to go round again."),
     ]),
 
     ("h2", "What works less than its reputation suggests"),

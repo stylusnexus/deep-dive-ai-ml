@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tokens, the Context Window, and the KV Cache</title>
+<title>Structured Output: JSON You Can Actually Parse</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -182,69 +182,70 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 2 of 21</span>
-  <h1>Tokens, the Context Window, and the KV Cache</h1>
-  <p class="subtitle">Why a model 'forgets', why long conversations get expensive, and what's actually being cached.</p>
+  <span class="pill">Lesson 13 of 21</span>
+  <h1>Structured Output: JSON You Can Actually Parse</h1>
+  <p class="subtitle">The gap between 'the model returned JSON' and 'the model always returns valid JSON'.</p>
 
-  <p>A model does not read characters or words. It reads <strong>tokens</strong> — chunks of text produced by a tokenizer, roughly ¾ of a word in English. "unbelievable" might be three tokens; a rare surname might be six. Every cost, limit and speed figure in this field is denominated in tokens, which is why the unit matters.</p>
-  <h2>The context window is a hard wall</h2>
-  <p>The <strong>context window</strong> is the maximum number of tokens the model can consider at once — system prompt, conversation history, retrieved documents, tool definitions, tool results, and the answer being generated, all counted together.</p>
-  <p>It is not memory in any human sense. Nothing is remembered between calls. Each time the loop runs, the <em>entire</em> conversation is re-sent. What looks like a model remembering what you said ten turns ago is the harness re-sending those ten turns every single time.</p>
-  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Context window composition and cost growth">
-<text x="12" y="20" class="d-label-b">One context window</text>
-<rect x="12" y="32" width="616" height="38" rx="5" class="d-box"/>
-<rect x="14" y="34" width="90" height="34" rx="4" class="d-fill-accent" opacity="0.75"/>
-<text x="26" y="56" class="d-label-sm">system</text>
-<rect x="106" y="34" width="230" height="34" rx="4" class="d-fill-yellow" opacity="0.65"/>
-<text x="170" y="56" class="d-label-sm">conversation history</text>
-<rect x="338" y="34" width="180" height="34" rx="4" class="d-fill-green" opacity="0.6"/>
-<text x="372" y="56" class="d-label-sm">retrieved context</text>
-<rect x="520" y="34" width="106" height="34" rx="4" class="d-fill-muted" opacity="0.5"/>
-<text x="540" y="56" class="d-label-sm">answer</text>
-<text x="12" y="108" class="d-label-b">Tokens sent per turn</text>
-<line x1="12" y1="180" x2="628" y2="180" class="d-arrow"/>
-<rect x="40" y="168" width="26" height="12" class="d-fill-accent" opacity="0.8"/>
-<rect x="110" y="150" width="26" height="30" class="d-fill-accent" opacity="0.8"/>
-<rect x="180" y="130" width="26" height="50" class="d-fill-accent" opacity="0.8"/>
-<rect x="250" y="104" width="26" height="76" class="d-fill-accent" opacity="0.8"/>
-<rect x="320" y="122" width="26" height="58" class="d-fill-red" opacity="0.35"/>
-<text x="40" y="196" class="d-label-sm">t1</text>
-<text x="110" y="196" class="d-label-sm">t5</text>
-<text x="180" y="196" class="d-label-sm">t10</text>
-<text x="250" y="196" class="d-label-sm">t20</text>
-<text x="380" y="130" class="d-label-sm">the whole conversation is</text>
-<text x="380" y="146" class="d-label-sm">re-sent every single turn</text>
-</svg><figcaption>Everything competes for the same window. As history grows, the room left for retrieved context and the answer shrinks — and the whole bar is re-sent every turn.</figcaption></figure>
-  <div class="callout pitfall"><span class="label">The mistake this causes</span>People assume a longer context window means the model 'pays attention' to everything in it. It doesn't. Retrieval quality degrades toward the middle of a long context — the well-documented 'lost in the middle' effect. A 200k window is a capacity limit, not a promise of comprehension.</div>
-  <h2>Why long sessions get expensive fast</h2>
-  <p>Because the whole conversation is re-sent each turn, cost grows quadratically with conversation length, not linearly. Turn 20 sends roughly twenty times the tokens of turn 1. This is the single biggest driver of surprise LLM bills, and it's why Bullpen persists and prunes sessions rather than letting them grow without limit.</p>
-  <h2>The KV cache</h2>
-  <p>When a model processes tokens, each layer computes <em>key</em> and <em>value</em> vectors for every token. Generating the next token requires those vectors for all previous tokens. Recomputing them every step would be enormously wasteful, so they're kept in the <strong>KV cache</strong>.</p>
-  <p>Two consequences you can feel:</p>
-  <ul><li><strong>Memory.</strong> The KV cache grows with context length and is often what actually exhausts RAM when running a model locally — not the weights. This is why a model that loads fine can still die on a long prompt.</li><li><strong>Speed.</strong> The first token is slow (the whole prompt must be processed — 'prefill'); subsequent tokens are fast (only one new token to process — 'decode'). That's why time-to-first-token and tokens-per-second are reported separately.</li></ul>
-  <div class="callout insight"><span class="label">Prompt caching is this, sold</span>When a provider offers 'prompt caching' at a discount, they are keeping the KV cache for your unchanging prefix instead of recomputing it. That's why the advice is always to put the stable content — system prompt, long documents — at the <em>front</em> and the variable content at the end. Reorder and the cache misses.</div>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noopener">Lost in the Middle (Liu et al., 2023)</a><span class="link-note">The paper behind the U-shaped attention finding. Short and worth reading properly.</span></li><li><a href="https://docs.claude.com/en/docs/build-with-claude/prompt-caching" target="_blank" rel="noopener">Prompt caching</a><span class="link-note">The KV cache sold as a feature — note the rules about what invalidates a cached prefix.</span></li></ul></div>
+  <p>The moment code consumes a model's output rather than a human reading it, free text becomes a liability. Tool calls, routing decisions, extraction, classification, anything feeding a database — all need a shape that parses every time. Getting from "usually" to "always" is a specific engineering problem with a ladder of solutions.</p>
+  <h2>Why &#x27;usually&#x27; isn&#x27;t good enough</h2>
+  <p>A model that returns valid JSON 97% of the time fails three times in a hundred. Inside an agent loop making six calls per task, that's roughly one task in six broken. Reliability multiplies against you, exactly as it did with agent chains.</p>
+  <h2>The ladder</h2>
+  <figure class="diagram"><svg viewBox="0 0 640 230" role="img" aria-label="Ladder of structured output guarantees">
+<rect x="12" y="176" width="450" height="42" rx="6" class="d-box-warn"/>
+<text x="28" y="196" class="d-label-b">1. Ask nicely</text>
+<text x="28" y="212" class="d-label-sm">"respond in JSON" — no guarantee at all</text>
+<text x="480" y="202" class="d-fill-red" font-size="11" font-weight="600">weakest</text>
+<rect x="12" y="126" width="450" height="42" rx="6" class="d-box"/>
+<text x="28" y="146" class="d-label-b">2. JSON mode</text>
+<text x="28" y="162" class="d-label-sm">provider guarantees valid JSON — but not your shape</text>
+<rect x="12" y="76" width="450" height="42" rx="6" class="d-box-accent"/>
+<text x="28" y="96" class="d-label-b">3. Schema / tool definition</text>
+<text x="28" y="112" class="d-label-sm">provider validates against your schema — the usual right answer</text>
+<rect x="12" y="26" width="450" height="42" rx="6" class="d-box-good"/>
+<text x="28" y="46" class="d-label-b">4. Constrained decoding</text>
+<text x="28" y="62" class="d-label-sm">invalid tokens made impossible at sampling time — llama.cpp GBNF</text>
+<text x="480" y="52" class="d-fill-green" font-size="11" font-weight="600">strongest</text>
+</svg><figcaption>Each rung constrains the model more and leaves less to chance. Use the highest rung your provider supports, and validate anyway.</figcaption></figure>
+  <p>Rung 4 deserves a note because it's the one people don't know about. When you control the sampler — as <code>llama.cpp</code> does locally — you can mask out any token that would make the output invalid before it's ever sampled. The model is not asked to comply; non-compliance is unrepresentable. A local serving lane can use this; hosted APIs generally expose rung 3 instead.</p>
+  <h2>The schema is prompt engineering</h2>
+  <p>Field names and descriptions are read by the model. <code>{"s": string}</code> and <code>{"sentiment": "positive | negative | neutral"}</code> produce measurably different results. Use explicit enums rather than free strings wherever the set of valid answers is known, and describe fields as if explaining them to someone unfamiliar — because that's exactly the situation.</p>
+  <div class="callout matters"><span class="label">Temperature 0, always, for this</span>Structured output is a task with one correct shape. Sampling variety buys nothing and costs validity. A surprising proportion of intermittent JSON failures are an unnecessarily high temperature inherited from a chat default.</div>
+  <h2>The failure modes worth knowing by sight</h2>
+  <ul><li><strong>Markdown fences.</strong> The model wraps JSON in triple backticks. Extremely common; strip before parsing.</li><li><strong>Prose either side.</strong> "Here's the JSON you asked for:" preceding the object.</li><li><strong>Truncation.</strong> The response hit the token limit mid-object. Parses as invalid, and the cause isn't the model's formatting — it's your max-tokens setting.</li><li><strong>Hallucinated enum values.</strong> Valid JSON, invalid content — a category you never defined. This is why schema validation must check values, not just parse.</li><li><strong>Type drift.</strong> <code>"42"</code> where you expected <code>42</code>, or <code>null</code> where you expected an empty list.</li></ul>
+  <h2>Validate, then repair</h2>
+  <p>Parse into a typed model — Pydantic in Python — so validation checks structure <em>and</em> values. On failure, one repair attempt that hands the model the error text is worth having; it fixes most transient mistakes. Beyond one retry you're usually looking at a schema problem, not a model problem, and retrying costs tokens without changing the outcome.</p>
+  <div class="callout pitfall"><span class="label">Never trust it because it parsed</span>Valid JSON is not correct JSON. A perfectly-formed object can contain an invented product ID, a date that doesn't exist, or a confidence score of 0.99 attached to a guess. Schema validation catches shape. Only your own checks catch sense — which is the same lesson as Block 5's: the thing being evaluated cannot be the thing that grades it.</div>
+  <h2>Where this connects</h2>
+  <p>This is the mechanism under tool calling from lesson 6 — a tool call <em>is</em> schema-constrained structured output, which is why providers that support tool calling support structured output essentially for free. It's also what makes deterministic grading possible in Block 5: an output that validates against a schema is machine-checkable without a judge.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://platform.openai.com/docs/guides/structured-outputs" target="_blank" rel="noopener">Structured outputs (OpenAI)</a><span class="link-note">Rung 3 of the ladder, documented — schema-constrained generation and its limits.</span></li><li><a href="https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md" target="_blank" rel="noopener">GBNF grammars in llama.cpp</a><span class="link-note">Rung 4. Constrained decoding, where invalid output is made unrepresentable.</span></li><li><a href="https://docs.pydantic.dev" target="_blank" rel="noopener">Pydantic</a><span class="link-note">Validation that checks values, not just shape. The repair loop hangs off its error messages.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. A conversation is on turn 30 and costs are climbing sharply. Why?</p>
+    <p class="quiz-q">1. A provider&#x27;s JSON mode guarantees what, exactly?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">The model gets slower as it gets tired</div>
-      <div class="quiz-opt">The entire conversation is re-sent on every turn, so token count grows with each exchange</div>
-      <div class="quiz-opt">Longer conversations are billed at a higher per-token rate</div>
+      <div class="quiz-opt">That the output matches your schema</div>
+      <div class="quiz-opt">That the output is syntactically valid JSON — but not necessarily your shape</div>
+      <div class="quiz-opt">That the values are factually correct</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. You load a 13B model locally with room to spare, then it runs out of memory on a long document. What most likely consumed the memory?</p>
-    <div class="quiz-options" data-answer="0">
-      <div class="quiz-opt">The KV cache, which grows with context length</div>
-      <div class="quiz-opt">The model weights, which expand during inference</div>
-      <div class="quiz-opt">The tokenizer building a vocabulary</div>
+    <p class="quiz-q">2. Why is constrained decoding stronger than schema validation after the fact?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It runs faster</div>
+      <div class="quiz-opt">Invalid tokens are masked at sampling time, so non-compliant output cannot be generated at all</div>
+      <div class="quiz-opt">It works with any provider</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. Why does prompt-cache advice say to put stable content first?</p>
+    <p class="quiz-q">3. Your JSON output fails to parse roughly 3% of the time, always cut off partway through. What&#x27;s the cause?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Models pay more attention to the beginning of a prompt</div>
-      <div class="quiz-opt">The cache is keyed on an unchanged prefix — change something early and everything after it must be recomputed</div>
-      <div class="quiz-opt">It reduces the total token count</div>
+      <div class="quiz-opt">The model doesn&#x27;t support structured output</div>
+      <div class="quiz-opt">Responses are hitting the max-tokens limit and truncating mid-object</div>
+      <div class="quiz-opt">Temperature is too low</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. A response validates perfectly against your schema but contains a product ID that doesn&#x27;t exist. What does this show?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The schema needs more fields</div>
+      <div class="quiz-opt">Schema validation checks shape, not sense — correctness needs your own checks</div>
+      <div class="quiz-opt">The model needs a lower temperature</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

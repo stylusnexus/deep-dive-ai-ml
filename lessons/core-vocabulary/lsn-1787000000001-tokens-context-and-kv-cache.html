@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Agent Loop and the Harness</title>
+<title>Tokens, the Context Window, and the KV Cache</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -182,76 +182,69 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 1 of 21</span>
-  <h1>The Agent Loop and the Harness</h1>
-  <p class="subtitle">The two words that appear most often in your own docs — and the difference between them.</p>
+  <span class="pill">Lesson 2 of 21</span>
+  <h1>Tokens, the Context Window, and the KV Cache</h1>
+  <p class="subtitle">Why a model 'forgets', why long conversations get expensive, and what's actually being cached.</p>
 
-  <p>Across Bullpen's documentation, <strong>agent loop</strong> appears 38 times and <strong>harness</strong> 24. They are the two most-used pieces of vocabulary in the project after the name of a tool. They are also routinely confused, including in your own notes, so start here.</p>
-  <h2>The agent loop is a while-loop</h2>
-  <p>Strip away the branding and an AI agent is a loop that runs until something says stop:</p>
-  <pre><code>while not done:
-    response = model(conversation)
-    if response.wants_to_use_a_tool:
-        result = run_tool(response.tool_call)
-        conversation.append(result)
-    else:
-        done = True</code></pre>
-  <p>That is the whole idea. The model cannot <em>do</em> anything — it emits text. When that text is a request to run a tool, something outside the model runs the tool and appends the result to the conversation. Then the model gets another turn. The loop is what turns a text predictor into something that appears to act.</p>
-  <figure class="diagram"><svg viewBox="0 0 640 300" role="img" aria-label="Diagram of an agent loop inside a harness"><defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker><marker id="aa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
-<rect x="12" y="12" width="400" height="276" rx="10" class="d-box"/>
-<text x="28" y="38" class="d-accent">HARNESS</text>
-<text x="28" y="56" class="d-label-sm">prompt assembly · tool registry · turn limit · persistence</text>
-<rect x="40" y="76" width="150" height="42" rx="6" class="d-box-accent"/>
-<text x="60" y="102" class="d-label">1. Build context</text>
-<rect x="40" y="146" width="150" height="42" rx="6" class="d-box-accent"/>
-<text x="60" y="172" class="d-label">2. Call model</text>
-<rect x="40" y="216" width="150" height="42" rx="6" class="d-box-accent"/>
-<text x="52" y="236" class="d-label">3. Tool requested?</text>
-<text x="52" y="252" class="d-label-sm">run it, append result</text>
-<path d="M115 118 L115 146" class="d-arrow-accent" marker-end="url(#aa)"/>
-<path d="M115 188 L115 216" class="d-arrow-accent" marker-end="url(#aa)"/>
-<path d="M205 237 L240 237 L240 97 L205 97" class="d-arrow-accent" marker-end="url(#aa)"/>
-<text x="250" y="160" class="d-label-sm">loop until</text>
-<text x="250" y="176" class="d-label-sm">no tool needed</text>
-<rect x="470" y="146" width="150" height="60" rx="8" class="d-box"/>
-<text x="500" y="172" class="d-label-b">MODEL</text>
-<text x="486" y="192" class="d-label-sm">text in, text out</text>
-<path d="M195 160 L470 160" class="d-arrow" marker-end="url(#a)"/>
-<path d="M470 192 L195 192" class="d-arrow" marker-end="url(#a)"/>
-<text x="300" y="152" class="d-label-sm">context</text>
-<text x="300" y="212" class="d-label-sm">text (maybe a tool request)</text>
-</svg><figcaption>The harness is the outer box. The model sits outside it and only ever returns text — the loop is what turns that text into action.</figcaption></figure>
-  <div class="callout insight"><span class="label">Why this matters</span>Almost every agent failure is a loop failure, not a model failure. The loop ran out of turns, or fed back a badly-formatted tool result, or never noticed the model was going in circles. When an agent misbehaves, look at the loop before you blame the model.</div>
-  <h2>The harness is everything around the loop</h2>
-  <p>The <strong>harness</strong> is the scaffolding: what goes into the prompt, which tools are registered, how results are formatted on the way back, how many turns are allowed, what happens on failure, how the session is persisted. The model is a component the harness calls.</p>
-  <p>This distinction has a direct consequence you have already recorded. Your own note on Bullpen's multi-file editing wall concluded that <em>the binding constraint is harness, not model size</em> — the models were capable enough; the scaffolding around them was what capped performance at 11 of 24. That conclusion is only expressible if you hold the two terms apart.</p>
-  <div class="callout matters"><span class="label">The practical rule</span>If a bigger model would fix it, it's a model problem. If better prompting, better tool results, or more turns would fix it, it's a harness problem. Most of the time it's the harness — which is good news, because the harness is the part you control.</div>
-  <h2>Where this sits in Bullpen</h2>
-  <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">1</div><div><div class="roadmap-title">You type a message</div><div class="roadmap-desc">The REPL hands it to the harness.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2</div><div><div class="roadmap-title">The harness assembles context</div><div class="roadmap-desc">System prompt, session history, retrieved repo context, available tool definitions.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3</div><div><div class="roadmap-title">The loop starts</div><div class="roadmap-desc">Model responds. Wants a tool? Run it, append the result, go again.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">The loop ends</div><div class="roadmap-desc">Model answers without requesting a tool, or hits the turn limit, or escalates.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5</div><div><div class="roadmap-title">The harness persists</div><div class="roadmap-desc">Session and memory are written down so the next turn has history.</div></div></div></div>
-  <h2>The word you&#x27;ll see elsewhere</h2>
-  <p>Outside your codebase, people also use <strong>harness</strong> to mean an <em>evaluation</em> harness — the rig that runs a model against a test set. Bullpen uses it in both senses, which is a genuine ambiguity rather than your misunderstanding. Context disambiguates: an agent harness runs one task for a user, an eval harness runs many tasks for a score.</p>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents</a><span class="link-note">Anthropic's engineering write-up on when a loop is warranted and when a fixed workflow is better.</span></li><li><a href="https://github.com/stylusnexus/bullpen" target="_blank" rel="noopener">Bullpen: docs/agent-runtime-design.md (private)</a><span class="link-note">Your own loop, written down. Read it alongside this lesson.</span></li></ul></div>
+  <p>A model does not read characters or words. It reads <strong>tokens</strong> — chunks of text produced by a tokenizer, roughly ¾ of a word in English. "unbelievable" might be three tokens; a rare surname might be six. Every cost, limit and speed figure in this field is denominated in tokens, which is why the unit matters.</p>
+  <h2>The context window is a hard wall</h2>
+  <p>The <strong>context window</strong> is the maximum number of tokens the model can consider at once — system prompt, conversation history, retrieved documents, tool definitions, tool results, and the answer being generated, all counted together.</p>
+  <p>It is not memory in any human sense. Nothing is remembered between calls. Each time the loop runs, the <em>entire</em> conversation is re-sent. What looks like a model remembering what you said ten turns ago is the harness re-sending those ten turns every single time.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Context window composition and cost growth">
+<text x="12" y="20" class="d-label-b">One context window</text>
+<rect x="12" y="32" width="616" height="38" rx="5" class="d-box"/>
+<rect x="14" y="34" width="90" height="34" rx="4" class="d-fill-accent" opacity="0.75"/>
+<text x="26" y="56" class="d-label-sm">system</text>
+<rect x="106" y="34" width="230" height="34" rx="4" class="d-fill-yellow" opacity="0.65"/>
+<text x="170" y="56" class="d-label-sm">conversation history</text>
+<rect x="338" y="34" width="180" height="34" rx="4" class="d-fill-green" opacity="0.6"/>
+<text x="372" y="56" class="d-label-sm">retrieved context</text>
+<rect x="520" y="34" width="106" height="34" rx="4" class="d-fill-muted" opacity="0.5"/>
+<text x="540" y="56" class="d-label-sm">answer</text>
+<text x="12" y="108" class="d-label-b">Tokens sent per turn</text>
+<line x1="12" y1="180" x2="628" y2="180" class="d-arrow"/>
+<rect x="40" y="168" width="26" height="12" class="d-fill-accent" opacity="0.8"/>
+<rect x="110" y="150" width="26" height="30" class="d-fill-accent" opacity="0.8"/>
+<rect x="180" y="130" width="26" height="50" class="d-fill-accent" opacity="0.8"/>
+<rect x="250" y="104" width="26" height="76" class="d-fill-accent" opacity="0.8"/>
+<rect x="320" y="122" width="26" height="58" class="d-fill-red" opacity="0.35"/>
+<text x="40" y="196" class="d-label-sm">t1</text>
+<text x="110" y="196" class="d-label-sm">t5</text>
+<text x="180" y="196" class="d-label-sm">t10</text>
+<text x="250" y="196" class="d-label-sm">t20</text>
+<text x="380" y="130" class="d-label-sm">the whole conversation is</text>
+<text x="380" y="146" class="d-label-sm">re-sent every single turn</text>
+</svg><figcaption>Everything competes for the same window. As history grows, the room left for retrieved context and the answer shrinks — and the whole bar is re-sent every turn.</figcaption></figure>
+  <div class="callout pitfall"><span class="label">The mistake this causes</span>People assume a longer context window means the model 'pays attention' to everything in it. It doesn't. Retrieval quality degrades toward the middle of a long context — the well-documented 'lost in the middle' effect. A 200k window is a capacity limit, not a promise of comprehension.</div>
+  <h2>Why long sessions get expensive fast</h2>
+  <p>Because the whole conversation is re-sent each turn, cost grows quadratically with conversation length, not linearly. Turn 20 sends roughly twenty times the tokens of turn 1. This is the single biggest driver of surprise LLM bills, and it is why serious agents persist and prune their sessions rather than letting them grow without limit.</p>
+  <h2>The KV cache</h2>
+  <p>When a model processes tokens, each layer computes <em>key</em> and <em>value</em> vectors for every token. Generating the next token requires those vectors for all previous tokens. Recomputing them every step would be enormously wasteful, so they're kept in the <strong>KV cache</strong>.</p>
+  <p>Two consequences you can feel:</p>
+  <ul><li><strong>Memory.</strong> The KV cache grows with context length and is often what actually exhausts RAM when running a model locally — not the weights. This is why a model that loads fine can still die on a long prompt.</li><li><strong>Speed.</strong> The first token is slow (the whole prompt must be processed — 'prefill'); subsequent tokens are fast (only one new token to process — 'decode'). That's why time-to-first-token and tokens-per-second are reported separately.</li></ul>
+  <div class="callout insight"><span class="label">Prompt caching is this, sold</span>When a provider offers 'prompt caching' at a discount, they are keeping the KV cache for your unchanging prefix instead of recomputing it. That's why the advice is always to put the stable content — system prompt, long documents — at the <em>front</em> and the variable content at the end. Reorder and the cache misses.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noopener">Lost in the Middle (Liu et al., 2023)</a><span class="link-note">The paper behind the U-shaped attention finding. Short and worth reading properly.</span></li><li><a href="https://docs.claude.com/en/docs/build-with-claude/prompt-caching" target="_blank" rel="noopener">Prompt caching</a><span class="link-note">The KV cache sold as a feature — note the rules about what invalidates a cached prefix.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. An agent gets stuck repeating the same tool call five times before giving up. Where is the problem most likely to be?</p>
+    <p class="quiz-q">1. A conversation is on turn 30 and costs are climbing sharply. Why?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">The model isn&#x27;t large enough and should be swapped for a frontier model</div>
-      <div class="quiz-opt">The harness — nothing is detecting the repetition or feeding back that the approach isn&#x27;t working</div>
-      <div class="quiz-opt">The tool itself is broken and returning errors</div>
+      <div class="quiz-opt">The model gets slower as it gets tired</div>
+      <div class="quiz-opt">The entire conversation is re-sent on every turn, so token count grows with each exchange</div>
+      <div class="quiz-opt">Longer conversations are billed at a higher per-token rate</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. What is the one thing a language model fundamentally cannot do inside an agent loop?</p>
-    <div class="quiz-options" data-answer="2">
-      <div class="quiz-opt">Produce structured output like JSON</div>
-      <div class="quiz-opt">Decide which tool would be useful</div>
-      <div class="quiz-opt">Actually execute a tool — it can only emit a request that something else runs</div>
-    </div>
-    <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. Your note concluded Bullpen&#x27;s multi-file wall was &#x27;harness, not model size&#x27;. What would have been the alternative conclusion?</p>
+    <p class="quiz-q">2. You load a 13B model locally with room to spare, then it runs out of memory on a long document. What most likely consumed the memory?</p>
     <div class="quiz-options" data-answer="0">
-      <div class="quiz-opt">That the models lacked the capability, and only a bigger model would move the number</div>
-      <div class="quiz-opt">That the tools were badly written</div>
-      <div class="quiz-opt">That the test itself was measuring the wrong thing</div>
+      <div class="quiz-opt">The KV cache, which grows with context length</div>
+      <div class="quiz-opt">The model weights, which expand during inference</div>
+      <div class="quiz-opt">The tokenizer building a vocabulary</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why does prompt-cache advice say to put stable content first?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Models pay more attention to the beginning of a prompt</div>
+      <div class="quiz-opt">The cache is keyed on an unchanged prefix — change something early and everything after it must be recomputed</div>
+      <div class="quiz-opt">It reduces the total token count</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

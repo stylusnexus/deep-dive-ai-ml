@@ -109,7 +109,7 @@ LESSONS = [
 
     ("h2", "ADRs ossify"),
     ("p", "An ADR records a decision <em>and the evidence that forced it</em>. The decision persists in the document; the evidence decays in the world. When the two separate, the ADR becomes a rule enforced past its reason — and because it is written down and was once correct, it is unusually hard to argue with."),
-    ("p", "The Bullpen project spent months describing itself as a <em>cascader</em>: a system that tries a local model and escalates to progressively larger ones. That was a genuine, well-reasoned decision. Measurement later falsified the premise it rested on, and the project became a local agent that occasionally escalates. The architecture docs kept saying cascader, so new work kept being designed against a system that no longer existed."),
+    ("p", "One agent project spent months describing itself as a <em>cascader</em>: a system that tries a local model and escalates to progressively larger ones. That was a genuine, well-reasoned decision. Measurement later falsified the premise it rested on, and the project became a local agent that occasionally escalates. The architecture docs kept saying cascader, so new work kept being designed against a system that no longer existed."),
     ("terms", [
       ("Retrospective justification", "The common one", "An ADR written after the fact to legitimise a choice already made. It reads identically to a real one and contains no decision."),
       ("Consequence amnesia", "The costly one", "The “consequences” section is where an ADR states what it is giving up. Teams write it, then never re-read it when that cost starts being paid."),
@@ -361,7 +361,7 @@ swebench report my-run-01 -d verified"""),
       ("4 · Freeze the set", "Then leave it alone", "Its value comes from staying fixed. Edit it between runs and it measures nothing."),
       ("5 · Hold some back", "Never tune against all of it", "Tuning a scaffold against every task is leakage by hand."),
     ]),
-    ("callout", "matters", "Why this beats the public number for you", "A benchmark built from your own merged PRs is in your language, your codebase, your conventions, and nobody has optimised against it. It is the twenty-item rule from the eval-battery lesson, applied to code, and it is what <code>honest-bench</code> does — replaying real closed pull requests so the outcome is established before the agent starts and its self-report is irrelevant."),
+    ("callout", "matters", "Why this beats the public number for you", "A benchmark built from your own merged PRs is in your language, your codebase, your conventions, and nobody has optimised against it. It is the twenty-item rule from the eval-battery lesson, applied to code, and it is what a replay harness does — running real closed pull requests so the outcome is established before the agent starts, which makes its self-report irrelevant."),
 
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',
@@ -637,7 +637,7 @@ swebench report my-run-01 -d verified"""),
       ("Calibrate against humans", "The step nobody does", "Label 30-50 items by hand once. Measure agreement. If the judge disagrees with you on the cases you care about, it is not measuring what you think."),
       ("Report agreement alongside scores", "Honesty about the instrument", "A judge score without a known agreement rate is an opinion with a decimal point."),
     ]),
-    ("callout", "matters", "When you can buy a deterministic verifier, buy it", "Bullpen's edit verification runs typecheckers and a language server — not a model. It is narrower than a judge and it is not an opinion, which is what a loop needs when the verdict decides whether to escalate. Reach for a judge where nothing checkable exists, not because it was quicker to build than a real check."),
+    ("callout", "matters", "When you can buy a deterministic verifier, buy it", "One agent project verifies its edits with typecheckers and a language server rather than a model judge. That is narrower than a judge and it is not an opinion, which is what a loop needs when the verdict decides whether to escalate. Reach for a judge where nothing checkable exists — not because it was quicker to build than a real check."),
 
     ("h2", "Where this connects"),
     ("p", "This is the same principle as the loops lesson, one level up: a loop or a score improves things only when signal enters from outside. A judge from the same family as the system under test is not outside. A grader whose error tracks your treatment is not outside. Human labels, a compiler, a test suite and a held-out answer key are."),

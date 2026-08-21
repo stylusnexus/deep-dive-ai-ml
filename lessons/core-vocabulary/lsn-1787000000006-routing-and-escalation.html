@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Eval Battery</title>
+<title>Routing, Escalation and Sampling Controls</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -182,60 +182,69 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 8 of 21</span>
-  <h1>The Eval Battery</h1>
-  <p class="subtitle">How you know any of this works — and why the number you trust must be one you built.</p>
+  <span class="pill">Lesson 7 of 21</span>
+  <h1>Routing, Escalation and Sampling Controls</h1>
+  <p class="subtitle">Cheap-first architecture — plus temperature and top-k, which decide how a model picks words.</p>
 
-  <p>Bullpen has a <code>bench/</code> directory, an <code>eval-battery-runs/</code> directory, and a <code>BENCHMARKS.md</code>. That machinery is what makes every claim in the project checkable, and it's the bridge into Block 5.</p>
-  <h2>A battery is a fixed set of tasks with checkable outcomes</h2>
-  <p>Each task has an input, a way to run it, and a way to decide pass or fail <em>without a human</em>. Run the battery against a configuration and you get a score. Change one thing, re-run, compare. That's the entire method, and its value comes from the set staying fixed.</p>
-  <p>Your recorded result — 11 of 24 on multi-file editing as of a particular change — is only meaningful because the 24 didn't move. A benchmark you edit between runs measures nothing.</p>
-  <h2>Why public benchmarks won&#x27;t answer your question</h2>
-  <ul><li><strong>Contamination.</strong> Popular benchmarks are in the training data. High scores may be recall, not capability.</li><li><strong>Optimisation pressure.</strong> Vendors tune for benchmarks that decide purchases. The measure stops being a measure.</li><li><strong>Task mismatch.</strong> A model's competitive-programming score says little about editing four files in your Go codebase without breaking the build.</li></ul>
-  <div class="callout matters"><span class="label">The twenty-item rule</span>The single most valuable evaluation asset you can own is about twenty real tasks from your actual work, with known-good outcomes. It's small enough to build in an afternoon and specific enough that no vendor has optimised for it. Block 5 builds yours; HF Inference Providers then runs it across many models on one bill.</div>
-  <h2>Grading, from cheapest to loosest</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Deterministic</div><div><div class="roadmap-title">Compiles, tests pass, schema validates</div><div class="roadmap-desc">Cheap, unambiguous, trustworthy. Use wherever possible.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reference match</div><div><div class="roadmap-title">Compare against a known-good answer</div><div class="roadmap-desc">Exact match, or fuzzy for prose. Brittle when many answers are valid.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Model-as-judge</div><div><div class="roadmap-title">Another model scores the output</div><div class="roadmap-desc">Flexible, and the last resort — it inherits the judge's biases and can be circular if the judge is the model under test.</div></div></div></div>
-  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Grading methods ranked by trustworthiness">
-<rect x="12" y="16" width="440" height="44" rx="6" class="d-box-good"/>
-<text x="30" y="38" class="d-label-b">Deterministic</text>
-<text x="30" y="54" class="d-label-sm">compiles · tests pass · schema validates</text>
-<text x="470" y="44" class="d-fill-green" font-size="12" font-weight="600">most trustworthy</text>
-<rect x="12" y="72" width="440" height="44" rx="6" class="d-box"/>
-<text x="30" y="94" class="d-label-b">Reference match</text>
-<text x="30" y="110" class="d-label-sm">compare to a known-good answer · brittle when many answers are valid</text>
-<rect x="12" y="128" width="440" height="44" rx="6" class="d-box-warn"/>
-<text x="30" y="150" class="d-label-b">Model-as-judge</text>
-<text x="30" y="166" class="d-label-sm">flexible · inherits the judge's bias · circular if judge = model under test</text>
-<text x="470" y="156" class="d-fill-red" font-size="12" font-weight="600">last resort</text>
-<path d="M600 30 L600 160" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>
-</svg><figcaption>Grade as far up this ladder as the task allows. Every step down costs you certainty, and the bottom rung can be circular.</figcaption></figure>
-  <div class="callout pitfall"><span class="label">The trap the harness is named for</span>An agent asked whether it succeeded will frequently say yes. <code>honest-bench</code> exists on exactly this premise — replaying real closed pull requests so the outcome is established in advance and the agent's self-report is irrelevant. Never let the thing being evaluated report its own score.</div>
-  <h2>What to record on every run</h2>
-  <p>A score alone is nearly useless six weeks later. Record the model and quantization, the harness version or commit, the sampling settings, the date, and the per-task outcomes rather than only the total. Without those, a changed number tells you something moved but not what.</p>
-  <h2>Where this goes next</h2>
-  <p>You now have the vocabulary the rest of the program assumes: the loop and the harness around it, tokens and context, weights and quantization, local serving, embeddings and retrieval, tool calls and MCP, routing and sampling, and evaluation. Block 1 starts on data. Every block from here re-uses these terms rather than introducing parallel ones.</p>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://github.com/stylusnexus/honest-bench" target="_blank" rel="noopener">honest-bench</a><span class="link-note">Your eval harness (private repo). The premise — replay closed PRs so the outcome is known in advance — is the lesson.</span></li><li><a href="https://developers.google.com/machine-learning/crash-course/overfitting/overfitting" target="_blank" rel="noopener">Google ML Crash Course: overfitting</a><span class="link-note">Short, visual treatment of held-out evaluation if you want a second angle.</span></li></ul></div>
+  <p><strong>Escalation</strong> is worth meeting as an argument rather than as a feature, because the argument is what tells you when the pattern applies and when it collapses.</p>
+  <h2>Predict versus try</h2>
+  <p>Commercial model routers try to <em>predict</em>, from your prompt, which model will handle it best. The counter-premise is that this is unreliable — models produce confident wrong answers, and so do the classifiers predicting them.</p>
+  <p>The inversion: try the cheap local model, <em>watch what happens</em>, and escalate only when the result actually fails. Prediction is replaced by observation. You pay a little latency on hard tasks in exchange for not paying frontier prices on easy ones.</p>
+  <div class="callout insight"><span class="label">Why this only works with a verifier</span>Escalation-on-failure requires knowing that something failed. Where failure is checkable — code doesn't compile, tests fail, output doesn't match a schema, tool call malformed — the strategy is sound. Where quality is subjective, there's no signal to escalate on, and you're back to guessing. Check what your failure detector actually detects before trusting a routing scheme.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Escalation flow"><defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker><marker id="aa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="76" width="120" height="48" rx="7" class="d-box"/>
+<text x="46" y="105" class="d-label-b">Request</text>
+<path d="M132 100 L176 100" class="d-arrow" marker-end="url(#a)"/>
+<rect x="176" y="76" width="130" height="48" rx="7" class="d-box-good"/>
+<text x="200" y="98" class="d-label-b">Local model</text>
+<text x="208" y="115" class="d-label-sm">free, fast</text>
+<path d="M306 100 L350 100" class="d-arrow" marker-end="url(#a)"/>
+<polygon points="350,100 412,72 474,100 412,128" class="d-box-accent"/>
+<text x="378" y="96" class="d-label-sm">verifier</text>
+<text x="374" y="112" class="d-label-sm">passed?</text>
+<path d="M474 100 L560 100" class="d-arrow" marker-end="url(#a)"/>
+<text x="492" y="92" class="d-accent">yes</text>
+<rect x="560" y="78" width="68" height="44" rx="7" class="d-box-good"/>
+<text x="576" y="105" class="d-label">done</text>
+<path d="M412 128 L412 168 L560 168" class="d-arrow" marker-end="url(#a)"/>
+<text x="424" y="162" class="d-fill-red" font-size="12" font-weight="600">no</text>
+<rect x="560" y="146" width="68" height="44" rx="7" class="d-box-warn"/>
+<text x="572" y="166" class="d-label">escalate</text>
+<text x="572" y="182" class="d-label-sm">paid</text>
+<text x="12" y="36" class="d-label-sm">Compilation, tests, schema validation and malformed tool calls are all checkable — those make good verifiers.</text>
+<text x="12" y="52" class="d-label-sm">"Is this prose any good?" is not, so there is nothing to route on.</text>
+</svg><figcaption>Observation replaces prediction. The verifier is load-bearing — remove it and there is no signal to escalate on, which is why subjective tasks can't use this pattern.</figcaption></figure>
+  <h2>What escalation costs</h2>
+  <ul><li><strong>Latency.</strong> A failed local attempt is time spent before the real answer starts.</li><li><strong>Tokens.</strong> You pay for the failed attempt too, though local attempts are near-free.</li><li><strong>Complexity.</strong> Two lanes, two sets of failure modes, and a decision layer that can itself be wrong.</li></ul>
+  <p>The trade is worth it when most tasks are easy — which, for coding assistance, they are. Routing is an economic bet on the shape of your workload, so it's worth measuring that shape rather than assuming it.</p>
+  <h2>Temperature and top-k: how the next word gets picked</h2>
+  <p>At each step the model produces a probability across every token in its vocabulary. Sampling controls decide how that distribution gets turned into one choice.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Temperature</div><div><div class="roadmap-title">Flattens or sharpens the distribution</div><div class="roadmap-desc">0 means always take the most likely token — deterministic and repetitive. Around 0.7 is a conversational default. Above ~1.2, coherence degrades.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-k</div><div><div class="roadmap-title">Consider only the k most likely tokens</div><div class="roadmap-desc">Discards the long tail of nonsense before sampling.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-p</div><div><div class="roadmap-title">Consider the smallest set summing to probability p</div><div class="roadmap-desc">Adapts to the distribution's shape — more choices when the model is unsure, fewer when it's confident. Usually preferred over top-k.</div></div></div></div>
+  <div class="callout matters"><span class="label">The practical setting</span>For anything parsed by code — tool calls, structured output, classification, routing — use temperature 0 or very close. You want repeatability, not creativity. Save higher temperatures for prose where variation is the point. A surprising share of 'the agent is flaky' bugs are just an unnecessarily high temperature on a structured task.</div>
+  <h2>Determinism, honestly</h2>
+  <p>Temperature 0 makes sampling deterministic but does not guarantee identical outputs across runs. Batching, hardware differences, and floating-point non-associativity introduce variation, especially with hosted providers. Design evaluations to tolerate small differences rather than assuming byte-identical replies.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2406.18665" target="_blank" rel="noopener">RouteLLM (Ong et al., 2024)</a><span class="link-note">The predict-which-model approach this lesson argues against. Worth reading precisely to disagree with it.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. Why is your own 24-task battery more informative than a public benchmark?</p>
+    <p class="quiz-q">1. Why would a system try a local model first rather than predicting which model to use?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">It&#x27;s larger and more rigorous</div>
-      <div class="quiz-opt">It&#x27;s specific to your real work and nobody has optimised against it</div>
-      <div class="quiz-opt">Public benchmarks measure the wrong models</div>
+      <div class="quiz-opt">Local models are usually better than frontier models</div>
+      <div class="quiz-opt">Prediction is unreliable; observing an actual failure is a stronger signal than guessing in advance</div>
+      <div class="quiz-opt">It avoids sending data to third parties</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. What&#x27;s the main risk of model-as-judge grading?</p>
+    <p class="quiz-q">2. When is escalation-on-failure a poor strategy?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">It&#x27;s too slow to run frequently</div>
-      <div class="quiz-opt">It inherits the judge&#x27;s biases, and is circular when the judge is also the model under test</div>
-      <div class="quiz-opt">It can only grade prose</div>
+      <div class="quiz-opt">When the local model is small</div>
+      <div class="quiz-opt">When failure isn&#x27;t detectable — subjective quality gives you no signal to escalate on</div>
+      <div class="quiz-opt">When latency matters at all</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. A battery score moves from 11/24 to 15/24. What must have been recorded for that to mean anything?</p>
-    <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Only the two scores — the improvement speaks for itself</div>
-      <div class="quiz-opt">Model, quantization, harness version, sampling settings, date, and per-task outcomes</div>
-      <div class="quiz-opt">The wall-clock time of each run</div>
+    <p class="quiz-q">3. Your agent&#x27;s tool calls are intermittently malformed. What should you check first?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">Whether temperature is above 0 on a task that needs deterministic structured output</div>
+      <div class="quiz-opt">Whether the context window is full</div>
+      <div class="quiz-opt">Whether the model supports tool calling</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

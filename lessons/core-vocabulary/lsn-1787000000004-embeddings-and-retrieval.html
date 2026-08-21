@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Distillation</title>
+<title>Embeddings, Vectors and Semantic Routing</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -182,65 +182,65 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 18 of 21</span>
-  <h1>Distillation</h1>
-  <p class="subtitle">Training a small model to imitate a large one — and getting most of the capability at a fraction of the cost.</p>
+  <span class="pill">Lesson 5 of 21</span>
+  <h1>Embeddings, Vectors and Semantic Routing</h1>
+  <p class="subtitle">How a machine decides two things 'mean' something similar — and where that fails.</p>
 
-  <p>You have a large model that works and a bill that doesn't. <strong>Distillation</strong> trains a small "student" model to reproduce a large "teacher" model's behaviour. Done well, you keep most of the capability at a fraction of the size, latency and cost.</p>
-  <h2>Why it works better than just training a small model</h2>
-  <p>Train a small model on hard labels and each example teaches it one thing: this is a cat. Train it on the teacher's full output distribution and the same example teaches it far more — this is a cat, it's somewhat dog-like, it's nothing like a car. Those relative probabilities carry information about how the teacher organises the problem, and that's a richer signal than the label alone.</p>
-  <div class="callout insight"><span class="label">The name for that extra signal</span>It's often called dark knowledge — the information in the probabilities the teacher assigns to wrong answers. A small model trained on it reliably outperforms the same architecture trained on labels alone. You are transferring how the teacher thinks, not just what it concludes.</div>
-  <figure class="diagram"><svg viewBox="0 0 640 190" role="img" aria-label="Hard labels versus teacher distribution in distillation">
-<text x="12" y="18" class="d-label-b">Hard label</text>
-<rect x="12" y="30" width="60" height="70" rx="4" class="d-fill-green" opacity="0.85"/>
-<text x="22" y="116" class="d-label-sm">cat</text>
-<rect x="82" y="98" width="60" height="2" rx="1" class="d-fill-muted"/>
-<text x="90" y="116" class="d-label-sm">dog</text>
-<rect x="152" y="98" width="60" height="2" rx="1" class="d-fill-muted"/>
-<text x="160" y="116" class="d-label-sm">car</text>
-<text x="12" y="146" class="d-label-sm">one bit of information:</text>
-<text x="12" y="162" class="d-label-sm">"it is a cat"</text>
-<line x1="270" y1="14" x2="270" y2="176" stroke="var(--border)"/>
-<text x="310" y="18" class="d-label-b">Teacher distribution</text>
-<rect x="310" y="30" width="60" height="70" rx="4" class="d-fill-green" opacity="0.85"/>
-<text x="320" y="116" class="d-label-sm">cat</text>
-<rect x="380" y="66" width="60" height="34" rx="4" class="d-fill-accent" opacity="0.75"/>
-<text x="388" y="116" class="d-label-sm">dog</text>
-<rect x="450" y="94" width="60" height="6" rx="3" class="d-fill-muted" opacity="0.7"/>
-<text x="458" y="116" class="d-label-sm">car</text>
-<text x="310" y="146" class="d-label-sm">also: "quite dog-like, nothing like a car" —</text>
-<text x="310" y="162" class="d-label-sm">how the teacher organises the problem</text>
-</svg><figcaption>The teacher's full distribution carries more information than the label. That difference is why the student ends up better than the same model trained on labels alone.</figcaption></figure>
-  <h2>The forms you&#x27;ll meet</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Response distillation</div><div><div class="roadmap-title">Student copies final outputs</div><div class="roadmap-desc">Generate answers with the teacher, fine-tune the student on them. Simplest, and what most people mean by distillation now.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Logit distillation</div><div><div class="roadmap-title">Student matches the full distribution</div><div class="roadmap-desc">The classical form. Needs access to the teacher's raw outputs, so it's mostly for open-weight teachers.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Rationale distillation</div><div><div class="roadmap-title">Student copies the reasoning too</div><div class="roadmap-desc">Teacher produces chain-of-thought; student learns to reproduce it. Effective on reasoning-heavy tasks.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Task-specific distillation</div><div><div class="roadmap-title">One narrow job</div><div class="roadmap-desc">Where the wins are largest — a 7B student can match a frontier teacher on one well-defined task while being useless outside it.</div></div></div></div>
-  <h2>The economics</h2>
-  <p>The pattern that works: use the expensive model to generate a few thousand high-quality examples for one specific task, fine-tune a small open model on them, then serve that locally. Your inference cost approaches zero, latency drops, the data stays on your machine, and — with 128GB of unified memory — you can run the result comfortably.</p>
-  <p>It is also, in effect, the shape of Bullpen's argument, arrived at from a different direction: most work doesn't need frontier capability, and the trick is having something cheap that's good enough for the common case.</p>
-  <div class="callout pitfall"><span class="label">The two things that bite</span>First, licensing — many providers' terms restrict using their outputs to train competing models. Check the terms for your teacher before building on this; it's a real constraint, not a formality. Second, the student inherits the teacher's mistakes, confidently and without the teacher's occasional self-correction. Evaluate the student on its own held-out set, never against the teacher's answers.</div>
-  <h2>Where it sits relative to the alternatives</h2>
-  <p>Prompt engineering changes nothing about the model and costs tokens per call. Fine-tuning adapts a model to your format and domain. Distillation transfers capability from a bigger model into a smaller one. Quantization shrinks the same model by storing it less precisely. They compose — a distilled, fine-tuned, 4-bit student is a perfectly normal production artefact, and Block 7 builds toward exactly that.</p>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/1503.02531" target="_blank" rel="noopener">Distilling the Knowledge in a Neural Network (Hinton et al., 2015)</a><span class="link-note">The original paper, and where 'dark knowledge' comes from.</span></li><li><a href="https://arxiv.org/abs/2305.02301" target="_blank" rel="noopener">Distilling step-by-step (Hsieh et al., 2023)</a><span class="link-note">Rationale distillation — smaller students beating larger models by learning the reasoning, not just the answer.</span></li></ul></div>
+  <p><strong>Semantic routing</strong> depends entirely on <strong>embeddings</strong>, and so does RAG in Block 3 — so this concept pays for itself twice. It is also the cheapest classifier you will ever deploy.</p>
+  <h2>An embedding is a list of numbers standing in for meaning</h2>
+  <p>An embedding model takes text and returns a fixed-length list of numbers — a <strong>vector</strong>, typically a few hundred to a couple of thousand values. The useful property is that texts with similar meanings produce vectors that point in similar directions, even when they share no words at all.</p>
+  <p>"How do I reset my password?" and "I'm locked out of my account" have almost no vocabulary in common. Their embeddings sit close together. That is the whole trick, and everything else is bookkeeping.</p>
+  <div class="callout insight"><span class="label">Similarity is a measurable angle</span>Closeness is usually cosine similarity — the angle between two vectors, from 1 (same direction) to -1 (opposite). It's a cheap arithmetic operation, which is why searching millions of vectors is fast.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 260" role="img" aria-label="Embedding space with clusters">
+<rect x="12" y="12" width="616" height="236" rx="8" class="d-box"/>
+<circle cx="140" cy="80" r="6" class="d-fill-accent"/>
+<circle cx="176" cy="98" r="6" class="d-fill-accent"/>
+<circle cx="150" cy="118" r="6" class="d-fill-accent"/>
+<ellipse cx="156" cy="99" rx="60" ry="46" fill="none" stroke="var(--accent)" stroke-dasharray="4 4" opacity="0.6"/>
+<text x="106" y="172" class="d-label-sm">"reset my password"</text>
+<text x="106" y="188" class="d-label-sm">"locked out of my account"</text>
+<text x="106" y="204" class="d-label-sm">"can't sign in"</text>
+<circle cx="420" cy="70" r="6" class="d-fill-green"/>
+<circle cx="458" cy="88" r="6" class="d-fill-green"/>
+<ellipse cx="439" cy="79" rx="48" ry="34" fill="none" stroke="var(--green)" stroke-dasharray="4 4" opacity="0.6"/>
+<text x="392" y="140" class="d-label-sm">"where is my order"</text>
+<text x="392" y="156" class="d-label-sm">"track my delivery"</text>
+<circle cx="300" cy="212" r="6" class="d-fill-red"/>
+<circle cx="316" cy="216" r="6" class="d-fill-red"/>
+<text x="336" y="212" class="d-label-sm">"I want a refund" /</text>
+<text x="336" y="228" class="d-label-sm">"I don't want a refund" — too close</text>
+<text x="24" y="36" class="d-label-sm">similar meaning → similar direction</text>
+</svg><figcaption>Meaning becomes geometry. Phrases sharing no words land close together; the negation pair lands close too, which is exactly the failure mode to watch for.</figcaption></figure>
+  <h2>How semantic routing works</h2>
+  <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">1</div><div><div class="roadmap-title">Define the lanes</div><div class="roadmap-desc">Each route — a code edit, a factual lookup, a repo question — gets example phrasings.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2</div><div><div class="roadmap-title">Embed the examples</div><div class="roadmap-desc">Once, up front. Stored as vectors.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3</div><div><div class="roadmap-title">Embed the incoming turn</div><div class="roadmap-desc">One cheap embedding call, far cheaper and faster than asking an LLM to classify.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">Compare and pick</div><div class="roadmap-desc">Nearest lane wins, if it clears a confidence threshold.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5</div><div><div class="roadmap-title">Fall back</div><div class="roadmap-desc">Below threshold, ask a model to decide rather than guessing.</div></div></div></div>
+  <p>The reason to route this way rather than asking an LLM "which category is this?" is cost and latency. An embedding call is milliseconds and fractions of a cent. It runs on every single turn, so that difference compounds.</p>
+  <h2>Where embeddings fail</h2>
+  <ul><li><strong>Negation.</strong> "I want a refund" and "I don't want a refund" embed close together. Sign is meaning, and embeddings are weak at it.</li><li><strong>Jargon and identifiers.</strong> Internal names, error codes, and file paths often carry no useful semantics. Keyword search beats embeddings here — which is why serious retrieval combines both.</li><li><strong>Chunking artefacts.</strong> An embedding represents whatever text you gave it. Split a document badly and you get vectors representing half-thoughts.</li></ul>
+  <div class="callout pitfall"><span class="label">The baseline you should always run</span>Before reaching for a vector database, try keyword search — BM25 or plain Postgres full-text. On short, jargon-heavy, identifier-rich corpora it frequently wins, and it costs nothing to test. This is the intake sheet's 'dumb baseline' question applied to retrieval.</div>
+  <h2>Vector stores</h2>
+  <p>A <strong>vector database</strong> stores vectors alongside their source text and finds nearest neighbours quickly. Block 3 uses <code>pgvector</code> — the Postgres extension — because it means one database rather than two, and because at the scale you'll work at, the specialist stores buy speed you don't need.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://sbert.net" target="_blank" rel="noopener">Sentence Transformers</a><span class="link-note">The practical library for embeddings, with clear docs on model choice and similarity.</span></li><li><a href="https://github.com/pgvector/pgvector" target="_blank" rel="noopener">pgvector</a><span class="link-note">The Postgres extension Block 3 uses. Read the indexing notes before loading real data.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. Why does training on the teacher&#x27;s full distribution beat training on hard labels?</p>
+    <p class="quiz-q">1. Why route with embeddings rather than asking an LLM to classify each turn?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">It provides more training examples</div>
-      <div class="quiz-opt">The probabilities assigned to wrong answers reveal how the teacher organises the problem — a richer signal</div>
-      <div class="quiz-opt">It avoids overfitting by adding noise</div>
+      <div class="quiz-opt">Embeddings are more accurate at classification</div>
+      <div class="quiz-opt">An embedding call costs milliseconds and a fraction of a cent, and it runs on every turn</div>
+      <div class="quiz-opt">LLMs cannot perform classification reliably</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. Where are distillation&#x27;s gains largest?</p>
+    <p class="quiz-q">2. A support bot keeps confusing &#x27;I want to cancel&#x27; with &#x27;I don&#x27;t want to cancel&#x27;. What&#x27;s happening?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">General-purpose assistants covering many domains</div>
-      <div class="quiz-opt">One narrow, well-defined task, where a small student can approach a frontier teacher</div>
-      <div class="quiz-opt">Tasks requiring knowledge after the model&#x27;s training cutoff</div>
+      <div class="quiz-opt">The embedding model is broken and should be replaced</div>
+      <div class="quiz-opt">Embeddings handle negation poorly — the two phrases sit close together in vector space</div>
+      <div class="quiz-opt">The chunk size is too large</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. Why must you evaluate a student model on a held-out set rather than against the teacher&#x27;s answers?</p>
+    <p class="quiz-q">3. Before building vector search over a corpus of internal error codes and file paths, what should you try first?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Teacher answers are too expensive to generate</div>
-      <div class="quiz-opt">The student inherits the teacher&#x27;s mistakes, so matching the teacher would score those errors as correct</div>
-      <div class="quiz-opt">Held-out sets are required by most licences</div>
+      <div class="quiz-opt">A larger embedding model</div>
+      <div class="quiz-opt">Keyword search — on identifier-heavy text it often beats embeddings, and it&#x27;s free to test</div>
+      <div class="quiz-opt">Splitting the documents into smaller chunks</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

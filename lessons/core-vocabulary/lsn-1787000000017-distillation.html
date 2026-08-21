@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Weights, GGUF and Quantization</title>
+<title>Distillation</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -182,62 +182,65 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 3 of 21</span>
-  <h1>Weights, GGUF and Quantization</h1>
-  <p class="subtitle">What Q4_K_M actually means, and the trade you're making when you pick it.</p>
+  <span class="pill">Lesson 18 of 21</span>
+  <h1>Distillation</h1>
+  <p class="subtitle">Training a small model to imitate a large one — and getting most of the capability at a fraction of the cost.</p>
 
-  <p><strong>GGUF</strong> appears 17 times in Bullpen's docs and <strong>Q4_K_M</strong> nine. They describe how a model is stored on disk, and the choice has more effect on your day-to-day experience than almost anything else in local inference.</p>
-  <h2>Weights, briefly</h2>
-  <p>A trained model is a large pile of numbers — the <strong>weights</strong> or <em>parameters</em>. "7B" means seven billion of them. Stored at full precision (16 bits each), seven billion numbers is about 14GB. A 70B model is about 140GB, which is why it won't fit on most machines at full precision.</p>
-  <h2>Quantization is lossy compression for weights</h2>
-  <p><strong>Quantization</strong> stores each weight in fewer bits — 8, 5, 4, sometimes 2 — instead of 16. Four-bit quantization cuts the file roughly to a quarter: that 70B model drops from ~140GB to ~40GB and becomes something your 128GB machine runs comfortably.</p>
-  <p>The cost is precision. Each weight is stored approximately. In practice, 4-bit quantization of a large model degrades quality surprisingly little — usually far less than dropping to a smaller model of the same file size. That trade is the entire reason local inference is practical.</p>
-  <div class="callout matters"><span class="label">The rule of thumb worth memorising</span>A 4-bit quantized 70B model almost always beats a 16-bit 13B model, despite similar file sizes. Prefer the bigger model, more heavily quantized.</div>
-  <h2>Reading Q4_K_M</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Q</div><div><div class="roadmap-title">Quantized</div><div class="roadmap-desc">As opposed to full-precision F16 or F32.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">Four bits per weight</div><div class="roadmap-desc">The main lever. Lower means smaller and faster, but less precise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">K</div><div><div class="roadmap-title">K-quant method</div><div class="roadmap-desc">A smarter scheme that varies precision across parts of the model instead of applying one rate everywhere.</div></div></div><div class="roadmap-item"><div class="roadmap-num">M</div><div><div class="roadmap-title">Medium</div><div class="roadmap-desc">Within K-quants: S (small), M (medium), L (large). Larger keeps more precision in the layers that matter most.</div></div></div></div>
-  <p>So <strong>Q4_K_M</strong> is a four-bit K-quant at medium size — the default recommendation for most local models, and a sensible one. Q5_K_M is slightly better and slightly bigger; Q8_0 is near-lossless and roughly twice the size; Q2 is usually where quality visibly breaks.</p>
-  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Model size by quantization level">
-<text x="12" y="20" class="d-label-b">A 70B model on disk</text>
-<rect x="120" y="34" width="500" height="24" rx="4" class="d-fill-muted" opacity="0.55"/>
-<text x="12" y="51" class="d-label">F16</text>
-<text x="628" y="51" class="d-label-sm" text-anchor="end">~140 GB</text>
-<rect x="120" y="70" width="250" height="24" rx="4" class="d-fill-accent" opacity="0.6"/>
-<text x="12" y="87" class="d-label">Q8_0</text>
-<text x="380" y="87" class="d-label-sm">~70 GB · near-lossless</text>
-<rect x="120" y="106" width="156" height="24" rx="4" class="d-fill-green" opacity="0.75"/>
-<text x="12" y="123" class="d-label">Q5_K_M</text>
-<text x="286" y="123" class="d-label-sm">~44 GB</text>
-<rect x="120" y="142" width="125" height="24" rx="4" class="d-fill-green" opacity="0.9"/>
-<text x="12" y="159" class="d-label">Q4_K_M</text>
-<text x="255" y="159" class="d-label-sm">~35 GB · the usual default</text>
-<text x="12" y="190" class="d-label-sm">Q = quantized · 4 = bits per weight · K = k-quant method · M = medium size within that family</text>
-</svg><figcaption>Same 70B model at four precisions. Four-bit is the usual default because the quality loss is small and the size reduction is what makes the model runnable at all.</figcaption></figure>
-  <h2>GGUF is the container</h2>
-  <p><strong>GGUF</strong> (GPT-Generated Unified Format) is the file format that holds quantized weights plus the metadata needed to run them — tokenizer, architecture, prompt template. It's the format <code>llama.cpp</code> and Ollama consume. One file, self-describing, no Python environment required.</p>
-  <p>This is distinct from Hugging Face's <code>safetensors</code>, which stores full-precision weights for training and fine-tuning. The usual pipeline: fine-tune in safetensors, convert to GGUF, quantize, serve.</p>
-  <div class="callout pitfall"><span class="label">Your orphaned 95GB</span>Your own audit found roughly 95GB of local weights that nothing actually serves — a very common outcome. Quantized models are cheap to download and easy to forget. Before pulling another, check what's already on disk.</div>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://huggingface.co/docs/hub/gguf" target="_blank" rel="noopener">GGUF on the Hugging Face Hub</a><span class="link-note">Format reference, and the quantization table naming every Q-variant.</span></li><li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a><span class="link-note">The engine. The README's quantization section is the primary source for the trade-offs here.</span></li></ul></div>
+  <p>You have a large model that works and a bill that doesn't. <strong>Distillation</strong> trains a small "student" model to reproduce a large "teacher" model's behaviour. Done well, you keep most of the capability at a fraction of the size, latency and cost.</p>
+  <h2>Why it works better than just training a small model</h2>
+  <p>Train a small model on hard labels and each example teaches it one thing: this is a cat. Train it on the teacher's full output distribution and the same example teaches it far more — this is a cat, it's somewhat dog-like, it's nothing like a car. Those relative probabilities carry information about how the teacher organises the problem, and that's a richer signal than the label alone.</p>
+  <div class="callout insight"><span class="label">The name for that extra signal</span>It's often called dark knowledge — the information in the probabilities the teacher assigns to wrong answers. A small model trained on it reliably outperforms the same architecture trained on labels alone. You are transferring how the teacher thinks, not just what it concludes.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 190" role="img" aria-label="Hard labels versus teacher distribution in distillation">
+<text x="12" y="18" class="d-label-b">Hard label</text>
+<rect x="12" y="30" width="60" height="70" rx="4" class="d-fill-green" opacity="0.85"/>
+<text x="22" y="116" class="d-label-sm">cat</text>
+<rect x="82" y="98" width="60" height="2" rx="1" class="d-fill-muted"/>
+<text x="90" y="116" class="d-label-sm">dog</text>
+<rect x="152" y="98" width="60" height="2" rx="1" class="d-fill-muted"/>
+<text x="160" y="116" class="d-label-sm">car</text>
+<text x="12" y="146" class="d-label-sm">one bit of information:</text>
+<text x="12" y="162" class="d-label-sm">"it is a cat"</text>
+<line x1="270" y1="14" x2="270" y2="176" stroke="var(--border)"/>
+<text x="310" y="18" class="d-label-b">Teacher distribution</text>
+<rect x="310" y="30" width="60" height="70" rx="4" class="d-fill-green" opacity="0.85"/>
+<text x="320" y="116" class="d-label-sm">cat</text>
+<rect x="380" y="66" width="60" height="34" rx="4" class="d-fill-accent" opacity="0.75"/>
+<text x="388" y="116" class="d-label-sm">dog</text>
+<rect x="450" y="94" width="60" height="6" rx="3" class="d-fill-muted" opacity="0.7"/>
+<text x="458" y="116" class="d-label-sm">car</text>
+<text x="310" y="146" class="d-label-sm">also: "quite dog-like, nothing like a car" —</text>
+<text x="310" y="162" class="d-label-sm">how the teacher organises the problem</text>
+</svg><figcaption>The teacher's full distribution carries more information than the label. That difference is why the student ends up better than the same model trained on labels alone.</figcaption></figure>
+  <h2>The forms you&#x27;ll meet</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Response distillation</div><div><div class="roadmap-title">Student copies final outputs</div><div class="roadmap-desc">Generate answers with the teacher, fine-tune the student on them. Simplest, and what most people mean by distillation now.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Logit distillation</div><div><div class="roadmap-title">Student matches the full distribution</div><div class="roadmap-desc">The classical form. Needs access to the teacher's raw outputs, so it's mostly for open-weight teachers.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Rationale distillation</div><div><div class="roadmap-title">Student copies the reasoning too</div><div class="roadmap-desc">Teacher produces chain-of-thought; student learns to reproduce it. Effective on reasoning-heavy tasks.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Task-specific distillation</div><div><div class="roadmap-title">One narrow job</div><div class="roadmap-desc">Where the wins are largest — a 7B student can match a frontier teacher on one well-defined task while being useless outside it.</div></div></div></div>
+  <h2>The economics</h2>
+  <p>The pattern that works: use the expensive model to generate a few thousand high-quality examples for one specific task, fine-tune a small open model on them, then serve that locally. Your inference cost approaches zero, latency drops, the data stays on your machine, and — with 128GB of unified memory — you can run the result comfortably.</p>
+  <p>It is also the escalation argument arrived at from a different direction: most work does not need frontier capability, and the trick is having something cheap that is good enough for the common case.</p>
+  <div class="callout pitfall"><span class="label">The two things that bite</span>First, licensing — many providers' terms restrict using their outputs to train competing models. Check the terms for your teacher before building on this; it's a real constraint, not a formality. Second, the student inherits the teacher's mistakes, confidently and without the teacher's occasional self-correction. Evaluate the student on its own held-out set, never against the teacher's answers.</div>
+  <h2>Where it sits relative to the alternatives</h2>
+  <p>Prompt engineering changes nothing about the model and costs tokens per call. Fine-tuning adapts a model to your format and domain. Distillation transfers capability from a bigger model into a smaller one. Quantization shrinks the same model by storing it less precisely. They compose — a distilled, fine-tuned, 4-bit student is a perfectly normal production artefact, and Block 7 builds toward exactly that.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/1503.02531" target="_blank" rel="noopener">Distilling the Knowledge in a Neural Network (Hinton et al., 2015)</a><span class="link-note">The original paper, and where 'dark knowledge' comes from.</span></li><li><a href="https://arxiv.org/abs/2305.02301" target="_blank" rel="noopener">Distilling step-by-step (Hsieh et al., 2023)</a><span class="link-note">Rationale distillation — smaller students beating larger models by learning the reasoning, not just the answer.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. You have 40GB to spend on a local model. Which is generally the better choice?</p>
+    <p class="quiz-q">1. Why does training on the teacher&#x27;s full distribution beat training on hard labels?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">A 13B model at full 16-bit precision</div>
-      <div class="quiz-opt">A 70B model quantized to 4 bits</div>
-      <div class="quiz-opt">Two 7B models at 8-bit, used together</div>
+      <div class="quiz-opt">It provides more training examples</div>
+      <div class="quiz-opt">The probabilities assigned to wrong answers reveal how the teacher organises the problem — a richer signal</div>
+      <div class="quiz-opt">It avoids overfitting by adding noise</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. What does the &#x27;M&#x27; in Q4_K_M refer to?</p>
+    <p class="quiz-q">2. Where are distillation&#x27;s gains largest?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">The model was trained on medium-sized data</div>
-      <div class="quiz-opt">Medium within the K-quant family — how much precision is retained in the layers that matter most</div>
-      <div class="quiz-opt">Memory-mapped loading</div>
+      <div class="quiz-opt">General-purpose assistants covering many domains</div>
+      <div class="quiz-opt">One narrow, well-defined task, where a small student can approach a frontier teacher</div>
+      <div class="quiz-opt">Tasks requiring knowledge after the model&#x27;s training cutoff</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. Why convert a fine-tuned model to GGUF before serving it locally?</p>
-    <div class="quiz-options" data-answer="0">
-      <div class="quiz-opt">GGUF is the format llama.cpp and Ollama consume — self-contained, quantized, no Python environment needed</div>
-      <div class="quiz-opt">GGUF models are more accurate than safetensors</div>
-      <div class="quiz-opt">It&#x27;s required to publish to Hugging Face</div>
+    <p class="quiz-q">3. Why must you evaluate a student model on a held-out set rather than against the teacher&#x27;s answers?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Teacher answers are too expensive to generate</div>
+      <div class="quiz-opt">The student inherits the teacher&#x27;s mistakes, so matching the teacher would score those errors as correct</div>
+      <div class="quiz-opt">Held-out sets are required by most licences</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>
