@@ -144,6 +144,20 @@ LESSONS = [
     ]),
     ("callout", "insight", "Prompt caching is this, sold", "When a provider offers 'prompt caching' at a discount, they are keeping the KV cache for your unchanging prefix instead of recomputing it. That's why the advice is always to put the stable content — system prompt, long documents — at the <em>front</em> and the variable content at the end. Reorder and the cache misses."),
 
+    ("h2", "Sizing the KV cache"),
+    ("p", "The cache holds one key and one value vector per token, per layer, per key-value head. That arithmetic is worth doing once, because it explains a class of failure that looks like a memory leak and is not."),
+    ("terms", [
+      ("Grows with context", "Linearly", "Double the conversation and you double the cache."),
+      ("Grows with batch", "Linearly again", "Serving four users concurrently means four caches resident at once."),
+      ("Independent of the weights", "A separate budget", "A model that loads with room to spare can still die on a long prompt, and nothing about the weights explains why."),
+      ("Shrunk by GQA", "Often 4-8x", "Sharing key-value projections across query-head groups is why long context became affordable."),
+    ]),
+
+    ("know",
+     "The KV cache is a separate memory budget from the weights, and it is usually what actually runs you out.",
+     "Weights are fixed once loaded. The cache grows with context length and with how many requests you serve at once, so the failure appears under load or on a long document rather than at startup — which makes it look intermittent.",
+     "A 13B model loads comfortably in 32GB with room to spare, serves short prompts for a week, then fails on a 40,000-token document. The weights never changed. The cache for that one long prompt needed several gigabytes that the short prompts never asked for."),
+
     ("links", [
       ('Lost in the Middle (Liu et al., 2023)', 'https://arxiv.org/abs/2307.03172',
        'The paper behind the U-shaped attention finding. Short and worth reading properly.'),
@@ -2367,6 +2381,262 @@ LESSONS = [
        ["Quantise the model until it fits",
         "Rent a cloud GPU hourly — no capital cost and the ecosystem assumption is always satisfied",
         "Train on CPU with a larger batch size"], 1),
+    ]),
+  ],
+},
+{
+  "slug": "latency-and-caching",
+  "title": "Latency, Prefills and Caching",
+  "subtitle": "Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.",
+  "body": [
+    ("p", "\"The model is slow\" is four different problems wearing one description. Separating them is the difference between fixing latency and buying a bigger machine that does not help."),
+
+    ("h2", "The two phases, and why the split matters"),
+    ("terms", [
+      ("Prefill", "Processing your prompt", "All tokens at once, in parallel. Fast per token, and it scales with how much you sent."),
+      ("Decode", "Generating the answer", "One token at a time, each requiring a full pass. Slow, sequential, and what you watch while waiting."),
+    ]),
+    ("p", "Two numbers follow, and they move independently. <strong>Time to first token</strong> is dominated by prefill, so it grows with prompt length. <strong>Tokens per second</strong> is decode, and it barely changes with prompt length at all. Quoted throughput figures are almost always decode."),
+
+    ("figure", "The same request, two very different profiles. A long prompt with a short answer feels sluggish before anything appears; a short prompt with a long answer starts instantly and takes a while. Both might report identical tokens per second.", '''<svg viewBox="0 0 640 200" role="img" aria-label="Prefill and decode across two request shapes">
+<text x="12" y="18" class="d-label-sm">short prompt, long answer</text>
+<rect x="12" y="28" width="60" height="28" rx="4" class="d-fill-accent" opacity="0.8"/>
+<text x="22" y="47" class="d-label-sm">prefill</text>
+<rect x="76" y="28" width="380" height="28" rx="4" class="d-fill-green" opacity="0.55"/>
+<text x="230" y="47" class="d-label-sm">decode</text>
+<text x="466" y="47" class="d-fill-green" font-size="11" font-weight="600">feels responsive</text>
+<text x="12" y="88" class="d-label-sm">long prompt (retrieved context), short answer</text>
+<rect x="12" y="98" width="300" height="28" rx="4" class="d-fill-accent" opacity="0.8"/>
+<text x="140" y="117" class="d-label-sm">prefill</text>
+<rect x="316" y="98" width="70" height="28" rx="4" class="d-fill-green" opacity="0.55"/>
+<text x="330" y="117" class="d-label-sm">decode</text>
+<text x="396" y="117" class="d-fill-red" font-size="11" font-weight="600">long silence, then a quick answer</text>
+<line x1="12" y1="146" x2="628" y2="146" stroke="var(--border)"/>
+<text x="12" y="170" class="d-label-sm">Both may report the same tokens per second. Only one of them feels slow — and the fix for that one is</text>
+<text x="12" y="188" class="d-label-sm">to send fewer tokens or reuse the cache, not to find a faster model.</text>
+</svg>'''),
+
+    ("know",
+     "Time to first token and tokens per second are different problems with different fixes.",
+     "TTFT is prefill and scales with what you sent. Throughput is decode and barely moves with prompt length. Optimising the wrong one produces no perceptible change while looking like diligent work.",
+     "A RAG endpoint takes four seconds before anything appears, then streams quickly. Swapping to a model with 40% higher throughput changes almost nothing, because the four seconds was prefill on 8,000 tokens of retrieved context. Retrieving five chunks instead of twenty halves it."),
+
+    ("h2", "The cost curve in a conversation"),
+    ("p", "The whole conversation is re-sent every turn, so prefill grows with the transcript. Turn twenty prefills roughly twenty times what turn one did, and it happens on every single turn — which is why long agent sessions get slower and more expensive in a way that feels disproportionate."),
+    ("p", "This is not a gentle slope. Because the cost of turn <em>n</em> is proportional to <em>n</em>, the total cost of a conversation grows with the square of its length. A forty-turn session is not twice a twenty-turn session; it is around four times."),
+
+    ("h2", "Prompt caching, which is the lever"),
+    ("p", "Providers can keep the processed form of an unchanged prefix — the keys and values already computed — rather than recomputing it. On a cache hit you pay for the new tokens only. That is prefill almost entirely eliminated for the stable part of your prompt."),
+    ("terms", [
+      ("It keys on an exact prefix", "Byte-identical, from the start", "Change one character early and everything after it is a miss. Order is not a style choice."),
+      ("Stable content goes first", "System prompt, tools, long documents", "Variable content — the user's turn — goes last."),
+      ("It has a lifetime", "Minutes, typically", "A cache that has expired is a cold start again."),
+      ("It is priced differently", "Writes cost slightly more, reads much less", "Which means caching a prefix used once is a small loss, and one used fifty times is a large win."),
+    ]),
+
+    ("know",
+     "Prompt caching keys on an exact, unchanged prefix — so anything variable must go last.",
+     "The cache matches from the beginning of the prompt until the first difference. A timestamp, a session id, or a re-ordered tool list near the front invalidates everything after it, and the hit rate silently goes to zero while the code looks correct.",
+     "A team added the current date to the top of their system prompt for freshness. Cache hit rate went from 90% to zero overnight, cost tripled, and nothing in the application errored. The date changed the first line, so every subsequent token had to be reprocessed on every request."),
+
+    ("h2", "Cold start"),
+    ("p", "Separate from caching, and often confused with it. A cold start is the time before your system can serve <em>any</em> request: loading weights from disk into memory, allocating the KV cache, warming the runtime. For a large local model this can be tens of seconds."),
+    ("ul", [
+      "<strong>Local serving.</strong> First request after loading a model pays for the load. Ollama and similar keep a model resident for a while, then evict it — so an idle system goes cold and the next user waits.",
+      "<strong>Serverless.</strong> The classic case: no traffic means no container, and the first request pays for everything.",
+      "<strong>Model switching.</strong> Routing between two large local models can mean unloading one to load the other. On constrained memory, alternating requests is pathological.",
+      "<strong>Cache expiry.</strong> A warm prefix that has aged out is a cold start in miniature.",
+    ]),
+    ("callout", "matters", "The fix is usually keeping something warm, not making it faster", "A periodic keep-alive request, a longer residency setting, or provisioned capacity. None of these make the system faster; they move the cost off the user's critical path onto a schedule. That is almost always the right trade, and it is a configuration change rather than an engineering project."),
+
+    ("h2", "Warm, cold, and the states in between"),
+    ("p", "\"Is it warm?\" is really four questions, and they fail at different scales. Knowing which one you are in tells you whether to wait, to configure something, or to change the design."),
+    ("terms", [
+      ("Fully cold", "Nothing loaded", "Weights being read from disk into memory. Tens of seconds for a large local model. Affects the first user after any idle period."),
+      ("Model warm, cache cold", "Loaded, no cached prefix", "The common steady state. You pay full prefill on every request, which is fine for short prompts and painful for long ones."),
+      ("Fully warm", "Loaded, prefix cached", "The good case. New tokens only. This is what a well-designed multi-turn loop spends most of its time in."),
+      ("Warm but evicted", "The trap", "Runtimes unload idle models and caches expire. A system that was warm ten minutes ago is cold now, and nothing announced the transition."),
+    ]),
+
+    ("know",
+     "Warm is a state you have to maintain, not one you reach.",
+     "Models get evicted after idle periods and cached prefixes expire on a timer. A system that was fast during testing can be cold in production simply because real traffic is bursty and test traffic was not.",
+     "An internal tool is snappy all through development, because someone is always using it. In production it serves twenty requests a day, spread out. Almost every one is a cold start, and users describe it as unusably slow — the same code, the same model, a different traffic shape."),
+
+    ("h2", "What inference cannot do for you"),
+    ("p", "Some limits are architectural rather than a matter of tuning, and recognising them saves you from optimising toward a wall:"),
+    ("ul", [
+      "<strong>Decode is sequential and cannot be parallelised within one response.</strong> Each token depends on the previous one. More hardware serves more users concurrently; it does not make a single response arrive faster past a point.",
+      "<strong>Batching helps throughput, not latency.</strong> Serving eight users at once is far more efficient in total, and any individual user may wait slightly longer. These are different objectives and you must pick one to optimise.",
+      "<strong>Context has a hard ceiling.</strong> Not a soft slope — beyond the trained length, behaviour degrades or the request is rejected outright.",
+      "<strong>Local inference is memory-bandwidth bound.</strong> A faster processor with the same memory bandwidth generates tokens at nearly the same rate.",
+      "<strong>Quantisation buys speed and capacity, not capability.</strong> It makes a bigger model fit. It does not make a model better at the task.",
+    ]),
+
+    ("h2", "Where the time actually goes"),
+    ("p", "Before optimising, measure the split. A single end-to-end number tells you nothing about which lever to pull:"),
+    ("terms", [
+      ("Retrieval", "Often larger than expected", "An unoptimised vector query or a reranker over too many candidates can dominate everything else."),
+      ("Prefill", "Scales with what you send", "Reduce context or improve cache hits."),
+      ("Decode", "Scales with what you ask for", "Shorter outputs, or a smaller model for this step."),
+      ("Tool calls", "Each is a round trip plus a model turn", "Five sequential tools is five of both. Parallelise where the calls are independent."),
+      ("Queueing", "Invisible until you look", "Under concurrency, waiting for a slot can exceed the work itself."),
+    ]),
+
+    ("know",
+     "Measure the split before optimising, because the biggest component is rarely the model.",
+     "Retrieval, prefill, decode, tool round trips and queueing all live inside one end-to-end number. Teams routinely spend weeks on model selection when most of their latency was a reranker scoring 500 candidates.",
+     "A 6-second p95 broke down as: 2.4s retrieval, 1.9s prefill, 0.9s decode, 0.8s in two sequential tool calls. The model accounted for under a sixth of it. Capping the rerank candidate set at 50 removed two seconds in a one-line change."),
+
+    ("h2", "Concurrency, which changes the shape of everything"),
+    ("p", "Everything above describes one request in isolation. Under concurrent load the picture changes, and the change is not proportional."),
+    ("terms", [
+      ("Batching raises throughput", "And can raise your latency", "A server groups requests to use the hardware efficiently. Total work per second goes up; your individual request may wait to join a batch."),
+      ("The KV cache is per request", "And they are all resident at once", "Eight concurrent long conversations means eight caches in memory. This is usually what caps concurrency on local hardware, not compute."),
+      ("Queueing dominates past saturation", "Sharply", "Below capacity, latency is roughly flat as load rises. Past it, queue time grows without limit and p95 detaches from p50 violently."),
+      ("Rate limits are a concurrency ceiling", "Imposed from outside", "Hosted providers cap tokens per minute and requests in flight. Hitting either produces retries, which look like latency and are really admission control."),
+    ]),
+
+    ("know",
+     "Below capacity, added load barely moves latency; past it, latency grows without limit.",
+     "Queueing systems have a knee, not a slope. Testing at 60% of capacity tells you almost nothing about behaviour at 95%, which is where real traffic spends its worst minutes — and where the difference between p50 and p95 explodes.",
+     "A service holds a steady 800ms p95 through load testing at 50 requests per second. At 70 it goes to nine seconds. Nothing degraded gradually in between; requests started waiting for a slot, and every additional request made the wait longer for everyone behind it."),
+
+    ("h2", "Percentiles, not averages"),
+    ("p", "Report p50 and p95, never the mean. Latency distributions have long tails — a few requests hitting a cache miss, a retry, or a queue take many times the median — and the mean hides exactly the experience that makes people abandon the product. Your p95 is what a frustrated user is describing."),
+
+    ("links", [
+      ("Prompt caching", "https://docs.claude.com/en/docs/build-with-claude/prompt-caching",
+       "The mechanics, including what invalidates a cached prefix and how the pricing differs for writes and reads."),
+      ("vLLM documentation", "https://docs.vllm.ai",
+       "Continuous batching and prefix caching from the serving side — the engine-level versions of the levers above."),
+    ]),
+
+    ("quiz", [
+      ("Your endpoint takes four seconds before the first token, then streams quickly. What should you look at?",
+       ["A model with higher throughput",
+        "Prefill — how many tokens you are sending, and whether the cache is being hit",
+        "The decode sampling parameters"], 1),
+      ("Why does adding a timestamp to the top of a system prompt increase costs sharply?",
+       ["Timestamps are expensive to tokenize",
+        "The cache keys on an exact prefix, so a change at the front invalidates everything after it",
+        "It forces the model to reason about time"], 1),
+      ("A forty-turn conversation costs roughly how much relative to a twenty-turn one?",
+       ["About twice as much",
+        "About four times, since the whole transcript is re-sent each turn and cost grows with the square of length",
+        "The same, if caching is enabled"], 1),
+      ("Why report p95 rather than the mean?",
+       ["p95 is easier to compute at scale",
+        "Latency has a long tail, and the mean hides the slow requests that actually make people abandon",
+        "The mean is only valid for normally distributed data"], 1),
+    ]),
+  ],
+},
+{
+  "slug": "session-lifecycle",
+  "title": "Memory, Compaction and Session Decay",
+  "subtitle": "A model has no memory. Everything that looks like memory is something you built — and all of it degrades.",
+  "body": [
+    ("p", "The single most useful correction a beginner can make: <strong>a language model retains nothing between calls.</strong> What looks like memory is the harness re-sending the conversation every turn. Once you hold that, every memory feature and every memory failure becomes predictable."),
+
+    ("know",
+     "A model has no memory. Everything that behaves like memory is re-sent context, and you are paying for it every turn.",
+     "Nothing persists inside the model between calls. The conversation appears continuous because the whole transcript is included in each request, which is why long sessions get expensive and why a fresh session forgets everything instantly.",
+     "A user says 'as I mentioned earlier, I use metric units' at turn 30 and the model complies. Nothing was remembered — turn 4 was re-sent along with turns 1 to 29. Trim the history to save cost and that instruction vanishes with no warning, because it was never stored anywhere."),
+
+    ("h2", "The four things people call memory"),
+    ("terms", [
+      ("Conversation history", "Re-sent every turn", "The default. Simple, and grows without limit until something manages it."),
+      ("Compaction", "History replaced by a summary", "Preserves the thread at a fraction of the tokens. Lossy, and the loss is not visible."),
+      ("External notes", "Written to a file, read back", "Survives resets because it was never in the context to begin with. The most durable option."),
+      ("Retrieved memory", "Facts stored, fetched when relevant", "Semantic search over past interactions. Powerful, and now you have a retrieval quality problem in addition to a memory one."),
+    ]),
+
+    ("h2", "Compaction, and what it costs"),
+    ("p", "When the window fills, replace the older part of the transcript with a summary and continue. The guidance that matters: <strong>tune the compaction prompt for recall first, precision second.</strong> Carrying redundancy is cheap; losing a decision the agent made two hours ago is not."),
+    ("p", "The safest form is clearing old tool results rather than summarising conversation. They are usually the largest thing in the window and, once acted upon, rarely needed verbatim. Reach for that before summarisation, which always risks dropping something."),
+
+    ("figure", "Each compaction is lossy, and the losses accumulate. What survives to turn 90 has been through three summarisations — a summary of a summary of a summary.", '''<svg viewBox="0 0 640 190" role="img" aria-label="Successive compaction losing detail"><defs><marker id="cp" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="34" width="150" height="46" rx="5" class="d-fill-green" opacity="0.5"/>
+<text x="26" y="54" class="d-label-sm">turns 1-30</text>
+<text x="26" y="72" class="d-label-sm">full detail</text>
+<path d="M162 57 L196 57" class="d-arrow-accent" marker-end="url(#cp)"/>
+<rect x="196" y="42" width="110" height="30" rx="5" class="d-fill-yellow" opacity="0.5"/>
+<text x="210" y="62" class="d-label-sm">summary A</text>
+<path d="M306 57 L340 57" class="d-arrow-accent" marker-end="url(#cp)"/>
+<rect x="340" y="46" width="90" height="22" rx="5" class="d-fill-yellow" opacity="0.35"/>
+<text x="352" y="62" class="d-label-sm">summary B</text>
+<path d="M430 57 L464 57" class="d-arrow-accent" marker-end="url(#cp)"/>
+<rect x="464" y="48" width="70" height="18" rx="5" class="d-fill-red" opacity="0.4"/>
+<text x="474" y="62" class="d-label-sm">summary C</text>
+<text x="548" y="62" class="d-label-sm">turn 90</text>
+<rect x="12" y="104" width="616" height="70" rx="7" class="d-box"/>
+<text x="28" y="126" class="d-label-b">What survives, and what does not</text>
+<text x="28" y="146" class="d-label-sm">Survives: the goal, big decisions, anything restated often. Lost: exact values, why an option was rejected,</text>
+<text x="28" y="164" class="d-label-sm">constraints mentioned once. Anything that must survive should be written to a file, not trusted to a summary.</text>
+</svg>'''),
+
+    ("know",
+     "Compaction is lossy, and the loss is silent.",
+     "The agent does not know what the summary dropped, so it cannot tell you. It carries on confidently with a thinner picture, and the failure appears later as a decision that contradicts something agreed hours earlier.",
+     "At turn 20 you tell an agent the database is read-only. At turn 60, after two compactions, it proposes a migration. It is not ignoring you — the constraint was mentioned once, judged unimportant by a summariser, and no longer exists anywhere in its context."),
+
+    ("h2", "Session decay"),
+    ("p", "Long sessions degrade in a characteristic way that is not the same as running out of room. Early mistakes stay in the history, get re-read every turn, and are treated as established fact. A wrong assumption at turn 3 is still shaping behaviour at turn 30, and each turn adds material that makes it harder to escape."),
+    ("p", "Compounding this: attention over a long context is weakest in the middle, so the material most likely to be crowded out is whatever sits between the opening instructions and the recent turns."),
+    ("callout", "matters", "Restarting frequently beats fighting a poisoned context", "A fresh session with a short accurate summary routinely outperforms continuing a long one. This feels like giving up and is usually the efficient move — you are trading the thread for clean attention, and the thread was already degraded. If you find yourself repeatedly correcting the same misunderstanding, stop correcting and restart."),
+
+    ("h2", "Working around the limits"),
+    ("terms", [
+      ("Write it down", "Files, not context", "An agent maintaining a notes file has memory that survives every reset. The simplest durable option and the most under-used."),
+      ("Structure the state", "Not prose", "A task list with statuses beats a narrative of what happened. Cheaper to carry, harder to mis-summarise."),
+      ("Sub-agents for exploration", "Isolated windows", "The expensive search happens elsewhere and only the conclusion comes back."),
+      ("Re-anchor the constraints", "Every turn, deliberately", "Critical constraints belong in the system prompt, which is never compacted — not in a turn that can be summarised away."),
+      ("Cap the session", "Deliberately", "Decide the turn budget in advance, and end with a written handover rather than degrading past usefulness."),
+    ]),
+
+    ("know",
+     "Anything that must survive the session belongs somewhere the session cannot delete.",
+     "Context is working memory: fast, expensive and volatile. Constraints, decisions and state that matter should live in the system prompt or in a file, both of which survive compaction, resets and restarts.",
+     "Two agents are given the same three-hour task. One holds its plan in conversation and, after compaction, rebuilds a slightly different plan from a summary. The other writes the plan to a file at the start and re-reads it after every reset. Only the second finishes the task it was actually given."),
+
+    ("h2", "Context length is a ceiling, not a target"),
+    ("p", "A larger window is frequently sold as a solution to everything above. It is not, for three separate reasons that compound."),
+    ("ul", [
+      "<strong>Attention degrades before the limit does.</strong> The window is a capacity constraint; usable attention is a gradient that thins well before it. A model with a 200k window does not attend to 200k tokens evenly.",
+      "<strong>Cost grows with the square of conversation length.</strong> The whole transcript is re-sent each turn, so a window you actually fill is expensive on every subsequent turn, not just the one that filled it.",
+      "<strong>Latency follows the same curve.</strong> Prefill scales with what you send, so a full window means a slow first token every single turn.",
+    ]),
+    ("p", "So the objective is not to fill the window but to find the smallest set of high-signal tokens that produces the outcome. A larger window buys you headroom for the cases that genuinely need it — a long document, a deep trace — rather than permission to stop managing context."),
+    ("callout", "pitfall", "The upgrade that changes nothing", "Teams hitting quality problems at 30k tokens often move to a model with a much larger window and see no improvement, because the problem was never capacity — it was that the relevant material was buried mid-context among distractors. More room to bury things in does not help. Rank better and send less."),
+
+    ("h2", "What this means for design"),
+    ("p", "Treat the session as a resource with a lifecycle rather than an unbounded conversation. It has a beginning where you establish constraints durably, a middle where you manage growth deliberately, and an end you choose rather than discover. Systems designed that way degrade gracefully; systems that treat context as infinite degrade unpredictably and always at the worst moment."),
+
+    ("links", [
+      ("Effective context engineering for AI agents", "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+       "Compaction, structured note-taking and sub-agent isolation, with the attention-budget framing behind this lesson."),
+      ("Lost in the Middle (Liu et al., 2023)", "https://arxiv.org/abs/2307.03172",
+       "The evidence for why the middle of a long session is where information goes to be ignored."),
+    ]),
+
+    ("quiz", [
+      ("What is actually happening when a model 'remembers' something from twenty turns ago?",
+       ["A session store is being queried automatically",
+        "The whole transcript, including that turn, is re-sent with every request",
+        "The model has a small persistent memory between calls"], 1),
+      ("An agent proposes something that contradicts a constraint you gave it an hour ago. What most likely happened?",
+       ["The model is ignoring instructions",
+        "The constraint was mentioned once, dropped by a compaction summary, and no longer exists in its context",
+        "The context window was exceeded and the request failed silently"], 1),
+      ("You keep correcting the same misunderstanding in a long session. What usually works better?",
+       ["Stating the correction more forcefully",
+        "Starting a fresh session with a short accurate summary",
+        "Increasing the context window"], 1),
+      ("Where should a hard constraint live so it survives a long agent run?",
+       ["In the first user message, where it will be re-sent",
+        "In the system prompt or an external file — both survive compaction and resets",
+        "Repeated every few turns in the conversation"], 1),
     ]),
   ],
 },

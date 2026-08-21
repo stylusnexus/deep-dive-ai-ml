@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latency, Prefills and Caching</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 27 of 28</span>
+  <h1>Latency, Prefills and Caching</h1>
+  <p class="subtitle">Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.</p>
+
+  <p>"The model is slow" is four different problems wearing one description. Separating them is the difference between fixing latency and buying a bigger machine that does not help.</p>
+  <h2>The two phases, and why the split matters</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Prefill</div><div><div class="roadmap-title">Processing your prompt</div><div class="roadmap-desc">All tokens at once, in parallel. Fast per token, and it scales with how much you sent.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decode</div><div><div class="roadmap-title">Generating the answer</div><div class="roadmap-desc">One token at a time, each requiring a full pass. Slow, sequential, and what you watch while waiting.</div></div></div></div>
+  <p>Two numbers follow, and they move independently. <strong>Time to first token</strong> is dominated by prefill, so it grows with prompt length. <strong>Tokens per second</strong> is decode, and it barely changes with prompt length at all. Quoted throughput figures are almost always decode.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Prefill and decode across two request shapes">
+<text x="12" y="18" class="d-label-sm">short prompt, long answer</text>
+<rect x="12" y="28" width="60" height="28" rx="4" class="d-fill-accent" opacity="0.8"/>
+<text x="22" y="47" class="d-label-sm">prefill</text>
+<rect x="76" y="28" width="380" height="28" rx="4" class="d-fill-green" opacity="0.55"/>
+<text x="230" y="47" class="d-label-sm">decode</text>
+<text x="466" y="47" class="d-fill-green" font-size="11" font-weight="600">feels responsive</text>
+<text x="12" y="88" class="d-label-sm">long prompt (retrieved context), short answer</text>
+<rect x="12" y="98" width="300" height="28" rx="4" class="d-fill-accent" opacity="0.8"/>
+<text x="140" y="117" class="d-label-sm">prefill</text>
+<rect x="316" y="98" width="70" height="28" rx="4" class="d-fill-green" opacity="0.55"/>
+<text x="330" y="117" class="d-label-sm">decode</text>
+<text x="396" y="117" class="d-fill-red" font-size="11" font-weight="600">long silence, then a quick answer</text>
+<line x1="12" y1="146" x2="628" y2="146" stroke="var(--border)"/>
+<text x="12" y="170" class="d-label-sm">Both may report the same tokens per second. Only one of them feels slow — and the fix for that one is</text>
+<text x="12" y="188" class="d-label-sm">to send fewer tokens or reuse the cache, not to find a faster model.</text>
+</svg><figcaption>The same request, two very different profiles. A long prompt with a short answer feels sluggish before anything appears; a short prompt with a long answer starts instantly and takes a while. Both might report identical tokens per second.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Time to first token and tokens per second are different problems with different fixes.</p><p class="know-why">TTFT is prefill and scales with what you sent. Throughput is decode and barely moves with prompt length. Optimising the wrong one produces no perceptible change while looking like diligent work.</p><p class="know-eg"><span class="know-eg-label">For example</span>A RAG endpoint takes four seconds before anything appears, then streams quickly. Swapping to a model with 40% higher throughput changes almost nothing, because the four seconds was prefill on 8,000 tokens of retrieved context. Retrieving five chunks instead of twenty halves it.</p></blockquote>
+  <h2>The cost curve in a conversation</h2>
+  <p>The whole conversation is re-sent every turn, so prefill grows with the transcript. Turn twenty prefills roughly twenty times what turn one did, and it happens on every single turn — which is why long agent sessions get slower and more expensive in a way that feels disproportionate.</p>
+  <p>This is not a gentle slope. Because the cost of turn <em>n</em> is proportional to <em>n</em>, the total cost of a conversation grows with the square of its length. A forty-turn session is not twice a twenty-turn session; it is around four times.</p>
+  <h2>Prompt caching, which is the lever</h2>
+  <p>Providers can keep the processed form of an unchanged prefix — the keys and values already computed — rather than recomputing it. On a cache hit you pay for the new tokens only. That is prefill almost entirely eliminated for the stable part of your prompt.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">It keys on an exact prefix</div><div><div class="roadmap-title">Byte-identical, from the start</div><div class="roadmap-desc">Change one character early and everything after it is a miss. Order is not a style choice.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Stable content goes first</div><div><div class="roadmap-title">System prompt, tools, long documents</div><div class="roadmap-desc">Variable content — the user's turn — goes last.</div></div></div><div class="roadmap-item"><div class="roadmap-num">It has a lifetime</div><div><div class="roadmap-title">Minutes, typically</div><div class="roadmap-desc">A cache that has expired is a cold start again.</div></div></div><div class="roadmap-item"><div class="roadmap-num">It is priced differently</div><div><div class="roadmap-title">Writes cost slightly more, reads much less</div><div class="roadmap-desc">Which means caching a prefix used once is a small loss, and one used fifty times is a large win.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Prompt caching keys on an exact, unchanged prefix — so anything variable must go last.</p><p class="know-why">The cache matches from the beginning of the prompt until the first difference. A timestamp, a session id, or a re-ordered tool list near the front invalidates everything after it, and the hit rate silently goes to zero while the code looks correct.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team added the current date to the top of their system prompt for freshness. Cache hit rate went from 90% to zero overnight, cost tripled, and nothing in the application errored. The date changed the first line, so every subsequent token had to be reprocessed on every request.</p></blockquote>
+  <h2>Cold start</h2>
+  <p>Separate from caching, and often confused with it. A cold start is the time before your system can serve <em>any</em> request: loading weights from disk into memory, allocating the KV cache, warming the runtime. For a large local model this can be tens of seconds.</p>
+  <ul><li><strong>Local serving.</strong> First request after loading a model pays for the load. Ollama and similar keep a model resident for a while, then evict it — so an idle system goes cold and the next user waits.</li><li><strong>Serverless.</strong> The classic case: no traffic means no container, and the first request pays for everything.</li><li><strong>Model switching.</strong> Routing between two large local models can mean unloading one to load the other. On constrained memory, alternating requests is pathological.</li><li><strong>Cache expiry.</strong> A warm prefix that has aged out is a cold start in miniature.</li></ul>
+  <div class="callout matters"><span class="label">The fix is usually keeping something warm, not making it faster</span>A periodic keep-alive request, a longer residency setting, or provisioned capacity. None of these make the system faster; they move the cost off the user's critical path onto a schedule. That is almost always the right trade, and it is a configuration change rather than an engineering project.</div>
+  <h2>Warm, cold, and the states in between</h2>
+  <p>"Is it warm?" is really four questions, and they fail at different scales. Knowing which one you are in tells you whether to wait, to configure something, or to change the design.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Fully cold</div><div><div class="roadmap-title">Nothing loaded</div><div class="roadmap-desc">Weights being read from disk into memory. Tens of seconds for a large local model. Affects the first user after any idle period.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Model warm, cache cold</div><div><div class="roadmap-title">Loaded, no cached prefix</div><div class="roadmap-desc">The common steady state. You pay full prefill on every request, which is fine for short prompts and painful for long ones.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Fully warm</div><div><div class="roadmap-title">Loaded, prefix cached</div><div class="roadmap-desc">The good case. New tokens only. This is what a well-designed multi-turn loop spends most of its time in.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Warm but evicted</div><div><div class="roadmap-title">The trap</div><div class="roadmap-desc">Runtimes unload idle models and caches expire. A system that was warm ten minutes ago is cold now, and nothing announced the transition.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Warm is a state you have to maintain, not one you reach.</p><p class="know-why">Models get evicted after idle periods and cached prefixes expire on a timer. A system that was fast during testing can be cold in production simply because real traffic is bursty and test traffic was not.</p><p class="know-eg"><span class="know-eg-label">For example</span>An internal tool is snappy all through development, because someone is always using it. In production it serves twenty requests a day, spread out. Almost every one is a cold start, and users describe it as unusably slow — the same code, the same model, a different traffic shape.</p></blockquote>
+  <h2>What inference cannot do for you</h2>
+  <p>Some limits are architectural rather than a matter of tuning, and recognising them saves you from optimising toward a wall:</p>
+  <ul><li><strong>Decode is sequential and cannot be parallelised within one response.</strong> Each token depends on the previous one. More hardware serves more users concurrently; it does not make a single response arrive faster past a point.</li><li><strong>Batching helps throughput, not latency.</strong> Serving eight users at once is far more efficient in total, and any individual user may wait slightly longer. These are different objectives and you must pick one to optimise.</li><li><strong>Context has a hard ceiling.</strong> Not a soft slope — beyond the trained length, behaviour degrades or the request is rejected outright.</li><li><strong>Local inference is memory-bandwidth bound.</strong> A faster processor with the same memory bandwidth generates tokens at nearly the same rate.</li><li><strong>Quantisation buys speed and capacity, not capability.</strong> It makes a bigger model fit. It does not make a model better at the task.</li></ul>
+  <h2>Where the time actually goes</h2>
+  <p>Before optimising, measure the split. A single end-to-end number tells you nothing about which lever to pull:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Retrieval</div><div><div class="roadmap-title">Often larger than expected</div><div class="roadmap-desc">An unoptimised vector query or a reranker over too many candidates can dominate everything else.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Prefill</div><div><div class="roadmap-title">Scales with what you send</div><div class="roadmap-desc">Reduce context or improve cache hits.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decode</div><div><div class="roadmap-title">Scales with what you ask for</div><div class="roadmap-desc">Shorter outputs, or a smaller model for this step.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Tool calls</div><div><div class="roadmap-title">Each is a round trip plus a model turn</div><div class="roadmap-desc">Five sequential tools is five of both. Parallelise where the calls are independent.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Queueing</div><div><div class="roadmap-title">Invisible until you look</div><div class="roadmap-desc">Under concurrency, waiting for a slot can exceed the work itself.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Measure the split before optimising, because the biggest component is rarely the model.</p><p class="know-why">Retrieval, prefill, decode, tool round trips and queueing all live inside one end-to-end number. Teams routinely spend weeks on model selection when most of their latency was a reranker scoring 500 candidates.</p><p class="know-eg"><span class="know-eg-label">For example</span>A 6-second p95 broke down as: 2.4s retrieval, 1.9s prefill, 0.9s decode, 0.8s in two sequential tool calls. The model accounted for under a sixth of it. Capping the rerank candidate set at 50 removed two seconds in a one-line change.</p></blockquote>
+  <h2>Concurrency, which changes the shape of everything</h2>
+  <p>Everything above describes one request in isolation. Under concurrent load the picture changes, and the change is not proportional.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Batching raises throughput</div><div><div class="roadmap-title">And can raise your latency</div><div class="roadmap-desc">A server groups requests to use the hardware efficiently. Total work per second goes up; your individual request may wait to join a batch.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The KV cache is per request</div><div><div class="roadmap-title">And they are all resident at once</div><div class="roadmap-desc">Eight concurrent long conversations means eight caches in memory. This is usually what caps concurrency on local hardware, not compute.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Queueing dominates past saturation</div><div><div class="roadmap-title">Sharply</div><div class="roadmap-desc">Below capacity, latency is roughly flat as load rises. Past it, queue time grows without limit and p95 detaches from p50 violently.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Rate limits are a concurrency ceiling</div><div><div class="roadmap-title">Imposed from outside</div><div class="roadmap-desc">Hosted providers cap tokens per minute and requests in flight. Hitting either produces retries, which look like latency and are really admission control.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Below capacity, added load barely moves latency; past it, latency grows without limit.</p><p class="know-why">Queueing systems have a knee, not a slope. Testing at 60% of capacity tells you almost nothing about behaviour at 95%, which is where real traffic spends its worst minutes — and where the difference between p50 and p95 explodes.</p><p class="know-eg"><span class="know-eg-label">For example</span>A service holds a steady 800ms p95 through load testing at 50 requests per second. At 70 it goes to nine seconds. Nothing degraded gradually in between; requests started waiting for a slot, and every additional request made the wait longer for everyone behind it.</p></blockquote>
+  <h2>Percentiles, not averages</h2>
+  <p>Report p50 and p95, never the mean. Latency distributions have long tails — a few requests hitting a cache miss, a retry, or a queue take many times the median — and the mean hides exactly the experience that makes people abandon the product. Your p95 is what a frustrated user is describing.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://docs.claude.com/en/docs/build-with-claude/prompt-caching" target="_blank" rel="noopener">Prompt caching</a><span class="link-note">The mechanics, including what invalidates a cached prefix and how the pricing differs for writes and reads.</span></li><li><a href="https://docs.vllm.ai" target="_blank" rel="noopener">vLLM documentation</a><span class="link-note">Continuous batching and prefix caching from the serving side — the engine-level versions of the levers above.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Your endpoint takes four seconds before the first token, then streams quickly. What should you look at?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A model with higher throughput</div>
+      <div class="quiz-opt">Prefill — how many tokens you are sending, and whether the cache is being hit</div>
+      <div class="quiz-opt">The decode sampling parameters</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why does adding a timestamp to the top of a system prompt increase costs sharply?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Timestamps are expensive to tokenize</div>
+      <div class="quiz-opt">The cache keys on an exact prefix, so a change at the front invalidates everything after it</div>
+      <div class="quiz-opt">It forces the model to reason about time</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. A forty-turn conversation costs roughly how much relative to a twenty-turn one?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">About twice as much</div>
+      <div class="quiz-opt">About four times, since the whole transcript is re-sent each turn and cost grows with the square of length</div>
+      <div class="quiz-opt">The same, if caching is enabled</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Why report p95 rather than the mean?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">p95 is easier to compute at scale</div>
+      <div class="quiz-opt">Latency has a long tail, and the mean hides the slow requests that actually make people abandon</div>
+      <div class="quiz-opt">The mean is only valid for normally distributed data</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

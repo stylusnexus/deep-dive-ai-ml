@@ -1039,4 +1039,100 @@ git switch main && git pull            # back to the main line, now updated"""),
     ]),
   ],
 },
+{
+  "slug": "rungs-and-experiments",
+  "title": "Rungs: Running Experiments on an Agent",
+  "subtitle": "A ladder of progressively more assistance — and the only design that tells you where the wall actually is.",
+  "body": [
+    ("p", "You have a task an agent fails. You have a dozen ideas about why. Testing them one at a time takes a week and, worse, each result is ambiguous — a change that produces no improvement might be the wrong lever, or the right lever applied where a different problem was blocking."),
+    ("p", "A <strong>rung</strong> is one configuration in an ordered ladder of increasing assistance. Run the same fixture across every rung and the pattern of where it starts passing localises the failure in a single sweep."),
+
+    ("h2", "A ladder, bottom to top"),
+    ("terms", [
+      ("Bare", "The task, nothing else", "No scaffolding, no hints. If it passes here, everything above is unnecessary."),
+      ("Test-first", "The failing test in context", "Supplies a checkable target. Passing here and not below means the agent could not work out what success looked like."),
+      ("Reloop", "Failures fed back, retry allowed", "The verifier-guided loop. Passing here means it could not get it right first time but could correct itself given the signal."),
+      ("Guards-off", "Budgets and limits relaxed", "Passing here means capability was never the issue — the harness was stopping it."),
+      ("Decomposed", "Task pre-split into steps", "Passing here means the model could do each part and not the planning."),
+      ("Oracle", "The answer, or most of it, supplied", "The control. Failing at this rung means the fixture or the rubric is broken, not the agent."),
+    ]),
+
+    ("figure", "Where a fixture starts passing is the diagnosis. Each rung isolates a different possible cause, and the top rung is a control on the instrument itself.", '''<svg viewBox="0 0 640 235" role="img" aria-label="A ladder of rungs and what each result means">
+<rect x="12" y="14" width="300" height="30" rx="5" class="d-box"/><text x="26" y="34" class="d-label-sm">bare</text>
+<text x="330" y="34" class="d-label-sm">passes → you had no problem</text>
+<rect x="12" y="48" width="300" height="30" rx="5" class="d-box"/><text x="26" y="68" class="d-label-sm">+ test-first</text>
+<text x="330" y="68" class="d-label-sm">passes → it could not tell what success was</text>
+<rect x="12" y="82" width="300" height="30" rx="5" class="d-box"/><text x="26" y="102" class="d-label-sm">+ reloop</text>
+<text x="330" y="102" class="d-label-sm">passes → needed feedback, not more capability</text>
+<rect x="12" y="116" width="300" height="30" rx="5" class="d-box-accent"/><text x="26" y="136" class="d-label-sm">+ guards off</text>
+<text x="330" y="136" class="d-accent">passes → the harness was the wall</text>
+<rect x="12" y="150" width="300" height="30" rx="5" class="d-box"/><text x="26" y="170" class="d-label-sm">+ decomposed</text>
+<text x="330" y="170" class="d-label-sm">passes → planning was the gap, not execution</text>
+<rect x="12" y="184" width="300" height="30" rx="5" class="d-box-warn"/><text x="26" y="204" class="d-label-sm">oracle (control)</text>
+<text x="330" y="204" class="d-fill-red" font-size="11" font-weight="600">fails → your fixture is broken</text>
+<text x="12" y="228" class="d-label-sm">Never passes anywhere → a genuine capability limit, and now you have evidence rather than a suspicion.</text>
+</svg>'''),
+
+    ("know",
+     "Where a task starts passing on the ladder is the diagnosis; a single failing run is not.",
+     "One configuration failing is consistent with a dozen causes. A ladder turns an ambiguous zero into a located one, because each rung removes exactly one candidate explanation and the transition point names the cause.",
+     "A fixture fails bare, fails test-first, fails reloop, and passes with guards off. That is not a model problem — the model could always do it, and a budget was stopping it before it got there. Nine experiments aimed at capability would all have measured flat."),
+
+    ("h2", "Reading the ladder"),
+    ("p", "The transitions carry the information, not the totals. Three patterns worth recognising:"),
+    ("ul", [
+      "<strong>Passes low, fails high.</strong> Almost always a bug in your ladder — a higher rung is supposed to be strictly more helpful. If added assistance makes things worse, that assistance is doing something you did not intend.",
+      "<strong>Fails everywhere including the oracle.</strong> The fixture or the rubric is broken. Fix the instrument before drawing any conclusion about the agent.",
+      "<strong>Passes only at the top.</strong> A real capability limit for this configuration. This is the only pattern that justifies reaching for a different model.",
+    ]),
+    ("callout", "matters", "The oracle rung is the one people leave out, and it is the one that saves you", "It is a control fixture doing its job continuously. Without it, a board of zeros is ambiguous between 'the agent cannot do this' and 'nothing could pass this fixture'. With it, that ambiguity resolves in one cell — and a broken fixture is far more common than people expect, because fixtures are written once and never tested against a known-good answer."),
+
+    ("h2", "Running the sweep honestly"),
+    ("terms", [
+      ("Same fixtures on every rung", "Non-negotiable", "Change the tasks between rungs and you are comparing nothing."),
+      ("Repeats per cell", "Three at minimum", "Agent runs are stochastic. A single run per cell gives you a board of coin flips presented as a table."),
+      ("One variable per rung", "Strictly cumulative", "Each rung adds exactly one thing to the one below. Two changes at once and the transition tells you nothing."),
+      ("Record the manifest", "Per cell", "Model, budgets, verification state, config version. Otherwise a surprising cell cannot be investigated later."),
+      ("Classify non-completions", "Before aggregating", "An infrastructure error is not a failure to solve the task, and mixing them corrupts every cell it touches."),
+    ]),
+
+    ("know",
+     "One run per cell produces a board of coin flips formatted as a table.",
+     "Agent runs vary between attempts for reasons that have nothing to do with your treatment — sampling, retrieval order, timing. Without repeats you cannot distinguish a real transition between rungs from noise, and the tidy grid makes the result look more solid than it is.",
+     "A smoke run on one fixture showed a discriminator of +1.00 between two conditions — apparently decisive. The full seven-fixture run showed +0.00. Nothing about the single-run result signalled that it was unrepresentative, and it had already been written up."),
+
+    ("h2", "When to stop climbing"),
+    ("p", "The ladder is a diagnostic, not a product. Once you know which rung fixes the task you have your answer, and the engineering question becomes whether that rung is affordable in production. Guards-off is a diagnosis, not a configuration you ship. Decomposition that works in a benchmark may be too slow for an interactive path."),
+    ("p", "That gap — between what makes the fixture pass and what you can actually run — is itself a finding worth recording. It tells you the size of the problem you still have."),
+
+    ("h2", "The connection to everything else"),
+    ("p", "This is the control-fixture idea from the localising lesson, made systematic. It is also the one-treatment-at-a-time rule from the measurement checklist, applied as a design rather than as discipline: because each rung differs by exactly one thing, the sweep is a set of controlled comparisons run in parallel rather than a sequence of experiments run over a fortnight."),
+
+    ("links", [
+      ("SWE-bench experiments", "https://github.com/swe-bench/experiments",
+       "Submissions differing in scaffold on identical tasks — the same comparison as a rung ladder, run across teams instead of within one."),
+      ("Building effective agents — Anthropic", "https://www.anthropic.com/engineering/building-effective-agents",
+       "The argument for the simplest scaffold that works, which is what a ladder is for finding."),
+    ]),
+
+    ("quiz", [
+      ("A fixture fails bare, test-first and reloop, and passes with guards off. What does that establish?",
+       ["The model lacks the capability and needs upgrading",
+        "The model could always do it — a budget or limit was stopping it before it got there",
+        "The fixture is too difficult and should be split"], 1),
+      ("Your ladder shows a task passing at a low rung and failing at a higher one. What does that mean?",
+       ["The higher rung is genuinely harder",
+        "Your ladder has a bug — higher rungs are supposed to be strictly more helpful",
+        "The result is within normal variance"], 1),
+      ("Why include an oracle rung where most of the answer is supplied?",
+       ["To establish an upper bound on achievable score",
+        "As a control — if it fails there, the fixture or rubric is broken rather than the agent",
+        "To give weaker models something they can pass"], 1),
+      ("Why are three repeats per cell the minimum?",
+       ["To average out slow network calls",
+        "Agent runs are stochastic, so a single run per cell cannot distinguish a real transition from noise",
+        "Most benchmarks require it for submission"], 1),
+    ]),
+  ],
+},
 ]

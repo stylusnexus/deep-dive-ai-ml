@@ -213,7 +213,7 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 2 of 26</span>
+  <span class="pill">Lesson 2 of 28</span>
   <h1>Tokens, the Context Window, and the KV Cache</h1>
   <p class="subtitle">Why a model 'forgets', why long conversations get expensive, and what's actually being cached.</p>
 
@@ -254,6 +254,10 @@
   <p>Two consequences you can feel:</p>
   <ul><li><strong>Memory.</strong> The KV cache grows with context length and is often what actually exhausts RAM when running a model locally — not the weights. This is why a model that loads fine can still die on a long prompt.</li><li><strong>Speed.</strong> The first token is slow (the whole prompt must be processed — 'prefill'); subsequent tokens are fast (only one new token to process — 'decode'). That's why time-to-first-token and tokens-per-second are reported separately.</li></ul>
   <div class="callout insight"><span class="label">Prompt caching is this, sold</span>When a provider offers 'prompt caching' at a discount, they are keeping the KV cache for your unchanging prefix instead of recomputing it. That's why the advice is always to put the stable content — system prompt, long documents — at the <em>front</em> and the variable content at the end. Reorder and the cache misses.</div>
+  <h2>Sizing the KV cache</h2>
+  <p>The cache holds one key and one value vector per token, per layer, per key-value head. That arithmetic is worth doing once, because it explains a class of failure that looks like a memory leak and is not.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Grows with context</div><div><div class="roadmap-title">Linearly</div><div class="roadmap-desc">Double the conversation and you double the cache.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Grows with batch</div><div><div class="roadmap-title">Linearly again</div><div class="roadmap-desc">Serving four users concurrently means four caches resident at once.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Independent of the weights</div><div><div class="roadmap-title">A separate budget</div><div class="roadmap-desc">A model that loads with room to spare can still die on a long prompt, and nothing about the weights explains why.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Shrunk by GQA</div><div><div class="roadmap-title">Often 4-8x</div><div class="roadmap-desc">Sharing key-value projections across query-head groups is why long context became affordable.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">The KV cache is a separate memory budget from the weights, and it is usually what actually runs you out.</p><p class="know-why">Weights are fixed once loaded. The cache grows with context length and with how many requests you serve at once, so the failure appears under load or on a long document rather than at startup — which makes it look intermittent.</p><p class="know-eg"><span class="know-eg-label">For example</span>A 13B model loads comfortably in 32GB with room to spare, serves short prompts for a week, then fails on a 40,000-token document. The weights never changed. The cache for that one long prompt needed several gigabytes that the short prompts never asked for.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noopener">Lost in the Middle (Liu et al., 2023)</a><span class="link-note">The paper behind the U-shaped attention finding. Short and worth reading properly.</span></li><li><a href="https://docs.claude.com/en/docs/build-with-claude/prompt-caching" target="_blank" rel="noopener">Prompt caching</a><span class="link-note">The KV cache sold as a feature — note the rules about what invalidates a cached prefix.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

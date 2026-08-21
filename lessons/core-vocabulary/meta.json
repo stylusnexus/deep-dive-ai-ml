@@ -168,6 +168,18 @@
       "title": "Local Hardware: CUDA, Metal and What Actually Constrains You",
       "file": "lsn-1787000000025-local-hardware-limits.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000026",
+      "title": "Latency, Prefills and Caching",
+      "file": "lsn-1787000000026-latency-and-caching.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000027",
+      "title": "Memory, Compaction and Session Decay",
+      "file": "lsn-1787000000027-session-lifecycle.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -297,6 +309,16 @@
       "starred": false
     },
     "lsn-1787000000025": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000026": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000027": {
       "viewed": false,
       "completed": false,
       "starred": false

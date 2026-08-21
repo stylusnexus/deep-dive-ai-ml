@@ -156,6 +156,24 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Scope inflation** — Publishing every scope up front so one stolen token reaches everything. Fixed by minimal initial scopes and elevation on demand.
 
+**Prefill / decode** — Processing your prompt (parallel, fast, scales with what you sent) versus generating the answer one token at a time (sequential, slow). Time-to-first-token is prefill; tokens-per-second is decode.
+
+**Cold start** — Time before a system can serve any request: loading weights, allocating the cache, warming the runtime. Distinct from a cache miss, and fixed by keeping something warm rather than making it faster.
+
+**Warm states** — Fully cold (nothing loaded), model-warm/cache-cold (the common case), fully warm (new tokens only), and evicted (was warm, silently is not any more).
+
+**Cache prefix rule** — Prompt caching keys on an exact unchanged prefix. Anything variable — a timestamp, a session id — must go last, or the hit rate silently goes to zero.
+
+**Queueing knee** — Below capacity, latency is roughly flat as load rises; past it, queue time grows without limit and p95 detaches from p50 sharply. Load-testing at 60% tells you little about 95%.
+
+**Session decay** — Long sessions degrade because early mistakes stay in history, get re-read each turn, and are treated as established fact. Restarting with a short accurate summary usually beats fighting it.
+
+**Compaction loss** — What a summary dropped is invisible to the agent, so it carries on confidently with a thinner picture. Constraints that must survive belong in the system prompt or a file.
+
+**Rung** — One configuration in an ordered ladder of increasing assistance (bare, test-first, reloop, guards-off, decomposed, oracle). Where a task starts passing is the diagnosis.
+
+**Oracle rung** — The control at the top of a ladder, supplying most of the answer. Failing there means the fixture is broken rather than the agent.
+
 ---
 
 ## Block 0 · Orientation
