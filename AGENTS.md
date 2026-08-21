@@ -83,6 +83,8 @@ text. If a build fails with an assertion, the content is wrong, not the builder.
 | Heredoc escaping | `—` renders literally | use real characters, not escapes |
 | Backtick in quiz text | build assertion fails | quiz strings are escaped; use plain text |
 | Rebuild strips outputs | notebook ships unrun | re-execute after every rebuild |
+| Rebuild strips *sibling* outputs | editing one notebook's content wipes all notebooks in that module | if the sibling's source is unchanged, `git checkout HEAD -- <file>` instead of re-running |
+| `models[0]` from /v1/models | HTTP 400 on chat completion | filter out embed/rerank/whisper models — the first listed is not necessarily a chat model |
 | `pd.Timedelta(days=n)` | DeprecationWarning under numpy 2.5 | `np.timedelta64(n, "D")` |
 | Suffix filters | duplicate column | name derived features distinctly |
 | Hardcoded topic lists | a whole block silently excluded | enumerate directories |

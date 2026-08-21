@@ -361,14 +361,19 @@ part this notebook is actually teaching."""),
 ENDPOINTS = ["http://localhost:11455/v1", "http://localhost:11434/v1"]
 
 def find_endpoint():
+    # The first entry in /v1/models is not necessarily a chat model. An
+    # embedding model listed first returns HTTP 400 on a chat completion,
+    # which is silent until it is not.
     for base in ENDPOINTS:
         try:
             with urllib.request.urlopen(f"{base}/models", timeout=3) as r:
-                models = _json.loads(r.read()).get("data", [])
-                if models:
-                    return base, models[0]["id"]
+                ids = [m["id"] for m in _json.loads(r.read()).get("data", [])]
         except Exception:
             continue
+        chat = [i for i in ids
+                if not any(w in i.lower() for w in ("embed", "rerank", "whisper", "clip"))]
+        if chat:
+            return base, chat[0]
     return None, None
 
 BASE, MODEL = find_endpoint()
