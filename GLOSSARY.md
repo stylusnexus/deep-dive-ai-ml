@@ -146,6 +146,16 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Prompt accretion** — Defensive lines added per incident and never removed, until the instructions contradict each other. Date every addition and re-run the eval set with it removed.
 
+**MCP primitives** — Server offers Tools (model-controlled), Resources (application-controlled, read-only by nature), Prompts (user-controlled templates). Client offers Sampling (server asks the model), Roots (server asks its boundaries), Elicitation (server asks the user).
+
+**stdio vs Streamable HTTP** — stdio runs the server as a subprocess with nothing listening on a port; HTTP brings the full web threat model. Prefer stdio locally.
+
+**Token passthrough** — A server accepting a token not issued to it and forwarding it downstream. Explicitly forbidden: breaks rate limiting, breaks the audit trail, enables proxied exfiltration.
+
+**Confused deputy (MCP)** — A proxy server with a static client ID plus dynamic registration plus a consent cookie lets an attacker obtain authorization codes with no consent screen. Fixed by per-client consent before forwarding.
+
+**Scope inflation** — Publishing every scope up front so one stolen token reaches everything. Fixed by minimal initial scopes and elevation on demand.
+
 ---
 
 ## Block 0 · Orientation

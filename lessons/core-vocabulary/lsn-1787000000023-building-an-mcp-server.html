@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building an MCP Server</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 24 of 25</span>
+  <h1>Building an MCP Server</h1>
+  <p class="subtitle">The full capability set, the two transports, and the design decisions that make a server usable rather than merely working.</p>
+
+  <p>The tool-calls lesson covered what MCP standardises and why. This one is how you build one, what it can actually do beyond exposing functions, and the choices that decide whether an agent uses your server well or badly.</p>
+  <h2>Six primitives, not one</h2>
+  <p>Most people think MCP means "a way to expose tools". Tools are one of six capabilities, and three of them flow the other way — from server to client.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 240" role="img" aria-label="MCP server and client capabilities"><defs><marker id="ma1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<text x="12" y="18" class="d-accent">SERVER OFFERS →</text>
+<rect x="12" y="28" width="290" height="34" rx="5" class="d-box-accent"/>
+<text x="26" y="50" class="d-label-sm"><tspan class="d-label-b">Tools</tspan> — functions the model executes</text>
+<rect x="12" y="66" width="290" height="34" rx="5" class="d-box"/>
+<text x="26" y="88" class="d-label-sm"><tspan class="d-label-b">Resources</tspan> — data addressed by URI</text>
+<rect x="12" y="104" width="290" height="34" rx="5" class="d-box"/>
+<text x="26" y="126" class="d-label-sm"><tspan class="d-label-b">Prompts</tspan> — templated workflows the user picks</text>
+<text x="338" y="18" class="d-fill-green" font-size="12" font-weight="600">← CLIENT OFFERS</text>
+<rect x="338" y="28" width="290" height="34" rx="5" class="d-box-good"/>
+<text x="352" y="50" class="d-label-sm"><tspan class="d-label-b">Sampling</tspan> — server asks the model to think</text>
+<rect x="338" y="66" width="290" height="34" rx="5" class="d-box"/>
+<text x="352" y="88" class="d-label-sm"><tspan class="d-label-b">Roots</tspan> — server asks where it may operate</text>
+<rect x="338" y="104" width="290" height="34" rx="5" class="d-box"/>
+<text x="352" y="126" class="d-label-sm"><tspan class="d-label-b">Elicitation</tspan> — server asks the user a question</text>
+<rect x="12" y="156" width="616" height="70" rx="7" class="d-box"/>
+<text x="28" y="178" class="d-label-b">Why the right-hand column matters</text>
+<text x="28" y="198" class="d-label-sm">Sampling lets a server do model work without holding an API key. Elicitation lets it ask for the one</text>
+<text x="28" y="214" class="d-label-sm">missing detail instead of failing. Roots let it discover its sandbox rather than guessing at paths.</text>
+</svg><figcaption>The server offers three things to the client. The client offers three back. Most servers use only the top-left box, which leaves the more interesting half of the protocol unused.</figcaption></figure>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Tools</div><div><div class="roadmap-title">Model-controlled</div><div class="roadmap-desc">Functions with schemas. The model decides when to call them.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Resources</div><div><div class="roadmap-title">Application-controlled</div><div class="roadmap-desc">Data addressed by URI, for the host or the model to read. A file, a record, a query result. Read-only by nature — which is exactly why they are safer than a tool that fetches the same thing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Prompts</div><div><div class="roadmap-title">User-controlled</div><div class="roadmap-desc">Named templates the person explicitly selects. A slash command, effectively. Underused, and the right home for a workflow you want invoked deliberately rather than inferred.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Sampling</div><div><div class="roadmap-title">Server asks the client for inference</div><div class="roadmap-desc">Your server can ask the model a question without shipping its own API key or picking a model. The user approves, and the protocol deliberately limits what the server sees.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Roots</div><div><div class="roadmap-title">Server asks about boundaries</div><div class="roadmap-desc">Where am I allowed to operate? Lets a server discover its sandbox rather than assuming a path exists.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Elicitation</div><div><div class="roadmap-title">Server asks the user</div><div class="roadmap-desc">Missing a parameter? Ask, mid-operation, instead of failing or hallucinating a value.</div></div></div></div>
+  <h2>Two transports, and the choice is mostly about trust</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">stdio</div><div><div class="roadmap-title">Subprocess on the same machine</div><div class="roadmap-desc">The client launches your server and talks over standard input and output. Nothing is listening on a port, so nothing else on the machine can reach it. The default for local servers, and the safer one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Streamable HTTP</div><div><div class="roadmap-title">A service over the network</div><div class="roadmap-desc">For servers that are shared, remote, or need to outlive a client session. Brings the entire web threat model with it — authorization, session handling, origin validation, all of it.</div></div></div></div>
+  <div class="callout matters"><span class="label">Pick stdio unless you need otherwise</span>A local server on HTTP is reachable by anything else on the host, including a browser tab via DNS rebinding. If your server runs on the user's machine for the user's client, stdio removes a whole category of problem for free. Where HTTP is genuinely required locally, require an auth token or use a unix socket.</div>
+  <h2>Designing tools an agent uses well</h2>
+  <p>This is where most servers are merely working rather than good. Every lesson from the tool-calls chapter applies, plus some specific to MCP:</p>
+  <ul><li><strong>The description is the interface.</strong> The model chooses from names and descriptions, so they are prompt engineering. Write them for someone who has never seen your system.</li><li><strong>Return what the model needs, not what your API returns.</strong> A raw 200-field JSON response is a context-budget disaster. Shape it. Summarise. Paginate. Remember that tool results are context too.</li><li><strong>Errors should name the fix.</strong> "Invalid request" wastes a turn. "start_date must be ISO 8601, received 03/04/2026" gets corrected on the next one.</li><li><strong>Prefer a few composite tools over many granular ones.</strong> Twenty definitions cost budget on every turn and crowd each other in selection. If a workflow always calls three tools in sequence, consider offering the workflow.</li><li><strong>Expose read-only things as resources.</strong> A resource cannot be induced to act. A tool that fetches the same data can.</li><li><strong>Make destructive operations obvious and confirmable.</strong> Annotate them, and expect the host to gate them.</li><li><strong>Include examples in the definition.</strong> Schemas express structure; examples express convention.</li></ul>
+  <h2>Testing it</h2>
+  <p>A server is a program with a protocol on one side and an API on the other, and both sides need testing separately. Unit-test the handlers directly, without a model in the loop. Then run the server against a real client and read the trajectory — what the model <em>tried</em> to call, and with what arguments, tells you more about your descriptions than any schema validation will.</p>
+  <div class="callout insight"><span class="label">The evaluation that actually finds problems</span>Give an agent five realistic tasks that need your server and watch which tools it reaches for. Wrong tool chosen, right tool called with malformed arguments, and tool ignored entirely are three different problems with three different fixes — and all three are invisible if you only test the handlers.</div>
+  <h2>When not to build one</h2>
+  <p>MCP solves an integration problem: write once, work across clients. If you have one client and one integration, a direct tool in your own harness is simpler, faster to change, and has no protocol surface to secure. The protocol earns its cost when the integration is reused — across clients, across agents, or by other people.</p>
+  <p>And the deterministic-first question still applies. If the agent's job is to run a fixed sequence against your API, that sequence is a script, and the script can be a bundled resource in a skill rather than six tools the model has to orchestrate correctly.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/transports" target="_blank" rel="noopener">MCP specification</a><span class="link-note">Transports, the base protocol, and capability negotiation.</span></li><li><a href="https://modelcontextprotocol.io/docs/develop/build-server" target="_blank" rel="noopener">Build a server — MCP docs</a><span class="link-note">The practical walkthrough in Python and TypeScript.</span></li><li><a href="https://github.com/modelcontextprotocol/servers" target="_blank" rel="noopener">modelcontextprotocol/servers</a><span class="link-note">Reference implementations. Read two or three before writing your own, particularly how they shape return values.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. What can sampling do for a server that a tool cannot?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Execute code on the client machine</div>
+      <div class="quiz-opt">Ask the model a question without the server holding an API key or choosing a model</div>
+      <div class="quiz-opt">Read files outside the server&#x27;s directory</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why expose read-only data as a resource rather than as a tool that fetches it?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Resources are faster to serve</div>
+      <div class="quiz-opt">A resource cannot be induced to act — a tool that fetches the same data can be called for the wrong reasons</div>
+      <div class="quiz-opt">Tools cannot return structured data</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. You are writing a local server for one user&#x27;s own client. Which transport?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Streamable HTTP, for flexibility later</div>
+      <div class="quiz-opt">stdio — nothing listens on a port, so nothing else on the machine can reach it</div>
+      <div class="quiz-opt">Either; the security properties are equivalent</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. When does MCP earn its cost over a direct tool in your own harness?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Always — the protocol is the modern approach</div>
+      <div class="quiz-opt">When the integration is reused across clients, agents or people; one client and one integration is simpler direct</div>
+      <div class="quiz-opt">When the API you are wrapping is complex</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

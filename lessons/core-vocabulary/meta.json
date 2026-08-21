@@ -150,6 +150,18 @@
       "title": "Operating an Agent",
       "file": "lsn-1787000000022-operating-an-agent.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000023",
+      "title": "Building an MCP Server",
+      "file": "lsn-1787000000023-building-an-mcp-server.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000024",
+      "title": "MCP: The Danger Surface",
+      "file": "lsn-1787000000024-mcp-dangers.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -264,6 +276,16 @@
       "starred": false
     },
     "lsn-1787000000022": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000023": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000024": {
       "viewed": false,
       "completed": false,
       "starred": false
