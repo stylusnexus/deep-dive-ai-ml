@@ -202,7 +202,28 @@
   <h2>The unifying diagnosis</h2>
   <p>All three failures share a shape: <strong>an artifact that was true when written, still asserting itself after its truth expired.</strong> The harness message that was accurate before the file grew. The recipe step that was right before the lever was exhausted. The ADR that was correct before the measurement came back.</p>
   <p>Which is why none of the three is self-correcting, and why the next lesson is about the only thing that corrects them.</p>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.swebench.com/" target="_blank" rel="noopener">SWE-bench</a><span class="link-note">Agentic coding benchmark. Compare leaderboard entries that share a model but differ in scaffold — the spread is the harness effect.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">Argues for the simplest scaffold that works, partly because scaffolding is where these failures hide.</span></li></ul></div>
+  <h2>The size of the harness effect, measured</h2>
+  <p>This is usually asserted and rarely quantified, so here it is with numbers. SWE-bench Verified is 500 real GitHub issues. These five submissions all run <strong>the same model</strong> — <code>claude-3-5-sonnet-20241022</code> — and differ only in the scaffolding around it:</p>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="SWE-bench Verified scores for one model across five scaffolds">
+<text x="12" y="18" class="d-label-sm">claude-3-5-sonnet-20241022 on SWE-bench Verified (500 tasks), by scaffold</text>
+<line x1="228" y1="32" x2="228" y2="182" stroke="var(--border)" stroke-width="1"/>
+<rect x="228" y="34" width="148" height="22" rx="3" class="d-fill-red" opacity="0.55"/>
+<text x="12" y="50" class="d-label-sm">AutoCodeRover v2.0</text><text x="386" y="50" class="d-label-sm">231 · 46.2%</text>
+<rect x="228" y="64" width="157" height="22" rx="3" class="d-fill-muted" opacity="0.6"/>
+<text x="12" y="80" class="d-label-sm">Tools</text><text x="395" y="80" class="d-label-sm">245 · 49.0%</text>
+<rect x="228" y="94" width="163" height="22" rx="3" class="d-fill-muted" opacity="0.6"/>
+<text x="12" y="110" class="d-label-sm">Agentless 1.5</text><text x="401" y="110" class="d-label-sm">254 · 50.8%</text>
+<rect x="228" y="124" width="165" height="22" rx="3" class="d-fill-accent" opacity="0.7"/>
+<text x="12" y="140" class="d-label-sm">AutoCodeRover v2.1</text><text x="403" y="140" class="d-label-sm">258 · 51.6%</text>
+<rect x="228" y="154" width="199" height="22" rx="3" class="d-fill-green" opacity="0.85"/>
+<text x="12" y="170" class="d-label-sm">CodeStory + swe-search</text><text x="437" y="170" class="d-label-sm">311 · 62.2%</text>
+<path d="M470 45 L470 165" stroke="var(--yellow)" stroke-width="1.6" stroke-dasharray="4 4"/>
+<text x="480" y="98" class="d-fill-yellow" font-size="11" font-weight="600">80 tasks of</text>
+<text x="480" y="114" class="d-fill-yellow" font-size="11" font-weight="600">pure harness</text>
+</svg><figcaption>Same model, same 500 tasks, five harnesses. The spread is 80 tasks — 16 percentage points — and none of it is model capability.</figcaption></figure>
+  <div class="callout matters"><span class="label">What this licenses you to say</span>A sixteen-point spread on identical model weights. If you swapped models and saw a gain that size you would call it a generational leap — here it is entirely scaffolding. Note also AutoCodeRover v2.0 to v2.1: the same team, the same model, 231 tasks to 258, from harness work alone. When something underperforms, the harness is the higher-yield place to look, and this is the evidence for it rather than the intuition.</div>
+  <div class="callout pitfall"><span class="label">Read it carefully, though</span>These submissions differ in more than scaffold — different prompts, retrieval, retry budgets and token spend. The spread is an upper bound on what harness work can buy, not a controlled experiment. It tells you the harness matters enormously; it does not tell you which harness change is responsible. That distinction is the whole of the next two lessons.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.swebench.com/" target="_blank" rel="noopener">SWE-bench</a><span class="link-note">Agentic coding benchmark. Compare leaderboard entries that share a model but differ in scaffold — the spread is the harness effect.</span></li><li><a href="https://github.com/swe-bench/experiments" target="_blank" rel="noopener">SWE-bench experiments — raw submissions</a><span class="link-note">Where the numbers above come from: every submission's resolved-task list under evaluation/verified/. Recompute them yourself rather than trusting this lesson.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">Argues for the simplest scaffold that works, partly because scaffolding is where these failures hide.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. An agent harness returns “(no matches)” from its search tool when the query was case-sensitive and the file used different casing. Why is this worse than an error?</p>
