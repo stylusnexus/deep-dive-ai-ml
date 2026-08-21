@@ -71,7 +71,7 @@ LESSONS = [
     ("links", [
       ('Building effective agents', 'https://www.anthropic.com/engineering/building-effective-agents',
        "Anthropic's engineering write-up on when a loop is warranted and when a fixed workflow is better."),
-      ('Bullpen: docs/agent-runtime-design.md', 'https://github.com/stylusnexus/Bullpen',
+      ('Bullpen: docs/agent-runtime-design.md (private)', 'https://github.com/stylusnexus/bullpen',
        'Your own loop, written down. Read it alongside this lesson.'),
     ]),
     ("quiz", [
@@ -525,7 +525,7 @@ LESSONS = [
     ("links", [
       ('RouteLLM (Ong et al., 2024)', 'https://arxiv.org/abs/2406.18665',
        'The predict-which-model approach Bullpen deliberately inverts. Useful for arguing with.'),
-      ('Bullpen: docs/routing-strategy.md', 'https://github.com/stylusnexus/Bullpen',
+      ('Bullpen: docs/routing-strategy.md (private)', 'https://github.com/stylusnexus/bullpen',
        'Your own strategy doc — the escalation criteria in prose.'),
     ]),
     ("quiz", [

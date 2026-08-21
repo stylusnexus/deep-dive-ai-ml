@@ -97,7 +97,7 @@ LESSONS = [
     ("p", "Neat diagrams like the one above are simplifications, and this one has a visible seam: reinforcement learning doesn't sit tidily inside any ring — it's a third learning paradigm alongside supervised and unsupervised, and it shows up both in classical ML and in how LLMs are aligned. Treat the rings as a map for orientation rather than a taxonomy to defend."),
 
     ("links", [
-      ("Google ML Crash Course: framing", "https://developers.google.com/machine-learning/crash-course/framing/what-is-supervised-learning",
+      ("Google ML Crash Course: framing", "https://developers.google.com/machine-learning/intro-to-ml/supervised",
        "The supervised/unsupervised framing that the middle ring rests on."),
       ("Building effective agents", "https://www.anthropic.com/engineering/building-effective-agents",
        "Why the outer box is an architecture rather than a model class — and when you don't need it."),
