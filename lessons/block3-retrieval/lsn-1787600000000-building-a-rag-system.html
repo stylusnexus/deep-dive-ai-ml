@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building a Retrieval System That Works</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 1 of 3</span>
+  <h1>Building a Retrieval System That Works</h1>
+  <p class="subtitle">Five stages, and the two that decide whether the other three matter.</p>
+
+  <p>Retrieval-augmented generation (RAG) is a short pipeline with a long tail of ways to get it wrong. The stages are simple; the judgement is in the two that people treat as configuration.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 215" role="img" aria-label="The five stages of a retrieval pipeline"><defs><marker id="r1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="30" width="112" height="52" rx="6" class="d-box"/>
+<text x="26" y="52" class="d-label-b">1 · Ingest</text>
+<text x="26" y="70" class="d-label-sm">parse, clean</text>
+<path d="M124 56 L150 56" class="d-arrow-accent" marker-end="url(#r1)"/>
+<rect x="150" y="30" width="112" height="52" rx="6" class="d-box-accent"/>
+<text x="164" y="52" class="d-label-b">2 · Chunk</text>
+<text x="164" y="70" class="d-label-sm">split by structure</text>
+<path d="M262 56 L288 56" class="d-arrow-accent" marker-end="url(#r1)"/>
+<rect x="288" y="30" width="112" height="52" rx="6" class="d-box"/>
+<text x="302" y="52" class="d-label-b">3 · Embed</text>
+<text x="302" y="70" class="d-label-sm">and index</text>
+<path d="M400 56 L426 56" class="d-arrow-accent" marker-end="url(#r1)"/>
+<rect x="426" y="30" width="112" height="52" rx="6" class="d-box-accent"/>
+<text x="440" y="52" class="d-label-b">4 · Retrieve</text>
+<text x="440" y="70" class="d-label-sm">and rank</text>
+<path d="M538 56 L564 56" class="d-arrow-accent" marker-end="url(#r1)"/>
+<rect x="546" y="30" width="82" height="52" rx="6" class="d-box"/>
+<text x="560" y="52" class="d-label-b">5 · Gen</text>
+<text x="560" y="70" class="d-label-sm">with cites</text>
+<rect x="150" y="100" width="112" height="24" rx="4" class="d-fill-accent" opacity="0.25"/>
+<rect x="426" y="100" width="112" height="24" rx="4" class="d-fill-accent" opacity="0.25"/>
+<text x="150" y="146" class="d-accent">these two decide everything</text>
+<text x="12" y="176" class="d-label-sm">A perfect model cannot answer from a chunk that was never retrieved, and cannot use a chunk that was</text>
+<text x="12" y="194" class="d-label-sm">split mid-thought. Most "the model is bad at this" complaints are stage 2 or stage 4 problems.</text>
+</svg><figcaption>Five stages. Chunking and ranking are where quality is won or lost — the model at the end can only work with what reaches it, and most RAG failures happen before generation.</figcaption></figure>
+  <h2>Chunking is a modelling decision, not a parameter</h2>
+  <p>The default advice — 512 tokens with 50 overlap — is a starting point that nobody should ship without looking at the output. The right question is not what size but <em>what is a self-contained thought in this corpus?</em></p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Split on structure first</div><div><div class="roadmap-title">Headings, sections, functions</div><div class="roadmap-desc">A chunk that ends mid-sentence embeds badly and reads worse. Character counts are a fallback, not a strategy.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Too small</div><div><div class="roadmap-title">Loses its referent</div><div class="roadmap-desc">A paragraph saying "this threshold must not be exceeded" is useless if the threshold was defined two chunks earlier.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Too large</div><div><div class="roadmap-title">Averages several topics</div><div class="roadmap-desc">The embedding represents none of them well, and retrieving it burns context on material the question did not ask about.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Overlap a little</div><div><div class="roadmap-title">10-15%</div><div class="roadmap-desc">So a passage spanning a boundary is not lost by both neighbours.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Keep the parent link</div><div><div class="roadmap-title">Small to match, larger to read</div><div class="roadmap-desc">Retrieve the precise chunk, then optionally expand to its section for the model to read.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Print twenty random chunks and read them before tuning anything downstream.</p><p class="know-why">If you cannot tell what a chunk is about without its neighbours, neither can an embedding model. Every hour spent on embedding models or rerankers before doing this is spent on the wrong layer.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team spent two weeks comparing embedding models on a technical corpus with flat retrieval quality throughout. Their PDF parser was splitting on page boundaries, so roughly a third of chunks began mid-sentence and ended mid-table. No embedding model can rescue that, and ten minutes of reading would have found it.</p></blockquote>
+  <h2>What actually makes retrieval fail</h2>
+  <p>In rough order of how often it is the real cause:</p>
+  <ul><li><strong>The chunk containing the answer was never retrieved.</strong> Nothing downstream can fix this, and it is by far the commonest failure.</li><li><strong>It was retrieved but ranked ninth.</strong> Attention is weakest mid-context, so a correct chunk buried in position nine is close to not retrieving it.</li><li><strong>The question needs two chunks that live far apart.</strong> Single-shot retrieval cannot combine them — this is the case the agentic lesson addresses.</li><li><strong>The corpus does not contain the answer.</strong> Worth establishing early, because everything else is wasted effort if so.</li><li><strong>The model ignored the context.</strong> Real, and much rarer than people assume. Check the first four before concluding this.</li></ul>
+  <div class="callout matters"><span class="label">Diagnose in that order, and cheaply</span>For a failing question, look at what was retrieved before looking at the answer. If the right chunk is absent, it is a retrieval problem. If it is present but ranked low, it is a ranking problem. If it is present and first and the answer is still wrong, only then is it a generation problem. Three different fixes, and people reach for the third by default.</div>
+  <h2>Retrieval: cheap, wide, then precise</h2>
+  <p>The architecture that works, and the reasoning behind each step:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Retrieve wide</div><div><div class="roadmap-title">50 by keyword, 50 by vector</div><div class="roadmap-desc">Independent failure modes, so coverage is better than either alone. Cheap at this stage.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Fuse by rank</div><div><div class="roadmap-title">Reciprocal rank fusion</div><div class="roadmap-desc">Two lines of code, no score normalisation, no tuning. Reliably beats either input list.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Rerank the shortlist</div><div><div class="roadmap-title">Cross-encoder over ~100</div><div class="roadmap-desc">Scores query and document together rather than separately. Far more accurate, and only affordable because the set is small.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Send few</div><div><div class="roadmap-title">Top 3 to 5</div><div class="roadmap-desc">Precision beats volume. Distractors actively degrade the answer rather than being politely ignored.</div></div></div></div>
+  <h2>Generation, and making the answer checkable</h2>
+  <ul><li><strong>Require citations to the retrieved chunks.</strong> Not a bibliography — a mapping from claim to source span, so a human can verify one sentence without re-reading the corpus.</li><li><strong>Licence refusal explicitly.</strong> "If the context does not contain the answer, say so" costs one line and is the difference between a wrong answer and no answer.</li><li><strong>Define the empty-retrieval path.</strong> When nothing relevant came back, the model must not fall through to its parameters. This is where grounded systems quietly stop being grounded.</li><li><strong>Put the retrieved material at the start or the end.</strong> Never buried in the middle of a long prompt.</li></ul>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A grounded system stops being grounded the moment retrieval returns nothing and the model answers anyway.</p><p class="know-why">The grounding lives in the pipeline, not in the model. If your prompt does not explicitly handle the empty case, the model falls back to its parameters and produces a fluent, uncited, unverifiable answer that looks exactly like the grounded ones.</p><p class="know-eg"><span class="know-eg-label">For example</span>A support assistant answers a question about a product discontinued before its training cutoff. Retrieval returned nothing, because the product is not in the knowledge base. The answer is confident, plausible, and drawn entirely from training data — indistinguishable in tone from the answers that were genuinely retrieved.</p></blockquote>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2005.11401" target="_blank" rel="noopener">Retrieval-Augmented Generation (Lewis et al., 2020)</a><span class="link-note">The original paper — grounding as an architecture rather than a prompting trick.</span></li><li><a href="https://github.com/pgvector/pgvector" target="_blank" rel="noopener">pgvector</a><span class="link-note">The Postgres extension this block uses. Read the indexing notes before loading real data.</span></li></ul></div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Building Reliable AI Systems</span><span class="bk-a">Rush Shahani</span><span class="bk-n">Chapters 3 and 4 cover the same pipeline with production framing — data preparation, indexing, and the optimisations worth making.</span></li><li><span class="bk-t">Enterprise RAG</span><span class="bk-a">Manning MEAP</span><span class="bk-n">Chunking strategies and hybrid retrieval at scale, on your shelf.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. A question fails. What do you look at first?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The generation prompt</div>
+      <div class="quiz-opt">What was actually retrieved — absent, present-but-low-ranked and present-and-first are three different problems</div>
+      <div class="quiz-opt">Whether the embedding model is strong enough</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why does chunk size matter beyond fitting the context window?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Larger chunks are slower to embed</div>
+      <div class="quiz-opt">Too small loses the referent; too large averages several topics into a vector representing none of them well</div>
+      <div class="quiz-opt">Embedding models have a fixed optimal input length</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What happens to a grounded system when retrieval returns nothing?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It returns an empty response by default</div>
+      <div class="quiz-opt">Unless the prompt handles the empty case, the model answers from its parameters — fluent, uncited and indistinguishable from a grounded answer</div>
+      <div class="quiz-opt">The retrieval layer retries automatically</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

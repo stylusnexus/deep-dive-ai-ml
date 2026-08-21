@@ -67,3 +67,11 @@ security incident, not a bug.
 ## The question that precedes both
 
 - [ ] Does this need to be an MCP server at all? One client and one integration is simpler as a direct tool. The protocol earns its cost when the integration is reused — across clients, agents, or people.
+
+## Smells
+
+- A tool's annotation claims it is read-only → that string is chosen by the server; verify what it can reach
+- Server asks for scopes far beyond its stated purpose → treat as hostile until explained
+- One-click install shows a truncated command → do not proceed until you can read all of it
+- Agent behaviour changes after a server update → you audited a version that is no longer running
+- Server returns text that reads like an instruction → that is data arriving in a model's context, not guidance

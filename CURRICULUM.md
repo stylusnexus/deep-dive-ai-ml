@@ -71,13 +71,11 @@ demonstrably better, and a threshold chosen from costs.
 - Embeddings, chunking, vector search against real pgvector — not an in-memory list
 - Hybrid retrieval: BM25 and vectors fused by rank; rerankers over the shortlist
 - Retrieval quality: what actually makes RAG fail, and measuring index recall
-- **Agentic RAG** — retrieval as a loop: retrieve, reason about what came back,
-  decide what is still missing, retrieve again. Fixes multi-hop questions a single
-  retrieval cannot answer, and brings its own failures: repetitive retrieval burning
-  turns without adding information, and weak contextualisation of what was returned.
-  De-duplication against what has already been retrieved, and a real termination
-  condition, are the mitigations
+- **Agentic RAG** — retrieval as a loop, its failure modes, and why it should be
+  routed to rather than made the default ✅
 - Structured outputs and tool calling
+
+3 lessons in `lessons/block3-retrieval/`. Notebooks and Project 2 still to build.
 
 **Exit:** Project 2 — financial report assistant answers cited questions over a real 10-K.
 

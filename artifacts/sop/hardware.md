@@ -59,3 +59,11 @@ Run top to bottom. Most people fail at step 3 and spend their time on step 2.
 | Consumer NVIDIA 8–24GB | Small models, real training, full ecosystem | Capacity — a hard wall |
 | Rented cloud GPU | Anything big and fast | Hourly cost |
 | No GPU | Embeddings, classical ML, API work | Nothing — most of Block 2 runs on CPU |
+
+## Smells
+
+- Model loads fine, then fails on a long document → the KV cache, not the weights
+- Correct results at a twentieth of expected speed on Apple Silicon → silent CPU fallback for an unimplemented operation
+- Fast in development, unusably slow in production → bursty traffic means most requests are cold starts
+- "It cannot run here" after one failed load → which build format did you actually test? Another may work
+- Vendor quotes a large speed multiple → ask which phase it measures, and whether that phase is your bottleneck

@@ -31,6 +31,9 @@ BLURBS = {
  "baseline-to-model": "A ladder of increasing complexity, climbed only as far as the evidence justifies — and how to compare fairly.",
  "neural-networks-both-ways": "The same network in Keras and raw PyTorch, and an honest account of when it is the wrong tool.",
  "time-series": "Why random splits lie on ordered data, walk-forward validation, and the gap people leave out.",
+ "building-a-rag-system": "Five stages, and the two that decide whether the other three matter.",
+ "measuring-retrieval": "Index recall, retrieval quality and groundedness — three numbers that fail independently.",
+ "agentic-rag": "When one retrieval cannot answer the question, and the failure modes the loop brings with it.",
  "the-map": "AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it's an architecture, not a model. Read this first.",
  "agent-loop-and-harness": "The two most-confused words in any agent codebase — and why most agent failures are harness failures, not model failures.",
  "tokens-context-and-kv-cache": "Why a model 'forgets', why long conversations get expensive quadratically, and what prompt caching is actually caching.",
@@ -88,6 +91,8 @@ for topic, heading, note in [
      "Real tabular data, read properly. Paired with four runnable notebooks in <code>notebooks/01-python-eda/</code>."),
     ("block2-classical-ml", "Block 2 · Predictive Modelling",
      "Classical machine learning done properly — the metrics, the models, and knowing when a neural network is the wrong answer."),
+    ("block3-retrieval", "Block 3 · Retrieval and Agentic RAG",
+     "Building a retrieval system that works, measuring the part everyone skips, and the loop that answers multi-hop questions."),
     ("engineering-practice", "Block 0 · Engineering Practice",
      "The three artifacts an LLM project accumulates — harness, recipes, decision records — how each one turns harmful, and the measurement procedure that corrects them."),
 ]:

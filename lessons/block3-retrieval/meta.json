@@ -1,0 +1,52 @@
+{
+  "title": "Block 3 \u00b7 Retrieval and Agentic RAG",
+  "topic": "block3-retrieval",
+  "icon": "\ud83d\udd0e",
+  "description": "Building a retrieval system that works, measuring the part everyone skips, and the loop that turns single-shot retrieval into something that can answer multi-hop questions.",
+  "tags": [
+    "ai",
+    "rag",
+    "retrieval"
+  ],
+  "colorScheme": "rose",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-08-21",
+  "lessons": [
+    {
+      "id": "lsn-1787600000000",
+      "title": "Building a Retrieval System That Works",
+      "file": "lsn-1787600000000-building-a-rag-system.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787600000001",
+      "title": "Measuring Retrieval",
+      "file": "lsn-1787600000001-measuring-retrieval.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787600000002",
+      "title": "Agentic RAG: Retrieval as a Loop",
+      "file": "lsn-1787600000002-agentic-rag.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1787600000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787600000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787600000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}

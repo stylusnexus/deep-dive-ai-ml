@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic RAG: Retrieval as a Loop</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 3 of 3</span>
+  <h1>Agentic RAG: Retrieval as a Loop</h1>
+  <p class="subtitle">When one retrieval cannot answer the question — and the failure modes that arrive with the loop.</p>
+
+  <p>Single-shot retrieval answers a question in one hop: embed, retrieve, generate. It works well and it has a hard limit. Some questions cannot be answered by any single retrieval, however good, because the answer does not exist in one place.</p>
+  <h2>The questions single-shot cannot reach</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Multi-hop</div><div><div class="roadmap-title">The answer needs two facts that live apart</div><div class="roadmap-desc">"Which site has the turbine with the highest failure rate?" needs per-turbine rates, then a site lookup. Neither chunk contains both.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Comparative</div><div><div class="roadmap-title">Requires assembling several sources</div><div class="roadmap-desc">"How does this year's policy differ from last year's?" needs both policies retrieved and contrasted.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Under-specified</div><div><div class="roadmap-title">The real question emerges from a first look</div><div class="roadmap-desc">"Why did output drop?" cannot be embedded usefully until you know which site and which period.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Aggregative</div><div><div class="roadmap-title">Needs many chunks, not the top five</div><div class="roadmap-desc">"How many incidents mentioned gearbox temperature?" is a counting problem wearing a retrieval costume.</div></div></div></div>
+  <div class="callout matters"><span class="label">The last one is a warning, not a use case</span>Aggregative questions are usually the wrong shape for retrieval entirely. Counting, filtering and grouping are what a database does exactly and cheaply, and what a retrieval loop does approximately and expensively. If the question is really SQL, write SQL — the deterministic-first argument applies here as much as anywhere.</div>
+  <h2>What the loop adds</h2>
+  <p>Retrieve, reason about what came back, decide what is still missing, retrieve again. The model controls the query rather than receiving results of one it never saw.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 220" role="img" aria-label="Single-shot retrieval compared with a retrieval loop"><defs><marker id="ar" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<text x="12" y="18" class="d-label-sm">SINGLE-SHOT</text>
+<rect x="12" y="28" width="86" height="30" rx="5" class="d-box"/><text x="26" y="48" class="d-label-sm">question</text>
+<path d="M98 43 L124 43" class="d-arrow-accent" marker-end="url(#ar)"/>
+<rect x="124" y="28" width="86" height="30" rx="5" class="d-box"/><text x="138" y="48" class="d-label-sm">retrieve</text>
+<path d="M210 43 L236 43" class="d-arrow-accent" marker-end="url(#ar)"/>
+<rect x="236" y="28" width="86" height="30" rx="5" class="d-box-good"/><text x="252" y="48" class="d-label-sm">answer</text>
+<text x="336" y="48" class="d-label-sm">one hop, cheap, predictable</text>
+<line x1="12" y1="76" x2="628" y2="76" stroke="var(--border)"/>
+<text x="12" y="100" class="d-label-sm">AGENTIC</text>
+<rect x="12" y="110" width="86" height="30" rx="5" class="d-box"/><text x="26" y="130" class="d-label-sm">question</text>
+<path d="M98 125 L124 125" class="d-arrow-accent" marker-end="url(#ar)"/>
+<rect x="124" y="110" width="86" height="30" rx="5" class="d-box"/><text x="138" y="130" class="d-label-sm">retrieve</text>
+<path d="M210 125 L236 125" class="d-arrow-accent" marker-end="url(#ar)"/>
+<rect x="236" y="110" width="112" height="30" rx="5" class="d-box-accent"/><text x="248" y="130" class="d-label-sm">what is missing?</text>
+<path d="M348 125 L374 125" class="d-arrow-accent" marker-end="url(#ar)"/>
+<rect x="374" y="110" width="86" height="30" rx="5" class="d-box-good"/><text x="390" y="130" class="d-label-sm">answer</text>
+<path d="M292 140 L292 166 L167 166 L167 142" class="d-arrow-accent" marker-end="url(#ar)"/>
+<text x="188" y="182" class="d-label-sm">reformulate and retrieve again</text>
+<text x="480" y="130" class="d-fill-red" font-size="11" font-weight="600">what stops it?</text>
+<text x="12" y="208" class="d-label-sm">More capable, several times the cost and latency, and it needs a termination condition that is not the model's own opinion.</text>
+</svg><figcaption>The loop can reformulate, decompose and follow up. What it cannot do is know when to stop — that has to come from outside, exactly as with every other loop in this course.</figcaption></figure>
+  <h2>The failure modes the loop brings with it</h2>
+  <ul><li><strong>Repetitive retrieval.</strong> The commonest and most expensive. The model reformulates slightly, gets near-identical results, and goes round again — burning turns and tokens without adding information.</li><li><strong>Weak contextualisation.</strong> Results arrive but are not integrated into the reasoning, so the next query is no better informed than the first.</li><li><strong>Context saturation.</strong> Every hop appends more retrieved text. By hop four the window holds a great deal of material, most of it already used, and attention thins across all of it.</li><li><strong>Drift.</strong> Each reformulation moves slightly away from the original question. By the fourth, the system is answering something adjacent.</li><li><strong>Cost you did not budget.</strong> Four hops is four retrievals and four generations, on a growing context. Several times the cost of single-shot, for a question that may not have needed it.</li></ul>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A retrieval loop with no de-duplication will re-retrieve what it already has.</p><p class="know-why">Slight query reformulations return substantially overlapping results. Without tracking what has already been seen, the loop mistakes repetition for progress, and its context fills with the same passages under different rankings.</p><p class="know-eg"><span class="know-eg-label">For example</span>An agent asked a multi-hop question runs six retrievals. Passages two and three appear in five of the six result sets. The final context holds forty chunks of which fourteen are distinct, and the answer is no better than hop two would have produced at a sixth of the cost.</p></blockquote>
+  <h2>What makes it work</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">De-duplicate against what you have</div><div><div class="roadmap-title">Non-negotiable</div><div class="roadmap-desc">Track retrieved chunk ids and exclude them, or explicitly down-weight them, on subsequent hops.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Contextualise before reasoning</div><div><div class="roadmap-title">Summarise what came back</div><div class="roadmap-desc">Turn raw chunks into a short statement of what is now known and what is still missing, then query on that.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Hard hop limit</div><div><div class="roadmap-title">Three or four</div><div class="roadmap-desc">Plus a token budget. The gains flatten fast and the costs do not.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decompose explicitly</div><div><div class="roadmap-title">Where the structure is known</div><div class="roadmap-desc">"Find the rate, then look up the site" as two planned retrievals beats hoping a loop discovers the same decomposition.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Route by question shape</div><div><div class="roadmap-title">Not everything needs the loop</div><div class="roadmap-desc">Most questions are single-hop. Detect the ones that are not, rather than paying loop cost on everything.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Route to the loop; do not make it the default.</p><p class="know-why">The overwhelming majority of real questions are answerable in one hop. Running every question through a multi-hop loop multiplies cost and latency across the whole workload to serve the minority that needed it, and adds failure modes to the majority that did not.</p><p class="know-eg"><span class="know-eg-label">For example</span>A support assistant handles 2,000 questions a day. Roughly 60 genuinely need multiple hops. Making the loop the default multiplies the daily bill several times over and introduces drift and repetition into 1,940 questions that a single retrieval answered correctly.</p></blockquote>
+  <h2>The same rule as every other loop</h2>
+  <p>This is the loops lesson arriving at a new surface. A retrieval loop improves things only when signal enters from outside it — a de-duplication check, a coverage test, an explicit "do I now have what I need" evaluated against something other than the model's confidence. Without that, extra hops mostly amplify the framing of the first query.</p>
+  <div class="callout pitfall"><span class="label">&quot;Do I have enough information?&quot; is the model marking its own work</span>Asking the model whether it can answer yet is the same circularity as asking an agent whether it succeeded. It will frequently say yes when it has the shape of an answer rather than the substance. Prefer a checkable condition — required entities present, a citation for each part of the question, a hop budget — over the model's self-assessment.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2501.09136" target="_blank" rel="noopener">Agentic RAG: a survey (Singh et al., 2025)</a><span class="link-note">The taxonomy of retrieval loops by agent count, control structure and autonomy.</span></li><li><a href="https://arxiv.org/abs/2603.12396" target="_blank" rel="noopener">Test-Time Strategies for Agentic RAG (2026)</a><span class="link-note">The failure modes above measured, with de-duplication and contextualisation as the mitigations.</span></li><li><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener">Effective context engineering for AI agents</a><span class="link-note">Why hop four suffers — the attention budget, and what compaction does about it.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Which question genuinely needs a retrieval loop?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">What is the maximum gearbox temperature?</div>
+      <div class="quiz-opt">Which site has the turbine with the highest failure rate?</div>
+      <div class="quiz-opt">How many incidents mention gearbox temperature?</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. What is the most common failure of a retrieval loop?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The model ignoring retrieved context</div>
+      <div class="quiz-opt">Repetitive retrieval — slight reformulations returning near-identical results, mistaken for progress</div>
+      <div class="quiz-opt">Exceeding the context window on the first hop</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why is &#x27;ask the model whether it has enough information&#x27; a poor termination condition?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It costs an extra model call</div>
+      <div class="quiz-opt">It is the model marking its own work — it will say yes when it has the shape of an answer rather than the substance</div>
+      <div class="quiz-opt">Models cannot assess their own context</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. An aggregative question like &#x27;how many incidents mention X&#x27; is best handled how?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A retrieval loop with a high hop limit</div>
+      <div class="quiz-opt">Not by retrieval at all — counting and filtering is what a database does exactly and cheaply</div>
+      <div class="quiz-opt">Single-shot retrieval with a very large k</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

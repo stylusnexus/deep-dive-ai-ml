@@ -53,3 +53,11 @@ If either half is untrue, stop. Everything below produces noise.
 
 If it didn't, the improvement came from somewhere else and you've learned the
 wrong lesson. This is the step everyone skips.
+
+## Smells
+
+- A surprisingly good result → suspect the instrument before celebrating; check step 0 again
+- A null result on a change you were confident about → prove the treatment actually engaged before concluding it does not work
+- Every configuration failing identically → suspect the harness, not the thing under test
+- A number you cannot reproduce a week later → the manifest was incomplete
+- A conclusion drawn from one run → that is an anecdote with a decimal point
