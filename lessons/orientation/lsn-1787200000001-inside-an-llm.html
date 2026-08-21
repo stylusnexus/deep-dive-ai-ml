@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inside an LLM: The Parts and What Each Does</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 2 of 2</span>
+  <h1>Inside an LLM: The Parts and What Each Does</h1>
+  <p class="subtitle">Follow one sentence all the way through — from text, to numbers, to the next word.</p>
+
+  <p>You can use these models productively without knowing what's inside them. But almost every practical question — why context costs what it does, why a fine-tune changes behaviour, what quantization actually shrinks, why the tokenizer matters — has an answer that lives in the architecture. This lesson walks one sentence through the whole machine.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 420" role="img" aria-label="The full path of text through a large language model"><defs><marker id="la" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="180" y="10" width="280" height="34" rx="6" class="d-box"/>
+<text x="196" y="32" class="d-label-sm">"The turbine is"</text>
+<text x="470" y="32" class="d-label-sm">your text</text>
+<path d="M320 44 L320 62" class="d-arrow-accent" marker-end="url(#la)"/>
+<rect x="180" y="62" width="280" height="38" rx="6" class="d-box-accent"/>
+<text x="196" y="80" class="d-label-b">1 · Tokenizer</text>
+<text x="196" y="94" class="d-label-sm">[791, 66029, 374] — text becomes integers</text>
+<path d="M320 100 L320 118" class="d-arrow-accent" marker-end="url(#la)"/>
+<rect x="180" y="118" width="280" height="38" rx="6" class="d-box-accent"/>
+<text x="196" y="136" class="d-label-b">2 · Embedding + position</text>
+<text x="196" y="150" class="d-label-sm">each id becomes a vector; order is added</text>
+<path d="M320 156 L320 174" class="d-arrow-accent" marker-end="url(#la)"/>
+<rect x="120" y="174" width="400" height="146" rx="8" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="136" y="194" style="fill:var(--accent2);font-size:12px;font-weight:600;font-family:-apple-system,sans-serif">3 · Transformer blocks — repeated 30 to 100+ times</text>
+<rect x="150" y="204" width="160" height="46" rx="6" class="d-box"/>
+<text x="164" y="222" class="d-label-b">Attention</text>
+<text x="164" y="238" class="d-label-sm">tokens look at each other</text>
+<rect x="330" y="204" width="160" height="46" rx="6" class="d-box"/>
+<text x="344" y="222" class="d-label-b">Feed-forward</text>
+<text x="344" y="238" class="d-label-sm">each token thinks alone</text>
+<path d="M310 227 L330 227" class="d-arrow-accent" marker-end="url(#la)"/>
+<rect x="150" y="262" width="340" height="44" rx="6" class="d-box"/>
+<text x="164" y="280" class="d-label-sm">+ residual connections (keep the original signal)</text>
+<text x="164" y="296" class="d-label-sm">+ layer normalisation (keep the numbers stable)</text>
+<path d="M320 320 L320 338" class="d-arrow-accent" marker-end="url(#la)"/>
+<rect x="180" y="338" width="280" height="38" rx="6" class="d-box-accent"/>
+<text x="196" y="356" class="d-label-b">4 · Output head</text>
+<text x="196" y="370" class="d-label-sm">last position → score for every known token</text>
+<path d="M320 376 L320 392" class="d-arrow-accent" marker-end="url(#la)"/>
+<rect x="180" y="392" width="280" height="26" rx="6" class="d-box-good"/>
+<text x="196" y="410" class="d-label-sm">5 · Sample → " spinning"</text>
+</svg><figcaption>Text becomes numbers, numbers pass through a stack of identical blocks, and the last position gets turned back into a probability over every word the model knows. Everything else is detail.</figcaption></figure>
+  <h2>1 · The tokenizer</h2>
+  <p>Before any maths, text is split into tokens and each is looked up as an integer. The tokenizer is a fixed vocabulary — typically 32,000 to 200,000 entries — built once before training and never changed afterwards.</p>
+  <p>It explains several things that otherwise look arbitrary: why models are bad at counting letters in a word (they never see letters), why unusual names cost more tokens than common ones, and why non-English text is often more expensive — the vocabulary was fitted mostly to English, so other languages fragment into more pieces.</p>
+  <h2>2 · Embeddings and position</h2>
+  <p>Each token id is looked up in an <strong>embedding matrix</strong> and becomes a vector of a few thousand numbers. This is the same idea as the embeddings used for retrieval, learned here as part of the model.</p>
+  <p>Because attention compares all positions equally and has no inherent sense of order, position must be added explicitly — in most current models through <strong>rotary position embeddings</strong>. This is also why extending a model's context beyond what it was trained on is largely a positional-encoding problem rather than a memory one.</p>
+  <h2>3 · The transformer blocks</h2>
+  <p>The bulk of the model: the same block repeated dozens of times, each containing two operations that alternate.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Attention</div><div><div class="roadmap-title">Tokens exchange information</div><div class="roadmap-desc">Each token gathers from every other, weighted by relevance. The mechanism the algorithms lesson covers in detail.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Feed-forward network</div><div><div class="roadmap-title">Each token processes alone</div><div class="roadmap-desc">A small network applied to every position independently. Typically two-thirds of all parameters — most of the model's stored knowledge lives here, not in attention.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Residual connections</div><div><div class="roadmap-title">Add the input back to the output</div><div class="roadmap-desc">Lets signal and gradients pass through 80 layers without degrading. Without these, deep networks don't train.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Layer normalisation</div><div><div class="roadmap-title">Rescale the numbers</div><div class="roadmap-desc">Keeps values in a workable range so training stays stable.</div></div></div></div>
+  <div class="callout insight"><span class="label">Where the knowledge actually sits</span>It's tempting to think of attention as the clever part and the feed-forward layers as plumbing. It's closer to the reverse. Attention decides which information to route where; the feed-forward layers hold most of the learned facts, and they're where most of the parameters are. When you hear a model 'knows' something, it is largely these layers.</div>
+  <h2>4 · The output head</h2>
+  <p>After the final block, the vector at the last position is multiplied by an unembedding matrix to produce one score — a <strong>logit</strong> — for every token in the vocabulary. Softmax turns those scores into probabilities summing to one.</p>
+  <p>Note what is thrown away: the model computed a rich representation at <em>every</em> position, and generation uses only the last. The others aren't wasted — they're cached, which is exactly what the KV cache holds.</p>
+  <h2>5 · Sampling</h2>
+  <p>A probability distribution over the vocabulary isn't yet a word. Temperature, top-k and top-p reshape that distribution and one token is drawn. Then the whole process runs again with that token appended — one full pass through the entire model per token generated.</p>
+  <h2>The parts as files on disk</h2>
+  <p>Download an open model and you get the same components, made concrete:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">config.json</div><div><div class="roadmap-title">The architecture</div><div class="roadmap-desc">Layer count, hidden size, attention heads, vocabulary size, context length. The blueprint.</div></div></div><div class="roadmap-item"><div class="roadmap-num">tokenizer.json</div><div><div class="roadmap-title">The vocabulary</div><div class="roadmap-desc">Must match the weights exactly. Mismatch it and you get fluent nonsense — a classic and baffling bug.</div></div></div><div class="roadmap-item"><div class="roadmap-num">*.safetensors</div><div><div class="roadmap-title">The weights</div><div class="roadmap-desc">The actual learned numbers, at full precision. What fine-tuning modifies.</div></div></div><div class="roadmap-item"><div class="roadmap-num">*.gguf</div><div><div class="roadmap-title">Weights, quantized and packaged</div><div class="roadmap-desc">Config, tokenizer and quantized weights in one self-contained file for local serving.</div></div></div><div class="roadmap-item"><div class="roadmap-num">chat template</div><div><div class="roadmap-title">Turn structure</div><div class="roadmap-desc">How system, user and assistant turns are formatted into one string. Get this wrong and quality drops for no visible reason.</div></div></div></div>
+  <div class="callout matters"><span class="label">What each technique actually touches</span>Prompting changes the input only. Fine-tuning adjusts the weights — usually the feed-forward layers most. LoRA freezes the original weights and trains small add-on matrices alongside them. Quantization stores the same weights in fewer bits. RAG changes nothing about the model at all; it changes what's in the context. Knowing which layer of the machine each one touches tells you which problem each can and cannot solve.</div>
+  <h2>The size numbers, made concrete</h2>
+  <p>A 7-billion-parameter model has roughly 32 blocks, a hidden size around 4096, 32 attention heads, and a vocabulary near 32,000. At 16-bit precision the weights alone are about 14GB — most of it in the feed-forward layers. Every one of those parameters is touched for every token generated, which is why local inference is memory-bandwidth bound and why quantization speeds things up as well as shrinking them.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">The Illustrated Transformer</a><span class="link-note">The visual walkthrough of the same pipeline, one component at a time.</span></li><li><a href="https://github.com/rasbt/LLMs-from-scratch" target="_blank" rel="noopener">Build a Large Language Model (From Scratch)</a><span class="link-note">You have this locally. Chapters 2–4 build the tokenizer, the attention block and the full model in PyTorch.</span></li><li><a href="https://huggingface.co/docs/hub/gguf" target="_blank" rel="noopener">Hugging Face model file formats</a><span class="link-note">What each file in a model repository is for, and how GGUF packages them.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why is a model bad at counting the letters in a word?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The task requires arithmetic it can&#x27;t do</div>
+      <div class="quiz-opt">It never sees letters — text is split into tokens before any processing</div>
+      <div class="quiz-opt">Letters are stripped during normalisation</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Where do most of a model&#x27;s parameters — and most of its learned facts — sit?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">In the attention layers</div>
+      <div class="quiz-opt">In the feed-forward networks inside each block</div>
+      <div class="quiz-opt">In the embedding matrix</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. You load a model with the wrong tokenizer. What happens?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It refuses to load</div>
+      <div class="quiz-opt">It produces fluent nonsense — the ids no longer map to the text the weights were trained on</div>
+      <div class="quiz-opt">It runs correctly but slower</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Which part of the machine does RAG change?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The weights, by adding retrieved knowledge</div>
+      <div class="quiz-opt">None of it — RAG changes what&#x27;s in the context window, not the model</div>
+      <div class="quiz-opt">The tokenizer, to handle the retrieved documents</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

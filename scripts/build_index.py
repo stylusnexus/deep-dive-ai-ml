@@ -6,6 +6,12 @@ STYLE = (ROOT / "scripts" / "_index_style.html").read_text()
 E = html.escape
 
 BLURBS = {
+ "inside-an-llm": "Follow one sentence from text to next word — tokenizer, embeddings, transformer blocks, output head, and what each file on disk holds.",
+ "tabular-data-and-dtypes": "The dtype a column loads as is a free diagnostic — and 22 sentinel values can shift a mean fourfold.",
+ "first-fifteen-minutes": "Survey before you fix: the target's balance, the leaking feature, the duplicates, the missingness pattern.",
+ "missing-data-mechanisms": "MCAR, MAR, MNAR — and why 'fill with the median' can destroy exactly the signal you need.",
+ "what-a-plot-is-for": "Five questions with decisions attached, and the two chart mistakes that recur everywhere.",
+ "ai-assisted-analysis": "Let it write the code, don't let it make the decisions — and check row counts after every transform.",
  "the-map": "AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it's an architecture, not a model. Read this first.",
  "agent-loop-and-harness": "The two words your own docs use most — and why almost every agent failure is a harness failure, not a model failure.",
  "tokens-context-and-kv-cache": "Why a model 'forgets', why long conversations get expensive quadratically, and what prompt caching is actually caching.",
@@ -57,6 +63,8 @@ for topic, heading, note in [
      "The terms the rest of the program assumes, taught against Bullpen — a system you built — rather than someone else's toy example."),
     ("algorithms", "Block 0 · Algorithms",
      "What each algorithm does and where it breaks. Your statistics course covers the maths; this covers the machinery."),
+    ("block1-data-eda", "Block 1 · Python, Data and EDA",
+     "Real tabular data, read properly. Paired with four runnable notebooks in <code>notebooks/01-python-eda/</code>."),
 ]:
     html_, n = section(topic, heading, note); secs.append(html_); total += n
 
@@ -107,4 +115,4 @@ doc = f"""<!DOCTYPE html>
 </html>
 """
 (ROOT / "index.html").write_text(doc)
-print(f"built index.html — {total} lessons across 3 sets")
+print(f"built index.html — {total} lessons across {len(secs)} sets")

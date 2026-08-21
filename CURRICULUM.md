@@ -21,18 +21,24 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 29 lessons built, 31 diagrams, 56 cited sources.**
+**Status: 35 lessons built, 32 diagrams, 64 cited sources, 4 executed notebooks.**
 
 ---
 
 ## Block 1 · Python, Data & EDA — 1 week
 *Original: Pre-work + Module 01*
 
-- pandas and the shape of tabular data
-- Exploratory data analysis as a discipline, not a ritual
-- AI-assisted analysis, and where it lies to you
+- pandas and the shape of tabular data — dtypes as a diagnostic, sentinels, units ✅
+- Exploratory data analysis as a discipline, not a ritual ✅
+- Missing data: MCAR, MAR, MNAR, and why the mechanism decides the fix ✅
+- AI-assisted analysis, and where it lies to you ✅
 
-**Exit:** A clean EDA notebook on a dataset nobody handed you pre-cleaned.
+5 lessons in `lessons/block1-data-eda/` and 4 runnable notebooks in
+`notebooks/01-python-eda/`, all verified executing end to end.
+
+**Exit:** A clean EDA notebook on a dataset nobody handed you pre-cleaned. ✅
+Ends in a threshold decision table: at 0.2 you catch 93% of failures with 770 false
+alarms; at 0.7 you catch 44% with 77. Choosing a row is a business decision.
 
 ---
 

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Assisted Analysis, and Where It Lies to You</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 5 of 5</span>
+  <h1>AI-Assisted Analysis, and Where It Lies to You</h1>
+  <p class="subtitle">The original syllabus promises 'Python with generative AI'. Here's the honest version.</p>
+
+  <p>Using a model to help with data work is genuinely productive, and it fails in specific, predictable ways. Knowing which is which is the difference between a real speed-up and confidently wrong analysis.</p>
+  <h2>Where it reliably helps</h2>
+  <ul><li><strong>Syntax you'd otherwise look up.</strong> Reshaping, multi-level groupbys, the exact seaborn incantation. High value, low risk — the code either runs and does the visible thing or it doesn't.</li><li><strong>Boilerplate.</strong> Plot scaffolding, pipeline structure, docstrings.</li><li><strong>Explaining an error.</strong> Pasting a traceback is often faster than searching.</li><li><strong>Reviewing your approach.</strong> "Here's my cleaning sequence — what have I not considered?" It's good at generating candidate concerns for you to check.</li><li><strong>Naming and structure.</strong> Turning a working mess into something readable.</li></ul>
+  <h2>Where it lies</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Invented methods</div><div><div class="roadmap-title">Plausible, non-existent APIs</div><div class="roadmap-desc">A pandas method that sounds exactly right and doesn't exist. Easy to catch — it errors.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Silently wrong logic</div><div><div class="roadmap-title">Runs, wrong answer</div><div class="roadmap-desc">The dangerous one. A groupby on the wrong key, a merge that drops rows, an off-by-one on a date window. No error, plausible output.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Confident domain claims</div><div><div class="roadmap-title">Statistics stated as fact</div><div class="roadmap-desc">"A VIF above 5 indicates multicollinearity" — the sort of threshold that's conventional rather than true, delivered with certainty.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Context it cannot have</div><div><div class="roadmap-title">About your specific data</div><div class="roadmap-desc">It hasn't seen your rows. Any claim about what your data contains is inference from the column names.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">The failure that actually costs you</span>Not the hallucinated function — that errors immediately. It's the merge that silently drops 400 rows because the join key had different whitespace on each side. The code runs, the output looks fine, and your analysis is wrong. **After every AI-suggested transform, check the row count and the null counts.** Two lines, and it catches most of this.</div>
+  <h2>A workflow that holds up</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">1. You decide</div><div><div class="roadmap-title">The question and the approach</div><div class="roadmap-desc">The model is bad at knowing what matters in your business. That judgement is the part you're actually paid for.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2. It drafts</div><div><div class="roadmap-title">The code</div><div class="roadmap-desc">Where it's genuinely fast.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3. You verify</div><div><div class="roadmap-title">Shape, nulls, a spot check</div><div class="roadmap-desc">Before and after. Non-negotiable.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4. You interpret</div><div><div class="roadmap-title">What it means</div><div class="roadmap-desc">The model will happily explain a result it cannot see the context for.</div></div></div></div>
+  <h2>The trap specific to data work</h2>
+  <p>Ask a model to "clean this dataset" and it will produce something reasonable-looking: fill the nulls, drop the duplicates, encode the categoricals. Every one of those is a decision with consequences, and it made all of them for you, invisibly.</p>
+  <p>In the Block 1 data, the reasonable-looking action — filling vibration with the median — is precisely wrong, because the values are missing not at random. No model can know that from the column names. It requires knowing that vibration sensors fail on shaking turbines, which is domain knowledge you had to go and get.</p>
+  <div class="callout matters"><span class="label">The line worth holding</span>Let it write the code. Don't let it make the decisions. Every entry on your cleaning-decisions list should be one you can defend, and 'the model suggested it' is not a defence you'd want to give to an operations manager whose maintenance schedule you got wrong.</div>
+  <h2>The connection to everything else</h2>
+  <p>This is the same principle as the rest of the program arriving early: verify rather than trust, hold something back that the optimiser can't see, and don't let the thing producing the work also be the thing judging it. Blocks 5 and 6 formalise it. Here it's just good practice.</p>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents</a><span class="link-note">On knowing which parts of a task to hand over and which to keep — the same division applied to agents.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Which AI failure mode is most dangerous in data work?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Inventing a pandas method that doesn&#x27;t exist</div>
+      <div class="quiz-opt">Code that runs and produces plausible output while being logically wrong — a merge that silently drops rows</div>
+      <div class="quiz-opt">Refusing to answer a question</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. What should you check after every AI-suggested transform?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Whether the code follows PEP 8</div>
+      <div class="quiz-opt">Row count and null counts, before and after</div>
+      <div class="quiz-opt">Whether a faster implementation exists</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why can&#x27;t a model decide how to handle your missing values?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Models aren&#x27;t trained on imputation techniques</div>
+      <div class="quiz-opt">It hasn&#x27;t seen your data or the physical process behind it — MNAR is domain knowledge, not a property of column names</div>
+      <div class="quiz-opt">Imputation requires more context than fits in a prompt</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

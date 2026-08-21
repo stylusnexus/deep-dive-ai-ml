@@ -17,10 +17,21 @@
       "title": "The Map: AI, ML, Deep Learning, GenAI and Agents",
       "file": "lsn-1787200000000-the-map.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787200000001",
+      "title": "Inside an LLM: The Parts and What Each Does",
+      "file": "lsn-1787200000001-inside-an-llm.html",
+      "source": "skill"
     }
   ],
   "completion": {
     "lsn-1787200000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787200000001": {
       "viewed": false,
       "completed": false,
       "starred": false

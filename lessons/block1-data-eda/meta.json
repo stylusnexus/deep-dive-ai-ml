@@ -1,0 +1,74 @@
+{
+  "title": "Block 1 \u00b7 Python, Data and EDA",
+  "topic": "block1-data-eda",
+  "icon": "\ud83d\udd0d",
+  "description": "Working with real tabular data \u2014 reading dtypes properly, judging missingness, exploring with intent, and the split-before-you-fit discipline that prevents leakage.",
+  "tags": [
+    "ai",
+    "data",
+    "eda"
+  ],
+  "colorScheme": "green",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-08-20",
+  "lessons": [
+    {
+      "id": "lsn-1787300000000",
+      "title": "Tabular Data and the Lies dtypes Tell",
+      "file": "lsn-1787300000000-tabular-data-and-dtypes.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787300000001",
+      "title": "The First Fifteen Minutes",
+      "file": "lsn-1787300000001-first-fifteen-minutes.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787300000002",
+      "title": "Missing Data: The Mechanism Matters More Than the Amount",
+      "file": "lsn-1787300000002-missing-data-mechanisms.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787300000003",
+      "title": "What a Plot Is Actually For",
+      "file": "lsn-1787300000003-what-a-plot-is-for.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787300000004",
+      "title": "AI-Assisted Analysis, and Where It Lies to You",
+      "file": "lsn-1787300000004-ai-assisted-analysis.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1787300000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787300000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787300000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787300000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787300000004": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}

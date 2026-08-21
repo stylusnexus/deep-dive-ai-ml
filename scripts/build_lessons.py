@@ -89,6 +89,9 @@ def render_block(b):
     if kind == "quiz":
         parts = ['  <div class="quiz">', "    <h3>✅ Check Yourself</h3>"]
         for n, (q, opts, ans) in enumerate(b[1], 1):
+            # quiz text is HTML-escaped, so backticks would render literally
+            assert "`" not in q and not any("`" in o for o in opts), \
+                f"backtick in escaped quiz text: {q[:50]}"
             parts.append(f'    <p class="quiz-q">{n}. {E(q)}</p>')
             parts.append(f'    <div class="quiz-options" data-answer="{ans}">')
             parts += [f'      <div class="quiz-opt">{E(o)}</div>' for o in opts]

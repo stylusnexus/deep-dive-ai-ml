@@ -161,7 +161,22 @@ to someone non-technical in two sentences, it hasn't landed yet.
 ---
 
 ## Block 1 · Python, Data & EDA
-*to come*
+
+**dtype** — The type pandas inferred for a column. A numeric-looking column typed `object` means something non-numeric is in it. Free diagnostic; read it every time.
+
+**Sentinel value** — A placeholder written instead of a null: 9999, -1, 1900-01-01. Missing data in disguise, and it silently pollutes every statistic.
+
+**MCAR / MAR / MNAR** — The three missingness mechanisms. Completely at random (filling is safe); at random given other columns (fill using them); not at random (filling introduces bias).
+
+**Missingness indicator** — A binary column recording that a value was absent, added before imputing. Preserves signal that imputation would destroy.
+
+**Stratified split** — Splitting while preserving class balance in both halves. Necessary whenever a class is rare.
+
+**Pipeline** — Chained preprocessing plus model, fitted on training data only. Makes leakage structurally difficult, including inside cross-validation.
+
+**Threshold table** — Recall, precision, missed cases and false alarms across candidate cut-offs. More useful than any single score, because it converts a model into a business decision.
+
+**Confounding** — A group difference explained by a third variable. A site with a higher failure rate and older turbines may just be old.
 
 ## Block 2 · Classical ML
 *to come*

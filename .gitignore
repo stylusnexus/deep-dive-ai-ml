@@ -9,3 +9,4 @@ mlruns/
 data/raw/
 *.gguf
 *.safetensors
+data/turbine_clean.csv

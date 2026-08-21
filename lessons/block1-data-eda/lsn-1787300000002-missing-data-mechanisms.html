@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missing Data: The Mechanism Matters More Than the Amount</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 3 of 5</span>
+  <h1>Missing Data: The Mechanism Matters More Than the Amount</h1>
+  <p class="subtitle">Why 'fill it with the median' is a decision about the world, not a default.</p>
+
+  <p>The standard reflex on encountering gaps is to fill them with the column's mean or median and move on. Whether that's reasonable depends entirely on <em>why</em> the values are absent — and that question has three standard answers with very different consequences.</p>
+  <h2>The three mechanisms</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">MCAR</div><div><div class="roadmap-title">Missing completely at random</div><div class="roadmap-desc">The gap is unrelated to anything — a dropped packet, a corrupted row. Filling is relatively safe and you mainly lose statistical power.</div></div></div><div class="roadmap-item"><div class="roadmap-num">MAR</div><div><div class="roadmap-title">Missing at random, given other columns</div><div class="roadmap-desc">Missingness is explained by data you *do* have. One site's sensors fail more often. Fill using those other columns and you can do well.</div></div></div><div class="roadmap-item"><div class="roadmap-num">MNAR</div><div><div class="roadmap-title">Missing not at random</div><div class="roadmap-desc">Missingness depends on the missing value itself. High-vibration sensors drop out *because* of the vibration. Filling actively introduces bias.</div></div></div></div>
+  <div class="callout insight"><span class="label">You cannot test for MNAR directly</span>By definition you don't have the values that would prove it. What you can do is compare rows where a value is missing against rows where it's present, on every *other* column. If those groups differ systematically, treat MNAR as likely — and involve someone who knows how the data is collected.</div>
+  <h2>The Block 1 case</h2>
+  <p>Vibration readings are missing on about 7% of turbines. Comparing those rows against the rest: the missing group has a failure rate of 24% against 14.9% for the rest. Missingness is strongly associated with the outcome.</p>
+  <p>The mechanism is physical — the sensors fail most on the turbines shaking hardest. So the missing values are disproportionately the <em>high</em> ones. Fill them with the median and you replace the most alarming readings in the dataset with typical ones, systematically hiding the risk you were hired to detect.</p>
+  <h2>The move that turns a problem into a feature</h2>
+  <p>Add a binary column recording that the value was missing, before filling anything. It costs one column and preserves the signal that the imputation is about to destroy. In the Block 1 pipeline, that flag ends up among the more predictive features — the absence of data <em>is</em> data.</p>
+  <div class="callout matters"><span class="label">The order that matters</span>Record the flag, then impute — and impute inside a pipeline, after the split. Fitting an imputer on the full dataset means the training data has seen the test set's statistics. It's one of the most common leaks in practice precisely because it doesn't feel like model fitting.</div>
+  <h2>Choosing a fill</h2>
+  <ul><li><strong>Median</strong> — robust to skew and outliers. The sensible default for numeric columns.</li><li><strong>Mean</strong> — only for roughly symmetric distributions. Skew drags it.</li><li><strong>Most frequent</strong> — for categoricals, though a literal <code>"missing"</code> category is often more honest.</li><li><strong>Model-based (KNN, iterative)</strong> — predicts the gap from other columns. Genuinely better under MAR, and slower and easier to leak with.</li><li><strong>Leave it</strong> — gradient boosting implementations handle missing values natively and often do better than any fill you'd choose.</li></ul>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/impute.html" target="_blank" rel="noopener">Imputation of missing values (scikit-learn)</a><span class="link-note">Simple, iterative and KNN imputers, and the missing-indicator feature discussed above.</span></li><li><a href="https://stefvanbuuren.name/fimd/" target="_blank" rel="noopener">Statistical Analysis with Missing Data — overview</a><span class="link-note">Van Buuren's open book on multiple imputation. Chapter 1 covers the three mechanisms properly.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Vibration sensors fail more often on high-vibration turbines. Which mechanism is that?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">MCAR — the failures are random hardware faults</div>
+      <div class="quiz-opt">MNAR — missingness depends on the value that&#x27;s missing</div>
+      <div class="quiz-opt">MAR — it&#x27;s explained by the other columns</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why add a missingness flag before imputing?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It helps the imputer choose a better fill value</div>
+      <div class="quiz-opt">The fact a value was missing may itself be predictive, and imputation destroys that information</div>
+      <div class="quiz-opt">scikit-learn requires it for pipelines</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why must imputation happen inside a pipeline rather than before splitting?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Pipelines run faster</div>
+      <div class="quiz-opt">Fitting the imputer on all the data lets the test set&#x27;s statistics into training — a leak that shows no train/validation gap</div>
+      <div class="quiz-opt">Pipelines handle categorical columns automatically</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>
