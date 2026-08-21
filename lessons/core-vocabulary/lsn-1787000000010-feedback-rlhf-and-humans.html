@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -249,7 +259,7 @@
   <div class="callout matters"><span class="label">The rule that follows</span>Match the position to reversibility, not to how much you trust the model. Reversible and cheap: out of the loop is fine. Irreversible or outward-facing — sending, publishing, deleting, paying, merging — a human approves first, however good the model has been so far.</div>
   <h2>Where this reappears</h2>
   <p>Block 4 places approval gates in a multi-agent system. Block 5 confronts model-as-judge, which is RLAIF's evaluation twin and carries the same circularity risk. Block 7 runs DPO on a real preference set. The vocabulary is the same throughout.</p>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Match the human's position to reversibility, not to how much you trust the model.</strong> Reversible and cheap: out of the loop is fine. Irreversible or outward-facing: a human approves first, however well it has behaved so far.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Match the human's position to reversibility, not to how much you trust the model.</p><p class="know-why">Trust accumulated over a thousand good runs tells you nothing about the thousand-and-first, and the cost of being wrong is set by the action, not by the track record. Reversible and cheap: out of the loop is fine. Irreversible or outward-facing: a human approves first.</p><p class="know-eg"><span class="know-eg-label">For example</span>An agent that drafts replies and saves them for review needs no gate — a bad draft costs someone thirty seconds. The same agent, sending directly, needs one every time, because a wrong email to a customer cannot be recalled and the agent's excellent record last quarter does not change that.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noopener">InstructGPT (Ouyang et al., 2022)</a><span class="link-note">The RLHF pipeline paper. Figure 2 is the diagram in this lesson, done properly.</span></li><li><a href="https://arxiv.org/abs/2305.18290" target="_blank" rel="noopener">Direct Preference Optimization (Rafailov et al., 2023)</a><span class="link-note">Why the reward model and RL stage can be collapsed into one step.</span></li><li><a href="https://arxiv.org/abs/2212.08073" target="_blank" rel="noopener">Constitutional AI (Bai et al., 2022)</a><span class="link-note">Self-critique against written principles, and how Claude is trained.</span></li><li><a href="https://huggingface.co/docs/trl" target="_blank" rel="noopener">TRL documentation</a><span class="link-note">The library you'll actually run DPO with in Block 7.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

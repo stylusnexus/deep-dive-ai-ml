@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -210,7 +220,7 @@
   <p>Lesson 3 asked whether your instrument can tell success from inaction. This lesson is about the layer beneath that: whether anything <em>else</em> ended the run, and whether you would know.</p>
   <p>The failure has a shape. A run stops early. The output shows no error. You attribute the result to the model — because the model is the only component you were thinking about — and you design your next experiment against that attribution. Then you do it eight more times.</p>
   <div class="callout matters"><span class="label">The definition worth memorising</span><strong>A limit that can end a run and cannot be seen is not a guard, it is a confound.</strong> The distinction isn't whether the limit is reasonable — most of them are. It is whether its firing appears anywhere in the output you read afterwards. An invisible guard doesn't just stop the run; it stops it while looking exactly like the thing you were trying to measure.</div>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>A limit that can end a run and cannot be seen is not a guard, it is a confound.</strong> An invisible terminator does not merely stop the run — it stops it while looking exactly like the thing you were trying to measure.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A limit that can end a run and cannot be seen is not a guard, it is a confound.</p><p class="know-why">An invisible terminator does not merely stop the run. It stops it while looking exactly like the thing you were trying to measure, so the result gets attributed to whichever component you were already thinking about — which is almost always the model.</p><p class="know-eg"><span class="know-eg-label">For example</span>Nine runs produced zero edits and were recorded as a model failing to commit changes. They had been terminated by six different mechanisms: a read budget, a phase clamp, a decomposition reassignment, a whole-run wall clock, a routing bug that served a smaller model than the one under test, and a config default that silently disabled verification. None appeared in the output.</p></blockquote>
   <h2>A worked case: six mechanisms, one symptom</h2>
   <p>Nine runs of a local coding agent on one issue produced zero edits. The obvious reading was that the model wouldn't commit a change. The runs were in fact terminated by <strong>six different mechanisms</strong>, none of which appeared in the output:</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">A read-budget nudge</div><div><div class="roadmap-title">set to 3 by a task classifier</div><div class="roadmap-desc">Fired before the model reached the edit.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A phase transition</div><div><div class="roadmap-title">clamped the pre-edit limit to 4</div><div class="roadmap-desc">Silently overwrote the operator's setting.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decomposition</div><div><div class="roadmap-title">reassigned the nudge to 3 for the rest of the run</div><div class="roadmap-desc">A third writer to the same number.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A whole-run wall clock</div><div><div class="roadmap-title">separate from the per-call timeout</div><div class="roadmap-desc">Nothing in the log named it when it fired.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The wrong model</div><div><div class="roadmap-title">the flag used a different config key</div><div class="roadmap-desc">Six runs credited to a 30B were served by a 9B.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A nil verifier</div><div><div class="roadmap-title">one config default was false</div><div class="roadmap-desc">Which disabled turn-end verification, the fix-attempt loop and per-edit feedback at once.</div></div></div></div>

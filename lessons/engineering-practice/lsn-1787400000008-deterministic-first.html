@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -240,7 +250,7 @@
 <text x="262" y="212" class="d-fill-green" font-size="13" font-weight="700">✗</text>
 <text x="452" y="212" class="d-fill-red" font-size="13" font-weight="700">✓</text>
 </svg><figcaption>The comparison people skip. A model wins the top row decisively and loses every row beneath it — so the question is whether you actually need the top row.</figcaption></figure>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>A model is the most expensive, slowest, least debuggable and least testable component you can put in a system.</strong> Sometimes it is the only thing that can do the job. Frequently it is not.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A model is the most expensive, slowest, least debuggable and least testable component you can put in a system.</p><p class="know-why">Sometimes it is the only thing that can do the job, and then it earns every one of those costs. Frequently it is not, and reaching for it anyway is a bill you pay on every request forever.</p><p class="know-eg"><span class="know-eg-label">For example</span>Extracting an order number that always matches ORD-######. A regex is free, runs in microseconds, can be unit tested exhaustively, and cannot invent a number that was not in the text. An LLM call costs money per invocation, takes a second, and will occasionally return a plausible order number that does not exist.</p></blockquote>
   <h2>The tasks people reach for a model on that don&#x27;t need one</h2>
   <ul><li><strong>Extraction from structured or semi-structured text.</strong> Invoice numbers, dates, order ids in a known format. A regex is free, instant, and cannot invent a value that wasn't there.</li><li><strong>Routing on explicit signals.</strong> If the request contains an order number, it's an order query. Rules first; a classifier for what falls through.</li><li><strong>Validation.</strong> Schema checks, range checks, referential integrity. Never ask a model whether data is valid when you can assert it.</li><li><strong>Deduplication and matching on identifiers.</strong> A join, not a similarity search.</li><li><strong>Formatting and templating.</strong> If the output shape is fixed, a template with slots beats generation, and it cannot drift.</li><li><strong>Arithmetic and aggregation.</strong> Give the model the tool; do not ask it for the number.</li><li><strong>Anything with a lookup table.</strong> Country codes, tax rates, product mappings. A model will approximate a table it could simply have been given.</li></ul>
   <div class="callout matters"><span class="label">The hybrid is usually the right answer</span>This is not an argument for avoiding models. It is an argument for putting them where they earn their cost. Deterministic code handles the 80% that is structured, and the model handles the ambiguous remainder — which means it sees fewer calls, on harder inputs, where its judgement is actually worth paying for. Systems built this way are cheaper, faster, easier to debug, and usually more accurate, because each component is doing what it is good at.</div>

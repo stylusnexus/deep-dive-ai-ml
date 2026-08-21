@@ -14,9 +14,10 @@ for topic in ["orientation", "core-vocabulary", "algorithms", "engineering-pract
     items = []
     for l in meta["lessons"]:
         s = (d / l["file"]).read_text()
-        for m in re.findall(r'<blockquote class="know">.*?</span>(.*?)</blockquote>', s, re.S):
+        for m in re.findall(r'<blockquote class="know">(.*?)</blockquote>', s, re.S):
+            body = m.split("</span>", 1)[1] if "</span>" in m else m
             items.append(f'  <li><a href="lessons/{topic}/{l["file"]}">{html.escape(l["title"])}</a>'
-                         f"<p>{m.strip()}</p></li>")
+                         f"{body.strip()}</li>")
     if items:
         total += len(items)
         sections.append(f'<h2>{meta["icon"]} {html.escape(meta["title"])}</h2>\n'
@@ -39,7 +40,13 @@ doc = f"""<!DOCTYPE html>
                    letter-spacing: 0.09em; font-weight: 700; text-decoration: none;
                    color: var(--accent2); opacity: 0.95; margin-bottom: 2px; }}
   ul.knows li a:hover {{ text-decoration: underline; }}
-  ul.knows li p {{ margin: 8px 0 0; line-height: 1.6; }}
+  ul.knows li .know-rule {{ margin: 8px 0 8px; font-weight: 600; font-size: 1.02em; }}
+  ul.knows li .know-why {{ margin: 0 0 10px; opacity: 0.9; }}
+  ul.knows li .know-eg {{ margin: 0; padding: 10px 12px; background: var(--code-bg);
+                          border-radius: 5px; font-size: 0.93em; color: var(--muted); }}
+  ul.knows li .know-eg-label {{ display: block; font-size: 0.7em; font-weight: 700;
+                                letter-spacing: 0.09em; text-transform: uppercase;
+                                color: var(--green); margin-bottom: 4px; }}
 </style>
 </head>
 <body>

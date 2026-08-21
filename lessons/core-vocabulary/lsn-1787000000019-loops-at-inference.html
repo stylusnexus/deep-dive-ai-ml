@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -210,7 +220,7 @@
   <p>The single most common way to improve an LLM system is to stop calling the model once. Sample several times, critique and revise, retry on failure, search over branches. All of these are loops, and they are the main lever you have that doesn't involve changing the model.</p>
   <p>They also fail in a way worth naming up front, because it predicts which ones work.</p>
   <div class="callout insight"><span class="label">The rule that governs all of it</span>A loop improves the result only if <strong>signal enters from outside the loop</strong>. A compiler, a test suite, a schema validator, a retrieval hit, or the independence of separate samples — something that isn't the model's own opinion. A loop with no external signal mostly amplifies whatever the model already believed, including its errors. Every result below is explained by that one sentence.</div>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>A loop improves the result only if signal enters from outside the loop.</strong> A test, a compiler, a schema, or the independence of separate samples. A loop with no external signal mostly amplifies what the model already believed, including its errors.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A loop improves the result only if signal enters from outside the loop.</p><p class="know-why">A test, a compiler, a schema validator, or the independence of separate samples. Without one, extra iterations mostly amplify whatever the model already believed, including its errors.</p><p class="know-eg"><span class="know-eg-label">For example</span>Verifier-guided retry works: generate, run the tests, feed the failures back — the compiler is not the model's opinion. Asking a model to review and improve its own reasoning frequently makes things worse, because the instruction to find fault is itself pressure to change a correct answer.</p></blockquote>
   <h2>The control flow</h2>
   <p>Strip the branding and there are four shapes. What differs is who decides to go round again.</p>
   <figure class="diagram"><svg viewBox="0 0 640 240" role="img" aria-label="Four inference-time loop shapes"><defs><marker id="fa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>

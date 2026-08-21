@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -273,7 +283,7 @@
   <p>The same failure follows you through the whole program under different names:</p>
   <ul><li><strong>Fine-tuning (Block 7).</strong> Train too long on a small dataset and the model parrots your examples, losing the general ability that made it useful. Held-out evaluation before and after is non-negotiable.</li><li><strong>Benchmarks (Block 5).</strong> Contaminated benchmarks are overfitting at industry scale — the test set leaked into training, so the score measures memory. Your own twenty-item eval set is a private held-out set, which is precisely why it's worth more than a public leaderboard.</li><li><strong>Prompt engineering (Block 3).</strong> Tuning a prompt against the same five examples until it's perfect on them is overfitting by hand. Hold some examples back.</li></ul>
   <div class="callout matters"><span class="label">The transferable idea</span>Any time you tune something against results you can see, you risk fitting the measurement rather than the thing being measured. The defence is always the same: keep some data where you can't look at it.</div>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Any time you tune against results you can see, you risk fitting the measurement rather than the thing measured.</strong> The defence never changes: keep some data where you cannot look at it.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Any time you tune against results you can see, you risk fitting the measurement rather than the thing measured.</p><p class="know-why">This is one failure wearing many costumes. Training too long fits the training set. Tuning a prompt against your test examples fits those examples. Training on a contaminated benchmark fits the benchmark. The defence never changes: keep something back where the optimiser cannot see it.</p><p class="know-eg"><span class="know-eg-label">For example</span>You iterate a prompt against five test cases until it handles all five perfectly. It performs no better than the first version on the sixth. You did not improve the prompt; you memorised five cases by hand.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/cross_validation.html" target="_blank" rel="noopener">Cross-validation (scikit-learn)</a><span class="link-note">The canonical reference, with the diagrams. You'll use this directly in Block 2.</span></li><li><a href="https://developers.google.com/machine-learning/crash-course/overfitting/overfitting" target="_blank" rel="noopener">Google ML Crash Course: overfitting</a><span class="link-note">Generalisation, regularisation and early stopping, worked through interactively.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

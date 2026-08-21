@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -251,7 +261,7 @@
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Falls then flattens</div><div><div class="roadmap-title">Healthy</div><div class="roadmap-desc">The flattening is where early stopping earns its place.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Spikes then recovers</div><div><div class="roadmap-title">Usually fine</div><div class="roadmap-desc">A hard batch. Persistent spiking means the learning rate is too high or gradients need clipping.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Goes to NaN</div><div><div class="roadmap-title">Broken</div><div class="roadmap-desc">Learning rate first, always. Then check for division by zero or a log of zero in a custom loss.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Flat from step one</div><div><div class="roadmap-title">Wiring bug</div><div class="roadmap-desc">Not a learning-rate problem. Labels not connected, loss computed on the wrong tensor, or gradients not flowing. Overfit one batch to find out.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Falls, validation rises</div><div><div class="roadmap-title">Not optimisation</div><div class="roadmap-desc">That is overfitting. More training makes it worse, not better.</div></div></div></div>
   <div class="callout matters"><span class="label">The debugging move worth doing first, every time</span>Take one batch of about eight examples and train on it repeatedly with everything else held constant. A correctly-wired network will drive that loss to nearly zero — it can memorise eight things trivially. If it cannot, the bug is in the loop, the data pipeline or the loss, and no amount of hyperparameter tuning will find it. This takes two minutes and it separates 'the model cannot learn this' from 'the code does not work'.</div>
   <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">The Principles of Deep Learning Theory</span><span class="bk-a">Roberts, Yaida &amp; Hanin</span><span class="bk-n">For when the intuition stops being enough. Rigorous, and the treatment of initialisation and why depth is hard is the real thing rather than an analogy.</span></li><li><span class="bk-t">Hands-On Machine Learning with Scikit-Learn and PyTorch</span><span class="bk-a">Aurelien Geron</span><span class="bk-n">The practical counterpart — training loops, optimisers and schedules with code you can run.</span></li></ul></div>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Overfit a single batch before anything else.</strong> A correctly-wired network drives eight examples to near-zero loss trivially. If it cannot, the bug is in the loop or the data, and no hyperparameter will find it.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Overfit a single batch before anything else.</p><p class="know-why">A correctly-wired network can memorise eight examples trivially, driving loss to near zero. If it cannot, the bug is in the loop, the data pipeline or the loss function — and no amount of hyperparameter tuning will find it.</p><p class="know-eg"><span class="know-eg-label">For example</span>Your loss sits flat at 2.3 from the first step and you spend an afternoon sweeping learning rates. Training on one batch would have shown the same flat line in ninety seconds and told you it was not a learning-rate problem. The labels were being passed in the wrong argument position.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent" target="_blank" rel="noopener">Google ML Crash Course: gradient descent</a><span class="link-note">Interactive treatment of step size and convergence.</span></li><li><a href="https://docs.pytorch.org/docs/stable/notes/autograd.html" target="_blank" rel="noopener">PyTorch autograd</a><span class="link-note">How backprop is actually implemented in the framework you'll use.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -257,7 +267,7 @@ swebench report my-run-01 -d verified</code></pre>
   <p>You are unlikely to need a SWE-bench number. You are very likely to need a benchmark for <em>your</em> repository, and SWE-bench is the design worth copying — because your merged pull requests are already labelled data.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">1 · Mine closed PRs</div><div><div class="roadmap-title">That fixed something and touched tests</div><div class="roadmap-desc">The issue is the prompt, the merge commit's parent is the base, the PR is the reference answer.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2 · Derive both test sets</div><div><div class="roadmap-title">Fail-to-pass and pass-to-pass</div><div class="roadmap-desc">Run the suite at base to find what fails; everything else must stay green.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3 · Validate with gold</div><div><div class="roadmap-title">Reference patch must resolve</div><div class="roadmap-desc">If it doesn't, the fixture is broken and every later number is noise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4 · Freeze the set</div><div><div class="roadmap-title">Then leave it alone</div><div class="roadmap-desc">Its value comes from staying fixed. Edit it between runs and it measures nothing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5 · Hold some back</div><div><div class="roadmap-title">Never tune against all of it</div><div class="roadmap-desc">Tuning a scaffold against every task is leakage by hand.</div></div></div></div>
   <div class="callout matters"><span class="label">Why this beats the public number for you</span>A benchmark built from your own merged PRs is in your language, your codebase, your conventions, and nobody has optimised against it. It is the twenty-item rule from the eval-battery lesson, applied to code, and it is what a replay harness does — running real closed pull requests so the outcome is established before the agent starts, which makes its self-report irrelevant.</div>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>A benchmark must make doing nothing and solving it score differently.</strong> FAIL_TO_PASS proves the work happened; PASS_TO_PASS proves nothing else broke. Most homemade benchmarks omit the second half and quietly reward vandalism.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A benchmark must make doing nothing and solving it score differently.</p><p class="know-why">SWE-bench does this with two test sets. FAIL_TO_PASS proves the work happened; PASS_TO_PASS proves nothing else broke. Most homemade benchmarks implement only the first half.</p><p class="know-eg"><span class="know-eg-label">For example</span>Score only on 'the failing test now passes' and an agent can delete the test. Score only on 'the suite is green' and an agent that changes nothing scores full marks on any task where the suite was already green. You need both halves, and the second is the one people leave out.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.swebench.com/" target="_blank" rel="noopener">SWE-bench</a><span class="link-note">Leaderboards for each variant. Read which variant a number refers to before comparing anything.</span></li><li><a href="https://github.com/SWE-bench/SWE-bench" target="_blank" rel="noopener">SWE-bench on GitHub</a><span class="link-note">The harness, the CLI shown above, and the dataset definitions.</span></li><li><a href="https://openai.com/index/introducing-swe-bench-verified/" target="_blank" rel="noopener">Introducing SWE-bench Verified — OpenAI</a><span class="link-note">How the 500 were validated, and what was wrong with the tasks removed.</span></li><li><a href="https://github.com/swe-bench/experiments" target="_blank" rel="noopener">SWE-bench experiments — raw submissions</a><span class="link-note">Every submission's resolved-task list. The source of lesson 2's numbers, and recomputable yourself.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

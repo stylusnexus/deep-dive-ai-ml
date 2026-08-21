@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -233,7 +243,7 @@
   <div class="callout pitfall"><span class="label">What this means for you</span>Treat a chain as a debugging aid and a verification surface, not as an audit trail. It's genuinely useful — you can check the intermediate steps, spot where a calculation went wrong, and catch a wrong premise. But do not present it to a regulator, a customer, or a colleague as the reason the system decided something. It is what the model said about its reasoning, which is not the same object.</div>
   <h2>Where this reappears</h2>
   <p>Block 4's agents reason before choosing tools, and a visible chain is often the only way to debug why the wrong tool was called. Block 5 measures whether the chain actually supports the conclusion, which is a distinct question from whether the conclusion is right. And rationale distillation from the previous lesson trains a small model on these chains — one of the more effective ways to move reasoning capability downward.</p>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Chain-of-thought is not the model becoming smarter — it is the model being given room to compute.</strong> Which is why it helps on multi-step problems and does nothing for recall.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Chain-of-thought is not the model becoming smarter — it is the model being given room to compute.</p><p class="know-why">A model does roughly fixed work per token. Demanding an immediate answer to a five-step problem allocates one token's worth of computation to five steps. Generating the steps buys more forward passes, and each step becomes context the next one can build on.</p><p class="know-eg"><span class="know-eg-label">For example</span>Ask for the answer to a multi-step arithmetic word problem and you get a wrong number instantly. Ask the same model to work through it and it gets it right — same weights, same prompt otherwise. Now ask it to think step by step about the capital of Portugal: no gain, because there were never any steps to take.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener">Chain-of-Thought Prompting (Wei et al., 2022)</a><span class="link-note">The paper that established the effect and its scale dependence.</span></li><li><a href="https://arxiv.org/abs/2203.11171" target="_blank" rel="noopener">Self-Consistency (Wang et al., 2022)</a><span class="link-note">Sampling multiple chains and taking the majority — trading tokens for accuracy.</span></li><li><a href="https://arxiv.org/abs/2307.13702" target="_blank" rel="noopener">Measuring Faithfulness in Chain-of-Thought (Lanham et al., 2023)</a><span class="link-note">The evidence that stated reasoning often isn't the actual reason. Read before trusting a chain as an explanation.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

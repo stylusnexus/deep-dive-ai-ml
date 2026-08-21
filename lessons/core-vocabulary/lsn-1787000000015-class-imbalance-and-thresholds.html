@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -239,7 +249,7 @@
   <div class="callout pitfall"><span class="label">The leakage trap here</span>Oversample before splitting and copies of the same minority row land in both train and test. Your model has effectively seen the test data, the score is inflated, and the usual overfitting gap won't show it. This is one of the most common leakage mistakes in practice — resample inside the pipeline, after the split, every time.</div>
   <h2>Where this reappears</h2>
   <p>Every rare-event problem in the program: fraud, equipment failure, safety incidents, and the retrieval evaluations in Block 5 where the relevant documents are a tiny fraction of the corpus. The reflex worth building is to check the class balance before reading any metric at all.</p>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Compute the trivial baseline before reporting any accuracy figure.</strong> If your model is at 99.2% and always-guess-the-majority scores 99.1%, you have not built anything.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Compute the trivial baseline before reporting any accuracy figure.</p><p class="know-why">When one class dominates, always guessing the majority sets a very high floor, and beating it by a little can look impressive while representing no skill at all.</p><p class="know-eg"><span class="know-eg-label">For example</span>Your fraud model reports 99.2% accuracy and the room is pleased. One transaction in a hundred and twenty is fraudulent, so always predicting 'not fraud' scores 99.1%. Your model has added one-tenth of a percentage point, and it may well be catching nothing at all.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html" target="_blank" rel="noopener">Precision-recall (scikit-learn)</a><span class="link-note">Worked curves, plus why PR curves beat ROC on heavily imbalanced data.</span></li><li><a href="https://imbalanced-learn.org/stable/" target="_blank" rel="noopener">imbalanced-learn</a><span class="link-note">SMOTE and the resampling family, with pipeline integration that avoids the leakage trap.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

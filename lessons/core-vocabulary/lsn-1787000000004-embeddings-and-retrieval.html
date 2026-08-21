@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -240,7 +250,7 @@
   <div class="callout pitfall"><span class="label">The baseline you should always run</span>Before reaching for a vector database, try keyword search — BM25 or plain Postgres full-text. On short, jargon-heavy, identifier-rich corpora it frequently wins, and it costs nothing to test. This is the intake sheet's 'dumb baseline' question applied to retrieval.</div>
   <h2>Vector stores</h2>
   <p>A <strong>vector database</strong> stores vectors alongside their source text and finds nearest neighbours quickly. Block 3 uses <code>pgvector</code> — the Postgres extension — because it means one database rather than two, and because at the scale you'll work at, the specialist stores buy speed you don't need.</p>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Try keyword search before you reach for a vector database.</strong> On short, jargon-heavy, identifier-rich text it frequently wins, and it costs nothing to test. This is the dumb-baseline question applied to retrieval.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Try keyword search before you reach for a vector database.</p><p class="know-why">Embeddings compress meaning into a few hundred numbers, and precise tokens are exactly what gets lost in that compression. Keyword search matches them exactly. On technical corpora this is frequently the difference between finding the answer and not.</p><p class="know-eg"><span class="know-eg-label">For example</span>Your corpus is internal error codes, file paths and function names. A user searches for ERR_QUEUE_4471. The embedding of that string sits near the embeddings of every other error code, because to the model they all look like the same kind of token. BM25 matches it exactly, in milliseconds, with no model and no index to maintain.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://sbert.net" target="_blank" rel="noopener">Sentence Transformers</a><span class="link-note">The practical library for embeddings, with clear docs on model choice and similarity.</span></li><li><a href="https://github.com/pgvector/pgvector" target="_blank" rel="noopener">pgvector</a><span class="link-note">The Postgres extension Block 3 uses. Read the indexing notes before loading real data.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

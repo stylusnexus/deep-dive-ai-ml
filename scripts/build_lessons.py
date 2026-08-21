@@ -88,8 +88,13 @@ def render_block(b):
         return (f'  <figure class="diagram">{svg}'
                 f"<figcaption>{caption}</figcaption></figure>")
     if kind == "know":
-        return (f'  <blockquote class="know"><span class="know-label">Worth knowing</span>'
-                f"{b[1]}</blockquote>")
+        _, rule, why, example = b
+        return (f'  <blockquote class="know">'
+                f'<span class="know-label">Worth knowing</span>'
+                f'<p class="know-rule">{rule}</p>'
+                f'<p class="know-why">{why}</p>'
+                f'<p class="know-eg"><span class="know-eg-label">For example</span>{example}</p>'
+                f"</blockquote>")
     if kind == "books":
         items = "".join(
             f'<li><span class="bk-t">{E(t)}</span>'

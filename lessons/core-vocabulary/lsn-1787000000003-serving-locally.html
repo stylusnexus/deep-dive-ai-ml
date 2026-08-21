@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -248,7 +258,7 @@
   <div class="callout pitfall"><span class="label">The habit this should build</span>When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck. Two premature speed claims were made on that project from partial data before the real one was confirmed by cache-hit telemetry. A number measured on the wrong phase is not a small error — it points your optimisation work at the wrong layer entirely.</div>
   <h2>The thing to keep straight</h2>
   <p>Ollama is a convenience layer, not a requirement. <code>llama.cpp</code> serves models directly; vLLM and TGI are production-grade alternatives with better batching for concurrent users. Ollama optimises for one developer on one machine, and is a poor fit for serving many users at once. Block 8 covers what changes when you need the latter.</p>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck.</strong> A figure measured on the wrong phase points your optimisation work at the wrong layer entirely.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck.</p><p class="know-why">Inference has two phases with wildly different speeds — prefill processes your prompt in parallel and is fast; decode generates one token at a time and is slow. A benchmark measuring the phase that is not your constraint tells you nothing useful about your workload.</p><p class="know-eg"><span class="know-eg-label">For example</span>A serving runtime was widely reported as roughly three times faster than the alternative: 130 tokens per second against 43. Both figures were decode. Measured on a real agent loop — which re-sends a growing context every turn and is therefore prefill-bound — the end-to-end gain was nothing like 3x. The actual lever turned out to be prefix-KV caching, worth about tenfold, and no tokens-per-second figure would ever have surfaced it.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a><span class="link-note">Model registry and the local OpenAI-compatible server.</span></li><li><a href="https://docs.vllm.ai" target="_blank" rel="noopener">vLLM documentation</a><span class="link-note">What you move to when one developer becomes many concurrent users — the contrast is instructive.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

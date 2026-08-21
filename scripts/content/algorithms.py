@@ -90,7 +90,10 @@ LESSONS = [
        "The practical counterpart — training loops, optimisers and schedules with code you can run."),
     ]),
 
-    ("know", '<strong>Overfit a single batch before anything else.</strong> A correctly-wired network drives eight examples to near-zero loss trivially. If it cannot, the bug is in the loop or the data, and no hyperparameter will find it.'),
+    ("know",
+     'Overfit a single batch before anything else.',
+     'A correctly-wired network can memorise eight examples trivially, driving loss to near zero. If it cannot, the bug is in the loop, the data pipeline or the loss function — and no amount of hyperparameter tuning will find it.',
+     'Your loss sits flat at 2.3 from the first step and you spend an afternoon sweeping learning rates. Training on one batch would have shown the same flat line in ninety seconds and told you it was not a learning-rate problem. The labels were being passed in the wrong argument position.'),
 
     ("links", [
       ("Google ML Crash Course: gradient descent", "https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent",
@@ -463,7 +466,10 @@ LESSONS = [
        "Chapter 7 on clustering at scale, including what changes when the data does not fit in memory."),
     ]),
 
-    ("know", '<strong>Clusters are always returned, whether or not they exist.</strong> k-means partitions; it does not detect structure. Check that the same k on shuffled data looks meaningfully worse before believing a clustering.'),
+    ("know",
+     'Clusters are always returned, whether or not they exist.',
+     'k-means partitions; it does not detect structure. Ask for five clusters and you get five, with centroids and a plot that looks entirely convincing, regardless of whether the data has any grouping in it.',
+     "Run k-means with k=5 on uniform random noise. You get five tidy, roughly equal clusters and a plot you could put in a deck. Before believing a real clustering, run the same k on shuffled data — if the silhouette score is similar, you have found the algorithm's behaviour rather than your data's."),
 
     ("links", [
       ("Clustering (scikit-learn)", "https://scikit-learn.org/stable/modules/clustering.html",
@@ -793,7 +799,10 @@ LESSONS = [
 </g>
 </svg>'''),
 
-    ("know", "<strong>Overfitting announces itself as a gap; leakage lifts both curves together.</strong> A surprisingly good result on a hard problem is more likely a leak than a breakthrough — treat it as a bug report."),
+    ("know",
+     'Overfitting announces itself as a gap; leakage lifts both curves together.',
+     'That is what makes leakage the more dangerous of the two. The train-versus-validation gap you would normally use to spot a problem shows nothing, because the leak is present in both halves.',
+     'A churn model reaches 0.99 AUC and validation agrees. The feature list includes account_closed_date, populated only for customers who already churned. Every metric is excellent and the model is worthless, because at prediction time that field is empty for everyone you care about.'),
     ("h2", "The forms it takes"),
     ("terms", [
       ("Target leakage", "A feature encodes the answer", "Predicting customer churn using 'cancellation_date'. Predicting failure using 'maintenance_ticket_raised'. The feature only exists because the outcome already happened."),

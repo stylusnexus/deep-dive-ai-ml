@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -247,7 +257,7 @@
   <h2>The honest position</h2>
   <p>The methodology is young, the tooling is proliferating faster than the evidence, and much of what is written about it is advocacy. Treat claims about productivity gains the way you would treat any unmeasured claim in this course — as a hypothesis with a plausible mechanism. The mechanism here is sound, which is a reason to try it, not a reason to believe a number.</p>
   <p>The defensible version is modest and probably enough: when intent must survive multiple sessions, write it down before generating; keep it in version control; keep it current or delete it. Everything past that is tooling preference.</p>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>An agent cannot tell a decision you made from a sentence you wrote carelessly.</strong> Every under-specified area becomes an invented answer, delivered confidently. Vagueness surfaces as working code, not as questions.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">An agent cannot tell a decision you made from a sentence you wrote carelessly.</p><p class="know-why">Waterfall's specs were ignored; these are followed exactly. Every under-specified area becomes an invented answer, delivered confidently and consistently, so vagueness surfaces as working code rather than as questions.</p><p class="know-eg"><span class="know-eg-label">For example</span>Your spec says the export should handle large files. You meant streaming rather than loading into memory. The agent implemented a 100MB size limit with a clear error message — a reasonable reading, faithfully built, and not what you wanted. You discovered what you meant by reading what you got.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://github.com/github/spec-kit" target="_blank" rel="noopener">GitHub Spec Kit</a><span class="link-note">The open-source toolkit that popularised the four-phase workflow. Agent-agnostic and CLI-first — the easiest place to see the shape of it.</span></li><li><a href="https://developer.microsoft.com/blog/spec-driven-development-ai-native-engineering/" target="_blank" rel="noopener">Spec-Driven Development: a spec-first approach — Microsoft</a><span class="link-note">The rationale written out, including the honest account of why specification-first failed the first time.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

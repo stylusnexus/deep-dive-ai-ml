@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -237,7 +247,7 @@
   <p><strong>GGUF</strong> (GPT-Generated Unified Format) is the file format that holds quantized weights plus the metadata needed to run them — tokenizer, architecture, prompt template. It's the format <code>llama.cpp</code> and Ollama consume. One file, self-describing, no Python environment required.</p>
   <p>This is distinct from Hugging Face's <code>safetensors</code>, which stores full-precision weights for training and fine-tuning. The usual pipeline: fine-tune in safetensors, convert to GGUF, quantize, serve.</p>
   <div class="callout pitfall"><span class="label">Your orphaned 95GB</span>Your own audit found roughly 95GB of local weights that nothing actually serves — a very common outcome. Quantized models are cheap to download and easy to forget. Before pulling another, check what's already on disk.</div>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>Prefer the bigger model, more heavily quantized.</strong> A 4-bit 70B almost always beats a 16-bit 13B of similar file size. Precision is the cheaper thing to give up.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Prefer the bigger model, more heavily quantized.</p><p class="know-why">Quantization stores each weight approximately, and large models tolerate that surprisingly well. Cutting parameters, by contrast, removes capability outright. Given a fixed memory budget, spend it on parameters and economise on precision.</p><p class="know-eg"><span class="know-eg-label">For example</span>You have 40GB. A 13B model at full 16-bit precision fits, and so does a 70B quantized to 4 bits — both around 35-40GB on disk. The 4-bit 70B will win on nearly every task, despite storing each of its weights far less precisely.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://huggingface.co/docs/hub/gguf" target="_blank" rel="noopener">GGUF on the Hugging Face Hub</a><span class="link-note">Format reference, and the quantization table naming every Q-variant.</span></li><li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a><span class="link-note">The engine. The README's quantization section is the primary source for the trade-offs here.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

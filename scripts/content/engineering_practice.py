@@ -194,7 +194,10 @@ LESSONS = [
     ("p", "Every architectural conclusion drawn from that board had to be thrown out, including a headline result that a whole escalation mechanism produced zero benefit. It produced zero <em>measured</em> benefit, because the instrument could not see benefit."),
     ("figure", "An honest fixture must fail before the work and pass after it. Fail either half and the instrument cannot tell the two columns apart.", '''<svg viewBox="0 0 640 240" role="img" aria-label="Diagram of the two honesty invariants for a test fixture"><rect x="30" y="40" width="250" height="70" rx="8" class="d-box"/><text x="52" y="68" class="d-label-b">At the starting commit</text><text x="52" y="90" class="d-label-sm">feature absent \u2192 verify MUST FAIL</text><rect x="360" y="40" width="250" height="70" rx="8" class="d-box"/><text x="382" y="68" class="d-label-b">With the known-good fix</text><text x="382" y="90" class="d-label-sm">feature present \u2192 verify MUST PASS</text><rect x="30" y="150" width="580" height="60" rx="8" class="d-box-accent"/><text x="52" y="176" class="d-label-b">If either half is untrue</text><text x="52" y="196" class="d-label-sm">“did nothing” and “solved it” score identically, and every number the instrument produces is noise</text></svg>'''),
 
-    ("know", "<strong>An instrument that cannot tell success from inaction produces noise, not numbers.</strong> Prove it fails before the work and passes after it, before you trust anything it tells you."),
+    ("know",
+     'An instrument that cannot tell success from inaction produces noise, not numbers.',
+     'Before trusting any measurement, prove the fixture fails at the starting state and passes with a known-good fix applied. If either half is untrue, every number it produces afterwards is meaningless.',
+     'A benchmark reported six of eight tasks passing before any work had been done. The verification step was checking that the test command exited zero, and the command was piped through head, which exits zero regardless of what failed upstream. Weeks of comparisons had been run against that fixture.'),
     ("h2", "Two kinds of honesty"),
     ("p", "The invariant above is <strong>outcome honesty</strong> — can the instrument tell success from inaction? There is a second one, checked far less often. <strong>Process honesty</strong>: did the instrument record what the system actually did and said, or only whether it succeeded?"),
     ("p", "Two completely different failures score identically under outcome metrics alone:"),
@@ -407,7 +410,10 @@ swebench report my-run-01 -d verified"""),
     ]),
     ("callout", "matters", "Why this beats the public number for you", "A benchmark built from your own merged PRs is in your language, your codebase, your conventions, and nobody has optimised against it. It is the twenty-item rule from the eval-battery lesson, applied to code, and it is what a replay harness does — running real closed pull requests so the outcome is established before the agent starts, which makes its self-report irrelevant."),
 
-    ("know", '<strong>A benchmark must make doing nothing and solving it score differently.</strong> FAIL_TO_PASS proves the work happened; PASS_TO_PASS proves nothing else broke. Most homemade benchmarks omit the second half and quietly reward vandalism.'),
+    ("know",
+     'A benchmark must make doing nothing and solving it score differently.',
+     'SWE-bench does this with two test sets. FAIL_TO_PASS proves the work happened; PASS_TO_PASS proves nothing else broke. Most homemade benchmarks implement only the first half.',
+     "Score only on 'the failing test now passes' and an agent can delete the test. Score only on 'the suite is green' and an agent that changes nothing scores full marks on any task where the suite was already green. You need both halves, and the second is the one people leave out."),
 
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',
@@ -450,7 +456,10 @@ swebench report my-run-01 -d verified"""),
 
     ("callout", "matters", "The definition worth memorising", "<strong>A limit that can end a run and cannot be seen is not a guard, it is a confound.</strong> The distinction isn't whether the limit is reasonable — most of them are. It is whether its firing appears anywhere in the output you read afterwards. An invisible guard doesn't just stop the run; it stops it while looking exactly like the thing you were trying to measure."),
 
-    ("know", "<strong>A limit that can end a run and cannot be seen is not a guard, it is a confound.</strong> An invisible terminator does not merely stop the run — it stops it while looking exactly like the thing you were trying to measure."),
+    ("know",
+     'A limit that can end a run and cannot be seen is not a guard, it is a confound.',
+     'An invisible terminator does not merely stop the run. It stops it while looking exactly like the thing you were trying to measure, so the result gets attributed to whichever component you were already thinking about — which is almost always the model.',
+     'Nine runs produced zero edits and were recorded as a model failing to commit changes. They had been terminated by six different mechanisms: a read budget, a phase clamp, a decomposition reassignment, a whole-run wall clock, a routing bug that served a smaller model than the one under test, and a config default that silently disabled verification. None appeared in the output.'),
     ("h2", "A worked case: six mechanisms, one symptom"),
     ("p", "Nine runs of a local coding agent on one issue produced zero edits. The obvious reading was that the model wouldn't commit a change. The runs were in fact terminated by <strong>six different mechanisms</strong>, none of which appeared in the output:"),
     ("terms", [
@@ -671,7 +680,10 @@ swebench report my-run-01 -d verified"""),
 
     ("callout", "warning", "Ask this before trusting any judge comparison", "Not \"how accurate is the judge?\" but <strong>\"is the judge's error correlated with the thing I changed?\"</strong> If one variant produces longer answers and your judge rewards length, you have a verbosity bias masquerading as an improvement. If one variant is more verbose because it explains itself more, you cannot tell those apart from the score alone. Extra samples will not save you — bias does not average out."),
 
-    ("know", "<strong>Ask not how accurate your grader is, but whether its error correlates with what you changed.</strong> Noise costs you power. Bias that tracks the treatment invents an effect, and more sampling will not remove it."),
+    ("know",
+     'Ask not how accurate your grader is, but whether its error correlates with what you changed.',
+     'Noise that is even across conditions costs you statistical power and nothing else. Bias that tracks the treatment manufactures an effect, and no amount of extra sampling removes it.',
+     'Your judge mildly prefers longer answers. You test a prompt change that makes the model more verbose. The judge scores it higher. You ship a verbosity increase believing it was a quality improvement, and every additional sample makes the false result look more solid.'),
     ("h2", "A judge that is silently off is worse than no judge"),
     ("p", "On the same project, one configuration default meant the verifier was nil. That single value disabled turn-end verification, the fix-attempt loop and per-edit feedback simultaneously — and nothing said so. The system continued producing results that looked like verified results."),
     ("p", "No judge at all is an obvious gap. A judge that has quietly stopped running is a number that carries authority it has not earned. Assert that your grader ran, on every run, and fail loudly when it did not."),
@@ -767,7 +779,10 @@ swebench report my-run-01 -d verified"""),
 <text x="452" y="212" class="d-fill-red" font-size="13" font-weight="700">✓</text>
 </svg>'''),
 
-    ("know", "<strong>A model is the most expensive, slowest, least debuggable and least testable component you can put in a system.</strong> Sometimes it is the only thing that can do the job. Frequently it is not."),
+    ("know",
+     'A model is the most expensive, slowest, least debuggable and least testable component you can put in a system.',
+     'Sometimes it is the only thing that can do the job, and then it earns every one of those costs. Frequently it is not, and reaching for it anyway is a bill you pay on every request forever.',
+     'Extracting an order number that always matches ORD-######. A regex is free, runs in microseconds, can be unit tested exhaustively, and cannot invent a number that was not in the text. An LLM call costs money per invocation, takes a second, and will occasionally return a plausible order number that does not exist.'),
     ("h2", "The tasks people reach for a model on that don't need one"),
     ("ul", [
       "<strong>Extraction from structured or semi-structured text.</strong> Invoice numbers, dates, order ids in a known format. A regex is free, instant, and cannot invent a value that wasn't there.",
@@ -886,7 +901,10 @@ swebench report my-run-01 -d verified"""),
     ("p", "The methodology is young, the tooling is proliferating faster than the evidence, and much of what is written about it is advocacy. Treat claims about productivity gains the way you would treat any unmeasured claim in this course — as a hypothesis with a plausible mechanism. The mechanism here is sound, which is a reason to try it, not a reason to believe a number."),
     ("p", "The defensible version is modest and probably enough: when intent must survive multiple sessions, write it down before generating; keep it in version control; keep it current or delete it. Everything past that is tooling preference."),
 
-    ("know", '<strong>An agent cannot tell a decision you made from a sentence you wrote carelessly.</strong> Every under-specified area becomes an invented answer, delivered confidently. Vagueness surfaces as working code, not as questions.'),
+    ("know",
+     'An agent cannot tell a decision you made from a sentence you wrote carelessly.',
+     "Waterfall's specs were ignored; these are followed exactly. Every under-specified area becomes an invented answer, delivered confidently and consistently, so vagueness surfaces as working code rather than as questions.",
+     'Your spec says the export should handle large files. You meant streaming rather than loading into memory. The agent implemented a 100MB size limit with a clear error message — a reasonable reading, faithfully built, and not what you wanted. You discovered what you meant by reading what you got.'),
 
     ("links", [
       ("GitHub Spec Kit", "https://github.com/github/spec-kit",

@@ -198,6 +198,16 @@
     text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
   }
   blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
 </style>
 
 </head>
@@ -236,7 +246,7 @@
   <h2>Sentinel values</h2>
   <p>Some systems write a placeholder rather than a null when a reading fails: <code>9999</code>, <code>-1</code>, <code>0</code>, <code>1900-01-01</code>. These are missing values in disguise, and because they're numeric they silently pollute every statistic.</p>
   <p>In the Block 1 data, 22 rotor-speed readings are exactly 9999.0. Left in place they drag the column mean from 14.4 to 53.3 — a nearly fourfold distortion from 22 rows in six thousand. The tell is a repeated, round, physically implausible value.</p>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><strong>A numeric-looking column that loads as text is a question, not a detail.</strong> It means something non-numeric is in there. Ten seconds of reading dtypes routinely saves an afternoon.</blockquote>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A numeric-looking column that loads as text is a question, not a detail.</p><p class="know-why">It means pandas found something it could not parse and fell back to strings. That is a free diagnostic, delivered before you have done any work, and it takes ten seconds to read.</p><p class="know-eg"><span class="know-eg-label">For example</span>operating_hours loads as object rather than float. The cause is thousands separators on every row and a stray 'hrs' suffix on about 140 of them — two different formatting problems in one column, which is what happens when data is assembled from more than one system.</p></blockquote>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://pandas.pydata.org/docs/user_guide/basics.html#dtypes" target="_blank" rel="noopener">pandas dtypes</a><span class="link-note">What each type is, and how missing values force type changes.</span></li><li><a href="https://vita.had.co.nz/papers/tidy-data.pdf" target="_blank" rel="noopener">Tidy Data (Wickham, 2014)</a><span class="link-note">The paper that defined what a well-shaped table looks like. Still the clearest statement of it.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
