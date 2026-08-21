@@ -1,0 +1,62 @@
+[
+  {
+    "doc_id": "site-ard",
+    "title": "Ardrossan Site Profile",
+    "kind": "site",
+    "text": "# Ardrossan Site Profile\n\nSite code: ARD. Region: North West.\nOperational turbines: 42.\nSite manager: J. Okafor.\n\n## Operating envelope\n\nTurbines at Ardrossan operate under the standard envelope defined in\nOPS-STD-04 unless a site variance is recorded. Gearbox temperature is\nlogged every fifteen minutes and reported daily to the regional desk.\n\n## Escalation\n\nFaults are escalated to the North West regional desk. Out of hours,\nescalation passes to the national control room."
+  },
+  {
+    "doc_id": "site-whl",
+    "title": "Whitelee Site Profile",
+    "kind": "site",
+    "text": "# Whitelee Site Profile\n\nSite code: WHL. Region: Central.\nOperational turbines: 68.\nSite manager: M. Lindqvist.\n\n## Operating envelope\n\nTurbines at Whitelee operate under the standard envelope defined in\nOPS-STD-04 unless a site variance is recorded. Gearbox temperature is\nlogged every fifteen minutes and reported daily to the regional desk.\n\n## Escalation\n\nFaults are escalated to the Central regional desk. Out of hours,\nescalation passes to the national control room."
+  },
+  {
+    "doc_id": "site-cly",
+    "title": "Clyde Site Profile",
+    "kind": "site",
+    "text": "# Clyde Site Profile\n\nSite code: CLY. Region: South.\nOperational turbines: 51.\nSite manager: S. Tran.\n\n## Operating envelope\n\nTurbines at Clyde operate under the standard envelope defined in\nOPS-STD-04 unless a site variance is recorded. Gearbox temperature is\nlogged every fifteen minutes and reported daily to the regional desk.\n\n## Escalation\n\nFaults are escalated to the South regional desk. Out of hours,\nescalation passes to the national control room."
+  },
+  {
+    "doc_id": "site-bat",
+    "title": "Beinn an Tuirc Site Profile",
+    "kind": "site",
+    "text": "# Beinn an Tuirc Site Profile\n\nSite code: BAT. Region: West.\nOperational turbines: 29.\nSite manager: R. Achebe.\n\n## Operating envelope\n\nTurbines at Beinn an Tuirc operate under the standard envelope defined in\nOPS-STD-04 unless a site variance is recorded. Gearbox temperature is\nlogged every fifteen minutes and reported daily to the regional desk.\n\n## Escalation\n\nFaults are escalated to the West regional desk. Out of hours,\nescalation passes to the national control room."
+  },
+  {
+    "doc_id": "ops-std-04",
+    "title": "OPS-STD-04 Operating Envelope",
+    "kind": "standard",
+    "text": "# OPS-STD-04 \u2014 Standard Operating Envelope\n\n## Gearbox temperature\n\nThe gearbox oil temperature must not exceed 82 degrees Celsius during\ncontinuous operation. Between 82 and 90 degrees the turbine enters\nderated operation automatically. Above 90 degrees the turbine performs a\ncontrolled shutdown.\n\n## Vibration\n\nNacelle vibration above 0.55 mm/s RMS sustained for more than thirty\nminutes triggers a Level 2 alert. Above 0.80 mm/s the turbine shuts down\nimmediately and requires physical inspection before restart.\n\n## Rotor speed\n\nRated rotor speed is 14.6 rpm. The overspeed trip is set at 17.2 rpm."
+  },
+  {
+    "doc_id": "maint-pol-11",
+    "title": "MAINT-POL-11 Inspection Intervals",
+    "kind": "policy",
+    "text": "# MAINT-POL-11 \u2014 Scheduled Inspection Intervals\n\n## Routine inspection\n\nEvery turbine receives a routine inspection every 180 days. The interval\nreduces to 90 days for any turbine older than twelve years.\n\n## Post-alert inspection\n\nA Level 2 vibration alert requires inspection within 14 days. A Level 3\nalert requires inspection before the turbine is returned to service.\n\n## Deferral\n\nA routine inspection may be deferred once, by no more than 30 days, with\nwritten approval from the site manager. A post-alert inspection may not\nbe deferred under any circumstances."
+  },
+  {
+    "doc_id": "inc-2026-014",
+    "title": "Incident Report 2026-014",
+    "kind": "incident",
+    "text": "# Incident Report 2026-014\n\nDate: 14 March 2026. Site: Whitelee. Turbine: WHL-031.\n\n## Summary\n\nTurbine WHL-031 performed a controlled shutdown after gearbox oil\ntemperature reached 91.4 degrees Celsius. The turbine had been in derated\noperation for approximately six hours prior to shutdown.\n\n## Root cause\n\nA partially blocked oil cooler restricted flow. The blockage was traced to\ndebris ingress following a filter change on 2 March 2026 where the\nreplacement filter seal was incorrectly seated.\n\n## Corrective action\n\nFilter seating is now verified by a second engineer on every change. The\nverification requirement was added to MAINT-POL-11 as an appendix."
+  },
+  {
+    "doc_id": "inc-2026-021",
+    "title": "Incident Report 2026-021",
+    "kind": "incident",
+    "text": "# Incident Report 2026-021\n\nDate: 2 June 2026. Site: Clyde. Turbine: CLY-008.\n\n## Summary\n\nNacelle vibration on CLY-008 exceeded 0.80 mm/s RMS, triggering an\nimmediate shutdown. Vibration had been rising steadily for eleven days\nprior, crossing the Level 2 threshold on 22 May.\n\n## Root cause\n\nBlade root bolt tension had relaxed below specification on two of three\nblades. The preceding routine inspection had been deferred by 28 days\nunder the single-deferral provision.\n\n## Corrective action\n\nDeferral is no longer permitted for turbines with an open Level 2 alert."
+  },
+  {
+    "doc_id": "perf-2026-q2",
+    "title": "Fleet Performance Summary Q2 2026",
+    "kind": "report",
+    "text": "# Fleet Performance Summary \u2014 Q2 2026\n\n## Availability\n\nFleet availability averaged 94.2 percent. Whitelee recorded the highest\navailability at 96.1 percent. Beinn an Tuirc recorded the lowest at\n91.3 percent, attributed to two extended outages.\n\n## Failure rate\n\nThe fleet failure rate for the quarter was 3.1 failures per hundred\nturbines. Clyde recorded the highest site failure rate at 5.9 per hundred\nturbines. Ardrossan recorded 2.4 and Whitelee 2.1.\n\n## Generation\n\nTotal generation was 412 GWh, three percent above the quarterly forecast."
+  },
+  {
+    "doc_id": "proc-restart-07",
+    "title": "PROC-RESTART-07 Return to Service",
+    "kind": "procedure",
+    "text": "# PROC-RESTART-07 \u2014 Return to Service After Shutdown\n\n## Applicability\n\nThis procedure applies after any automatic shutdown, including overspeed,\nvibration and thermal shutdowns.\n\n## Sequence\n\n1. Confirm the originating fault has been cleared and logged.\n2. Complete the inspection required by MAINT-POL-11 for the alert level.\n3. Obtain written release from the site manager.\n4. Restart under supervision and monitor for two hours at reduced output.\n\n## Restriction\n\nA turbine that has shut down twice within 30 days may not be returned to\nservice without regional engineering approval."
+  }
+]

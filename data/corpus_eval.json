@@ -1,0 +1,93 @@
+[
+  {
+    "qid": "q01",
+    "question": "What is the maximum gearbox oil temperature during continuous operation?",
+    "gold_docs": [
+      "ops-std-04"
+    ],
+    "hops": 1,
+    "answer": "82 degrees Celsius."
+  },
+  {
+    "qid": "q02",
+    "question": "How often must a turbine older than twelve years be inspected?",
+    "gold_docs": [
+      "maint-pol-11"
+    ],
+    "hops": 1,
+    "answer": "Every 90 days."
+  },
+  {
+    "qid": "q03",
+    "question": "What caused the shutdown of turbine WHL-031?",
+    "gold_docs": [
+      "inc-2026-014"
+    ],
+    "hops": 1,
+    "answer": "A partially blocked oil cooler, caused by an incorrectly seated filter seal."
+  },
+  {
+    "qid": "q04",
+    "question": "Which site had the highest failure rate in Q2 2026?",
+    "gold_docs": [
+      "perf-2026-q2"
+    ],
+    "hops": 1,
+    "answer": "Clyde, at 5.9 failures per hundred turbines."
+  },
+  {
+    "qid": "q05",
+    "question": "Who is the site manager responsible for the site with the highest Q2 failure rate?",
+    "gold_docs": [
+      "perf-2026-q2",
+      "site-cly"
+    ],
+    "hops": 2,
+    "answer": "S. Tran \u2014 Clyde had the highest failure rate and S. Tran manages Clyde."
+  },
+  {
+    "qid": "q06",
+    "question": "Was the inspection deferral before incident 2026-021 permitted under policy at the time?",
+    "gold_docs": [
+      "inc-2026-021",
+      "maint-pol-11"
+    ],
+    "hops": 2,
+    "answer": "Yes \u2014 a single deferral of up to 30 days was permitted, and 28 days was used."
+  },
+  {
+    "qid": "q07",
+    "question": "What vibration level triggers immediate shutdown, and how soon must inspection follow?",
+    "gold_docs": [
+      "ops-std-04",
+      "maint-pol-11"
+    ],
+    "hops": 2,
+    "answer": "0.80 mm/s RMS triggers immediate shutdown; a Level 3 alert requires inspection before return to service."
+  },
+  {
+    "qid": "q08",
+    "question": "How many operational turbines are there at Whitelee?",
+    "gold_docs": [
+      "site-whl"
+    ],
+    "hops": 1,
+    "answer": "68."
+  },
+  {
+    "qid": "q09",
+    "question": "What approval is needed to return a turbine to service after two shutdowns in 30 days?",
+    "gold_docs": [
+      "proc-restart-07"
+    ],
+    "hops": 1,
+    "answer": "Regional engineering approval."
+  },
+  {
+    "qid": "q10",
+    "question": "What is the average lifespan of a gearbox bearing?",
+    "gold_docs": [],
+    "hops": 0,
+    "answer": "NOT IN CORPUS \u2014 the system should refuse rather than answer."
+  }
+]
