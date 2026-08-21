@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overfitting and Underfitting</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 9 of 9</span>
+  <h1>Overfitting and Underfitting</h1>
+  <p class="subtitle">The single most important pair of words in machine learning \u2014 and the reason you always hold data back.</p>
+
+  <p>Every model you build from Block 2 onward can fail in exactly two directions. It can be too simple to capture what's in the data, or so flexible that it memorises the specific examples it was shown instead of learning the pattern behind them. Almost all practical machine learning is navigating between those two failures.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Underfitting, good fit and overfitting compared">
+<g>
+<rect x="12" y="24" width="190" height="140" rx="6" class="d-box"/>
+<text x="60" y="18" class="d-fill-red" font-size="12" font-weight="600">UNDERFIT</text>
+<circle cx="42" cy="132" r="3.5" class="d-fill-muted"/><circle cx="68" cy="112" r="3.5" class="d-fill-muted"/>
+<circle cx="88" cy="120" r="3.5" class="d-fill-muted"/><circle cx="112" cy="82" r="3.5" class="d-fill-muted"/>
+<circle cx="134" cy="94" r="3.5" class="d-fill-muted"/><circle cx="158" cy="56" r="3.5" class="d-fill-muted"/>
+<circle cx="178" cy="68" r="3.5" class="d-fill-muted"/><circle cx="56" cy="146" r="3.5" class="d-fill-muted"/>
+<path d="M30 140 L190 62" stroke="var(--red)" stroke-width="2.5" fill="none"/>
+<text x="30" y="182" class="d-label-sm">too simple \u2014 misses</text>
+<text x="30" y="196" class="d-label-sm">the real shape</text>
+</g>
+<g>
+<rect x="225" y="24" width="190" height="140" rx="6" class="d-box"/>
+<text x="284" y="18" class="d-fill-green" font-size="12" font-weight="600">GOOD FIT</text>
+<circle cx="255" cy="132" r="3.5" class="d-fill-muted"/><circle cx="281" cy="112" r="3.5" class="d-fill-muted"/>
+<circle cx="301" cy="120" r="3.5" class="d-fill-muted"/><circle cx="325" cy="82" r="3.5" class="d-fill-muted"/>
+<circle cx="347" cy="94" r="3.5" class="d-fill-muted"/><circle cx="371" cy="56" r="3.5" class="d-fill-muted"/>
+<circle cx="391" cy="68" r="3.5" class="d-fill-muted"/><circle cx="269" cy="146" r="3.5" class="d-fill-muted"/>
+<path d="M243 146 Q300 120 330 92 Q365 62 403 60" stroke="var(--green)" stroke-width="2.5" fill="none"/>
+<text x="243" y="182" class="d-label-sm">captures the trend,</text>
+<text x="243" y="196" class="d-label-sm">ignores the noise</text>
+</g>
+<g>
+<rect x="438" y="24" width="190" height="140" rx="6" class="d-box"/>
+<text x="494" y="18" class="d-fill-red" font-size="12" font-weight="600">OVERFIT</text>
+<circle cx="468" cy="132" r="3.5" class="d-fill-muted"/><circle cx="494" cy="112" r="3.5" class="d-fill-muted"/>
+<circle cx="514" cy="120" r="3.5" class="d-fill-muted"/><circle cx="538" cy="82" r="3.5" class="d-fill-muted"/>
+<circle cx="560" cy="94" r="3.5" class="d-fill-muted"/><circle cx="584" cy="56" r="3.5" class="d-fill-muted"/>
+<circle cx="604" cy="68" r="3.5" class="d-fill-muted"/><circle cx="482" cy="146" r="3.5" class="d-fill-muted"/>
+<path d="M468 146 L482 146 L494 112 L514 120 L538 82 L560 94 L584 56 L604 68" stroke="var(--red)" stroke-width="2.5" fill="none"/>
+<text x="456" y="182" class="d-label-sm">threads every point \u2014</text>
+<text x="456" y="196" class="d-label-sm">memorised the noise</text>
+</g>
+</svg><figcaption>The same data, three models. The middle one is worse on the training points than the right one \u2014 and far better on everything else.</figcaption></figure>
+  <h2>Underfitting: the model is too simple</h2>
+  <p>An <strong>underfit</strong> model hasn't got enough capacity, or hasn't trained long enough, to represent the real relationship. It performs badly on the training data <em>and</em> badly on new data. This is the easier problem — it's obvious, and the fix is usually more capacity, better features, or longer training.</p>
+  <h2>Overfitting: the model memorised</h2>
+  <p>An <strong>overfit</strong> model has learned the training set in detail, including its noise, its quirks, and its accidents. It scores brilliantly on data it has seen and poorly on anything else. This is the dangerous one, because from inside the training run it looks like spectacular success.</p>
+  <div class="callout pitfall"><span class="label">How this gets shipped</span>Someone reports 99% accuracy. Nobody asks 99% on what. The model was scored on the same data it trained on, which measures memory rather than learning. Any accuracy figure without a held-out set behind it is not a result.</div>
+  <h2>The one habit that catches it</h2>
+  <p>Split your data before you do anything else:</p>
+  <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">Train</div><div><div class="roadmap-title">~70%</div><div class="roadmap-desc">The model learns from this and only this.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Validation</div><div><div class="roadmap-title">~15%</div><div class="roadmap-desc">Used while developing \u2014 tuning, choosing between models, deciding when to stop.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Test</div><div><div class="roadmap-title">~15%</div><div class="roadmap-desc">Touched once, at the very end. Every time you look, it becomes a little more like validation data.</div></div></div></div>
+  <p>The gap between training and validation performance is the diagnostic. Small gap and poor scores on both means underfitting. Large gap \u2014 excellent on train, mediocre on validation \u2014 means overfitting.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 240" role="img" aria-label="Training and validation loss curves diverging">
+<line x1="60" y1="20" x2="60" y2="190" class="d-arrow"/>
+<line x1="60" y1="190" x2="610" y2="190" class="d-arrow"/>
+<text x="14" y="100" class="d-label-sm">loss</text>
+<text x="300" y="216" class="d-label-sm">training time \u2192</text>
+<path d="M60 44 Q150 120 250 148 Q380 172 600 182" stroke="var(--accent)" stroke-width="2.5" fill="none"/>
+<text x="470" y="172" class="d-accent">training loss</text>
+<path d="M60 50 Q150 122 250 140 Q330 152 400 130 Q490 100 600 52" stroke="var(--red)" stroke-width="2.5" fill="none"/>
+<text x="464" y="80" class="d-fill-red" font-size="12" font-weight="600">validation loss</text>
+<line x1="286" y1="28" x2="286" y2="190" stroke="var(--green)" stroke-width="1.8" stroke-dasharray="5 4"/>
+<circle cx="286" cy="143" r="5" class="d-fill-green"/>
+<text x="192" y="24" class="d-fill-green" font-size="12" font-weight="600">stop here</text>
+<text x="96" y="214" class="d-label-sm">both improving</text>
+<text x="330" y="214" class="d-label-sm">memorising \u2014 validation gets worse while training keeps improving</text>
+</svg><figcaption>Training loss almost always keeps falling. Validation loss is the one that tells the truth. The moment they diverge is where you should have stopped.</figcaption></figure>
+  <h2>The fixes, in the order worth trying</h2>
+  <ul><li><strong>More data.</strong> Almost always the strongest remedy. Harder to memorise a large, varied set.</li><li><strong>Early stopping.</strong> Halt when validation loss stops improving. Free, and shown above.</li><li><strong>Regularisation.</strong> Penalise complexity (L1/L2), or drop random units during training (dropout).</li><li><strong>Simplify.</strong> Fewer parameters, shallower trees, fewer features.</li><li><strong>Cross-validation.</strong> Rotate which slice is held out, so your estimate doesn't hinge on one lucky split.</li></ul>
+  <h2>Where this shows up outside classical ML</h2>
+  <p>The same failure follows you through the whole program under different names:</p>
+  <ul><li><strong>Fine-tuning (Block 7).</strong> Train too long on a small dataset and the model parrots your examples, losing the general ability that made it useful. Held-out evaluation before and after is non-negotiable.</li><li><strong>Benchmarks (Block 5).</strong> Contaminated benchmarks are overfitting at industry scale \u2014 the test set leaked into training, so the score measures memory. Your own twenty-item eval set is a private held-out set, which is precisely why it's worth more than a public leaderboard.</li><li><strong>Prompt engineering (Block 3).</strong> Tuning a prompt against the same five examples until it's perfect on them is overfitting by hand. Hold some examples back.</li></ul>
+  <div class="callout matters"><span class="label">The transferable idea</span>Any time you tune something against results you can see, you risk fitting the measurement rather than the thing being measured. The defence is always the same: keep some data where you can't look at it.</div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. A model scores 99% on training data and 62% on data it hasn&#x27;t seen. What&#x27;s happening?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Underfitting — the model needs more capacity</div>
+      <div class="quiz-opt">Overfitting — it has memorised the training set including its noise</div>
+      <div class="quiz-opt">The test set is too small to be meaningful</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why hold back a test set separate from the validation set?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">To have more data available for training</div>
+      <div class="quiz-opt">Because repeatedly tuning against validation data gradually fits it too — the test set stays clean for one honest final measurement</div>
+      <div class="quiz-opt">Because validation sets are usually mislabelled</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. How does a contaminated public benchmark relate to overfitting?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It doesn&#x27;t — contamination is a separate problem</div>
+      <div class="quiz-opt">It&#x27;s the same failure at industry scale: the test data leaked into training, so the score measures memory rather than capability</div>
+      <div class="quiz-opt">It only affects small models</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. You fine-tune a model on 200 examples and it now answers those beautifully but has lost general ability. What&#x27;s the name for this?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Catastrophic underfitting</div>
+      <div class="quiz-opt">Overfitting — trained too long on too little data</div>
+      <div class="quiz-opt">Quantization loss</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

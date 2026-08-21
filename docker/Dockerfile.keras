@@ -1,0 +1,18 @@
+# TensorFlow + Keras 3 + Jupyter — Block 2 neural networks
+# Python 3.12: TF has no 3.14 support. Verified TF 2.21.0 / Keras 3.15.1.
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+WORKDIR /work
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      build-essential git curl && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir \
+      tensorflow==2.21.* \
+      jupyterlab==4.* \
+      "numpy<3" pandas==2.* scikit-learn==1.* matplotlib seaborn \
+      mlflow
+
+EXPOSE 8889
+CMD ["jupyter","lab","--ip=0.0.0.0","--port=8889","--no-browser","--allow-root","--NotebookApp.token="]

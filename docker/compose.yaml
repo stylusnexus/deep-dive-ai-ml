@@ -1,0 +1,44 @@
+name: pgp-aiml
+
+services:
+  torch:
+    build: { context: ., dockerfile: Dockerfile.torch }
+    ports: ["8888:8888"]
+    volumes: ["../:/work"]
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+
+  keras:
+    build: { context: ., dockerfile: Dockerfile.keras }
+    ports: ["8889:8889"]
+    volumes: ["../:/work"]
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+
+  # Vector store for Block 3 (RAG). Real pgvector, not an in-memory list.
+  pgvector:
+    image: pgvector/pgvector:pg17
+    ports: ["5433:5432"]
+    environment:
+      POSTGRES_USER: aiml
+      POSTGRES_PASSWORD: aiml
+      POSTGRES_DB: aiml
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U aiml"]
+      interval: 10s
+      retries: 5
+
+  # Experiment tracking — Blocks 2 and 7
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.19.0
+    ports: ["5001:5000"]
+    command: >
+      mlflow server --host 0.0.0.0 --port 5000
+      --backend-store-uri sqlite:////mlruns/mlflow.db
+      --default-artifact-root /mlruns/artifacts
+    volumes: ["mlruns:/mlruns"]
+
+volumes:
+  pgdata:
+  mlruns:

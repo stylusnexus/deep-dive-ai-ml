@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Embeddings, Vectors and Semantic Routing</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 5 of 9</span>
+  <h1>Embeddings, Vectors and Semantic Routing</h1>
+  <p class="subtitle">How a machine decides two things 'mean' something similar — and where that fails.</p>
+
+  <p><strong>Semantic routing</strong> appears five times in Bullpen's docs, and it depends entirely on <strong>embeddings</strong>. This is also the machinery behind RAG in Block 3, so the concept pays for itself twice.</p>
+  <h2>An embedding is a list of numbers standing in for meaning</h2>
+  <p>An embedding model takes text and returns a fixed-length list of numbers — a <strong>vector</strong>, typically a few hundred to a couple of thousand values. The useful property is that texts with similar meanings produce vectors that point in similar directions, even when they share no words at all.</p>
+  <p>"How do I reset my password?" and "I'm locked out of my account" have almost no vocabulary in common. Their embeddings sit close together. That is the whole trick, and everything else is bookkeeping.</p>
+  <div class="callout insight"><span class="label">Similarity is a measurable angle</span>Closeness is usually cosine similarity — the angle between two vectors, from 1 (same direction) to -1 (opposite). It's a cheap arithmetic operation, which is why searching millions of vectors is fast.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 260" role="img" aria-label="Embedding space with clusters">
+<rect x="12" y="12" width="616" height="236" rx="8" class="d-box"/>
+<circle cx="140" cy="80" r="6" class="d-fill-accent"/>
+<circle cx="176" cy="98" r="6" class="d-fill-accent"/>
+<circle cx="150" cy="118" r="6" class="d-fill-accent"/>
+<ellipse cx="156" cy="99" rx="60" ry="46" fill="none" stroke="var(--accent)" stroke-dasharray="4 4" opacity="0.6"/>
+<text x="106" y="172" class="d-label-sm">"reset my password"</text>
+<text x="106" y="188" class="d-label-sm">"locked out of my account"</text>
+<text x="106" y="204" class="d-label-sm">"can't sign in"</text>
+<circle cx="420" cy="70" r="6" class="d-fill-green"/>
+<circle cx="458" cy="88" r="6" class="d-fill-green"/>
+<ellipse cx="439" cy="79" rx="48" ry="34" fill="none" stroke="var(--green)" stroke-dasharray="4 4" opacity="0.6"/>
+<text x="392" y="140" class="d-label-sm">"where is my order"</text>
+<text x="392" y="156" class="d-label-sm">"track my delivery"</text>
+<circle cx="300" cy="212" r="6" class="d-fill-red"/>
+<circle cx="316" cy="216" r="6" class="d-fill-red"/>
+<text x="336" y="212" class="d-label-sm">"I want a refund" /</text>
+<text x="336" y="228" class="d-label-sm">"I don't want a refund" — too close</text>
+<text x="24" y="36" class="d-label-sm">similar meaning → similar direction</text>
+</svg><figcaption>Meaning becomes geometry. Phrases sharing no words land close together; the negation pair lands close too, which is exactly the failure mode to watch for.</figcaption></figure>
+  <h2>How semantic routing works in Bullpen</h2>
+  <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">1</div><div><div class="roadmap-title">Define the lanes</div><div class="roadmap-desc">Each route — a code edit, a factual lookup, a repo question — gets example phrasings.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2</div><div><div class="roadmap-title">Embed the examples</div><div class="roadmap-desc">Once, up front. Stored as vectors.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3</div><div><div class="roadmap-title">Embed the incoming turn</div><div class="roadmap-desc">One cheap embedding call, far cheaper and faster than asking an LLM to classify.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">Compare and pick</div><div class="roadmap-desc">Nearest lane wins, if it clears a confidence threshold.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5</div><div><div class="roadmap-title">Fall back</div><div class="roadmap-desc">Below threshold, ask a model to decide rather than guessing.</div></div></div></div>
+  <p>The reason to route this way rather than asking an LLM "which category is this?" is cost and latency. An embedding call is milliseconds and fractions of a cent. It runs on every single turn, so that difference compounds.</p>
+  <h2>Where embeddings fail</h2>
+  <ul><li><strong>Negation.</strong> "I want a refund" and "I don't want a refund" embed close together. Sign is meaning, and embeddings are weak at it.</li><li><strong>Jargon and identifiers.</strong> Internal names, error codes, and file paths often carry no useful semantics. Keyword search beats embeddings here — which is why serious retrieval combines both.</li><li><strong>Chunking artefacts.</strong> An embedding represents whatever text you gave it. Split a document badly and you get vectors representing half-thoughts.</li></ul>
+  <div class="callout pitfall"><span class="label">The baseline you should always run</span>Before reaching for a vector database, try keyword search — BM25 or plain Postgres full-text. On short, jargon-heavy, identifier-rich corpora it frequently wins, and it costs nothing to test. This is the intake sheet's 'dumb baseline' question applied to retrieval.</div>
+  <h2>Vector stores</h2>
+  <p>A <strong>vector database</strong> stores vectors alongside their source text and finds nearest neighbours quickly. Block 3 uses <code>pgvector</code> — the Postgres extension — because it means one database rather than two, and because at the scale you'll work at, the specialist stores buy speed you don't need.</p>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why route with embeddings rather than asking an LLM to classify each turn?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Embeddings are more accurate at classification</div>
+      <div class="quiz-opt">An embedding call costs milliseconds and a fraction of a cent, and it runs on every turn</div>
+      <div class="quiz-opt">LLMs cannot perform classification reliably</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. A support bot keeps confusing &#x27;I want to cancel&#x27; with &#x27;I don&#x27;t want to cancel&#x27;. What&#x27;s happening?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The embedding model is broken and should be replaced</div>
+      <div class="quiz-opt">Embeddings handle negation poorly — the two phrases sit close together in vector space</div>
+      <div class="quiz-opt">The chunk size is too large</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Before building vector search over a corpus of internal error codes and file paths, what should you try first?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A larger embedding model</div>
+      <div class="quiz-opt">Keyword search — on identifier-heavy text it often beats embeddings, and it&#x27;s free to test</div>
+      <div class="quiz-opt">Splitting the documents into smaller chunks</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+{
+  "title": "Bullpen Vocabulary: The Terms Your Own Codebase Uses",
+  "topic": "bullpen-vocabulary",
+  "icon": "\ud83c\udfaf",
+  "description": "The fourteen terms that recur across Bullpen's docs, taught against the system you built rather than someone else's toy example.",
+  "tags": [
+    "ai",
+    "vocabulary",
+    "bullpen"
+  ],
+  "colorScheme": "blue",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-08-20",
+  "lessons": [
+    {
+      "id": "lsn-1787000000000",
+      "title": "The Agent Loop and the Harness",
+      "file": "lsn-1787000000000-agent-loop-and-harness.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000001",
+      "title": "Tokens, the Context Window, and the KV Cache",
+      "file": "lsn-1787000000001-tokens-context-and-kv-cache.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000002",
+      "title": "Weights, GGUF and Quantization",
+      "file": "lsn-1787000000002-weights-gguf-quantization.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000003",
+      "title": "Serving Locally: Ollama, llama.cpp and tok/s",
+      "file": "lsn-1787000000003-serving-locally.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000004",
+      "title": "Embeddings, Vectors and Semantic Routing",
+      "file": "lsn-1787000000004-embeddings-and-retrieval.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000005",
+      "title": "Tool Calls and MCP",
+      "file": "lsn-1787000000005-tool-calls-and-mcp.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000006",
+      "title": "Routing, Escalation and Sampling Controls",
+      "file": "lsn-1787000000006-routing-and-escalation.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000007",
+      "title": "The Eval Battery",
+      "file": "lsn-1787000000007-eval-battery.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000008",
+      "title": "Overfitting and Underfitting",
+      "file": "lsn-1787000000008-overfitting-and-underfitting.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1787000000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000004": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000005": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000006": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000007": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000008": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}

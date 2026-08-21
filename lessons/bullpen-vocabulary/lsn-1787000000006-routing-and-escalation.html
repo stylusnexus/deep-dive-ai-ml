@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Routing, Escalation and Sampling Controls</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 7 of 9</span>
+  <h1>Routing, Escalation and Sampling Controls</h1>
+  <p class="subtitle">The idea Bullpen is built on — plus temperature and top-k, which decide how a model picks words.</p>
+
+  <p><strong>Escalation</strong> appears 44 times in Bullpen's docs. It is not a feature of the project; it is the project's whole argument.</p>
+  <h2>Predict versus try</h2>
+  <p>Commercial model routers try to <em>predict</em>, from your prompt, which model will handle it best. Bullpen's premise is that this is unreliable — models produce confident wrong answers, and so do the classifiers predicting them.</p>
+  <p>The inversion: try the cheap local model, <em>watch what happens</em>, and escalate only when the result actually fails. Prediction is replaced by observation. You pay a little latency on hard tasks in exchange for not paying frontier prices on easy ones.</p>
+  <div class="callout insight"><span class="label">Why this only works with a verifier</span>Escalation-on-failure requires knowing that something failed. Where failure is checkable — code doesn't compile, tests fail, output doesn't match a schema, tool call malformed — the strategy is sound. Where quality is subjective, there's no signal to escalate on, and you're back to guessing. Check what your failure detector actually detects before trusting a routing scheme.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Escalation flow"><defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker><marker id="aa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="76" width="120" height="48" rx="7" class="d-box"/>
+<text x="46" y="105" class="d-label-b">Request</text>
+<path d="M132 100 L176 100" class="d-arrow" marker-end="url(#a)"/>
+<rect x="176" y="76" width="130" height="48" rx="7" class="d-box-good"/>
+<text x="200" y="98" class="d-label-b">Local model</text>
+<text x="208" y="115" class="d-label-sm">free, fast</text>
+<path d="M306 100 L350 100" class="d-arrow" marker-end="url(#a)"/>
+<polygon points="350,100 412,72 474,100 412,128" class="d-box-accent"/>
+<text x="378" y="96" class="d-label-sm">verifier</text>
+<text x="374" y="112" class="d-label-sm">passed?</text>
+<path d="M474 100 L560 100" class="d-arrow" marker-end="url(#a)"/>
+<text x="492" y="92" class="d-accent">yes</text>
+<rect x="560" y="78" width="68" height="44" rx="7" class="d-box-good"/>
+<text x="576" y="105" class="d-label">done</text>
+<path d="M412 128 L412 168 L560 168" class="d-arrow" marker-end="url(#a)"/>
+<text x="424" y="162" class="d-fill-red" font-size="12" font-weight="600">no</text>
+<rect x="560" y="146" width="68" height="44" rx="7" class="d-box-warn"/>
+<text x="572" y="166" class="d-label">escalate</text>
+<text x="572" y="182" class="d-label-sm">paid</text>
+<text x="12" y="36" class="d-label-sm">Compilation, tests, schema validation and malformed tool calls are all checkable — those make good verifiers.</text>
+<text x="12" y="52" class="d-label-sm">"Is this prose any good?" is not, so there is nothing to route on.</text>
+</svg><figcaption>Observation replaces prediction. The verifier is load-bearing — remove it and there is no signal to escalate on, which is why subjective tasks can't use this pattern.</figcaption></figure>
+  <h2>What escalation costs</h2>
+  <ul><li><strong>Latency.</strong> A failed local attempt is time spent before the real answer starts.</li><li><strong>Tokens.</strong> You pay for the failed attempt too, though local attempts are near-free.</li><li><strong>Complexity.</strong> Two lanes, two sets of failure modes, and a decision layer that can itself be wrong.</li></ul>
+  <p>The trade is worth it when most tasks are easy — which, for coding assistance, they are. Routing is an economic bet on the shape of your workload, so it's worth measuring that shape rather than assuming it.</p>
+  <h2>Temperature and top-k: how the next word gets picked</h2>
+  <p>At each step the model produces a probability across every token in its vocabulary. Sampling controls decide how that distribution gets turned into one choice.</p>
+  <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">Temperature</div><div><div class="roadmap-title">Flattens or sharpens the distribution</div><div class="roadmap-desc">0 means always take the most likely token — deterministic and repetitive. Around 0.7 is a conversational default. Above ~1.2, coherence degrades.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-k</div><div><div class="roadmap-title">Consider only the k most likely tokens</div><div class="roadmap-desc">Discards the long tail of nonsense before sampling.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-p</div><div><div class="roadmap-title">Consider the smallest set summing to probability p</div><div class="roadmap-desc">Adapts to the distribution's shape — more choices when the model is unsure, fewer when it's confident. Usually preferred over top-k.</div></div></div></div>
+  <div class="callout matters"><span class="label">The practical setting</span>For anything parsed by code — tool calls, structured output, classification, routing — use temperature 0 or very close. You want repeatability, not creativity. Save higher temperatures for prose where variation is the point. A surprising share of 'the agent is flaky' bugs are just an unnecessarily high temperature on a structured task.</div>
+  <h2>Determinism, honestly</h2>
+  <p>Temperature 0 makes sampling deterministic but does not guarantee identical outputs across runs. Batching, hardware differences, and floating-point non-associativity introduce variation, especially with hosted providers. Design evaluations to tolerate small differences rather than assuming byte-identical replies.</p>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why does Bullpen try a local model first rather than predicting which model to use?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Local models are usually better than frontier models</div>
+      <div class="quiz-opt">Prediction is unreliable; observing an actual failure is a stronger signal than guessing in advance</div>
+      <div class="quiz-opt">It avoids sending data to third parties</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. When is escalation-on-failure a poor strategy?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">When the local model is small</div>
+      <div class="quiz-opt">When failure isn&#x27;t detectable — subjective quality gives you no signal to escalate on</div>
+      <div class="quiz-opt">When latency matters at all</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Your agent&#x27;s tool calls are intermittently malformed. What should you check first?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">Whether temperature is above 0 on a task that needs deterministic structured output</div>
+      <div class="quiz-opt">Whether the context window is full</div>
+      <div class="quiz-opt">Whether the model supports tool calling</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tokens, the Context Window, and the KV Cache</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 2 of 9</span>
+  <h1>Tokens, the Context Window, and the KV Cache</h1>
+  <p class="subtitle">Why a model 'forgets', why long conversations get expensive, and what's actually being cached.</p>
+
+  <p>A model does not read characters or words. It reads <strong>tokens</strong> — chunks of text produced by a tokenizer, roughly ¾ of a word in English. "unbelievable" might be three tokens; a rare surname might be six. Every cost, limit and speed figure in this field is denominated in tokens, which is why the unit matters.</p>
+  <h2>The context window is a hard wall</h2>
+  <p>The <strong>context window</strong> is the maximum number of tokens the model can consider at once — system prompt, conversation history, retrieved documents, tool definitions, tool results, and the answer being generated, all counted together.</p>
+  <p>It is not memory in any human sense. Nothing is remembered between calls. Each time the loop runs, the <em>entire</em> conversation is re-sent. What looks like a model remembering what you said ten turns ago is the harness re-sending those ten turns every single time.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Context window composition and cost growth">
+<text x="12" y="20" class="d-label-b">One context window</text>
+<rect x="12" y="32" width="616" height="38" rx="5" class="d-box"/>
+<rect x="14" y="34" width="90" height="34" rx="4" class="d-fill-accent" opacity="0.75"/>
+<text x="26" y="56" class="d-label-sm">system</text>
+<rect x="106" y="34" width="230" height="34" rx="4" class="d-fill-yellow" opacity="0.65"/>
+<text x="170" y="56" class="d-label-sm">conversation history</text>
+<rect x="338" y="34" width="180" height="34" rx="4" class="d-fill-green" opacity="0.6"/>
+<text x="372" y="56" class="d-label-sm">retrieved context</text>
+<rect x="520" y="34" width="106" height="34" rx="4" class="d-fill-muted" opacity="0.5"/>
+<text x="540" y="56" class="d-label-sm">answer</text>
+<text x="12" y="108" class="d-label-b">Tokens sent per turn</text>
+<line x1="12" y1="180" x2="628" y2="180" class="d-arrow"/>
+<rect x="40" y="168" width="26" height="12" class="d-fill-accent" opacity="0.8"/>
+<rect x="110" y="150" width="26" height="30" class="d-fill-accent" opacity="0.8"/>
+<rect x="180" y="130" width="26" height="50" class="d-fill-accent" opacity="0.8"/>
+<rect x="250" y="104" width="26" height="76" class="d-fill-accent" opacity="0.8"/>
+<rect x="320" y="122" width="26" height="58" class="d-fill-red" opacity="0.35"/>
+<text x="40" y="196" class="d-label-sm">t1</text>
+<text x="110" y="196" class="d-label-sm">t5</text>
+<text x="180" y="196" class="d-label-sm">t10</text>
+<text x="250" y="196" class="d-label-sm">t20</text>
+<text x="380" y="130" class="d-label-sm">the whole conversation is</text>
+<text x="380" y="146" class="d-label-sm">re-sent every single turn</text>
+</svg><figcaption>Everything competes for the same window. As history grows, the room left for retrieved context and the answer shrinks — and the whole bar is re-sent every turn.</figcaption></figure>
+  <div class="callout pitfall"><span class="label">The mistake this causes</span>People assume a longer context window means the model 'pays attention' to everything in it. It doesn't. Retrieval quality degrades toward the middle of a long context — the well-documented 'lost in the middle' effect. A 200k window is a capacity limit, not a promise of comprehension.</div>
+  <h2>Why long sessions get expensive fast</h2>
+  <p>Because the whole conversation is re-sent each turn, cost grows quadratically with conversation length, not linearly. Turn 20 sends roughly twenty times the tokens of turn 1. This is the single biggest driver of surprise LLM bills, and it's why Bullpen persists and prunes sessions rather than letting them grow without limit.</p>
+  <h2>The KV cache</h2>
+  <p>When a model processes tokens, each layer computes <em>key</em> and <em>value</em> vectors for every token. Generating the next token requires those vectors for all previous tokens. Recomputing them every step would be enormously wasteful, so they're kept in the <strong>KV cache</strong>.</p>
+  <p>Two consequences you can feel:</p>
+  <ul><li><strong>Memory.</strong> The KV cache grows with context length and is often what actually exhausts RAM when running a model locally — not the weights. This is why a model that loads fine can still die on a long prompt.</li><li><strong>Speed.</strong> The first token is slow (the whole prompt must be processed — 'prefill'); subsequent tokens are fast (only one new token to process — 'decode'). That's why time-to-first-token and tokens-per-second are reported separately.</li></ul>
+  <div class="callout insight"><span class="label">Prompt caching is this, sold</span>When a provider offers 'prompt caching' at a discount, they are keeping the KV cache for your unchanging prefix instead of recomputing it. That's why the advice is always to put the stable content — system prompt, long documents — at the <em>front</em> and the variable content at the end. Reorder and the cache misses.</div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. A conversation is on turn 30 and costs are climbing sharply. Why?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The model gets slower as it gets tired</div>
+      <div class="quiz-opt">The entire conversation is re-sent on every turn, so token count grows with each exchange</div>
+      <div class="quiz-opt">Longer conversations are billed at a higher per-token rate</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. You load a 13B model locally with room to spare, then it runs out of memory on a long document. What most likely consumed the memory?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">The KV cache, which grows with context length</div>
+      <div class="quiz-opt">The model weights, which expand during inference</div>
+      <div class="quiz-opt">The tokenizer building a vocabulary</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why does prompt-cache advice say to put stable content first?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Models pay more attention to the beginning of a prompt</div>
+      <div class="quiz-opt">The cache is keyed on an unchanged prefix — change something early and everything after it must be recomputed</div>
+      <div class="quiz-opt">It reduces the total token count</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

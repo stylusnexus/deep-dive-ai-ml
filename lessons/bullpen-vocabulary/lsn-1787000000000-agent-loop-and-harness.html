@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Agent Loop and the Harness</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 1 of 9</span>
+  <h1>The Agent Loop and the Harness</h1>
+  <p class="subtitle">The two words that appear most often in your own docs — and the difference between them.</p>
+
+  <p>Across Bullpen's documentation, <strong>agent loop</strong> appears 38 times and <strong>harness</strong> 24. They are the two most-used pieces of vocabulary in the project after the name of a tool. They are also routinely confused, including in your own notes, so start here.</p>
+  <h2>The agent loop is a while-loop</h2>
+  <p>Strip away the branding and an AI agent is a loop that runs until something says stop:</p>
+  <pre><code>while not done:
+    response = model(conversation)
+    if response.wants_to_use_a_tool:
+        result = run_tool(response.tool_call)
+        conversation.append(result)
+    else:
+        done = True</code></pre>
+  <p>That is the whole idea. The model cannot <em>do</em> anything — it emits text. When that text is a request to run a tool, something outside the model runs the tool and appends the result to the conversation. Then the model gets another turn. The loop is what turns a text predictor into something that appears to act.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 300" role="img" aria-label="Diagram of an agent loop inside a harness"><defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker><marker id="aa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="12" width="400" height="276" rx="10" class="d-box"/>
+<text x="28" y="38" class="d-accent">HARNESS</text>
+<text x="28" y="56" class="d-label-sm">prompt assembly · tool registry · turn limit · persistence</text>
+<rect x="40" y="76" width="150" height="42" rx="6" class="d-box-accent"/>
+<text x="60" y="102" class="d-label">1. Build context</text>
+<rect x="40" y="146" width="150" height="42" rx="6" class="d-box-accent"/>
+<text x="60" y="172" class="d-label">2. Call model</text>
+<rect x="40" y="216" width="150" height="42" rx="6" class="d-box-accent"/>
+<text x="52" y="236" class="d-label">3. Tool requested?</text>
+<text x="52" y="252" class="d-label-sm">run it, append result</text>
+<path d="M115 118 L115 146" class="d-arrow-accent" marker-end="url(#aa)"/>
+<path d="M115 188 L115 216" class="d-arrow-accent" marker-end="url(#aa)"/>
+<path d="M205 237 L240 237 L240 97 L205 97" class="d-arrow-accent" marker-end="url(#aa)"/>
+<text x="250" y="160" class="d-label-sm">loop until</text>
+<text x="250" y="176" class="d-label-sm">no tool needed</text>
+<rect x="470" y="146" width="150" height="60" rx="8" class="d-box"/>
+<text x="500" y="172" class="d-label-b">MODEL</text>
+<text x="486" y="192" class="d-label-sm">text in, text out</text>
+<path d="M195 160 L470 160" class="d-arrow" marker-end="url(#a)"/>
+<path d="M470 192 L195 192" class="d-arrow" marker-end="url(#a)"/>
+<text x="300" y="152" class="d-label-sm">context</text>
+<text x="300" y="212" class="d-label-sm">text (maybe a tool request)</text>
+</svg><figcaption>The harness is the outer box. The model sits outside it and only ever returns text — the loop is what turns that text into action.</figcaption></figure>
+  <div class="callout insight"><span class="label">Why this matters</span>Almost every agent failure is a loop failure, not a model failure. The loop ran out of turns, or fed back a badly-formatted tool result, or never noticed the model was going in circles. When an agent misbehaves, look at the loop before you blame the model.</div>
+  <h2>The harness is everything around the loop</h2>
+  <p>The <strong>harness</strong> is the scaffolding: what goes into the prompt, which tools are registered, how results are formatted on the way back, how many turns are allowed, what happens on failure, how the session is persisted. The model is a component the harness calls.</p>
+  <p>This distinction has a direct consequence you have already recorded. Your own note on Bullpen's multi-file editing wall concluded that <em>the binding constraint is harness, not model size</em> — the models were capable enough; the scaffolding around them was what capped performance at 11 of 24. That conclusion is only expressible if you hold the two terms apart.</p>
+  <div class="callout matters"><span class="label">The practical rule</span>If a bigger model would fix it, it's a model problem. If better prompting, better tool results, or more turns would fix it, it's a harness problem. Most of the time it's the harness — which is good news, because the harness is the part you control.</div>
+  <h2>Where this sits in Bullpen</h2>
+  <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">1</div><div><div class="roadmap-title">You type a message</div><div class="roadmap-desc">The REPL hands it to the harness.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2</div><div><div class="roadmap-title">The harness assembles context</div><div class="roadmap-desc">System prompt, session history, retrieved repo context, available tool definitions.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3</div><div><div class="roadmap-title">The loop starts</div><div class="roadmap-desc">Model responds. Wants a tool? Run it, append the result, go again.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">The loop ends</div><div class="roadmap-desc">Model answers without requesting a tool, or hits the turn limit, or escalates.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5</div><div><div class="roadmap-title">The harness persists</div><div class="roadmap-desc">Session and memory are written down so the next turn has history.</div></div></div></div>
+  <h2>The word you&#x27;ll see elsewhere</h2>
+  <p>Outside your codebase, people also use <strong>harness</strong> to mean an <em>evaluation</em> harness — the rig that runs a model against a test set. Bullpen uses it in both senses, which is a genuine ambiguity rather than your misunderstanding. Context disambiguates: an agent harness runs one task for a user, an eval harness runs many tasks for a score.</p>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. An agent gets stuck repeating the same tool call five times before giving up. Where is the problem most likely to be?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The model isn&#x27;t large enough and should be swapped for a frontier model</div>
+      <div class="quiz-opt">The harness — nothing is detecting the repetition or feeding back that the approach isn&#x27;t working</div>
+      <div class="quiz-opt">The tool itself is broken and returning errors</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. What is the one thing a language model fundamentally cannot do inside an agent loop?</p>
+    <div class="quiz-options" data-answer="2">
+      <div class="quiz-opt">Produce structured output like JSON</div>
+      <div class="quiz-opt">Decide which tool would be useful</div>
+      <div class="quiz-opt">Actually execute a tool — it can only emit a request that something else runs</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Your note concluded Bullpen&#x27;s multi-file wall was &#x27;harness, not model size&#x27;. What would have been the alternative conclusion?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">That the models lacked the capability, and only a bigger model would move the number</div>
+      <div class="quiz-opt">That the tools were badly written</div>
+      <div class="quiz-opt">That the test itself was measuring the wrong thing</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>
