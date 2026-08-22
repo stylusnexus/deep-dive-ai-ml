@@ -52,7 +52,7 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **top-k / top-p** — Limit sampling to the k most likely tokens, or to the smallest set summing to probability p. top-p adapts to the distribution's shape and is usually preferred.
 
-**Eval battery** — A fixed set of tasks with machine-checkable outcomes. Its value comes from staying fixed.
+**Eval battery** — A fixed set of tasks with machine-checkable outcomes. Its value comes from staying fixed. The battery is the *data*; an eval harness is the *machinery* that runs it. Distinct again from an agent harness, which is the scaffolding around one agent run.
 
 **Model-as-judge** — Using a model to grade another model's output. Flexible, biased, and circular if the judge is the model under test.
 

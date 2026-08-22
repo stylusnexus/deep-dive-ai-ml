@@ -620,7 +620,11 @@ LESSONS = [
     ("p", "Each task has an input, a way to run it, and a way to decide pass or fail <em>without a human</em>. Run the battery against a configuration and you get a score. Change one thing, re-run, compare. That's the entire method, and its value comes from the set staying fixed."),
     ("p", "A recorded result — say 11 of 24 on multi-file editing as of a particular change — is only meaningful because the 24 did not move. A benchmark you edit between runs measures nothing."),
 
-    ("h2", "Why public benchmarks won't answer your question"),
+("callout", "insight", "Battery, eval harness, agent harness — three things", "A <strong>battery</strong> is the set of tasks. An <strong>eval harness</strong> is the machinery that runs them and produces a score. An <strong>agent harness</strong> is the scaffolding around a single agent run — prompt assembly, tools, turn limits — which is the sense the loop lesson uses. The exam analogy: the battery is the question paper and the mark scheme; the eval harness is the invigilator and the process that totals the marks; the agent harness is how one candidate sits the exam. Context disambiguates, and the field genuinely uses the word both ways."),
+
+    ("callout", "pitfall", "The battery is not the product", "An eval harness frequently builds its own configuration rather than the one your real system runs — a different system prompt, different budgets, sometimes no whole-run clock at all. When that is true, a result from the battery is evidence about the harness that ran it, not about the thing you ship. Check whether the two configurations actually match before treating a board of numbers as a statement about your product."),
+
+        ("h2", "Why public benchmarks won't answer your question"),
     ("ul", [
       "<strong>Contamination.</strong> Popular benchmarks are in the training data. High scores may be recall, not capability.",
       "<strong>Optimisation pressure.</strong> Vendors tune for benchmarks that decide purchases. The measure stops being a measure.",
