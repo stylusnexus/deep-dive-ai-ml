@@ -174,6 +174,12 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Oracle rung** — The control at the top of a ladder, supplying most of the answer. Failing there means the fixture is broken rather than the agent.
 
+**Prefix caching** — Reusing the processed keys and values for an unchanged prompt prefix. The largest latency lever in a multi-turn loop, and it fails silently: a cache that stopped matching looks exactly like one that never existed, except on the bill.
+
+**Read accumulation** — Tool results staying in the transcript and being re-sent every turn. A single large read early in a run is paid for on every turn after it.
+
+**Verification granularity** — Whether you check after every edit, after a logical unit, or once at the end. Decides whether feedback names the cause or only the symptom. Per-edit checking breaks on changes that are atomic across files.
+
 ---
 
 ## Block 0 · Orientation

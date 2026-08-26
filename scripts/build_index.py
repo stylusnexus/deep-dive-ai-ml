@@ -39,6 +39,7 @@ BLURBS = {
  "what-a-graph-buys": "Checkpointing is the feature; everything else you could write in an afternoon.",
  "multi-agent-and-approval": "When splitting is justified, what handoffs cost, and why most approval gates do not stop what matters.",
  "telemetry-and-instrumentation": "You cannot reproduce an agent run, so the trace is the only evidence it happened the way you think.",
+ "loop-tradeoffs": "Prefix caching, read accumulation, verification granularity and reasoning effort — each trades tokens against reliability.",
  "the-map": "AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it's an architecture, not a model. Read this first.",
  "agent-loop-and-harness": "The two most-confused words in any agent codebase — and why most agent failures are harness failures, not model failures.",
  "tokens-context-and-kv-cache": "Why a model 'forgets', why long conversations get expensive quadratically, and what prompt caching is actually caching.",

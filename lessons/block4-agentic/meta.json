@@ -36,6 +36,12 @@
       "title": "Telemetry: Making the Run Legible",
       "file": "lsn-1787700000003-telemetry-and-instrumentation.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787700000004",
+      "title": "Four Levers, and What Each Costs",
+      "file": "lsn-1787700000004-loop-tradeoffs.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -55,6 +61,11 @@
       "starred": false
     },
     "lsn-1787700000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787700000004": {
       "viewed": false,
       "completed": false,
       "starred": false

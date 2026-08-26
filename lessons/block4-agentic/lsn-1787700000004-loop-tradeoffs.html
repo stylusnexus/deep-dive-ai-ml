@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Four Levers, and What Each Costs</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 5 of 5</span>
+  <h1>Four Levers, and What Each Costs</h1>
+  <p class="subtitle">Prefix caching, read accumulation, per-edit verification and reasoning effort — every one trades tokens against reliability.</p>
+
+  <p>The loop works. Now you have four dials, and turning any of them costs something. They are worth taking together because they share a shape: <strong>each trades tokens and latency against reliability</strong>, and the right setting depends entirely on where your failures actually are — which you only know from the trace.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 230" role="img" aria-label="Four loop levers and their tradeoffs">
+<text x="12" y="18" class="d-accent">LEVER</text><text x="250" y="18" class="d-fill-green" font-size="12" font-weight="600">BUYS</text><text x="452" y="18" class="d-fill-red" font-size="12" font-weight="600">COSTS</text>
+<line x1="12" y1="26" x2="628" y2="26" stroke="var(--border)"/>
+<rect x="12" y="36" width="220" height="40" rx="4" class="d-box"/>
+<text x="26" y="52" class="d-label-b">Prefix caching</text>
+<text x="26" y="68" class="d-label-sm">reuse the processed prefix</text>
+<text x="250" y="60" class="d-label-sm">most of prefill, free</text>
+<text x="452" y="52" class="d-label-sm">rigid prompt order,</text>
+<text x="452" y="68" class="d-label-sm">silent invalidation</text>
+<rect x="12" y="84" width="220" height="40" rx="4" class="d-box"/>
+<text x="26" y="100" class="d-label-b">Read accumulation</text>
+<text x="26" y="116" class="d-label-sm">keep every tool result</text>
+<text x="250" y="108" class="d-label-sm">full fidelity, revisitable</text>
+<text x="452" y="100" class="d-label-sm">quadratic cost,</text>
+<text x="452" y="116" class="d-label-sm">attention diluted</text>
+<rect x="12" y="132" width="220" height="40" rx="4" class="d-box"/>
+<text x="26" y="148" class="d-label-b">Per-edit verification</text>
+<text x="26" y="164" class="d-label-sm">check after every change</text>
+<text x="250" y="148" class="d-label-sm">fast failure, precise</text>
+<text x="250" y="164" class="d-label-sm">attribution</text>
+<text x="452" y="148" class="d-label-sm">latency per edit,</text>
+<text x="452" y="164" class="d-label-sm">blocks valid interim states</text>
+<rect x="12" y="180" width="220" height="40" rx="4" class="d-box"/>
+<text x="26" y="196" class="d-label-b">Reasoning effort</text>
+<text x="26" y="212" class="d-label-sm">let it think first</text>
+<text x="250" y="204" class="d-label-sm">accuracy on multi-step</text>
+<text x="452" y="196" class="d-label-sm">tokens billed unseen,</text>
+<text x="452" y="212" class="d-label-sm">nothing on recall tasks</text>
+</svg><figcaption>Four levers on the same axis. Nothing here is free, and the correct position for each is a property of your failure distribution rather than a best practice.</figcaption></figure>
+  <h2>1 · Prefix caching</h2>
+  <p>The provider keeps the processed keys and values for an unchanged prefix instead of recomputing them. On a hit you pay for new tokens only, which on a multi-turn loop is most of the work eliminated.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">What it buys</div><div><div class="roadmap-title">Prefill, mostly gone</div><div class="roadmap-desc">On a long system prompt plus a tool set plus a growing transcript, this is the single largest latency and cost lever available in an agent loop.</div></div></div><div class="roadmap-item"><div class="roadmap-num">What it costs — ordering</div><div><div class="roadmap-title">The prompt becomes rigid</div><div class="roadmap-desc">Stable content must come first and stay byte-identical. Adding a timestamp, reordering tools, or interpolating a session id near the front sets your hit rate to zero.</div></div></div><div class="roadmap-item"><div class="roadmap-num">What it costs — pricing</div><div><div class="roadmap-title">Writes cost more than reads save, once</div><div class="roadmap-desc">Caching a prefix used twice is roughly break-even. Used fifty times it is a large win. Below a few reuses it is a small loss.</div></div></div><div class="roadmap-item"><div class="roadmap-num">What it costs — silence</div><div><div class="roadmap-title">Nothing errors on a miss</div><div class="roadmap-desc">Hit rate is a metric you have to look at. A cache that stopped working looks exactly like a system that never had one, except on the bill.</div></div></div></div>
+  <div class="callout matters"><span class="label">Instrument the hit rate or you do not have caching</span>The failure mode is not a broken cache, it is a cache that quietly stopped matching after someone added a line to the system prompt. Record cached-token counts per call and alert on the ratio. Without that number you are hoping, and hoping is expensive at three times the cost per turn.</div>
+  <h2>2 · Read accumulation, and the growing context</h2>
+  <p>An agent reads a file, then another, then searches, then reads again. By default every one of those results stays in the transcript and is re-sent on every subsequent turn. That is the default because it is simple and because the model can revisit anything — and it is also why turn twenty costs twenty times turn one.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Keep everything</div><div><div class="roadmap-title">Maximum fidelity</div><div class="roadmap-desc">The model can go back to any detail. Simple to implement. Cost grows with the square of the run, and attention thins across material that is mostly already used.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Truncate on ingest</div><div><div class="roadmap-title">Cheapest intervention</div><div class="roadmap-desc">Cap each tool result. One line of code, and it caps the worst case — a 3,000-line file read at turn four otherwise dominates the window for the rest of the run.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Summarise as you go</div><div><div class="roadmap-title">Middle ground</div><div class="roadmap-desc">Replace a read with a short statement of what was learned. Preserves the finding, drops the bulk. Lossy in a way the agent cannot see, which is the compaction problem.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Drop after use</div><div><div class="roadmap-title">Most aggressive</div><div class="roadmap-desc">Once an edit is made from a read, the read itself is rarely needed verbatim. Clearing old tool results is the safest form of compaction and the most under-used.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A single large read early in a run taxes every turn after it.</p><p class="know-why">Tool results are context, and context is re-sent whole on every turn. A file read at turn four is paid for again at turns five through twenty, at growing prefill cost, while crowding out the material the model actually needs now.</p><p class="know-eg"><span class="know-eg-label">For example</span>An agent reads a 3,000-line file at turn four of a twenty-turn run. That one read is re-sent sixteen more times. It is not the read that costs, it is the sixteen re-sends — and truncating the result to the relevant 200 lines would have removed almost all of it.</p></blockquote>
+  <h2>3 · Per-edit verification</h2>
+  <p>Run the check after every change, rather than once at the end. The granularity question, and it has a sharper tradeoff than it first appears.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Verify at the end</div><div><div class="roadmap-title">Cheapest</div><div class="roadmap-desc">One check per run. When it fails you know the run failed and not which of nine edits caused it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Verify per edit</div><div><div class="roadmap-title">Precise attribution</div><div class="roadmap-desc">The failing edit is named immediately, and the agent gets feedback while the context that produced it is still present. This is the strongest form of verifier-guided looping.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Verify per logical unit</div><div><div class="roadmap-title">The usual compromise</div><div class="roadmap-desc">After a coherent group of edits rather than each one. Keeps most of the attribution and pays a fraction of the cost.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">Per-edit verification blocks legitimate intermediate states</span>A refactor that renames a function across four files does not compile after the first edit, and per-edit checking will report a failure that is not one. The agent then tries to fix a break that its own next edit was about to resolve, and can spin. Where changes are genuinely atomic across files, verify per unit rather than per edit — and make sure the agent can tell the difference.</div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Verification granularity decides whether feedback names the cause or only the symptom.</p><p class="know-why">A check at the end tells you the run failed. A check after each change tells you which change did it, while the reasoning that produced it is still in context and can be corrected. The cost is real, and so is the difference between debuggable and not.</p><p class="know-eg"><span class="know-eg-label">For example</span>Nine edits, one broken build, one check at the end. The agent sees a failure with no attribution, guesses, and reverts the wrong edit — because from inside the loop every one of the nine is equally suspect. Per-unit checking would have named the third.</p></blockquote>
+  <h2>4 · Reasoning effort</h2>
+  <p>Covered in its own lesson, so only the tradeoff here. Extra reasoning tokens buy accuracy on genuinely multi-step problems and buy nothing on recall, extraction, classification or formatting. They are billed whether or not you see them, so cost tracks problem difficulty rather than visible output length.</p>
+  <div class="callout insight"><span class="label">This is a routing decision, not a setting</span>The mistake is picking one reasoning level for the whole system. Most turns in an agent loop are mechanical — read this, call that, format the result — and pay for reasoning they cannot use. Route by turn shape: high effort where the model must plan or diagnose, low or none where it is executing a decision already made.</div>
+  <h2>Setting them, in order</h2>
+  <p>There is a sequence that avoids wasted work, and it starts where it always starts:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">First, read the trace</div><div><div class="roadmap-title">Where do runs actually fail?</div><div class="roadmap-desc">Turn cap, wrong tool, broken edit, or cost? Each points at a different lever, and tuning the wrong one measures flat.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Then truncate reads</div><div><div class="roadmap-title">Cheapest real win</div><div class="roadmap-desc">One line, no downside worth the name, and it caps the worst case immediately.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Then order the prompt for caching</div><div><div class="roadmap-title">Free once, then permanent</div><div class="roadmap-desc">Stable content first, variable last, and instrument the hit rate.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Then set verification granularity</div><div><div class="roadmap-title">Match it to your change shape</div><div class="roadmap-desc">Per edit for independent changes, per unit where changes are atomic across files.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Last, tune reasoning effort</div><div><div class="roadmap-title">By turn type, not globally</div><div class="roadmap-desc">And only after the above, because a cheaper loop makes higher effort affordable where it helps.</div></div></div></div>
+  <div class="callout matters"><span class="label">Change one lever at a time and re-run the whole battery</span>These interact. Truncating reads improves cache hit rates by stabilising the prompt. Per-edit verification adds turns, which makes read accumulation worse. Adjust two at once and the result tells you something moved, not what — which is the measurement checklist arriving in a place people forget to apply it.</div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://docs.claude.com/en/docs/build-with-claude/prompt-caching" target="_blank" rel="noopener">Prompt caching</a><span class="link-note">The mechanics, the pricing asymmetry between writes and reads, and exactly what invalidates a prefix.</span></li><li><a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener">Effective context engineering for AI agents</a><span class="link-note">Compaction and tool-result clearing, which is lever two done properly.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">The case for the simplest loop that works, before any of these are worth tuning.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Your cache hit rate silently dropped to zero last week. What most likely happened?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The provider expired the cache</div>
+      <div class="quiz-opt">Something variable was added near the front of the prompt, and the prefix stopped matching</div>
+      <div class="quiz-opt">The conversation grew past the cache size limit</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. An agent reads a 3,000-line file at turn four of a twenty-turn run. What is the real cost?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The one large prefill on turn four</div>
+      <div class="quiz-opt">The sixteen re-sends afterwards, at growing prefill cost, crowding out what the model needs now</div>
+      <div class="quiz-opt">The time taken to read the file from disk</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. A refactor renames a function across four files. Why can per-edit verification hurt?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Verification is too slow to run four times</div>
+      <div class="quiz-opt">The code does not compile after the first edit, so the check reports a failure the next edit was about to resolve</div>
+      <div class="quiz-opt">The agent cannot see verification results mid-run</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Which lever should you tune last?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Prefix caching, because pricing changes often</div>
+      <div class="quiz-opt">Reasoning effort — a cheaper loop first makes higher effort affordable where it actually helps</div>
+      <div class="quiz-opt">Read truncation, since it risks losing information</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

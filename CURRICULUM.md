@@ -102,7 +102,8 @@ Built in **LangGraph / LangChain / LangSmith**, matching the original. The Micro
 - Multi-agent systems, handoffs, and approval gates that actually halt ✅
 - Telemetry and instrumentation — the trace is the only evidence ✅
 
-4 lessons in `lessons/block4-agentic/`. Notebooks and Project 3 still to build.
+5 lessons in `lessons/block4-agentic/`, including the four loop levers and their tradeoffs.
+One notebook written; Project 3 scaffolded. Both await a free model endpoint.
 
 **Exit:** Project 3 — multi-agent delivery-exception handler runs with human approval, traced in LangSmith.
 

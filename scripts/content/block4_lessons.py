@@ -454,4 +454,123 @@ class AgentState(TypedDict):
     ]),
   ],
 },
+{
+  "slug": "loop-tradeoffs",
+  "title": "Four Levers, and What Each Costs",
+  "subtitle": "Prefix caching, read accumulation, per-edit verification and reasoning effort — every one trades tokens against reliability.",
+  "body": [
+    ("p", "The loop works. Now you have four dials, and turning any of them costs something. They are worth taking together because they share a shape: <strong>each trades tokens and latency against reliability</strong>, and the right setting depends entirely on where your failures actually are — which you only know from the trace."),
+
+    ("figure", "Four levers on the same axis. Nothing here is free, and the correct position for each is a property of your failure distribution rather than a best practice.", '''<svg viewBox="0 0 640 230" role="img" aria-label="Four loop levers and their tradeoffs">
+<text x="12" y="18" class="d-accent">LEVER</text><text x="250" y="18" class="d-fill-green" font-size="12" font-weight="600">BUYS</text><text x="452" y="18" class="d-fill-red" font-size="12" font-weight="600">COSTS</text>
+<line x1="12" y1="26" x2="628" y2="26" stroke="var(--border)"/>
+<rect x="12" y="36" width="220" height="40" rx="4" class="d-box"/>
+<text x="26" y="52" class="d-label-b">Prefix caching</text>
+<text x="26" y="68" class="d-label-sm">reuse the processed prefix</text>
+<text x="250" y="60" class="d-label-sm">most of prefill, free</text>
+<text x="452" y="52" class="d-label-sm">rigid prompt order,</text>
+<text x="452" y="68" class="d-label-sm">silent invalidation</text>
+<rect x="12" y="84" width="220" height="40" rx="4" class="d-box"/>
+<text x="26" y="100" class="d-label-b">Read accumulation</text>
+<text x="26" y="116" class="d-label-sm">keep every tool result</text>
+<text x="250" y="108" class="d-label-sm">full fidelity, revisitable</text>
+<text x="452" y="100" class="d-label-sm">quadratic cost,</text>
+<text x="452" y="116" class="d-label-sm">attention diluted</text>
+<rect x="12" y="132" width="220" height="40" rx="4" class="d-box"/>
+<text x="26" y="148" class="d-label-b">Per-edit verification</text>
+<text x="26" y="164" class="d-label-sm">check after every change</text>
+<text x="250" y="148" class="d-label-sm">fast failure, precise</text>
+<text x="250" y="164" class="d-label-sm">attribution</text>
+<text x="452" y="148" class="d-label-sm">latency per edit,</text>
+<text x="452" y="164" class="d-label-sm">blocks valid interim states</text>
+<rect x="12" y="180" width="220" height="40" rx="4" class="d-box"/>
+<text x="26" y="196" class="d-label-b">Reasoning effort</text>
+<text x="26" y="212" class="d-label-sm">let it think first</text>
+<text x="250" y="204" class="d-label-sm">accuracy on multi-step</text>
+<text x="452" y="196" class="d-label-sm">tokens billed unseen,</text>
+<text x="452" y="212" class="d-label-sm">nothing on recall tasks</text>
+</svg>'''),
+
+    ("h2", "1 · Prefix caching"),
+    ("p", "The provider keeps the processed keys and values for an unchanged prefix instead of recomputing them. On a hit you pay for new tokens only, which on a multi-turn loop is most of the work eliminated."),
+    ("terms", [
+      ("What it buys", "Prefill, mostly gone", "On a long system prompt plus a tool set plus a growing transcript, this is the single largest latency and cost lever available in an agent loop."),
+      ("What it costs — ordering", "The prompt becomes rigid", "Stable content must come first and stay byte-identical. Adding a timestamp, reordering tools, or interpolating a session id near the front sets your hit rate to zero."),
+      ("What it costs — pricing", "Writes cost more than reads save, once", "Caching a prefix used twice is roughly break-even. Used fifty times it is a large win. Below a few reuses it is a small loss."),
+      ("What it costs — silence", "Nothing errors on a miss", "Hit rate is a metric you have to look at. A cache that stopped working looks exactly like a system that never had one, except on the bill."),
+    ]),
+    ("callout", "matters", "Instrument the hit rate or you do not have caching", "The failure mode is not a broken cache, it is a cache that quietly stopped matching after someone added a line to the system prompt. Record cached-token counts per call and alert on the ratio. Without that number you are hoping, and hoping is expensive at three times the cost per turn."),
+
+    ("h2", "2 · Read accumulation, and the growing context"),
+    ("p", "An agent reads a file, then another, then searches, then reads again. By default every one of those results stays in the transcript and is re-sent on every subsequent turn. That is the default because it is simple and because the model can revisit anything — and it is also why turn twenty costs twenty times turn one."),
+    ("terms", [
+      ("Keep everything", "Maximum fidelity", "The model can go back to any detail. Simple to implement. Cost grows with the square of the run, and attention thins across material that is mostly already used."),
+      ("Truncate on ingest", "Cheapest intervention", "Cap each tool result. One line of code, and it caps the worst case — a 3,000-line file read at turn four otherwise dominates the window for the rest of the run."),
+      ("Summarise as you go", "Middle ground", "Replace a read with a short statement of what was learned. Preserves the finding, drops the bulk. Lossy in a way the agent cannot see, which is the compaction problem."),
+      ("Drop after use", "Most aggressive", "Once an edit is made from a read, the read itself is rarely needed verbatim. Clearing old tool results is the safest form of compaction and the most under-used."),
+    ]),
+
+    ("know",
+     "A single large read early in a run taxes every turn after it.",
+     "Tool results are context, and context is re-sent whole on every turn. A file read at turn four is paid for again at turns five through twenty, at growing prefill cost, while crowding out the material the model actually needs now.",
+     "An agent reads a 3,000-line file at turn four of a twenty-turn run. That one read is re-sent sixteen more times. It is not the read that costs, it is the sixteen re-sends — and truncating the result to the relevant 200 lines would have removed almost all of it."),
+
+    ("h2", "3 · Per-edit verification"),
+    ("p", "Run the check after every change, rather than once at the end. The granularity question, and it has a sharper tradeoff than it first appears."),
+    ("terms", [
+      ("Verify at the end", "Cheapest", "One check per run. When it fails you know the run failed and not which of nine edits caused it."),
+      ("Verify per edit", "Precise attribution", "The failing edit is named immediately, and the agent gets feedback while the context that produced it is still present. This is the strongest form of verifier-guided looping."),
+      ("Verify per logical unit", "The usual compromise", "After a coherent group of edits rather than each one. Keeps most of the attribution and pays a fraction of the cost."),
+    ]),
+    ("callout", "pitfall", "Per-edit verification blocks legitimate intermediate states", "A refactor that renames a function across four files does not compile after the first edit, and per-edit checking will report a failure that is not one. The agent then tries to fix a break that its own next edit was about to resolve, and can spin. Where changes are genuinely atomic across files, verify per unit rather than per edit — and make sure the agent can tell the difference."),
+
+    ("know",
+     "Verification granularity decides whether feedback names the cause or only the symptom.",
+     "A check at the end tells you the run failed. A check after each change tells you which change did it, while the reasoning that produced it is still in context and can be corrected. The cost is real, and so is the difference between debuggable and not.",
+     "Nine edits, one broken build, one check at the end. The agent sees a failure with no attribution, guesses, and reverts the wrong edit — because from inside the loop every one of the nine is equally suspect. Per-unit checking would have named the third."),
+
+    ("h2", "4 · Reasoning effort"),
+    ("p", "Covered in its own lesson, so only the tradeoff here. Extra reasoning tokens buy accuracy on genuinely multi-step problems and buy nothing on recall, extraction, classification or formatting. They are billed whether or not you see them, so cost tracks problem difficulty rather than visible output length."),
+    ("callout", "insight", "This is a routing decision, not a setting", "The mistake is picking one reasoning level for the whole system. Most turns in an agent loop are mechanical — read this, call that, format the result — and pay for reasoning they cannot use. Route by turn shape: high effort where the model must plan or diagnose, low or none where it is executing a decision already made."),
+
+    ("h2", "Setting them, in order"),
+    ("p", "There is a sequence that avoids wasted work, and it starts where it always starts:"),
+    ("terms", [
+      ("First, read the trace", "Where do runs actually fail?", "Turn cap, wrong tool, broken edit, or cost? Each points at a different lever, and tuning the wrong one measures flat."),
+      ("Then truncate reads", "Cheapest real win", "One line, no downside worth the name, and it caps the worst case immediately."),
+      ("Then order the prompt for caching", "Free once, then permanent", "Stable content first, variable last, and instrument the hit rate."),
+      ("Then set verification granularity", "Match it to your change shape", "Per edit for independent changes, per unit where changes are atomic across files."),
+      ("Last, tune reasoning effort", "By turn type, not globally", "And only after the above, because a cheaper loop makes higher effort affordable where it helps."),
+    ]),
+    ("callout", "matters", "Change one lever at a time and re-run the whole battery", "These interact. Truncating reads improves cache hit rates by stabilising the prompt. Per-edit verification adds turns, which makes read accumulation worse. Adjust two at once and the result tells you something moved, not what — which is the measurement checklist arriving in a place people forget to apply it."),
+
+    ("links", [
+      ("Prompt caching", "https://docs.claude.com/en/docs/build-with-claude/prompt-caching",
+       "The mechanics, the pricing asymmetry between writes and reads, and exactly what invalidates a prefix."),
+      ("Effective context engineering for AI agents", "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+       "Compaction and tool-result clearing, which is lever two done properly."),
+      ("Building effective agents — Anthropic", "https://www.anthropic.com/engineering/building-effective-agents",
+       "The case for the simplest loop that works, before any of these are worth tuning."),
+    ]),
+
+    ("quiz", [
+      ("Your cache hit rate silently dropped to zero last week. What most likely happened?",
+       ["The provider expired the cache",
+        "Something variable was added near the front of the prompt, and the prefix stopped matching",
+        "The conversation grew past the cache size limit"], 1),
+      ("An agent reads a 3,000-line file at turn four of a twenty-turn run. What is the real cost?",
+       ["The one large prefill on turn four",
+        "The sixteen re-sends afterwards, at growing prefill cost, crowding out what the model needs now",
+        "The time taken to read the file from disk"], 1),
+      ("A refactor renames a function across four files. Why can per-edit verification hurt?",
+       ["Verification is too slow to run four times",
+        "The code does not compile after the first edit, so the check reports a failure the next edit was about to resolve",
+        "The agent cannot see verification results mid-run"], 1),
+      ("Which lever should you tune last?",
+       ["Prefix caching, because pricing changes often",
+        "Reasoning effort — a cheaper loop first makes higher effort affordable where it actually helps",
+        "Read truncation, since it risks losing information"], 1),
+    ]),
+  ],
+},
 ]
