@@ -49,7 +49,13 @@ in `scripts/content/` and rebuild:
 python3 scripts/build_lessons.py <module_name>   # e.g. core_vocabulary
 python3 scripts/build_index.py                   # landing page
 python3 scripts/build_knows.py                   # Things to Know revision sheet
+python3 scripts/build_sop.py                     # the Master SOP page (make sop)
 ```
+
+`artifacts/sop/index.html` is generated from the markdown checklists in the same
+directory. Edit the markdown; never the HTML. The builder asserts that every
+`- [ ]` in the markdown survives into the page, so a parse failure cannot
+silently drop a checklist item.
 
 Notebooks are the same: authored in `scripts/content/*_notebooks.py`, built with
 `scripts/build_notebooks.py`, then **executed** so their outputs are committed.
