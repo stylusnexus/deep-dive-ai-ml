@@ -95,7 +95,11 @@ system cannot handle.
 ## Block 4 · Agentic AI — 1.5 weeks
 *Original: Module 04*
 
-Built in **LangGraph / LangChain / LangSmith**, matching the original. The Microsoft agents course is Azure/AutoGen-based and lifts as reading only, not code.
+The original is built in **LangGraph / LangChain / LangSmith**. This rebuild uses
+**LangGraph** only, and writes traces as local JSON rather than to LangSmith — a
+hosted tracer needs an account and an API key, and the telemetry lesson's claim is
+that the trace is the only evidence, not that it lives in a particular product. The
+Microsoft agents course is Azure/AutoGen-based and lifts as reading only, not code.
 
 - Single-agent loops: the loop written by hand before any framework ✅
 - What a graph runtime buys, and what it costs ✅
@@ -104,10 +108,12 @@ Built in **LangGraph / LangChain / LangSmith**, matching the original. The Micro
 
 5 lessons in `lessons/block4-agentic/`, including the four loop levers and their tradeoffs.
 2 notebooks in `notebooks/04-agentic/` — the loop by hand, then the same loop as a
-checkpointed graph, which measures what resuming a crashed run costs. Project 3 is
-scaffolded; `src/pipeline.py` is not yet written.
+checkpointed graph, which measures what resuming a crashed run costs. Project 3 is built:
+`src/pipeline.py` applies the lookup table first, escalates by guard where policy
+forbids automating a decision, and calls a model only on the exceptions whose
+delivery note contradicts their event code — 98% correct against an 82% baseline.
 
-**Exit:** Project 3 — multi-agent delivery-exception handler runs with human approval, traced in LangSmith.
+**Exit:** Project 3 — multi-agent delivery-exception handler runs with human approval, traced to local JSON.
 
 ---
 

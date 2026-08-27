@@ -10,3 +10,8 @@ data/raw/
 *.gguf
 *.safetensors
 data/turbine_clean.csv
+
+# Project 3 run output. Every trace is byte-identical to its entry in
+# results.json, which is committed; pending/ holds in-flight approvals.
+projects/p3-delivery-agents/traces/
+projects/p3-delivery-agents/pending/

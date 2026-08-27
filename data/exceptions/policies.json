@@ -1,0 +1,32 @@
+[
+  {
+    "doc_id": "pol-del-01",
+    "title": "POL-DEL-01 Delivery Attempts and Rescheduling",
+    "text": "# POL-DEL-01 Delivery Attempts and Rescheduling\n\nA carrier may attempt delivery three times. Attempts one and two are\nrescheduled automatically for the next working day. On the third failed\nattempt the parcel returns to the depot and the customer is notified that\ncollection is available for ten days.\n\nWhere the recipient is known to be away for an extended period \u2014 including\nhospitalisation \u2014 the parcel is held at the depot for that period rather\nthan reattempted. Reattempting a delivery to an address the recipient is\nknown to be away from wastes an attempt and is not permitted.\n\nWhere a recipient asks for a parcel to be held following a bereavement or\nother personal circumstance, it is held at the depot. This is a hold, not a\nrefusal, and the parcel is not returned to the sender.\n\nA failed attempt caused by the carrier \u2014 attending on the wrong day, or at\nthe wrong address \u2014 does not count towards the three attempts. It is\nrescheduled and the counter is unchanged.\n\nAn invalid or incomplete address is never a failed attempt. The customer is\nasked to correct the address and the attempt counter is reset."
+  },
+  {
+    "doc_id": "pol-dam-02",
+    "title": "POL-DAM-02 Damage, Refunds and Replacements",
+    "text": "# POL-DAM-02 Damage, Refunds and Replacements\n\nGoods recorded as damaged in transit are refunded and replaced without\nrequiring the customer to return them, where the order value is below\n\u00a3250.\n\nDamage to outer packaging alone, where the recipient confirms the contents\nare intact and wishes to keep the goods, is not a damage event. No refund\nor replacement is issued; the packaging fault is logged against the carrier.\n\nOrders at or above \u00a3250 recorded as damaged require human review before any\nrefund is issued, regardless of customer tier."
+  },
+  {
+    "doc_id": "pol-cus-03",
+    "title": "POL-CUS-03 Customs and Documentation",
+    "text": "# POL-CUS-03 Customs and Documentation\n\nA parcel held at customs pending documentation is released once the\ncustomer supplies the missing paperwork. The customer is asked once, then\nagain after five days.\n\nA parcel held at customs for a prohibited or restricted item is not a\ndocumentation problem and must not be handled by requesting paperwork. It\nis escalated to the trade compliance team.\n\nWhere the documentation has already been supplied and acknowledged and the\nhold has not lifted, asking again would loop. The case is escalated."
+  },
+  {
+    "doc_id": "pol-esc-04",
+    "title": "POL-ESC-04 Escalation and Human Review",
+    "text": "# POL-ESC-04 Escalation and Human Review\n\nThe following are escalated to a human and never decided automatically:\n\n- Any order at or above \u00a3250 involving damage, loss or refund\n- Any exception where injury is reported in connection with the goods or\n  the delivery itself\n- Any suspected prohibited or restricted item\n- Any consignment described as time-critical or temperature-controlled\n  where the delay would exceed its stated window\n\nIllness or bereavement explaining why a recipient was absent is not on this\nlist. That is an absence, and POL-DEL-01 says what to do with it.\n\nEscalation is a decision to not decide. It is recorded in the trace with the\nreason, and the case leaves the automated path entirely."
+  },
+  {
+    "doc_id": "pol-com-05",
+    "title": "POL-COM-05 Customer Communication Standards",
+    "text": "# POL-COM-05 Customer Communication Standards\n\nEvery message to a customer states what happened, what is being done, and\nwhat if anything the customer must do. It does not apologise for events\noutside the carrier's control, and it never states a delivery date that has\nnot been confirmed by the carrier.\n\nMessages about damage, loss or refunds are approved by a human before\nsending. No exception to this exists."
+  },
+  {
+    "doc_id": "pol-gen-06",
+    "title": "POL-GEN-06 Records and Delivery Notes",
+    "text": "# POL-GEN-06 Records and Delivery Notes\n\nAn event code is recorded by the carrier's system; a delivery note is\nwritten by the person who was there. Where the note contradicts the code,\nthe note is authoritative, and the exception is handled according to what\nthe note actually describes rather than what the code says.\n\nA parcel marked lost that has since been scanned is not lost. It re-enters\nthe network and the customer is notified that the delivery is delayed; a\nparcel already moving is not rescheduled, because no attempt has failed.\n\nAn address marked invalid that the driver simply could not find is not\ninvalid.\n\nWhere the note contradicts the code and leaves no clear correct action, the\ncase is escalated rather than guessed."
+  }
+]
