@@ -85,6 +85,8 @@ text. If a build fails with an assertion, the content is wrong, not the builder.
 | Rebuild strips outputs | notebook ships unrun | re-execute after every rebuild |
 | Rebuild strips *sibling* outputs | editing one notebook's content wipes all notebooks in that module | if the sibling's source is unchanged, `git checkout HEAD -- <file>` instead of re-running |
 | `models[0]` from /v1/models | HTTP 400 on chat completion | filter out embed/rerank/whisper models — the first listed is not necessarily a chat model |
+| `max_tokens` too low for a reasoning model | empty answer, scored as wrong — or a fabricated `NOT IN CONTEXT` | reasoning burns the budget before the first visible word; check `finish_reason == "length"` and record it. ~850 completion tokens is the worst case on this corpus, so the ceiling is 1500 |
+| `None` groundedness in a pandas column | refusals silently labelled as ungrounded answers | `None` becomes `NaN`; test with `pd.isna(x)`, never `x is None` |
 | `pd.Timedelta(days=n)` | DeprecationWarning under numpy 2.5 | `np.timedelta64(n, "D")` |
 | Suffix filters | duplicate column | name derived features distinctly |
 | Hardcoded topic lists | a whole block silently excluded | enumerate directories |

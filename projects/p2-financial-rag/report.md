@@ -6,23 +6,24 @@ k=4 from a pool of 12.
 Generation: `qwen3.8-27b-mlx-dwq`
 
 
+
 ## The four numbers
 
 | stage | measurement |
 |---|---|
 | Retrieval recall (single-hop) | 1.00 |
 | Retrieval recall (multi-hop) | 0.83 |
-| Mean groundedness (answered) | 0.54 |
-| Correct — single-hop | 2/6 |
-| Correct — multi-hop | 0/3 |
+| Mean groundedness (answered) | 0.79 |
+| Correct — single-hop | 4/6 |
+| Correct — multi-hop | 2/3 |
 | Refused correctly when unanswerable | yes |
 
 ## What this system can and cannot do
 
 **Can:** answer single-hop questions where the fact lives in one document, with
-citations, at 0.54 mean groundedness.
+citations, at 0.79 mean groundedness.
 
-**Cannot:** reliably answer questions needing facts from two documents. Retrieval recall drops from 1.00 to 0.83 on multi-hop questions, because the question embeds close to one document and not the other. That is a limit of single-shot retrieval, not a tuning problem — it needs a retrieval loop.
+**Weakens on:** questions needing facts from two documents. Retrieval recall drops from 1.00 to 0.83 on multi-hop questions, because the question embeds close to one document and not the other. That is a limit of single-shot retrieval, not a tuning problem — it needs a retrieval loop. With only 3 multi-hop questions the correctness figure above carries no precision: the recall drop is the finding, and the per-question table is where to read what actually failed.
 
 **Refusal:** the system correctly refuses when the corpus does not contain the answer.
 
@@ -30,15 +31,15 @@ citations, at 0.54 mean groundedness.
 
 | qid | hops | retrieval_recall | groundedness | correct | answer |
 |---|---|---|---|---|---|
-| q01 | 1 | 1.0 | 0.875 | False | The maximum gearbox oil temperature during continuous operation is **82 degrees Celsius** [1]. |
-| q02 | 1 | 1.0 | 0.667 | False | A turbine older than twelve years must be inspected every **90 days** [1]. |
-| q03 | 1 | 1.0 | 0.909 | False | Turbine WHL-031 performed a controlled shutdown after its gearbox oil temperature reached 91.4 degrees Celsius |
-| q04 | 1 | 1.0 | 0.889 | True | Clyde had the highest site failure rate in Q2 2026, at 5.9 failures per hundred turbines [1][2]. |
-| q05 | 2 | 0.5 | 0.0 | False |  |
-| q06 | 2 | 1.0 | 0.0 | False |  |
-| q07 | 2 | 1.0 | 0.0 | False |  |
+| q01 | 1 | 1.0 | 0.818 | True | According to [1], the maximum gearbox oil temperature during continuous operation must not exceed **82 degrees |
+| q02 | 1 | 1.0 | 0.667 | True | A turbine older than twelve years must be inspected every **90 days** [1]. |
+| q03 | 1 | 1.0 | 0.9 | False | According to the summary, turbine WHL-031 performed a controlled shutdown after its **gearbox oil temperature  |
+| q04 | 1 | 1.0 | 0.889 | True | Clyde had the highest site failure rate in Q2 2026, at 5.9 failures per hundred turbines [1]. |
+| q05 | 2 | 0.5 | None | False | NOT IN CONTEXT |
+| q06 | 2 | 1.0 | 0.667 | True | Yes, the inspection deferral before incident 2026-021 was permitted under policy at the time.  According to [1 |
+| q07 | 2 | 1.0 | 0.756 | True | **Immediate shutdown threshold:** Above **0.80 mm/s RMS**, the turbine shuts down immediately [1].  **Inspecti |
 | q08 | 1 | 1.0 | 0.75 | False | According to the Whitelee Site Profile, there are **68** operational turbines at Whitelee [1]. |
-| q09 | 1 | 1.0 | 0.786 | True | According to the context, a turbine that has shut down twice within 30 days may not be returned to service wit |
+| q09 | 1 | 1.0 | 0.846 | True | According to [1], a turbine that has shut down twice within 30 days may not be returned to service without **r |
 | q10 | 0 | None | None | True | NOT IN CONTEXT |
 
 ## What would make me distrust this

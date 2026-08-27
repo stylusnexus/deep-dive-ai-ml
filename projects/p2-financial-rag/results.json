@@ -3,25 +3,25 @@
     "qid": "q01",
     "hops": 1,
     "retrieval_recall": 1.0,
-    "groundedness": 0.875,
-    "correct": false,
-    "answer": "The maximum gearbox oil temperature during continuous operation is **82 degrees Celsius** [1]."
+    "groundedness": 0.818,
+    "correct": true,
+    "answer": "According to [1], the maximum gearbox oil temperature during continuous operation must not exceed **82 degrees"
   },
   {
     "qid": "q02",
     "hops": 1,
     "retrieval_recall": 1.0,
     "groundedness": 0.667,
-    "correct": false,
+    "correct": true,
     "answer": "A turbine older than twelve years must be inspected every **90 days** [1]."
   },
   {
     "qid": "q03",
     "hops": 1,
     "retrieval_recall": 1.0,
-    "groundedness": 0.909,
+    "groundedness": 0.9,
     "correct": false,
-    "answer": "Turbine WHL-031 performed a controlled shutdown after its gearbox oil temperature reached 91.4 degrees Celsius"
+    "answer": "According to the summary, turbine WHL-031 performed a controlled shutdown after its **gearbox oil temperature "
   },
   {
     "qid": "q04",
@@ -29,31 +29,31 @@
     "retrieval_recall": 1.0,
     "groundedness": 0.889,
     "correct": true,
-    "answer": "Clyde had the highest site failure rate in Q2 2026, at 5.9 failures per hundred turbines [1][2]."
+    "answer": "Clyde had the highest site failure rate in Q2 2026, at 5.9 failures per hundred turbines [1]."
   },
   {
     "qid": "q05",
     "hops": 2,
     "retrieval_recall": 0.5,
-    "groundedness": 0.0,
+    "groundedness": null,
     "correct": false,
-    "answer": ""
+    "answer": "NOT IN CONTEXT"
   },
   {
     "qid": "q06",
     "hops": 2,
     "retrieval_recall": 1.0,
-    "groundedness": 0.0,
-    "correct": false,
-    "answer": ""
+    "groundedness": 0.667,
+    "correct": true,
+    "answer": "Yes, the inspection deferral before incident 2026-021 was permitted under policy at the time.  According to [1"
   },
   {
     "qid": "q07",
     "hops": 2,
     "retrieval_recall": 1.0,
-    "groundedness": 0.0,
-    "correct": false,
-    "answer": ""
+    "groundedness": 0.756,
+    "correct": true,
+    "answer": "**Immediate shutdown threshold:** Above **0.80 mm/s RMS**, the turbine shuts down immediately [1].  **Inspecti"
   },
   {
     "qid": "q08",
@@ -67,9 +67,9 @@
     "qid": "q09",
     "hops": 1,
     "retrieval_recall": 1.0,
-    "groundedness": 0.786,
+    "groundedness": 0.846,
     "correct": true,
-    "answer": "According to the context, a turbine that has shut down twice within 30 days may not be returned to service wit"
+    "answer": "According to [1], a turbine that has shut down twice within 30 days may not be returned to service without **r"
   },
   {
     "qid": "q10",
