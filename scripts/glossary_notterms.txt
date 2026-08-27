@@ -132,3 +132,84 @@ Invented methods
 Confident domain claims
 Context it cannot have
 bool
+# Diagnostic-table and worked-example rows from the algorithms lessons.
+Falls then flattens
+Spikes then recovers
+Goes to NaN
+Flat from step one
+Falls, validation rises
+Scale changes everything
+Sign can flip
+Log-odds, not probability
+Association, not cause
+High-vibration group
+Low-vibration group
+Weighted result
+Single tree
+You must choose k
+Assumes round clusters
+Scale matters enormously
+Random start
+Domain constraint
+Feature selection before the split
+n_estimators (forest)
+n_estimators (boosting)
+Stochastic (SGD)
+# Comparison-table rows from core vocabulary: KV-cache growth, context budget,
+# grounding tactics, hardware options, cache states, operating cadence, and
+# Model Context Protocol hygiene. The concept each illustrates has its own entry.
+Grows with context
+Grows with batch
+Independent of the weights
+Shrunk by grouped-query attention (GQA)
+Mechanically checkable
+Not checkable
+No completion test
+Tool use examples
+Instructions
+History
+Retrieved material
+Tool results
+Room to answer
+Retrieval
+Require citations
+Permit refusal
+Constrain the output
+Verify externally
+Test
+Fresh real data each round
+Cost and latency
+Daily
+Weekly
+Monthly
+On every change
+Per incident
+Vet before installing
+Start read-only
+Scope the credentials
+Production last
+Prefer stdio locally
+Log every call
+Gate the irreversible
+Overhead
+Works well on Metal
+Works with friction
+Does not work
+Containers
+Apple Silicon, high memory
+Consumer NVIDIA (8-24GB)
+Rented cloud GPU
+No local GPU
+Stable content goes first
+It has a lifetime
+It is priced differently
+Fully cold
+Model warm, cache cold
+Fully warm
+Warm but evicted
+Write it down
+Structure the state
+Sub-agents for exploration
+Re-anchor the constraints
+Cap the session
+Best-of-N with a reward model

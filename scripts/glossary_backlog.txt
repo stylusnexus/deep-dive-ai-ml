@@ -2,39 +2,23 @@
 # been triaged. This is a debt list, not a permission slip: the guard stays
 # green while they sit here, so work it down block by block.
 Acceptance criteria
-Activations
 After
 Against a baseline
-Agent
 Aggregative
-Apple Silicon, high memory
-Association, not cause
-Assumes round clusters
 At least three repeats
 Bare
 Batching raises throughput
 Before
-Best-of-N with a reward model
-Bounded loops
 Branching
 Calibrate against humans
-Cap the session
-Causal masking
-Chatbot
 Classify non-completions
 Comparative
 Consequence amnesia
 Consistency
-Constrain the output
 Constraints and prior decisions
-Consumer NVIDIA (8-24GB)
-Containers
 Contextualise before reasoning
-Conversation history
 Correctness
-Cost and latency
 Coverage
-Daily
 De-duplicate against what you have
 Decompose explicitly
 Decomposed
@@ -42,203 +26,85 @@ Decomposition
 Deterministic
 Differences
 Different family from the system
-Distillation flywheel
-Diversity monitoring
-Does not work
-Domain constraint
 During
-Elbow method
-Elicitation
 Enough context to decide
 Explicit non-goals
 Explicit state object
-External notes
 FAIL_TO_PASS
-Falls then flattens
-Falls, validation rises
-Feature selection before the split
 Few-shot CoT
-Flat from step one
-Fresh real data each round
 Full action log
-Fully cold
-Fully warm
 Fuse by rank
-Gate the irreversible
-Goes to NaN
-Group leakage
-Grouped-query attention (GQA)
-Grows with batch
-Grows with context
 Guards-off
 Hard hop limit
-Held-out evaluation
-High-vibration group
-History
 Identity on the decision
 Implicit / behavioural
 In the loop
-Independent of the weights
 Inspectability
-Instructions
 Intake question 1
-Inverse document frequency
-It has a lifetime
-It is priced differently
 Iteration speed
 Keep data out
 Keep everything
 Keep the parent link
 Lags
 Last resort on the ladder
-Least privilege
-Length normalisation
-Local server compromise
-Log every call
-Log-odds, not probability
-Logit distillation
-Low-vibration group
 MCP server
-Mechanically checkable
 Message history
 Messages accumulate
-Model warm, cache cold
 Model-generated
-Monthly
-Multi-head attention (MHA)
 Multi-hop
 Multimodal / Multilingual
-No completion test
-No local GPU
 No self-assessment
-Not checkable
-On every change
 On the loop
 One variable per rung
-One-shot
 Open questions
 Oracle
 Out of the loop
 Outcome honesty
-Overhead
 Overlap a little
 PASS_TO_PASS
 Pairwise, not absolute
 Parallelism
-Per incident
-Permit refusal
 Position bias
-Prefer stdio locally
-Preprocessing leakage
 Process honesty
-Product quantization
-Production last
 Programmatic / weak supervision
-Prompts
-Queueing
 Queueing dominates past saturation
-Random start
-Rationale distillation
-Re-anchor the constraints
-Reasoning models
 Record the manifest
-Reference match
 Reinforcement
 Reloop
-Rented cloud GPU
 Repeats per cell
 Report agreement alongside scores
-Require citations
 Rerank the shortlist
-Resources
-Response distillation
-Retrieval
 Retrieve wide
-Retrieved material
-Retrieved memory
 Retrospective justification
-Room to answer
-Roots
 Route by question shape
 SWE-bench
 SWE-bench Lite
 SWE-bench Verified
 Same fixtures on every rung
-Sampling
-Sandboxing
 Scale
-Scale changes everything
-Scale matters enormously
-Scope the credentials
-Scoped credentials
 Score compression
 Self-preference
 Send few
-Session hijacking
-Shrunk by grouped-query attention (GQA)
-Sign can flip
-Silhouette score
-Single tree
-Spikes then recovers
 Split on structure first
-Stable content goes first
-Start read-only
 Status theatre
-Stochastic (SGD)
-Streamable HTTP
 Structure
-Structure the state
-Sub-agents for exploration
 Supervised
-Target leakage
-Task-specific distillation
-Temporal leakage
-Term frequency
-Test
 Test-first
-Threshold tuning
 Too large
 Too small
-Tool
-Tool results
-Tool use examples
-Tools
-Train-test contamination
 Truncating tool results
-Tuning against the test set
 Under-specified
-Undersampling
 Unsupervised
-Variance reduction
 Verbosity bias
-Verifier-guided retry
 Verify at the end
-Verify externally
 Verify per edit
 Verify per logical unit
-Vet before installing
-Warm but evicted
-Weekly
-Weighted result
 What it buys
 What it costs — ordering
 What it costs — pricing
 What it costs — silence
-Workflow
-Works well on Metal
-Works with friction
-Write it down
 Write why, not what
-You must choose k
 Zero-shot CoT
-ef_construction
-ef_search
-learning_rate (boosting)
-max_depth (boosting)
-n_estimators (boosting)
-n_estimators (forest)
 patch / test_patch
 problem_statement
 repo + base_commit
-stdio
-subsample / colsample

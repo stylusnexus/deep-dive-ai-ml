@@ -180,6 +180,98 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Verification granularity** — Whether you check after every edit, after a logical unit, or once at the end. Decides whether feedback names the cause or only the symptom. Per-edit checking breaks on changes that are atomic across files.
 
+**Chatbot** — Model in, text out, no actions. It cannot affect the world, which makes it safe by construction and limited by the same fact.
+
+**Workflow** — Fixed steps you decided, with the model filling gaps inside them. Predictable and auditable, because the sequence is not the model's to choose.
+
+**Agent** — A system where the model chooses which tool to use, in what order, and when to stop. Flexible, and the flexibility is exactly what makes it dangerous.
+
+**Supervised learning** — Learning from labelled examples: here is an input, here is the right answer. Most of classical machine learning.
+
+**Unsupervised learning** — Finding structure without labels, as in clustering or embeddings. Nobody said what the groups are, so nobody can tell you the answer is wrong.
+
+**Reinforcement learning** — Learning from consequences rather than answers. No correct output is given, only a signal about whether an outcome was good.
+
+**Human in the loop** — The action waits for a person to approve it. Slowest and safest, and correct for anything irreversible or outward-facing.
+
+**Human on the loop** — The action proceeds while a person watches and can stop it. Requires real observability, or the watching is decorative.
+
+**Human out of the loop** — Nobody watching. Appropriate only where actions are reversible, bounded and logged.
+
+**Least privilege** — Starting an integration read-only and widening only for the task in hand, then narrowing again. Production is the last thing you connect, never the first.
+
+**Scoped credentials** — Access to what the task needs rather than to the whole account. A repository connection does not need every repository.
+
+**Sandboxing** — Running agent-executed code somewhere it cannot reach anything that matters. Containers, not promises.
+
+**Bounded loop** — Turn and cost ceilings plus repetition detection, so a loop cannot spin silently until somebody notices the bill.
+
+**Action log** — A record of what an agent did, in order, with arguments and results. You cannot investigate what you did not record, and this is where an injection shows up.
+
+**Tool** — A single capability with a schema: one function the agent can invoke. The unit of what an agent is able to do.
+
+**Resources** — Things a Model Context Protocol server offers for reading rather than invoking — files, records, documents, addressed by URI.
+
+**Prompts (MCP)** — Named, reusable prompt templates a server offers its clients, as distinct from tools it offers to call.
+
+**Sampling (MCP)** — A server asking its client to run an inference on its behalf, so the server needs no API key or model choice of its own.
+
+**Roots** — A server asking its client where it is allowed to operate, so it can discover its sandbox rather than assume one.
+
+**Elicitation** — A server asking the user for a missing parameter mid-operation, instead of failing or inventing a value.
+
+**stdio** — A Model Context Protocol transport where the client launches the server as a subprocess and talks over standard input and output. Nothing listens on a port, which removes a class of attacks outright.
+
+**Streamable HTTP** — The network transport for Model Context Protocol servers that are shared, remote, or need to outlive a client session. It brings the usual network exposure with it.
+
+**Local server compromise** — The commonest Model Context Protocol threat: a server is a binary running on your machine with your client's privileges. Installing one is a trust decision, not a configuration step.
+
+**Session hijacking** — A guessed or stolen session identifier used to impersonate a client on an HTTP transport, or to inject into its stream.
+
+**Deterministic grading** — Scoring by something that cannot be argued with: it compiles, the tests pass, the schema validates. Cheap and trustworthy, so use it wherever the task allows.
+
+**Reference match** — Scoring against a known-good answer, exactly or fuzzily. Brittle whenever many different answers would be correct.
+
+**One-shot** — Giving a single example in the prompt. Frequently enough to pin down output format, which is often the actual problem.
+
+**Zero-shot chain-of-thought** — Asking the model to think step by step with no examples. One line, and a real improvement on reasoning tasks.
+
+**Few-shot chain-of-thought** — Examples that show the working rather than only the answers, to demonstrate the reasoning style you want.
+
+**Reasoning model** — A model trained to produce an extended internal chain before its visible answer. That chain costs output tokens, which is why budgets sized for an answer alone return nothing.
+
+**Undersampling** — Discarding majority-class rows to balance a dataset. Fast, and it throws away real data, which is reasonable only when the majority class is enormous.
+
+**Threshold tuning** — Moving the decision cut-off rather than changing the model. Frequently the most effective option available and the most often skipped.
+
+**Response distillation** — Generating answers with a teacher model and fine-tuning a student on them. The simplest form and the usual starting point.
+
+**Logit distillation** — Training the student to match the teacher's full output distribution rather than its final answers. The classical form, and it needs access to raw outputs.
+
+**Rationale distillation** — Having the student learn the teacher's reasoning as well as its conclusions. Effective where the reasoning is the hard part.
+
+**Task-specific distillation** — Distilling for one narrow job, which is where the wins are largest: a small student can match a frontier teacher on a single well-defined task.
+
+**Verifier-guided retry** — Generate, run the tests, feed the failures back. The strongest inference-time loop, because the verifier is ground truth rather than an opinion.
+
+**Best-of-N** — Generate N candidates and keep the highest-scoring. Quality is capped by the scorer, so a weak reward model produces confidently mediocre picks.
+
+**Distillation flywheel** — A large model generating training data for a smaller one, round after round. The teacher is the external signal that keeps it from collapsing.
+
+**Held-out evaluation** — A set the training loop cannot see. If the loop can read the set that judges it, it will optimise the set rather than the task.
+
+**Diversity monitoring** — Tracking the variety of outputs across generations, not just their quality. Model collapse shows up in the tails first, where nobody is looking.
+
+**Queueing** — Time spent waiting for a slot rather than doing work. Invisible until you measure it, and past saturation it dominates latency entirely.
+
+**Batching** — Grouping requests so hardware is used efficiently. Raises total throughput and can raise the latency of any individual request.
+
+**Conversation history** — The default form of agent memory: everything re-sent every turn. Simple, and it grows without limit until something manages it.
+
+**External notes** — Memory an agent writes to a file and reads back. It survives resets because it was never in the context to begin with, which makes it the most durable kind.
+
+**Retrieved memory** — Facts stored and fetched when relevant, by semantic search over past interactions. Powerful, and it means you now have a retrieval quality problem as well.
+
 ---
 
 ## Block 0 · Orientation
@@ -261,6 +353,58 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **Cross-encoder reranker** — Scores query and document together rather than separately. Much more accurate, far too slow for a whole corpus — so it reranks a shortlist.
 
 **Data leakage** — Information available at training time but not at prediction time. Inflates training *and* validation together, so the usual overfitting gap shows nothing wrong.
+
+**Stochastic gradient descent (SGD)** — Updating the weights from one example, or a small batch, at a time rather than the whole dataset. Fast and noisy, and the noise sometimes helps escape a bad minimum.
+
+**Activations** — The intermediate values kept from the forward pass so backpropagation can use them. They scale with batch size and sequence length, and they are the knob you actually turn when you run out of memory.
+
+**Loss curve** — Training loss plotted against steps, read as a diagnostic rather than a score. Falling then flattening is healthy; flat from step one is a wiring bug, not a learning-rate problem; training falling while validation rises is overfitting.
+
+**Log-odds** — What a logistic regression's coefficients are expressed in, not probabilities. A coefficient of 0.7 is not 70% — exponentiate it for an odds ratio of about 2.0, meaning the odds roughly double.
+
+**Variance reduction** — The splitting criterion for regression trees: choose the split that most reduces variance within each resulting group. The regression counterpart to Gini impurity.
+
+**n_estimators** — How many trees an ensemble builds. In a random forest more is safe and converges; in gradient boosting more is dangerous past the optimum, which is why early stopping is mandatory for one and optional for the other.
+
+**learning_rate (boosting)** — How much each tree contributes. Lower means you need more trees and generalise better; 0.05 with early stopping is a reliable starting point.
+
+**max_depth (boosting)** — How deep each tree may go, kept to roughly 3 to 6. The ensemble supplies the complexity, so deep individual trees overfit quickly.
+
+**subsample / colsample** — Sampling rows and columns per tree in boosting. Randomness regularises here for the same reason it helps a forest.
+
+**Elbow method** — Plotting within-cluster variance against k and looking for the bend. Real data frequently has no visible elbow, at which point the method has told you nothing.
+
+**Silhouette score** — How well each point fits its own cluster against the next-nearest, from -1 to 1. More decisive than the elbow method and slower.
+
+**Multi-head attention (MHA)** — The original form, where every head keeps its own keys and values. Most expressive, and the largest KV cache.
+
+**Grouped-query attention (GQA)** — Heads sharing key and value projections in groups. The current default, because it cuts the KV cache substantially at little cost in quality.
+
+**Causal masking** — Preventing a token from attending to tokens after it. Not a variant but a requirement: during generation the future does not exist yet.
+
+**Product quantization** — Compressing the stored vectors themselves rather than the search over them. Often paired with an inverted file index to cut memory dramatically — quantization again, a different object.
+
+**ef_construction** — How much effort an HNSW index spends while being built. You pay it once, so be generous.
+
+**ef_search** — How many candidates the index examines per query. The dial you tune live: raise it for recall and pay in latency, and move it first when recall disappoints.
+
+**Term frequency** — How often a word appears in a document, as a relevance signal. Not linear — ten mentions are not ten times more relevant, which is why BM25 saturates it.
+
+**Inverse document frequency** — Weighting terms by how rare they are across the corpus. A document matching "gearbox" tells you far more than one matching "the".
+
+**Length normalisation** — Discounting matches in long documents, which contain most words by accident. Tuned so that length neither helps nor hurts more than it should.
+
+**Target leakage** — A feature that encodes the answer, such as predicting churn from a cancellation date. The model scores brilliantly in testing and is worthless in production.
+
+**Train-test contamination** — The same rows appearing in both splits: duplicates, near-duplicates, or one customer under two identifiers. Very common in scraped or merged data.
+
+**Preprocessing leakage** — Fitting a scaler or imputer before splitting, so the training set has seen the test set's statistics. The reason a pipeline is fitted inside cross-validation rather than before it.
+
+**Temporal leakage** — Training on the future by splitting time-ordered data at random. The model learns from events that happen after the ones it is predicting.
+
+**Group leakage** — Related rows split across train and test: several readings from one turbine, several notes on one patient. The model recognises the group rather than the pattern.
+
+**Tuning against the test set** — Leakage by repetition. Every time you read the test score and change something, a little of that set moves into your model, and the number stops being an estimate of anything.
 
 ---
 
