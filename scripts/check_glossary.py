@@ -82,6 +82,19 @@ def main():
     known = defined | backlog | notterms
     new = {t: mod for t, mod in terms.items() if norm(t) not in known}
 
+    # The glossary can also drift against itself: a term defined once in Block 0
+    # and again in a later block is two answers to the same question.
+    seen, dupes = set(), []
+    for m in re.finditer(r'^\*\*(.+?)\*\*\s+—', glossary, re.M):
+        k = m.group(1).strip().lower()
+        (dupes.append(m.group(1)) if k in seen else seen.add(k))
+    if dupes:
+        print(f"\n{len(dupes)} term(s) defined twice in GLOSSARY.md:\n")
+        for d in dupes:
+            print(f"  {d}")
+        print("\nKeep one definition and delete the other.")
+        return 1
+
     print(f"glossary defines   : {len(defined)}")
     print(f"lessons define     : {len(terms)}")
     print(f"awaiting triage    : {len(backlog)}  (scripts/glossary_backlog.txt)")

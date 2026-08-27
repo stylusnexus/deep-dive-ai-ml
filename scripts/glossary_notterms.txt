@@ -213,3 +213,92 @@ Sub-agents for exploration
 Re-anchor the constraints
 Cap the session
 Best-of-N with a reward model
+# Rows whose concept is defined under its own name elsewhere in the glossary.
+Deterministic
+Full action log
+Supervised
+Unsupervised
+Reinforcement
+In the loop
+On the loop
+Out of the loop
+Zero-shot CoT
+Few-shot CoT
+Batching raises throughput
+Queueing dominates past saturation
+Programmatic / weak supervision
+Implicit / behavioural
+Model-generated
+Lags
+Differences
+Correctness
+Multi-hop
+Comparative
+Under-specified
+Aggregative
+Split on structure first
+Too small
+Too large
+Overlap a little
+Keep the parent link
+Retrieve wide
+Fuse by rank
+Rerank the shortlist
+Send few
+De-duplicate against what you have
+Contextualise before reasoning
+Hard hop limit
+Decompose explicitly
+Route by question shape
+Truncating tool results
+Messages accumulate
+No self-assessment
+Message history
+Explicit state object
+Identity on the decision
+Enough context to decide
+What it buys
+What it costs — ordering
+What it costs — pricing
+What it costs — silence
+Keep everything
+Verify at the end
+Verify per edit
+Verify per logical unit
+Against a baseline
+At least three repeats
+Before
+During
+After
+repo + base_commit
+problem_statement
+patch / test_patch
+Multimodal / Multilingual
+Decomposition
+Coverage
+Scale
+Consistency
+Structure
+Iteration speed
+Last resort on the ladder
+Different family from the system
+Pairwise, not absolute
+Calibrate against humans
+Report agreement alongside scores
+Intake question 1
+Constraints and prior decisions
+Open questions
+Write why, not what
+Keep data out
+Same fixtures on every rung
+Repeats per cell
+One variable per rung
+Record the manifest
+Classify non-completions
+Bare
+Test-first
+Reloop
+Guards-off
+Decomposed
+Oracle
+Explicit non-goals

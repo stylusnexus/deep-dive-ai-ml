@@ -156,8 +156,6 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Scope inflation** — Publishing every scope up front so one stolen token reaches everything. Fixed by minimal initial scopes and elevation on demand.
 
-**Prefill / decode** — Processing your prompt (parallel, fast, scales with what you sent) versus generating the answer one token at a time (sequential, slow). Time-to-first-token is prefill; tokens-per-second is decode.
-
 **Cold start** — Time before a system can serve any request: loading weights, allocating the cache, warming the runtime. Distinct from a cache miss, and fixed by keeping something warm rather than making it faster.
 
 **Warm states** — Fully cold (nothing loaded), model-warm/cache-cold (the common case), fully warm (new tokens only), and evicted (was warm, silently is not any more).
@@ -253,8 +251,6 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **Task-specific distillation** — Distilling for one narrow job, which is where the wins are largest: a small student can match a frontier teacher on a single well-defined task.
 
 **Verifier-guided retry** — Generate, run the tests, feed the failures back. The strongest inference-time loop, because the verifier is ground truth rather than an opinion.
-
-**Best-of-N** — Generate N candidates and keep the highest-scoring. Quality is capped by the scorer, so a weak reward model produces confidently mediocre picks.
 
 **Distillation flywheel** — A large model generating training data for a smaller one, round after round. The teacher is the external signal that keeps it from collapsing.
 
@@ -488,10 +484,7 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Overfit one batch** — Deliberately training on a single batch until the loss collapses, to prove the training loop is wired correctly. Ninety seconds, before tuning anything.
 
-**Early stopping** — Halting training when validation performance stops improving. Networks will fit noise indefinitely if you let them.
-
 **Class weights** — Making errors on the rare class cost more during training. Without them a model on imbalanced data learns to predict the majority and calls it accuracy.
-
 
 **Keras** — A high-level neural-network application programming interface for conventional architectures and training loops. Less code and fewer bugs when the training loop is not the interesting part.
 
@@ -555,8 +548,6 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Audit trail** — Who approved, when, and exactly what. "Approved" without those three is not an audit trail.
 
-**Termination condition** — The observable event that ends an agent loop, normally the model ceasing to request tools. Asking the model whether it is finished is an opinion, not an event.
-
 **Turn cap** — A hard limit on loop iterations, which must name itself when it fires. A run that returns nothing with no reason is indistinguishable from the model failing.
 
 **Trace** — Everything that happened in service of one request, tied together by a single identifier. The unit you look at when asking what happened to this particular run.
@@ -589,7 +580,59 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Drop after use** — Clearing old tool results once the work derived from them is done. The safest form of compaction, because a read that has already produced an edit is rarely needed verbatim again.
 
-**Verification granularity** — How often you check the agent's work: at the end, per logical unit, or per edit. Verifying at the end is cheapest and tells you least; per edit names the failure immediately and costs the most.
+**Retrospective justification** — An architecture decision record written after the fact to legitimise a choice already made. It reads like a decision and records none.
+
+**Consequence amnesia** — An architecture decision record whose consequences section is empty or optimistic. That section is where it states what it is giving up, and without it the record cannot be revisited honestly.
+
+**Status theatre** — Writing a decision record for every change, so none of them are signal. If it does not forbid anything, it is not a decision.
+
+**Outcome honesty** — Whether your fixture can tell success from inaction. At the starting state the check must fail, and with a known-good change it must pass — otherwise every number downstream is noise.
+
+**Process honesty** — Whether the harness recorded what actually happened: the model's reasoning, its tool arguments, and why the run stopped. Without it you cannot tell "never attempted" from "attempted and failed".
+
+**SWE-bench** — A benchmark of 2,294 real GitHub issues across twelve Python repositories, scored by whether the agent's patch makes the project's own tests pass.
+
+**SWE-bench Lite** — A 300-instance subset filtered toward self-contained problems. Cheaper to run and easier, so its scores are not comparable to the full set.
+
+**SWE-bench Verified** — A 500-instance subset human-validated to remove tasks that were underspecified or impossible. The variant most quoted, and the fairest.
+
+**FAIL_TO_PASS** — The tests that must start passing for a fix to count, drawn from the real pull request. They fail at the base commit and pass afterwards.
+
+**PASS_TO_PASS** — The tests that must keep passing. This is what stops "delete the failing test" from scoring as a solution.
+
+**Position bias** — A judge's verdict changing when the same two answers are presented in the opposite order. The reason every pairwise comparison is run both ways.
+
+**Verbosity bias** — A judge rewarding length beyond the point where length helps. Dangerous when the systems being compared differ in how much they say.
+
+**Self-preference** — Models favouring their own generations. The reason a judge should come from a different family than the system under test, and never be the model under test.
+
+**Score compression** — Absolute one-to-ten scoring clustering everything into a seven or an eight. Pairwise comparison discriminates far better.
+
+**Judge calibration** — Hand-labelling thirty to fifty items once and measuring how often the judge agrees. The step nobody does, and without it a judge score is an opinion with a decimal point.
+
+**Acceptance criteria** — Checkable conditions for done, not aspirations. "Fast" is not one; "p95 under 400ms on the existing fixture set" is.
+
+**Non-goals** — What a piece of work explicitly does not do. The highest-value section of any spec and the most often missing, because it is what stops scope creep being invisible.
+
+**Bare (rung)** — The bottom rung of an agent experiment: the task and nothing else, no scaffolding or hints. If it passes here, everything above it is unnecessary.
+
+**Test-first (rung)** — The failing test supplied in context, giving the agent a checkable target. Passing here and not below means it needed the target, not more capability.
+
+**Reloop (rung)** — Failures fed back with a retry allowed. Passing here means it could not get it right first time but could correct itself.
+
+**Guards-off (rung)** — Budgets and limits relaxed. Passing here means capability was never the problem — your harness was stopping it.
+
+**Decomposed (rung)** — The task pre-split into steps. Passing here means the model could do each part and not the planning.
+
+**Oracle (rung)** — The answer, or most of it, supplied. This is the control: failing here means the fixture or the rubric is broken, not the model.
+
+**Branching** — Conditional edges routing by task type, instead of a growing thicket of if-statements inside one function.
+
+**Parallelism** — Independent nodes running together, so two retrievals that do not depend on each other cost one node's worth of wall clock rather than two.
+
+**Inspectability** — Being able to read what the state was at every step of a run that finished yesterday. The trajectory log the telemetry lesson asks for, produced by construction rather than by discipline.
+
+**MCP server** — A connection to a system outside your codebase, spoken in a standard protocol so any client can use it. Installing one grants it your client's privileges, so treat it like adding a dependency.
 
 ---
 
