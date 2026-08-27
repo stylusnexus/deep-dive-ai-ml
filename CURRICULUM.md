@@ -23,7 +23,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 69 lessons built, 69 diagrams, 12 executed notebooks.**
+**Status: 69 lessons built, 69 diagrams, 13 executed notebooks.**
 
 ---
 
@@ -103,7 +103,9 @@ Built in **LangGraph / LangChain / LangSmith**, matching the original. The Micro
 - Telemetry and instrumentation — the trace is the only evidence ✅
 
 5 lessons in `lessons/block4-agentic/`, including the four loop levers and their tradeoffs.
-One notebook written; Project 3 scaffolded. Both await a free model endpoint.
+2 notebooks in `notebooks/04-agentic/` — the loop by hand, then the same loop as a
+checkpointed graph, which measures what resuming a crashed run costs. Project 3 is
+scaffolded; `src/pipeline.py` is not yet written.
 
 **Exit:** Project 3 — multi-agent delivery-exception handler runs with human approval, traced in LangSmith.
 
