@@ -172,7 +172,7 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Oracle rung** — The control at the top of a ladder, supplying most of the answer. Failing there means the fixture is broken rather than the agent.
 
-**Prefix caching** — Reusing the processed keys and values for an unchanged prompt prefix. The largest latency lever in a multi-turn loop, and it fails silently: a cache that stopped matching looks exactly like one that never existed, except on the bill.
+**Prefix caching** — A serving engine reusing already-computed keys and values when a new request begins with a prefix it has seen. Automatic and unbilled — you do not mark anything, which is why a second identical request is often faster with no code change. See [[prompt-caching]] for the same mechanism sold as a product.
 
 **Read accumulation** — Tool results staying in the transcript and being re-sent every turn. A single large read early in a run is paid for on every turn after it.
 
@@ -570,7 +570,11 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Sub-agent as a tool** — A child agent the parent calls like any other tool: it runs, returns, and disappears. The simplest useful form of multi-agent, and the one to reach for first.
 
-**Prompt caching** — Reusing the processed prefix of a prompt across calls so prefill is largely skipped. The single largest latency and cost lever in an agent loop, and it keys on an exact byte-identical prefix.
+**Prompt caching** — Prefix caching exposed as a billable feature: you mark where the stable part of the prompt ends, entries expire, and writes and reads are priced differently. Reads cost about a tenth of normal input; writes cost 1.25× at the five-minute lifetime and 2× at the one-hour one, so a prefix reused twice roughly breaks even and one reused fifty times is a large win.
+
+**Semantic caching** — Answering from a store of previous responses when an incoming question embeds close enough to an earlier one, without calling the model at all. Unrelated to the other three caches despite the name: it reuses answers rather than arithmetic, so a near-miss returns a confident answer to a question nobody asked.
+
+**Similarity threshold** — The cut-off a semantic cache uses to decide two questions are the same one. Tight enough to be safe and it rarely hits; loose enough to be useful and it starts answering the wrong question — there is no value that is correct everywhere.
 
 **Cache hit rate** — The fraction of calls that actually reused a cached prefix. Nothing errors on a miss, so a cache that quietly stopped working looks exactly like never having had one, except on the bill.
 

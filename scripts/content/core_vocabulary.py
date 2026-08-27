@@ -2443,6 +2443,49 @@ LESSONS = [
      "The cache matches from the beginning of the prompt until the first difference. A timestamp, a session id, or a re-ordered tool list near the front invalidates everything after it, and the hit rate silently goes to zero while the code looks correct.",
      "A team added the current date to the top of their system prompt for freshness. Cache hit rate went from 90% to zero overnight, cost tripled, and nothing in the application errored. The date changed the first line, so every subsequent token had to be reprocessed on every request."),
 
+    ("h2", "Four different things are called caching"),
+    ("p", "Three of these are the same mechanism seen at three levels, and the fourth is unrelated to all of them. They share a word and almost nothing else, which is why a conversation about &ldquo;adding caching&rdquo; can run for ten minutes with two people meaning different things."),
+
+    ("terms", [
+      ("KV cache", "Inside one request",
+       "The keys and values for tokens already processed, held so that generating token 500 does not reprocess the first 499. Not a feature you enable — it is how generation works at all. It lives in memory, it grows with context length and batch size, and it is usually what runs you out of it."),
+      ("Prefix caching", "Across requests, in the server",
+       "Reusing those same keys and values when a new request begins with a prefix that has already been computed. Serving engines do this automatically and without being asked, which is why a second identical request is often faster with no code change at all."),
+      ("Prompt caching", "The same thing, billed",
+       "Prefix caching exposed as a product: you mark where the stable part ends, entries have a lifetime, and writes and reads are priced differently. This is the one you can get wrong, because it is the one with a knob."),
+      ("Semantic caching", "Before the model, in your application",
+       "Embed the incoming question, and if it is close enough to one you have answered before, return the stored answer without calling the model. Nothing to do with keys, values or prefixes — a different layer solving a different problem."),
+    ]),
+
+    ("figure", "The first three are one mechanism exposed at three levels; the fourth sits in front of all of them and never reaches the model. Only two of the four are things you configure.", '''<svg viewBox="0 0 640 260" role="img" aria-label="Four kinds of caching, by layer"><defs><marker id="cch" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="14" width="200" height="58" rx="7" class="d-box-accent"/>
+<text x="26" y="38" class="d-label-b">SEMANTIC CACHE</text>
+<text x="26" y="58" class="d-label-sm">your app — answers, by similarity</text>
+<path d="M212 43 L266 43" class="d-arrow-accent" marker-end="url(#cch)"/>
+<text x="276" y="40" class="d-label-sm">hit? the model is never called</text>
+<path d="M112 72 L112 104" class="d-arrow-accent" marker-end="url(#cch)"/>
+<text x="126" y="94" class="d-label-sm">miss</text>
+<rect x="12" y="104" width="200" height="58" rx="7" class="d-box"/>
+<text x="26" y="128" class="d-label-b">PROMPT CACHING</text>
+<text x="26" y="148" class="d-label-sm">the provider — prefix, billed</text>
+<path d="M212 133 L266 133" class="d-arrow-accent" marker-end="url(#cch)"/>
+<text x="276" y="130" class="d-label-sm">you mark the breakpoint</text>
+<path d="M112 162 L112 194" class="d-arrow-accent" marker-end="url(#cch)"/>
+<rect x="12" y="194" width="200" height="54" rx="7" class="d-box"/>
+<text x="26" y="216" class="d-label-b">PREFIX + KV CACHE</text>
+<text x="26" y="236" class="d-label-sm">the server — keys and values</text>
+<path d="M212 221 L266 221" class="d-arrow-accent" marker-end="url(#cch)"/>
+<text x="276" y="218" class="d-label-sm">automatic; nothing to configure</text>
+</svg>'''),
+
+    ("know",
+     "Three of them reuse computation. The fourth skips the model, which is a different risk entirely.",
+     "A prefix cache can only ever return what the model would have returned anyway, because it is replaying arithmetic that was already done. A semantic cache returns an answer to a <em>different question</em> that scored as similar — so its failure mode is not a slow response or a larger bill, but a confident wrong answer with nothing in the logs to suggest anything happened.",
+     "Two support queries: &ldquo;how do I cancel my subscription?&rdquo; and &ldquo;how do I cancel my subscription without losing my data?&rdquo;. They embed close together. A semantic cache tuned loosely answers the second with the first, and the customer loses their data."),
+
+    ("callout", "pitfall", "The threshold is the whole design",
+     "<p>Semantic caching lives or dies on the similarity threshold, and there is no setting that is safe everywhere. Tight enough to be correct and it almost never hits; loose enough to hit often and it starts answering questions nobody asked. If you cannot state what a near-miss costs, you are not ready to turn it on.</p>"),
+
     ("h2", "Cold start"),
     ("p", "Separate from caching, and often confused with it. A cold start is the time before your system can serve <em>any</em> request: loading weights from disk into memory, allocating the KV cache, warming the runtime. For a large local model this can be tens of seconds."),
     ("ul", [
