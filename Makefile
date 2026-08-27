@@ -1,4 +1,4 @@
-.PHONY: up down torch keras logs check notebooks sop
+.PHONY: up down torch keras logs check notebooks sop glossary
 
 up:    ; docker compose -f docker/compose.yaml up -d
 down:  ; docker compose -f docker/compose.yaml down
@@ -8,3 +8,4 @@ logs:  ; docker compose -f docker/compose.yaml logs -f
 check: ; bash scripts/check-env.sh
 notebooks: ; python3 scripts/check_notebooks.py
 sop: ; python3 scripts/build_sop.py
+glossary: ; python3 scripts/check_glossary.py

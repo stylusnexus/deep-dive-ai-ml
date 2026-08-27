@@ -1,0 +1,322 @@
+# Terms a lesson defines that the glossary does not, and that have not yet
+# been triaged. This is a debt list, not a permission slip: the guard stays
+# green while they sit here, so work it down block by block.
+*.gguf
+*.safetensors
+Acceptance criteria
+Activations
+After
+Against a baseline
+Agent
+Aggregates over a group
+Aggregative
+And the rare class
+Apple Silicon, high memory
+Approval gates
+Artificial intelligence
+Association, not cause
+Assumes round clusters
+At least three repeats
+Attention
+Bare
+Batch
+Batching raises throughput
+Before
+Best-of-N with a reward model
+Bounded loops
+Branching
+Calendar features
+Calibrate against humans
+Cap the session
+Causal masking
+Chatbot
+Class weights for imbalance
+Classify non-completions
+Comparative
+Confident domain claims
+Confused deputy
+Consequence amnesia
+Consistency
+Constrain the output
+Constraints and prior decisions
+Consumer NVIDIA (8-24GB)
+Containers
+Context it cannot have
+Contextualise before reasoning
+Conversation history
+Correctness
+Cost and latency
+Coverage
+Daily
+De-duplicate against what you have
+Decode
+Decompose explicitly
+Decomposed
+Decomposition
+Deep learning
+Deterministic
+Differences
+Differences from a norm
+Different family from the system
+Distillation flywheel
+Diversity monitoring
+Does not work
+Domain constraint
+During
+Early stopping on validation
+Edges
+Elastic Net
+Elbow method
+Elicitation
+Enough context to decide
+Entropy
+Explicit non-goals
+Explicit state object
+External notes
+FAIL_TO_PASS
+Falls then flattens
+Falls, validation rises
+Feature selection before the split
+Feed-forward network
+Few-shot
+Few-shot CoT
+Flat from step one
+Fresh real data each round
+Full action log
+Fully cold
+Fully warm
+Fuse by rank
+Gap between train and test
+Gate the irreversible
+Generative AI
+Gini impurity
+Goes to NaN
+Group leakage
+Grouped-query attention (GQA)
+Grows with batch
+Grows with context
+Guards-off
+HNSW
+Hard hop limit
+Held-out evaluation
+High-vibration group
+History
+Human annotation
+IVF
+Identity on the decision
+Implicit / behavioural
+In the loop
+Independent of the weights
+Inspectability
+Instructions
+Intake question 1
+Interrupts
+Invented methods
+Inverse document frequency
+It has a lifetime
+It is priced differently
+Iteration speed
+Keep data out
+Keep everything
+Keep the parent link
+Keras
+Keras on the torch backend
+Lags
+Lasso (L1)
+Last resort on the ladder
+Layer normalisation
+Least privilege
+Length normalisation
+Local server compromise
+Log every call
+Log-odds, not probability
+Logit distillation
+Low-vibration group
+MAE
+MAPE
+MAR
+MCAR
+MCP server
+MNAR
+MRR
+Machine learning
+Many-shot
+Mechanically checkable
+Message history
+Messages accumulate
+Mini-batch
+Missingness indicators
+Model warm, cache cold
+Model-generated
+Monthly
+Multi-head attention (MHA)
+Multi-hop
+Multimodal / Multilingual
+No completion test
+No local GPU
+No self-assessment
+Nodes
+Normalise the inputs
+Not checkable
+On every change
+On the loop
+One variable per rung
+One-shot
+Open questions
+Oracle
+Out of the loop
+Outcome honesty
+Overfit one batch first
+Overhead
+Overlap a little
+PASS_TO_PASS
+Pairwise, not absolute
+Parallelism
+Per incident
+Permit refusal
+Position bias
+Prefer stdio locally
+Prefill
+Preprocessing leakage
+Process honesty
+Product quantization
+Production last
+Programmatic / weak supervision
+Programmatic tool calling
+Prompts
+PyTorch directly
+Queueing
+Queueing dominates past saturation
+RMSE
+Random sample first
+Random start
+Rationale distillation
+Ratios and rates
+Re-anchor the constraints
+Reasoning models
+Record the manifest
+Recorded outcomes
+Reference match
+Reinforcement
+Reloop
+Rented cloud GPU
+Repeats per cell
+Report agreement alongside scores
+Require citations
+Rerank the shortlist
+Residual connections
+Resources
+Response distillation
+Retrieval
+Retrieve wide
+Retrieved material
+Retrieved memory
+Retrospective justification
+Ridge (L2)
+Rolling statistics
+Room to answer
+Roots
+Route by question shape
+SWE-bench
+SWE-bench Lite
+SWE-bench Verified
+Same fixtures on every rung
+Sampling
+Sandboxing
+Scale
+Scale changes everything
+Scale matters enormously
+Scope the credentials
+Scoped credentials
+Score compression
+Self-preference
+Send few
+Session hijacking
+Shrunk by grouped-query attention (GQA)
+Sign can flip
+Silently wrong logic
+Silhouette score
+Single tree
+Spikes then recovers
+Split on structure first
+Stable content goes first
+Start read-only
+Start small
+State
+Status theatre
+Stochastic (SGD)
+Streamable HTTP
+Structure
+Structure the state
+Sub-agents for exploration
+Supervised
+Target leakage
+Task-specific distillation
+Temporal leakage
+Term frequency
+Test
+Test-first
+Threshold tuning
+Time since an event
+Too large
+Too small
+Tool
+Tool calls
+Tool results
+Tool search
+Tool use examples
+Tools
+Traces
+Train
+Train-test contamination
+Truncating tool results
+Tuning against the test set
+Under-specified
+Undersampling
+Unsupervised
+Validation
+Variance reduction
+Verbosity bias
+Verifier-guided retry
+Verify at the end
+Verify externally
+Verify per edit
+Verify per logical unit
+Vet before installing
+Warm but evicted
+Weekly
+Weighted result
+Weights
+What it buys
+What it costs — ordering
+What it costs — pricing
+What it costs — silence
+Workflow
+Works well on Metal
+Works with friction
+Write it down
+Write why, not what
+You must choose k
+Zero-shot
+Zero-shot CoT
+bool
+category
+chat template
+config.json
+datetime64
+ef_construction
+ef_search
+int64 / float64
+learning_rate (boosting)
+max_depth (boosting)
+n_estimators (boosting)
+n_estimators (forest)
+object
+patch / test_patch
+problem_statement
+repo + base_commit
+stdio
+subsample / colsample
+tokenizer.json
+top-k
+top-p

@@ -261,4 +261,142 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **Confounding** — A group difference explained by a third variable. A site with a higher failure rate and older turbines may just be old.
 
 ## Block 2 · Classical ML
-*to come*
+
+**Model ladder** — Climbing from majority class, to one rule, to logistic regression, to a forest, to boosting, to a network — stopping at the first rung that is good enough. Each rung must beat the one below it on the same fixtures, or you have learned that the extra complexity bought nothing.
+
+**Accuracy** — The fraction of all predictions that were correct. Meaningless when one class dominates, so always read it against the majority-class baseline before quoting it.
+
+**Precision** — Of the cases you flagged, how many were real. Low precision means effort wasted chasing false alarms.
+
+**Recall (sensitivity)** — Of the cases that were real, how many you caught. Low recall means missed cases, which is the expensive error whenever missing something is worse than a false alarm.
+
+**Specificity** — Of the genuinely negative cases, how many you correctly left alone. The mirror of recall, and the number that matters when false alarms are costly.
+
+**F1** — The harmonic mean of precision and recall, used when you need one number and both errors matter. It hides which of the two is failing, so read the pair as well.
+
+**Mean absolute error (MAE)** — Average distance from the truth in the original units. Robust to outliers and easy to explain to anyone.
+
+**Root mean squared error (RMSE)** — Like MAE but penalising large errors disproportionately. Use it when one big miss is worse than several small ones.
+
+**Mean absolute percentage error (MAPE)** — Error in percentage terms, which travels well between stakeholders. It breaks badly when true values approach zero.
+
+**R-squared** — The proportion of variance the model explains. Comparable across problems and easy to over-read: a high value on a trivially predictable target means nothing.
+
+**Derived feature** — A column built from others to expose what a raw value hides: a rate rather than a total, a deviation from the group norm rather than a level, days since an event rather than a date. Usually worth more than a bigger model.
+
+**Lag feature** — The value from n periods ago. Frequently the single strongest predictor in a time series, and the first one to build.
+
+**Rolling statistic** — A mean, maximum or standard deviation over a moving window. A rolling mean smooths noise; a rolling standard deviation captures instability, which is often the real signal.
+
+**Differencing** — Replacing a level with the change since the last period. Converts "how much" into "what moved", which is usually the question.
+
+**Calendar feature** — Day of week, month, holiday. Cheap, and they capture seasonality that no lag will.
+
+**Expanding window** — Backtesting where the training set grows with each fold, using all available history. The default when older data stays relevant.
+
+**Sliding window** — Backtesting with a fixed-length training set that moves forward, deliberately discarding old data. Right when the process itself has changed and history has become misleading.
+
+**Train-test gap** — Leaving a deliberate time gap between training and test data, matching how far ahead the prediction is actually used. Without it you are testing with information the deployed model would not have.
+
+**Input normalisation** — Rescaling features to comparable ranges before training a network. Non-negotiable: unscaled features make the loss surface pathological, and this is the commonest reason a network will not train.
+
+**Overfit one batch** — Deliberately training on a single batch until the loss collapses, to prove the training loop is wired correctly. Ninety seconds, before tuning anything.
+
+**Early stopping** — Halting training when validation performance stops improving. Networks will fit noise indefinitely if you let them.
+
+**Class weights** — Making errors on the rare class cost more during training. Without them a model on imbalanced data learns to predict the majority and calls it accuracy.
+
+
+---
+
+## Block 3 · Retrieval and Agentic RAG
+
+**Chunking** — Cutting documents into retrievable pieces before embedding them. Split on structure — headings, sections, functions — because a chunk that ends mid-sentence embeds badly and reads worse.
+
+**Chunk overlap** — Repeating a little of each chunk in its neighbour, usually 10–15%. Without it, a passage that straddles a boundary is lost by both sides.
+
+**Parent-document retrieval** — Match on a small chunk, then hand the model the larger section it came from. You get the precision of a small chunk and the context of a big one.
+
+**Index recall** — Whether your approximate index returns what an exhaustive search would have. It is a property of the index alone, measured against brute force, and almost nobody checks it.
+
+**Retrieval quality** — Whether the right chunk reaches the top k. Distinct from index recall: the index can be perfect and the embedding still wrong, and the two failures have different fixes.
+
+**Mean reciprocal rank (MRR)** — How high the right answer ranked, averaged over questions. Rewards putting the answer first rather than fifth.
+
+**Hit rate at k=1** — Did the best chunk come back first? Blunt and honest — when this is low, a reranker is the highest-value thing you can add.
+
+**Answer correctness** — Whether the answer is actually right, scored separately from whether it was grounded. High groundedness with low correctness means retrieval handed the model the wrong material, which is fixable upstream.
+
+**Distractor** — A retrieved chunk that is topically close but does not answer the question. Models do not politely ignore them; they actively degrade the answer, which is why you send three to five chunks rather than twenty.
+
+**Multi-hop question** — One whose answer needs two facts that live in different documents. Single-shot retrieval embeds the question, lands near one of them, and misses the other.
+
+**Comparative question** — One that needs several sources assembled and contrasted, such as how this year's policy differs from last year's. Retrieving one of them is worse than useless.
+
+**Under-specified question** — One whose real meaning only emerges after a first look, like "why did output drop?". It cannot be embedded usefully until you know which site and which period.
+
+**Aggregative question** — One that needs many chunks rather than the best five, such as how many incidents mentioned a term. A counting problem wearing a retrieval costume.
+
+**Agentic RAG** — Retrieval as a loop rather than a single shot: retrieve, read what came back, then ask a better question. It works because the second query did not exist until the first result arrived.
+
+**Hop limit** — A hard cap on how many retrieval rounds the loop may take, usually three or four, plus a token budget. The gains flatten quickly and the costs do not.
+
+---
+
+## Block 4 · Agentic AI
+
+**Graph runtime** — A framework that models an agent as nodes and edges rather than a while-loop, so the control flow becomes data something else can get between. LangGraph is the one this course uses.
+
+**State (graph)** — The typed dictionary threaded through every node, holding the plan, the history and what is known. Nodes receive it and return updates to it rather than rewriting it.
+
+**Node** — A function that transforms state: call the model, run a tool, summarise, validate. Ordinary functions, with no framework magic inside them.
+
+**Edge** — What runs next. A conditional edge that points back to an earlier node is how a graph expresses a loop.
+
+**Checkpointer** — The component that persists state after every node. This is the feature that changes what is possible; branching and typed state you could write yourself in an afternoon.
+
+**Resumption** — Continuing a crashed or paused run from its last checkpoint rather than the beginning. A crash on turn nine restarts at turn nine, so the eight turns of model calls before it are not paid for twice.
+
+**Interrupt** — A deliberate stop before a node, which persists state and hands control back to the caller. This is an approval gate that genuinely halts, as opposed to a prompt politely asking to proceed.
+
+**Thread id** — The key a checkpointer stores a run's state under. Resuming means invoking the graph again with the same thread id and no new input.
+
+**Approval gate** — A point where work stops until a human decides. It only counts if the run persists while it waits; a gate that lets the work continue is decoration.
+
+**Audit trail** — Who approved, when, and exactly what. "Approved" without those three is not an audit trail.
+
+**Termination condition** — The observable event that ends an agent loop, normally the model ceasing to request tools. Asking the model whether it is finished is an opinion, not an event.
+
+**Turn cap** — A hard limit on loop iterations, which must name itself when it fires. A run that returns nothing with no reason is indistinguishable from the model failing.
+
+**Trace** — Everything that happened in service of one request, tied together by a single identifier. The unit you look at when asking what happened to this particular run.
+
+**Span** — One unit of work inside a trace: a model call, a retrieval, a tool execution. Spans nest, so a tool span sits inside the turn that requested it.
+
+**Attributes** — Structured facts attached to a span — model name, token counts, latency, tool arguments. Queryable, unlike a line of prose in a log.
+
+**Events** — Timestamped occurrences within a span, such as a retry, a cache miss, or a guard firing.
+
+**Baggage** — Context carried across process boundaries, most often the trace id following a request into a sub-agent so the whole tree stays connected.
+
+**Logs** — What happened, in prose. Good for the unexpected, terrible at answering "how often" or "how slow".
+
+**Metrics** — Aggregates over time. Good for "is this getting worse", useless for "why did this one fail".
+
+**Orchestrator and workers** — One agent plans, several execute in parallel. Works when the subtasks are genuinely independent, and fails expensively when they need each other's intermediate results.
+
+**Planner, generator, evaluator** — Splitting conflicting roles across separate contexts so the evaluator is not marking the generator's homework. The independence requirement from the judging lesson, expressed as architecture.
+
+**Sub-agent as a tool** — A child agent the parent calls like any other tool: it runs, returns, and disappears. The simplest useful form of multi-agent, and the one to reach for first.
+
+**Prompt caching** — Reusing the processed prefix of a prompt across calls so prefill is largely skipped. The single largest latency and cost lever in an agent loop, and it keys on an exact byte-identical prefix.
+
+**Cache hit rate** — The fraction of calls that actually reused a cached prefix. Nothing errors on a miss, so a cache that quietly stopped working looks exactly like never having had one, except on the bill.
+
+**Truncate on ingest** — Capping each tool result as it enters the context. One line of code, and it prevents a single large file read from dominating the window for the rest of the run.
+
+**Summarise as you go** — Replacing a read with a short statement of what was learned. Preserves the finding and drops the bulk, but is lossy in a way the agent cannot see.
+
+**Drop after use** — Clearing old tool results once the work derived from them is done. The safest form of compaction, because a read that has already produced an edit is rarely needed verbatim again.
+
+**Verification granularity** — How often you check the agent's work: at the end, per logical unit, or per edit. Verifying at the end is cheapest and tells you least; per edit names the failure immediately and costs the most.

@@ -20,6 +20,7 @@ If either half is untrue, stop. Everything below produces noise.
 - [ ] Every terminator names itself when it fires — a wall clock must not look like a model stopping
 - [ ] Effective values printed **after** all writers, not the values you requested
 - [ ] Nothing truncated mid-measurement (output budget, context, tool-result clipping)
+- [ ] ☠ On a reasoning model the output budget covers thinking **and** answer — too low a ceiling returns an *empty* string, not a short one, and an empty answer scores as a wrong one
 - [ ] Non-completions classified — infrastructure errors kept out of capability numbers
 - [ ] Control fixture included, and read first when a board looks uniform
 

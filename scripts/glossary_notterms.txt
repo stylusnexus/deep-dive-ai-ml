@@ -1,0 +1,109 @@
+# Entries in a lesson's ('terms', ...) block that are comparison-table rows,
+# not glossary terms. Declined deliberately. Add to this list rather than
+# writing a definition for something like "Too large" or "Before".
+"This architecture can't reuse its cache"
+"This model can't run on that engine"
+"This runtime is twice as fast"
+0 · Majority class
+1
+1 · Can you write the rule?
+1 · Mine closed PRs
+1 · One rule
+1. Retrieve wide
+1. The target's balance
+1. You decide
+2
+2 · Derive both test sets
+2 · Is the input space bounded?
+2 · Logistic regression
+2. Fuse
+2. It drafts
+2. Leaking features
+3
+3 · Random forest
+3 · Validate with gold
+3 · What does a wrong answer cost?
+3. Duplicates
+3. Rerank
+3. You verify
+4
+4 · Do you have to explain it?
+4 · Freeze the set
+4 · Gradient boosting
+4. Missingness pattern
+4. Truncate
+4. You interpret
+5
+5 · Hold some back
+5 · Neural network
+5 · What is the volume?
+A checkpoint before the gated node
+A durable pending record
+A filter that isn't the model
+A nil verifier
+A phase transition
+A read-budget nudge
+A recipe
+A timeout with a default
+A whole-run wall clock
+Agent or workflow?
+An ADR
+Are features redundant?
+Both orders, every time
+Constitutional / reinforcement learning from AI feedback (RLAIF)
+Do the groups really differ?
+Does it relate to the target?
+Embeddings or keywords?
+Every model call
+Every tool call
+Every turn
+First, read the trace
+Gradients
+Is the missingness informative?
+It keys on an exact prefix
+Judge or verifier?
+K
+Last, tune reasoning effort
+M
+Never commit secrets
+Never only the easy ones
+Never understood the task
+Optimiser state
+Oversampling / synthetic minority over-sampling technique (SMOTE)
+Prompt or tool?
+Q
+Rate limits are a concurrency ceiling
+Read the interval, not the fraction
+Rejection sampling / Self-Taught Reasoner (STaR)
+The KV cache is per request
+The decision, not the prose
+The harness
+The harness executes
+The manifest
+The model
+The prompts
+The retrieval corpus
+The termination reason
+The termination set
+The tools
+The users
+The whole set
+The wrong model
+Then order the prompt for caching
+Then set verification granularity
+Then the uncertain cases
+Then truncate reads
+Understood it and would not act
+Weights
+What shape is it?
+reinforcement learning from human feedback (RLHF)
+server-side request forgery (SSRF) via discovery
+“Before changing code, inspect”
+“Its edits are already on disk”
+“Mean-centering will sharpen the router”
+“More exemplars will help classification”
+“The cheap tier is weak at agentic work, skip it”
+“This model class can’t drive tool loops”
+“You already read this file”
+“[clipped: original bytes 68671]”
+“…use search to explore”
