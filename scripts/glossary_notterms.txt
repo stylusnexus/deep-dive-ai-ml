@@ -112,3 +112,23 @@ How do serious people do it?
 Is my measurement trustworthy?
 What am I measuring against?
 Why did this number move?
+# Comparison rows whose concept is defined in the glossary under its own name.
+Ratios and rates
+Differences from a norm
+Time since an event
+Aggregates over a group
+Missingness indicators
+Normalise the inputs
+Start small
+Overfit one batch first
+Early stopping on validation
+Class weights for imbalance
+Gap between train and test
+Keras on the torch backend
+PyTorch directly
+Random sample first
+And the rare class
+Invented methods
+Confident domain claims
+Context it cannot have
+bool

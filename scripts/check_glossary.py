@@ -21,10 +21,33 @@ BACKLOG = ROOT / "scripts" / "glossary_backlog.txt"
 NOTTERMS = ROOT / "scripts" / "glossary_notterms.txt"
 
 
+def norm(term):
+    """Match a lesson's label to a glossary entry without demanding they be typed
+    identically. A lesson says "MAE" where the glossary says "Mean absolute error
+    (MAE)", and "Lags" where it says "Lag feature" — those are the same term, and
+    treating them as gaps buries the real ones."""
+    t = term.strip().lower().rstrip(".")
+    t = re.sub(r"\s+", " ", t)
+    t = re.sub(r"s$", "", t)          # lags -> lag
+    return t
+
+
+def names_for(entry):
+    """Every name a glossary entry answers to: its full name, each parenthesised
+    acronym or alias inside it, and the name with those parentheses removed."""
+    out = {entry}
+    for alias in re.findall(r"\(([^)]+)\)", entry):
+        out.add(alias)
+    out.add(re.sub(r"\s*\([^)]*\)", "", entry).strip())
+    for part in entry.split(" / "):
+        out.add(part.strip())
+    return {norm(o) for o in out if o.strip()}
+
+
 def read_list(path):
     if not path.exists():
         return set()
-    return {l.strip().lower() for l in path.read_text().splitlines()
+    return {norm(l) for l in path.read_text().splitlines()
             if l.strip() and not l.startswith("#")}
 
 
@@ -50,13 +73,14 @@ def lesson_terms():
 
 def main():
     glossary = (ROOT / "GLOSSARY.md").read_text()
-    defined = {m.group(1).strip().lower()
-               for m in re.finditer(r'^\*\*(.+?)\*\*\s+—', glossary, re.M)}
+    defined = set()
+    for m in re.finditer(r'^\*\*(.+?)\*\*\s+—', glossary, re.M):
+        defined |= names_for(m.group(1).strip())
     backlog, notterms = read_list(BACKLOG), read_list(NOTTERMS)
 
     terms = lesson_terms()
-    new = {t: mod for t, mod in terms.items()
-           if t.lower() not in defined | backlog | notterms}
+    known = defined | backlog | notterms
+    new = {t: mod for t, mod in terms.items() if norm(t) not in known}
 
     print(f"glossary defines   : {len(defined)}")
     print(f"lessons define     : {len(terms)}")
