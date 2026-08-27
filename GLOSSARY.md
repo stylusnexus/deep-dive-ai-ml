@@ -400,3 +400,21 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **Drop after use** — Clearing old tool results once the work derived from them is done. The safest form of compaction, because a read that has already produced an edit is rarely needed verbatim again.
 
 **Verification granularity** — How often you check the agent's work: at the end, per logical unit, or per edit. Verifying at the end is cheapest and tells you least; per edit names the failure immediately and costs the most.
+
+---
+
+## Block 5 · Evaluation
+
+**Correct by construction** — A gold label you know is right because you planted the fact it depends on, rather than because you trust whoever annotated it. The only kind of label you can debug.
+
+**Derivable** — A label that follows from applying the written rules to the written case, not merely one you believe is right. If a label is not derivable, no amount of model capability will reach it, and scoring against it measures your opinions.
+
+**Under-determined label** — One where two answers are equally defensible under the rules you wrote. The label is encoding a preference you never recorded, so either add the rule that distinguishes them or accept both.
+
+**Self-contradicting rules** — A general clause that quietly forbids what a specific label requires, usually an escalation rule. The system obeys the general clause and is marked wrong for obeying it.
+
+**Output budget** — The cap on tokens a model may generate. On a reasoning model this covers the thinking and the answer together, so it must be sized against the model that needs the most rather than the one you developed against.
+
+**Finish reason** — The model's own statement of why it stopped: it completed, it hit the budget, it was cut off. Record it, and a truncated run can never be misread as a failed one.
+
+**Non-completion** — A run that failed for infrastructure reasons — a timeout, a rate limit, a truncation — rather than because the model was wrong. Classify these out of capability scores, or a provider's bad afternoon becomes a permanent verdict about the model.

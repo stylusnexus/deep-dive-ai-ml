@@ -107,3 +107,8 @@ server-side request forgery (SSRF) via discovery
 “You already read this file”
 “[clipped: original bytes 68671]”
 “…use search to explore”
+Empty is not short
+How do serious people do it?
+Is my measurement trustworthy?
+What am I measuring against?
+Why did this number move?

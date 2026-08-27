@@ -23,7 +23,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 69 lessons built, 69 diagrams, 13 executed notebooks.**
+**Status: 72 lessons built, 72 diagrams, 13 executed notebooks.**
 
 ---
 
@@ -120,12 +120,23 @@ delivery note contradicts their event code — 98% correct against an 82% baseli
 ## Block 5 · Evaluation — 0.5 week
 *Not in the original as a module. It should be.*
 
-- Why public benchmarks mislead: contamination, gaming, task mismatch
-- Building a 20-item private eval set — the `honest-bench` premise
-- Running one eval set across many models via HF Inference Providers
-- LLM-as-judge, and when it's circular
+Most of this course's evaluation material was already written, scattered by design:
+the vocabulary in Block 0, the procedure in engineering practice, the checklist in
+`artifacts/sop/measurement.md`. Two of this block's original four topics — why public
+benchmarks mislead, and building a private eval set — are taught in
+`core-vocabulary/eval-battery`, and LLM-as-judge is taught in
+`engineering-practice/models-judging-models`. Restating them here would have been
+padding, so this block is a door plus the two genuine gaps.
 
-**Exit:** Your own eval set, run across ≥6 models, with a defensible ranking.
+- Where evaluation lives — the map, and the order that saves a week ✅
+- Eval data you can trust: labels that follow from the rules, not from your opinion ✅
+- One set, many models: the comparison, and the output budget that silently breaks it ✅
+
+3 lessons in `lessons/block5-evaluation/`. No notebook yet — the natural one runs a
+battery across providers, which needs API keys this repository does not assume.
+
+**Exit:** Your own eval set, run across ≥6 models, with a defensible ranking — and a
+non-completion column, without which the ranking is not defensible.
 
 ---
 

@@ -86,8 +86,7 @@ def section(topic, heading, note):
             f'<p class="lede" style="font-size:1em">{note}</p>\n'
             f'<ol class="lessons">\n{chr(10).join(cards)}\n</ol>'), len(meta["lessons"])
 
-secs, total = [], 0
-for topic, heading, note in [
+SECTIONS = [
     ("orientation", "Start here", "One picture that places every term in the program. Ten minutes, and the rest makes more sense."),
     ("core-vocabulary", "Block 0 · Vocabulary",
      "The terms the rest of the program assumes — each taught through the failure it explains, rather than as a definition."),
@@ -101,9 +100,22 @@ for topic, heading, note in [
      "Building a retrieval system that works, measuring the part everyone skips, and the loop that answers multi-hop questions."),
     ("block4-agentic", "Block 4 · Agentic AI",
      "The loop by hand before the framework, what a graph runtime actually buys, and approval gates that halt what matters."),
+    ("block5-evaluation", "Block 5 · Evaluation",
+     "The front door to the measurement material scattered across this course, then labels you can defend and a cross-model comparison that does not lie."),
     ("engineering-practice", "Block 0 · Engineering Practice",
      "The three artifacts an LLM project accumulates — harness, recipes, decision records — how each one turns harmful, and the measurement procedure that corrects them."),
-]:
+]
+
+# A topic directory that exists on disk and is missing here would drop out of the
+# index silently. That has happened; it is why this assertion is here.
+_on_disk = {d.name for d in (ROOT / "lessons").iterdir() if (d / "meta.json").exists()}
+_listed = {t for t, _, _ in SECTIONS}
+assert not (_on_disk - _listed), (
+    f"lesson set(s) on disk but missing from the index: {sorted(_on_disk - _listed)} "
+    "— add them to SECTIONS above")
+
+secs, total = [], 0
+for topic, heading, note in SECTIONS:
     html_, n = section(topic, heading, note); secs.append(html_); total += n
 
 doc = f"""<!DOCTYPE html>

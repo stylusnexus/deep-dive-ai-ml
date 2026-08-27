@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eval Data You Can Trust</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 2 of 3</span>
+  <h1>Eval Data You Can Trust</h1>
+  <p class="subtitle">A gold label is only correct if you can name the rule that produces it.</p>
+
+  <p>You write the rules the system must follow. You write the labels it will be scored against. Both came out of your head in the same afternoon, so it does not occur to you that they might disagree — and when they do, the system applies your written rule correctly, produces the answer the rule demands, and scores as wrong. You then spend a day improving a model that was right.</p>
+  <p>This is not a rare failure. It is the default outcome of writing labels and rules separately, and it is silent: nothing errors, the run completes, and the report is confidently incorrect.</p>
+  <h2>Synthetic on purpose</h2>
+  <p>The instinct is to reach for real data because real data is honest. For evaluation, that instinct is often wrong. Real data comes with labels somebody else assigned for a purpose that was not yours, at a quality you cannot inspect. Synthetic data lets you plant the answer, which means the label is correct by construction rather than by trust.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Correct by construction</div><div><div class="roadmap-title">You planted the fact, so you know the answer</div><div class="roadmap-desc">The document containing the answer is one you wrote, so the gold label is not an estimate. This is the only kind of label you can debug.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Derivable</div><div><div class="roadmap-title">The label follows from rules the system can see</div><div class="roadmap-desc">Not merely correct in your judgement — reachable by applying the written policy to the written case. If it is not derivable, no amount of model capability will find it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Under-determined label</div><div><div class="roadmap-title">Two answers are equally defensible</div><div class="roadmap-desc">The rules do not distinguish them, so the label encodes a preference you never wrote down. Fix the rules, or accept both answers.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Self-contradicting rules</div><div><div class="roadmap-title">A rule elsewhere forbids the label</div><div class="roadmap-desc">A general clause quietly overrides a specific one. The system obeys the general clause and is marked wrong for obeying it.</div></div></div></div>
+  <h2>The check that costs ten minutes</h2>
+  <p>Before running anything end to end, run only the deciding stage against the labelled cases and confirm each label is reachable. Not to score the system — to score your data. Every disagreement is a question about which of the two is wrong, and the answer is frequently the label.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Checking label derivability before evaluating"><defs><marker id="e5b" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="18" width="150" height="62" rx="7" class="d-box"/>
+<text x="26" y="42" class="d-label-b">Written rules</text>
+<text x="26" y="62" class="d-label-sm">what the system sees</text>
+<rect x="12" y="104" width="150" height="62" rx="7" class="d-box"/>
+<text x="26" y="128" class="d-label-b">Gold labels</text>
+<text x="26" y="148" class="d-label-sm">what you scored against</text>
+<path d="M162 50 L226 84" class="d-arrow-accent" marker-end="url(#e5b)"/>
+<path d="M162 134 L226 100" class="d-arrow-accent" marker-end="url(#e5b)"/>
+<rect x="226" y="62" width="164" height="60" rx="7" class="d-box-accent"/>
+<text x="240" y="86" class="d-label-b">Derivability check</text>
+<text x="240" y="106" class="d-label-sm">one stage, labelled cases only</text>
+<path d="M390 92 L446 92" class="d-arrow-accent" marker-end="url(#e5b)"/>
+<rect x="446" y="18" width="180" height="58" rx="7" class="d-box"/>
+<text x="460" y="42" class="d-label-b">Agrees → evaluate</text>
+<text x="460" y="62" class="d-label-sm">the data is defensible</text>
+<rect x="446" y="106" width="180" height="58" rx="7" class="d-box"/>
+<text x="460" y="130" class="d-label-b">Disagrees → fix data</text>
+<text x="460" y="150" class="d-label-sm">usually the label, not the model</text>
+</svg><figcaption>The check runs before the evaluation, not after. A disagreement at this stage is a question about the data; a disagreement after a full run looks like a question about the model, which is why the same bug survives for weeks.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">If you cannot name the rule that produces a label, the label is an opinion.</p><p class="know-why">An opinion is a perfectly good thing to hold, and a terrible thing to score a system against, because the system has no access to it. When a label and a written rule disagree, the system will follow the rule every time — so the disagreement is not a model failure to be fixed with a better prompt. It is a data defect, and every hour spent on the model is an hour spent on the wrong thing.</p><p class="know-eg"><span class="know-eg-label">For example</span>A policy set said any case where the event code was contradicted by the note must be escalated to a human. Six labels said to handle those cases on their merits instead. The system escalated, exactly as written, and scored six failures. The model was right and the data was wrong.</p></blockquote>
+  <div class="callout pitfall"><span class="label">The general clause that eats the specific ones</span><p>Escalation rules are the usual offender. A clause like &ldquo;escalate anything ambiguous&rdquo; sounds cautious and quietly overrides every specific rule you wrote, because almost everything interesting is ambiguous. When a system escalates far more than you expected, read your own escalation clause before blaming the model.</p></div>
+  <h2>What a disagreement is telling you</h2>
+  <ul><li><strong>The label is wrong</strong> — a rule elsewhere forbids it. Fix the rules or fix the label, and record which you chose.</li><li><strong>The rules are incomplete</strong> — two answers are equally defensible and your label picked one. Add the clause that distinguishes them, or accept both.</li><li><strong>The system is wrong</strong> — the label is genuinely derivable and it failed to derive it. This is the case you wanted, and it is the rarest of the three on a first run.</li></ul>
+  <div class="callout insight"><span class="label">This is why the corpus in Block 3 is synthetic</span><p>Every fact in that corpus lives in exactly one document, deliberately. That is what makes recall measurable rather than estimated — the gold set names the document, and the naming is correct because the document was written to contain the fact.</p></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Your system disagrees with a gold label. What is the first thing to check?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Whether a larger model gets it right</div>
+      <div class="quiz-opt">Whether the label is derivable from the rules the system was given — a rule elsewhere may forbid it</div>
+      <div class="quiz-opt">Whether the prompt needs more examples</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why is synthetic data often better than real data for an eval set?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It is faster to generate and cheaper to store</div>
+      <div class="quiz-opt">You planted the answer, so the label is correct by construction rather than by trusting somebody else&#x27;s annotation</div>
+      <div class="quiz-opt">Real data is usually too noisy for models to handle</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Two answers to a labelled case are equally defensible under your written rules. What does that mean?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The case is too hard and should be removed from the set</div>
+      <div class="quiz-opt">The label encodes a preference you never wrote down — either add the rule that distinguishes them, or accept both answers</div>
+      <div class="quiz-opt">The model needs a clearer system prompt</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

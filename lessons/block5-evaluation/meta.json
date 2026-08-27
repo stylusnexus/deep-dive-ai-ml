@@ -1,0 +1,52 @@
+{
+  "title": "Block 5 \u00b7 Evaluation",
+  "topic": "block5-evaluation",
+  "icon": "\ud83d\udccf",
+  "description": "The front door to everything this course teaches about measurement, then the two things it did not yet teach: eval data whose labels are actually derivable, and running one set across many models without the comparison lying to you.",
+  "tags": [
+    "ai",
+    "evaluation",
+    "measurement"
+  ],
+  "colorScheme": "teal",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-08-27",
+  "lessons": [
+    {
+      "id": "lsn-1787800000000",
+      "title": "Where Evaluation Lives",
+      "file": "lsn-1787800000000-where-evaluation-lives.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787800000001",
+      "title": "Eval Data You Can Trust",
+      "file": "lsn-1787800000001-eval-data-you-can-trust.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787800000002",
+      "title": "One Set, Many Models",
+      "file": "lsn-1787800000002-one-set-many-models.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1787800000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787800000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787800000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}
