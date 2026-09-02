@@ -2443,10 +2443,12 @@ LESSONS = [
      "The cache matches from the beginning of the prompt until the first difference. A timestamp, a session id, or a re-ordered tool list near the front invalidates everything after it, and the hit rate silently goes to zero while the code looks correct.",
      "A team added the current date to the top of their system prompt for freshness. Cache hit rate went from 90% to zero overnight, cost tripled, and nothing in the application errored. The date changed the first line, so every subsequent token had to be reprocessed on every request."),
 
-    ("h2", "Four different things are called caching"),
-    ("p", "Three of these are the same mechanism seen at three levels, and the fourth is unrelated to all of them. They share a word and almost nothing else, which is why a conversation about &ldquo;adding caching&rdquo; can run for ten minutes with two people meaning different things."),
+    ("h2", "Six things are called caching, on four levels"),
+    ("p", "They share a word and almost nothing else, which is why a conversation about &ldquo;adding caching&rdquo; can run for ten minutes with two people meaning different things. Sorting them by <em>what they store</em> and <em>who controls them</em> makes the differences visible, and puts the only dangerous one on its own."),
 
     ("terms", [
+      ("Hardware caches", "The chip — you never name them",
+       "Registers, shared memory and the L1 and L2 caches: the memory ladder from the hardware lesson. Automatic, invisible in your code, and influenced only through access patterns. Nothing you write addresses them by name."),
       ("KV cache", "Inside one request",
        "The keys and values for tokens already processed, held so that generating token 500 does not reprocess the first 499. Not a feature you enable — it is how generation works at all. It lives in memory, it grows with context length and batch size, and it is usually what runs you out of it."),
       ("Prefix caching", "Across requests, in the server",
@@ -2455,9 +2457,11 @@ LESSONS = [
        "Prefix caching exposed as a product: you mark where the stable part ends, entries have a lifetime, and writes and reads are priced differently. This is the one you can get wrong, because it is the one with a knob."),
       ("Semantic caching", "Before the model, in your application",
        "Embed the incoming question, and if it is close enough to one you have answered before, return the stored answer without calling the model. Nothing to do with keys, values or prefixes — a different layer solving a different problem."),
+      ("Exact-match response cache", "Also before the model, and much safer",
+       "Return a stored answer when the request is byte-identical to an earlier one. It saves the output tokens too, like a semantic cache, and carries no false-positive risk because it does no similarity matching at all. Measure your byte-identical repeat rate before reaching for embeddings — it is often higher than people expect, and it cannot be wrong."),
     ]),
 
-    ("figure", "The first three are one mechanism exposed at three levels; the fourth sits in front of all of them and never reaches the model. Only two of the four are things you configure.", '''<svg viewBox="0 0 640 260" role="img" aria-label="Four kinds of caching, by layer"><defs><marker id="cch" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+    ("figure", "Four levels. The hardware ladder is beneath everything and never named in code; the KV, prefix and prompt caches are one mechanism exposed at three levels; the answer caches sit in front and can skip the model entirely. Only the middle band holds decisions you make.", '''<svg viewBox="0 0 640 260" role="img" aria-label="Four kinds of caching, by layer"><defs><marker id="cch" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="12" y="14" width="200" height="58" rx="7" class="d-box-accent"/>
 <text x="26" y="38" class="d-label-b">SEMANTIC CACHE</text>
 <text x="26" y="58" class="d-label-sm">your app — answers, by similarity</text>
@@ -2479,7 +2483,7 @@ LESSONS = [
 </svg>'''),
 
     ("know",
-     "Three of them reuse computation. The fourth skips the model, which is a different risk entirely.",
+     "All but the answer caches reuse computation. Those skip the model, which is a different risk entirely.",
      "A prefix cache can only ever return what the model would have returned anyway, because it is replaying arithmetic that was already done. A semantic cache returns an answer to a <em>different question</em> that scored as similar — so its failure mode is not a slow response or a larger bill, but a confident wrong answer with nothing in the logs to suggest anything happened.",
      "Two support queries: &ldquo;how do I cancel my subscription?&rdquo; and &ldquo;how do I cancel my subscription without losing my data?&rdquo;. They embed close together. A semantic cache tuned loosely answers the second with the first, and the customer loses their data."),
 
@@ -2509,6 +2513,21 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
      "Three of the twelve pairs — one negation and two where a single operational value changed — score at or above the weakest genuine paraphrase. Those are the hits that return a confident wrong answer, and nothing distinguishes them from a correct hit except reading both questions."),
 
     ("p", "One honest note about that table: the follow-up needing its previous turn scored 0.149, far below anything a cache would hit on. In this run it would have been a miss rather than a wrong answer — a cost problem, not a correctness one. The failures that bite are the ones that look almost identical and mean the opposite."),
+
+    ("h3", "Two places this course contradicts itself, and how to resolve it"),
+    ("p", "The caching material and the agent material were written separately, and they give advice that collides. Both collisions are real and worth knowing before you follow either lesson."),
+
+    ("terms", [
+      ("Compaction rewrites the front",
+       "Summarising history destroys the cache",
+       "The agent lessons offer a ladder of compaction strategies. Caching rewards appending at the tail and summarising edits the beginning, so replacing history with a summary makes the next call pay full price on everything. Truncating a tool result <em>in place</em> keeps the prefix byte-identical and the cache alive; summarising the transcript does not. Choose knowing which one you are buying."),
+      ("Retrieval reorders the middle",
+       "Prefix caching underperforms badly on retrieval-augmented generation",
+       "A retrieval prompt is instructions, then retrieved chunks, then the question. The chunks change per request and — worse — change <em>order</em> between requests. Two requests that retrieve the same documents in a different order share nothing after the first difference, so the cache hit rate on a retrieval system is far lower than the shared system prompt suggests. Sorting retrieved chunks deterministically before rendering is the cheapest partial fix."),
+    ]),
+
+    ("callout", "warning", "A cache that stopped working raises no error",
+     "<p>Every failure on this page fails open. The request still succeeds, the answer is still correct, and the only symptom is the bill — which is why these are typically found a month late. A timestamp near the front, a reordered tool list, a model switch mid-session, or a compaction pass will each take the hit rate to zero silently. Read <code>cache_read_input_tokens</code> on real traffic rather than trusting that it is working.</p>"),
 
     ("callout", "pitfall", "The threshold is the whole design",
      "<p>Semantic caching lives or dies on the similarity threshold, and there is no setting that is safe everywhere. Tight enough to be correct and it almost never hits; loose enough to hit often and it starts answering questions nobody asked. If you cannot state what a near-miss costs, you are not ready to turn it on.</p>"),
@@ -2781,8 +2800,8 @@ time per token = 140 GB / 3.35 TB/s           = 42 ms   -> about 24 tokens/secon
     ("h2", "Where the waiting is hidden"),
     ("p", "The hardware does not try to avoid the wait — it arranges to always have other work available during it. Threads run in fixed groups of thirty-two, and a unit keeps many more of these groups resident than it can execute at once. When one stalls on memory, the scheduler switches to another in a single clock cycle. That is what keeps the arithmetic units fed, and it is why a workload with too few resident groups performs badly even when nothing about it looks slow."),
 
-    ("callout", "pitfall", "Vendor peak-FLOPS numbers often quote sparsity",
-     "<p>The break-even line is peak arithmetic rate over bandwidth, so the arithmetic rate you use decides the answer. Headline figures are frequently the sparsity-enabled number, which is double the dense one — and using it doubles your computed break-even. On one current card the same division gives 295 operations per byte with the headline figure and 148 with the dense figure. Check which one you have before quoting a threshold.</p>"),
+    ("callout", "pitfall", "The same figure means two things in the same datasheet",
+     "<p>The break-even line is peak arithmetic rate over bandwidth, so which arithmetic rate you pick up decides the answer. Vendor tables list every precision twice, dense and with structured sparsity, and lead with the sparsity number. On the H100 SXM, 16-bit tensor throughput is 1,979 TFLOPS with sparsity and 989 dense: over 3.35 TB/s of bandwidth that is 591 operations per byte against the correct 295, so grabbing the headline doubles your threshold.</p><p>Worse, 989 appears twice in that same table — as 16-bit dense, and as 32-bit tensor throughput <em>with</em> sparsity. Read the column heading and the footnote, not the number.</p>"),
 
     ("callout", "matters", "Small operations have a third bottleneck",
      "<p>Neither memory nor arithmetic. Every operation dispatched to the device carries a fixed launch cost paid by the processor driving it, so a workload made of very many tiny operations can be limited by dispatch overhead alone. The fix is the same as everywhere else — fewer, larger units of work.</p>"),

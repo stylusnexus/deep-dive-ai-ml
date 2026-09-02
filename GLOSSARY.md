@@ -594,6 +594,10 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Prompt caching** — Prefix caching exposed as a billable feature: you mark where the stable part of the prompt ends, entries expire, and writes and reads are priced differently. Reads cost about a tenth of normal input; writes cost 1.25× at the five-minute lifetime and 2× at the one-hour one, so a prefix reused twice roughly breaks even and one reused fifty times is a large win.
 
+**Exact-match response cache** — Returning a stored answer when a request is byte-identical to an earlier one. It saves output tokens as a semantic cache does, and carries none of the false-positive risk because it does no similarity matching — worth measuring your byte-identical repeat rate before reaching for embeddings.
+
+**Hardware caches** — Registers, shared memory, and the L1 and L2 caches: the memory ladder the chip manages for you. Automatic, never addressed by name in your code, and influenced only through access patterns — a different sense of the word from every other cache in this course.
+
 **Semantic caching** — Answering from a store of previous responses when an incoming question embeds close enough to an earlier one, without calling the model at all. Unrelated to the other three caches despite the name: it reuses answers rather than arithmetic, so a near-miss returns a confident answer to a question nobody asked.
 
 **Similarity threshold** — The cut-off a semantic cache uses to decide two questions are the same one. Measured on this course's own encoder, a negation that reverses the answer scores 0.984 while a genuine paraphrase scores 0.940, so no cut-off separates them — see <code>scripts/measure_semantic_threshold.py</code>.

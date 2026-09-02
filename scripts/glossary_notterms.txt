@@ -303,3 +303,5 @@ Decomposed
 Oracle
 Explicit non-goals
 Shared memory and L1
+Compaction rewrites the front
+Retrieval reorders the middle
