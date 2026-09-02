@@ -207,6 +207,9 @@ LESSONS = [
      "A project that reports recall, groundedness and correctness has measured whether the system is right and said nothing about whether it is usable. The read is prefill: every token retrieval adds must be processed before the first word of the answer appears, and because attention compares every token against every other, doubling the retrieved context roughly quadruples that work rather than doubling it.",
      "Going from 1,000 to 4,000 tokens of context is sixteen times the attention work, not four. This is why sending three good chunks beats sending twenty mediocre ones twice over — once on the answer, and once on the wait."),
 
+    ("callout", "warning", "Your own corpus may be too small to show this",
+     "<p>Project 2 measures both stages and finds retrieval at roughly a hundredth of the request, which supports the ranking above. It cannot support the <em>reason</em>. Its contexts run to about a hundred words, and a hundred words prefills in a fraction of a second — so nearly all of its read time is the model generating, not reading. The quadratic prefill cost needs contexts of thousands of tokens before it dominates.</p><p>That gap is worth sitting with. A measurement can confirm which stage is expensive and still fail to establish why, and a project that reports the first as though it proved the second has overclaimed. Check that the mechanism you are describing is the one your numbers could actually detect.</p>"),
+
     ("h2", "Running the evaluation"),
     ("ul", [
       "<strong>Fix the set and leave it alone.</strong> Its value comes from not moving. Edit it between runs and it measures nothing.",

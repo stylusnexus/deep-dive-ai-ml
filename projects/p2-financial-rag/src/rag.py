@@ -234,10 +234,21 @@ Generation: {f'`{model}`' if base else 'extractive stand-in (no local endpoint r
 | Retrieval — embed, search, rerank | {np.median([r['retrieval_s'] for r in rows]):.3f} | {np.median([r['retrieval_s'] for r in rows]) / (np.median([r['retrieval_s'] for r in rows]) + np.median([r['read_s'] for r in rows])):.0%} |
 | Reading the retrieved chunks | {np.median([r['read_s'] for r in rows]):.3f} | {np.median([r['read_s'] for r in rows]) / (np.median([r['retrieval_s'] for r in rows]) + np.median([r['read_s'] for r in rows])):.0%} |
 
-Retrieval is the stage this project measures for quality, and on this corpus it is
-**not** the stage that costs the time. Every optimisation aimed at retrieval speed is
-aimed at the smaller share. The read is prefill, it grows with the square of the
-context, and the lever on it is sending fewer chunks rather than finding them faster.
+Retrieval is the stage this project measures for quality, and it is **not** the stage
+that costs the time. Every optimisation aimed at retrieval speed is aimed at the
+smaller share.
+
+Read the mechanism honestly, though, because this corpus cannot demonstrate the usual
+one. Contexts here run to {min(r['context_tokens'] for r in rows)}-{max(r['context_tokens'] for r in rows)} words, which prefills in a fraction of a
+second — so almost all of the read above is the model *generating*, including its
+reasoning tokens, rather than reading what retrieval sent. The quadratic prefill cost
+that dominates production retrieval systems needs contexts of thousands of tokens
+before it shows, and ours are two orders of magnitude short of that.
+
+What this run does establish is the ranking: retrieval is around a hundredth of the
+request, so tuning it for speed is optimising the part that was already cheap. What it
+cannot establish is that prefill is the reason. On a corpus with realistic context
+sizes it would be; here the honest answer is that the model's own output dominates.
 
 ## The four numbers
 

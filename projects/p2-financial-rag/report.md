@@ -7,6 +7,29 @@ Generation: `qwen3.8-27b-mlx-dwq`
 
 
 
+## Where the time actually goes
+
+| stage | median seconds | share |
+|---|---|---|
+| Retrieval — embed, search, rerank | 0.098 | 2% |
+| Reading the retrieved chunks | 5.870 | 98% |
+
+Retrieval is the stage this project measures for quality, and it is **not** the stage
+that costs the time. Every optimisation aimed at retrieval speed is aimed at the
+smaller share.
+
+Read the mechanism honestly, though, because this corpus cannot demonstrate the usual
+one. Contexts here run to 65-136 words, which prefills in a fraction of a
+second — so almost all of the read above is the model *generating*, including its
+reasoning tokens, rather than reading what retrieval sent. The quadratic prefill cost
+that dominates production retrieval systems needs contexts of thousands of tokens
+before it shows, and ours are two orders of magnitude short of that.
+
+What this run does establish is the ranking: retrieval is around a hundredth of the
+request, so tuning it for speed is optimising the part that was already cheap. What it
+cannot establish is that prefill is the reason. On a corpus with realistic context
+sizes it would be; here the honest answer is that the model's own output dominates.
+
 ## The four numbers
 
 | stage | measurement |
@@ -29,18 +52,18 @@ citations, at 0.79 mean groundedness.
 
 ## Per question
 
-| qid | hops | retrieval_recall | groundedness | correct | answer |
-|---|---|---|---|---|---|
-| q01 | 1 | 1.0 | 0.818 | True | According to [1], the maximum gearbox oil temperature during continuous operation must not exceed **82 degrees |
-| q02 | 1 | 1.0 | 0.667 | True | A turbine older than twelve years must be inspected every **90 days** [1]. |
-| q03 | 1 | 1.0 | 0.9 | False | According to the summary, turbine WHL-031 performed a controlled shutdown after its **gearbox oil temperature  |
-| q04 | 1 | 1.0 | 0.889 | True | Clyde had the highest site failure rate in Q2 2026, at 5.9 failures per hundred turbines [1]. |
-| q05 | 2 | 0.5 | None | False | NOT IN CONTEXT |
-| q06 | 2 | 1.0 | 0.667 | True | Yes, the inspection deferral before incident 2026-021 was permitted under policy at the time.  According to [1 |
-| q07 | 2 | 1.0 | 0.756 | True | **Immediate shutdown threshold:** Above **0.80 mm/s RMS**, the turbine shuts down immediately [1].  **Inspecti |
-| q08 | 1 | 1.0 | 0.75 | False | According to the Whitelee Site Profile, there are **68** operational turbines at Whitelee [1]. |
-| q09 | 1 | 1.0 | 0.846 | True | According to [1], a turbine that has shut down twice within 30 days may not be returned to service without **r |
-| q10 | 0 | None | None | True | NOT IN CONTEXT |
+| qid | hops | retrieval_s | read_s | context_tokens | retrieval_recall | groundedness | correct | answer |
+|---|---|---|---|---|---|---|---|---|
+| q01 | 1 | 0.06 | 3.353 | 136 | 1.0 | 0.818 | True | According to [1], the maximum gearbox oil temperature during continuous operation must not exceed **82 degrees |
+| q02 | 1 | 0.103 | 3.904 | 106 | 1.0 | 0.667 | True | A turbine older than twelve years must be inspected every **90 days** [1]. |
+| q03 | 1 | 0.097 | 5.949 | 97 | 1.0 | 0.9 | False | According to the summary, turbine WHL-031 performed a controlled shutdown after its **gearbox oil temperature  |
+| q04 | 1 | 0.097 | 3.799 | 65 | 1.0 | 0.889 | True | Clyde had the highest site failure rate in Q2 2026, at 5.9 failures per hundred turbines [1]. |
+| q05 | 2 | 0.103 | 5.896 | 111 | 0.5 | None | False | NOT IN CONTEXT |
+| q06 | 2 | 0.099 | 18.25 | 90 | 1.0 | 0.667 | True | Yes, the inspection deferral before incident 2026-021 was permitted under policy at the time.  According to [1 |
+| q07 | 2 | 0.116 | 18.045 | 105 | 1.0 | 0.756 | True | **Immediate shutdown threshold:** Above **0.80 mm/s RMS**, the turbine shuts down immediately [1].  **Inspecti |
+| q08 | 1 | 0.105 | 2.856 | 96 | 1.0 | 0.75 | False | According to the Whitelee Site Profile, there are **68** operational turbines at Whitelee [1]. |
+| q09 | 1 | 0.093 | 5.845 | 86 | 1.0 | 0.846 | True | According to [1], a turbine that has shut down twice within 30 days may not be returned to service without **r |
+| q10 | 0 | 0.078 | 6.298 | 127 | None | None | True | NOT IN CONTEXT |
 
 ## What would make me distrust this
 
