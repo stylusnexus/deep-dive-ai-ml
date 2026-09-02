@@ -1,0 +1,18 @@
+# Render blueprint. Deliberately not applied from here — deploying a public
+# endpoint is a decision with a bill and an audience attached, so this file is
+# the reproducible description and the deploy stays a human action.
+services:
+  - type: web
+    name: pgp-aiml-assistant
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: API_KEYS
+        sync: false          # set in the dashboard; never committed
+      - key: RATE_LIMIT
+        value: "10"
+      - key: RATE_WINDOW_S
+        value: "60"

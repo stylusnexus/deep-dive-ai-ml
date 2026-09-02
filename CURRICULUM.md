@@ -192,7 +192,9 @@ Spine: `LLMS_from_Scratch` ch05–07 (Apache 2.0) plus the installed HF training
 - Deploy to Render and to an HF Space (ZeroGPU)
 - Monitoring, drift, and when to retrain
 
-**Exit:** Project 4 — a deployed, authenticated, rate-limited endpoint with a public URL.
+**Exit:** Project 4 — an authenticated, rate-limited, containerised endpoint, built and
+verified end to end ✅. The deploy itself is a human action: `render.yaml` describes it,
+and a public URL has a bill and an audience attached.
 
 ---
 

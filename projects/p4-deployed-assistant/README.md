@@ -1,3 +1,83 @@
-# p4-deployed-assistant
+# Project 4 · Deployed Grounded Assistant
 
-Intake sheet goes here first — copy from ../../artifacts/project-intake.md
+**Block 8 exit criterion.** The retrieval work from Projects 2 and 3, behind an
+interface someone else can call.
+
+> A deployed, authenticated, rate-limited endpoint with a public URL.
+
+## What changes when it becomes a service
+
+A notebook may assume one caller, a trusted question, unlimited time and a
+failure that only you see. A service may assume none of those. Everything in
+`src/app.py` that is not retrieval exists because of that difference:
+
+| Concern | Why it is here |
+|---|---|
+| API key auth | The endpoint is reachable by anyone who finds it |
+| Per-key rate limiting | A paid model call sits behind every request — the limit is about the bill, not the CPU |
+| Request validation | Question length and `k` are bounded, because context is cost |
+| Meaningful `/health` | Reports whether the corpus loaded and the model is reachable, and returns 503 when not |
+| Versioned path | `/v1/ask`, so the contract can change without breaking callers |
+| Refusal to start unconfigured | No `API_KEYS`, no service — better than a default that ships to production |
+| Generic error responses | An exception message is the cheapest way to leak a path or a hostname |
+
+## Running it
+
+```bash
+# locally
+API_KEYS=dev-key uvicorn src.app:app --port 8000
+
+# in a container, reaching a model on the host
+docker build -t assistant .
+docker run -p 8000:8000 -e API_KEYS=dev-key \
+  --add-host=host.docker.internal:host-gateway assistant
+
+curl -X POST localhost:8000/v1/ask \
+  -H 'Content-Type: application/json' -H 'X-API-Key: dev-key' \
+  -d '{"question":"What is the maximum gearbox oil temperature?"}'
+```
+
+## Tests
+
+```bash
+pytest tests/
+```
+
+Nine tests, none of which check answer quality — that is Project 2's job and it
+needs a model. These check the interface contract: that an unauthenticated caller
+cannot get in, that a wrong key is indistinguishable from a missing one, that the
+rate limit is per key and actually limits, that validation rejects what it should,
+and that the corpus genuinely loaded.
+
+That last one exists because of a real failure. An early version resolved the
+corpus path relative to the repository, which was wrong inside the container. The
+service was therefore never ready, every request short-circuited to 503, and the
+whole suite passed **without ever calling the model**. Green tests that exercise
+nothing are worse than red ones, and the guard is there so it cannot recur.
+
+## What "done" looks like
+
+- [ ] Intake sheet completed before building
+- [x] Auth, rate limiting, validation and health implemented and tested
+- [x] Container builds, runs as non-root, and answers correctly end to end
+- [x] Health check reports dependency state rather than "something is listening"
+- [x] Deploy configuration committed (`render.yaml`), secrets not committed
+- [ ] Deployed to a public URL — a human action, see below
+- [ ] Rate limit verified against the deployed instance
+
+## The deploy is deliberately not automated
+
+`render.yaml` describes the service reproducibly and is not applied from here.
+Publishing a public endpoint has a bill and an audience attached, and the API keys
+belong in the dashboard rather than in this repository. Applying the blueprint and
+setting `API_KEYS` is a decision, not a build step.
+
+## The honest framing
+
+This service retrieves by keyword, not by embedding. The embedding pipeline needs
+`sentence-transformers` and `torch`, which turns a 200MB image into a
+multi-gigabyte one, and for a project about deployment the image size is part of
+the subject. The consequence is real: answers here are worse than Project 2's on
+questions where wording differs from the corpus, and this is the same system with
+a web interface only in the parts that are not retrieval. Deploying the embedding
+version is a defensible different choice, and it is a different image.
