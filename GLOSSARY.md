@@ -544,6 +544,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Agentic RAG** — Retrieval as a loop rather than a single shot: retrieve, read what came back, then ask a better question. It works because the second query did not exist until the first result arrived.
 
+**Read time (prefill)** — How long the model takes to process everything retrieval handed it, before the first output token appears. Usually seconds where retrieval is milliseconds, and it is what the user experiences as the delay.
+
 **Hop limit** — A hard cap on how many retrieval rounds the loop may take, usually three or four, plus a token budget. The gains flatten quickly and the costs do not.
 
 ---

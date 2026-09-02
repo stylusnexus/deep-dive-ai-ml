@@ -305,3 +305,6 @@ Explicit non-goals
 Shared memory and L1
 Compaction rewrites the front
 Retrieval reorders the middle
+A high hit rate can cost more memory
+Retrieval time
+The lever

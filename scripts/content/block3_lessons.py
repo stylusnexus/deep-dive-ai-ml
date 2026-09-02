@@ -188,6 +188,25 @@ LESSONS = [
      "The first means the model faithfully used what it was given, and it was given the wrong thing. The second means the model is answering from its parameters and getting away with it, which is not a property you can rely on.",
      "An assistant answers a policy question correctly, but the cited passage does not support the claim. Retrieval had failed and the model knew the answer anyway. The evaluation passes on correctness, the system is not actually grounded, and the first question outside the model's knowledge produces a confident fabrication with a citation attached."),
 
+    ("h2", "The fourth number, which this lesson used to omit"),
+    ("p", "Everything above measures whether retrieval found the right thing. None of it measures how long the request took, and the two are not distributed the way people assume. Break a retrieval request into stages and the shape is stark: embedding the query is a few milliseconds, approximate nearest-neighbour search over a few million vectors is tens of milliseconds, and reranking a shortlist with a cross-encoder is around a hundred. Then the model reads what came back, and on a long context that step alone runs into <em>seconds</em>."),
+
+    ("p", "Retrieval is a small fraction of the clock. Tuning it for speed is optimising the part that was already cheap, while the expensive stage sits immediately downstream and is fed by exactly how much you chose to retrieve."),
+
+    ("terms", [
+      ("Retrieval time", "Milliseconds",
+       "Embedding, search and reranking together. Worth measuring, and rarely worth optimising first."),
+      ("Read time (prefill)", "Often seconds",
+       "The model processing everything retrieval handed it, before a single output token appears. This is what the user experiences as the delay."),
+      ("The lever", "Send fewer chunks, not find them faster",
+       "Attention cost during that read grows with the <em>square</em> of the context length, so the ninth chunk you attach costs more than the first did. Precision beats volume on the clock for the same reason it beats volume on the answer."),
+    ]),
+
+    ("know",
+     "Retrieval quality and retrieval latency are different problems, and the second one lives in the model.",
+     "A project that reports recall, groundedness and correctness has measured whether the system is right and said nothing about whether it is usable. The read is prefill: every token retrieval adds must be processed before the first word of the answer appears, and because attention compares every token against every other, doubling the retrieved context roughly quadruples that work rather than doubling it.",
+     "Going from 1,000 to 4,000 tokens of context is sixteen times the attention work, not four. This is why sending three good chunks beats sending twenty mediocre ones twice over — once on the answer, and once on the wait."),
+
     ("h2", "Running the evaluation"),
     ("ul", [
       "<strong>Fix the set and leave it alone.</strong> Its value comes from not moving. Edit it between runs and it measures nothing.",

@@ -10,7 +10,7 @@ Runs offline. Generation uses any OpenAI-compatible local endpoint if one is
 reachable, and an extractive stand-in otherwise — the measurement is the lesson.
 """
 from __future__ import annotations
-import argparse, json, pathlib, re, sys, urllib.request
+import argparse, json, pathlib, re, sys, time, urllib.request
 import numpy as np
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -186,13 +186,22 @@ def main() -> None:
     base, model = find_endpoint()
     rows = []
     for e in questions:
+        # Retrieval quality is what this project set out to measure, and it is not
+        # what dominates the clock. Time the two stages separately so the report
+        # can say so with a number rather than an opinion.
+        t0 = time.perf_counter()
         passages = retrieve(e["question"])
+        t_retrieval = time.perf_counter() - t0
         got_docs = {p["chunk_id"].split("#")[0] for p in passages}
+        t0 = time.perf_counter()
         answer = generate(e["question"], passages, base, model, encoder, timeout=args.timeout)
+        t_read = time.perf_counter() - t0
         ctx = "\n\n".join(p["text"] for p in passages)
         g = groundedness(answer, ctx)
         rows.append({
             "qid": e["qid"], "hops": e["hops"],
+            "retrieval_s": round(t_retrieval, 3), "read_s": round(t_read, 3),
+            "context_tokens": len(ctx.split()),
             "retrieval_recall": (round(len(set(e["gold_docs"]) & got_docs) / len(e["gold_docs"]), 2)
                                  if e["gold_docs"] else None),
             "groundedness": g,
@@ -217,6 +226,18 @@ k={args.k} from a pool of {args.pool}.
 Generation: {f'`{model}`' if base else 'extractive stand-in (no local endpoint reachable)'}
 {f'**{len(FALLBACKS)} of {len(questions)} calls fell back to the extractive stand-in** (endpoint slow or busy). Those answers are extractive, not generated — the measurement is still valid, but read the answer column with that in mind.' if FALLBACKS else ''}
 {f'**{len(TRUNCATIONS)} of {len(questions)} answers hit the token ceiling** and were cut off. Raise max_tokens and re-run: a truncated answer scores as a wrong one, so the numbers below would be measuring the token budget rather than the system.' if TRUNCATIONS else ''}
+
+## Where the time actually goes
+
+| stage | median seconds | share |
+|---|---|---|
+| Retrieval — embed, search, rerank | {np.median([r['retrieval_s'] for r in rows]):.3f} | {np.median([r['retrieval_s'] for r in rows]) / (np.median([r['retrieval_s'] for r in rows]) + np.median([r['read_s'] for r in rows])):.0%} |
+| Reading the retrieved chunks | {np.median([r['read_s'] for r in rows]):.3f} | {np.median([r['read_s'] for r in rows]) / (np.median([r['retrieval_s'] for r in rows]) + np.median([r['read_s'] for r in rows])):.0%} |
+
+Retrieval is the stage this project measures for quality, and on this corpus it is
+**not** the stage that costs the time. Every optimisation aimed at retrieval speed is
+aimed at the smaller share. The read is prefill, it grows with the square of the
+context, and the lever on it is sending fewer chunks rather than finding them faster.
 
 ## The four numbers
 
@@ -263,6 +284,8 @@ citations, at {np.mean(grounded):.2f} mean groundedness.
     print(f"single-hop recall : {np.mean([r['retrieval_recall'] for r in single]):.2f}")
     print(f"multi-hop recall  : {np.mean([r['retrieval_recall'] for r in multi]):.2f}")
     print(f"groundedness      : {np.mean(grounded):.2f}")
+    print(f"retrieval (median): {np.median([r['retrieval_s'] for r in rows]):.3f}s")
+    print(f"read      (median): {np.median([r['read_s'] for r in rows]):.3f}s")
     print(f"correct           : {pct(answerable)} answerable")
     print(f"refusal handled   : {refusal['correct']}")
     print("\nwrote report.md and results.json")
