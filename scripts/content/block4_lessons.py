@@ -310,6 +310,9 @@ class AgentState(TypedDict):
     ("h2", "What to log, since you now have several actors"),
     ("p", "Everything the operating lesson asked for, plus the seams: which agent produced which message, what crossed each handoff, and what was dropped in each summarisation. That last one is not usually recorded and it is where the failures live."),
 
+    ("callout", "insight", "On the protocols, and why this course does not teach one",
+     "<p>There is a growing set of standards for agents talking to each other and to interfaces — Agent2Agent and the agent-user interaction protocols among them. They are worth knowing exist. This course does not teach one, deliberately: they are young, several will not survive, and a lesson about a wire format dates in a way a lesson about a shape does not.</p><p>The durable questions are the ones above. Whether to split at all, what each agent may see, where the handoff drops information, and who approves the irreversible step — those decide whether a multi-agent system works, and none of them change when the encoding does. Learn the shape and read the specification when you need it.</p>"),
+
     ("h2", "The honest default"),
     ("p", "Use the fewest agents that do the job. Start with one, add a sub-agent when a specific context is being polluted by a specific exploration, and gate only what cannot be undone. Every addition beyond that should be answering a constraint you have observed rather than a diagram you find appealing."),
 

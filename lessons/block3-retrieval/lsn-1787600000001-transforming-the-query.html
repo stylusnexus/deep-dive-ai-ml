@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transforming the Query</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 2 of 5</span>
+  <h1>Transforming the Query</h1>
+  <p class="subtitle">Every technique so far improves what you search. This one changes what you search for.</p>
+
+  <p>The pipeline lesson tuned the index side: chunk well, retrieve wide, fuse, rerank, send few. All of it takes the user's question exactly as typed and works on everything downstream of it. That is a choice, and it is worth noticing, because the question is often the weakest part of the request.</p>
+  <h2>The asymmetry underneath all of this</h2>
+  <p>You embed a question and match it against documents that are <em>answers</em>. Those are different kinds of text. A question is short, interrogative, and phrased in the words of someone who does not yet know; the passage that answers it is declarative, longer, and phrased in the words of someone who does. Similarity search assumes the two live near each other in the vector space, and they often do not.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Hypothetical document embedding</div><div><div class="roadmap-title">Retrieve with a fake answer, not the question</div><div class="roadmap-desc">Ask the model to write the answer it would expect, then embed that draft and search with it. The draft is discarded — only its vector is used. You are matching answer against answer instead of question against answer, which is the shape the space is better at.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Query rewriting</div><div><div class="roadmap-title">Make a dependent question standalone</div><div class="roadmap-desc">A follow-up carries meaning from the turn before it and none of that meaning is in the embedding. Rewriting resolves the reference before retrieval happens.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Query expansion</div><div><div class="roadmap-title">Several phrasings instead of one</div><div class="roadmap-desc">Generate a handful of alternative wordings, retrieve for each, and fuse the ranked lists — the same reciprocal rank fusion the pipeline lesson already uses for combining keyword and vector results, applied to combining queries instead.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decomposition</div><div><div class="roadmap-title">Covered already, in the agentic lesson</div><div class="roadmap-desc">Splitting a question into planned sub-questions is the same family, and this course teaches it as part of the loop rather than here.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A follow-up question carries almost none of its meaning in its own words.</p><p class="know-why">This course has measured it. Running &ldquo;What is the failure rate at Clyde?&rdquo; against the follow-up &ldquo;And at Whitelee?&rdquo; through the same encoder the retrieval notebooks use gives a cosine similarity of 0.149 — near the floor, barely above two unrelated sentences. The second question is perfectly clear to a human reading the transcript and nearly meaningless to an embedding, because everything that makes it a question about failure rates is in the previous turn.</p><p class="know-eg"><span class="know-eg-label">For example</span>Retrieval on a conversational interface fails on follow-ups long before it fails on hard questions, and it fails silently: the search runs, returns something, and nobody sees that the query never contained the subject. Rewriting is not an optimisation here, it is the difference between working and not.</p></blockquote>
+  <figure class="diagram"><svg viewBox="0 0 640 232" role="img" aria-label="Query transformation before retrieval"><defs><marker id="qt" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="94" width="104" height="44" rx="6" class="d-box"/><text x="24" y="112" class="d-label-b">question</text><text x="24" y="130" class="d-label-sm">as typed</text>
+<path d="M116 116 L164 116" class="d-arrow-accent" marker-end="url(#qt)"/>
+<rect x="164" y="20" width="196" height="42" rx="6" class="d-box-accent"/><text x="176" y="38" class="d-label-b">rewrite</text><text x="176" y="55" class="d-label-sm">resolve what the turn assumed</text>
+<rect x="164" y="94" width="196" height="42" rx="6" class="d-box-accent"/><text x="176" y="112" class="d-label-b">draft an answer</text><text x="176" y="129" class="d-label-sm">embed that instead of the question</text>
+<rect x="164" y="168" width="196" height="42" rx="6" class="d-box-accent"/><text x="176" y="186" class="d-label-b">expand</text><text x="176" y="203" class="d-label-sm">several phrasings, fuse the results</text>
+<path d="M360 41 L432 108" class="d-arrow-accent" marker-end="url(#qt)"/>
+<path d="M360 115 L432 115" class="d-arrow-accent" marker-end="url(#qt)"/>
+<path d="M360 189 L432 124" class="d-arrow-accent" marker-end="url(#qt)"/>
+<rect x="432" y="94" width="196" height="44" rx="6" class="d-box"/><text x="444" y="112" class="d-label-b">retrieval, unchanged</text><text x="444" y="130" class="d-label-sm">chunk, search, fuse, rerank</text>
+<text x="164" y="228" class="d-label-sm">Each box is a model call, paid before the index is touched.</text>
+</svg><figcaption>Three transformations, all of them a model call before retrieval. The question is rewritten, replaced by a drafted answer, or fanned out into several phrasings — and only then does the index get used.</figcaption></figure>
+  <h2>What it costs, in the place you just learned to look</h2>
+  <p>Every one of these is a model call that happens <em>before</em> retrieval. The measurement lesson showed retrieval running in milliseconds against a read measured in seconds, and a transformation moves a piece of that expensive second category in front of the cheap first one. It is still usually worth it — a generated draft is short, and short generations are quick — but it is the one change in this block that makes the cheap stage meaningfully less cheap, and it should be timed rather than assumed.</p>
+  <div class="callout pitfall"><span class="label">A drafted answer can be confidently wrong and still steer retrieval</span><p>The draft in a hypothetical-document approach is never shown to anyone, which makes it easy to forget it can be nonsense. A model that drafts a plausible wrong answer produces a vector pointing at the wrong region of the corpus, and retrieval then faithfully returns documents supporting the wrong thing. The failure is invisible: recall looks fine against the drafted answer and terrible against the actual question.</p></div>
+  <div class="callout matters"><span class="label">Do not transform a query that was already good</span><p>These techniques repair a mismatch between how questions and answers are phrased. Where users type keyword-shaped queries, or where the corpus is itself full of questions — a support knowledge base of FAQ entries, say — the mismatch is small and the transformation adds latency, cost and a new failure mode for very little. Measure the block's existing three numbers before and after; if they do not move, do not keep it.</p></div>
+  <h2>Where this sits in the block</h2>
+  <p>Chunking decides what can be found. Retrieval and reranking decide what is found. Transformation decides what is looked for, and it is the only stage that touches the request rather than the corpus — which is why it is the first thing to reach for on a conversational interface and among the last on a search box.</p>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why can embedding a hypothetical answer retrieve better than embedding the question?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Generated text is cleaner than user input</div>
+      <div class="quiz-opt">The corpus contains answers, so matching an answer-shaped vector against answer-shaped passages is closer to what the space is good at than matching a question against them</div>
+      <div class="quiz-opt">It gives the retriever more tokens to work with</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. A conversational follow-up like &quot;And at Whitelee?&quot; retrieves badly. Why?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It is too short for the encoder to represent</div>
+      <div class="quiz-opt">Its meaning lives in the previous turn, so the embedding contains almost none of what the question is actually about — measured at 0.149 similarity to the question it follows</div>
+      <div class="quiz-opt">Site names are poorly represented in general-purpose embeddings</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What does a query transformation cost that the rest of this block does not?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A larger index and more storage</div>
+      <div class="quiz-opt">A model call before retrieval, which moves expensive generation work in front of the stage that was previously milliseconds</div>
+      <div class="quiz-opt">A second reranking pass over the results</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

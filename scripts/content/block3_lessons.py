@@ -121,6 +121,76 @@ LESSONS = [
   ],
 },
 {
+  "slug": "transforming-the-query",
+  "title": "Transforming the Query",
+  "subtitle": "Every technique so far improves what you search. This one changes what you search for.",
+  "body": [
+    ("p", "The pipeline lesson tuned the index side: chunk well, retrieve wide, fuse, rerank, send few. All of it takes the user's question exactly as typed and works on everything downstream of it. That is a choice, and it is worth noticing, because the question is often the weakest part of the request."),
+
+    ("h2", "The asymmetry underneath all of this"),
+    ("p", "You embed a question and match it against documents that are <em>answers</em>. Those are different kinds of text. A question is short, interrogative, and phrased in the words of someone who does not yet know; the passage that answers it is declarative, longer, and phrased in the words of someone who does. Similarity search assumes the two live near each other in the vector space, and they often do not."),
+
+    ("terms", [
+      ("Hypothetical document embedding", "Retrieve with a fake answer, not the question",
+       "Ask the model to write the answer it would expect, then embed that draft and search with it. The draft is discarded — only its vector is used. You are matching answer against answer instead of question against answer, which is the shape the space is better at."),
+      ("Query rewriting", "Make a dependent question standalone",
+       "A follow-up carries meaning from the turn before it and none of that meaning is in the embedding. Rewriting resolves the reference before retrieval happens."),
+      ("Query expansion", "Several phrasings instead of one",
+       "Generate a handful of alternative wordings, retrieve for each, and fuse the ranked lists — the same reciprocal rank fusion the pipeline lesson already uses for combining keyword and vector results, applied to combining queries instead."),
+      ("Decomposition", "Covered already, in the agentic lesson",
+       "Splitting a question into planned sub-questions is the same family, and this course teaches it as part of the loop rather than here."),
+    ]),
+
+    ("know",
+     "A follow-up question carries almost none of its meaning in its own words.",
+     "This course has measured it. Running &ldquo;What is the failure rate at Clyde?&rdquo; against the follow-up &ldquo;And at Whitelee?&rdquo; through the same encoder the retrieval notebooks use gives a cosine similarity of 0.149 — near the floor, barely above two unrelated sentences. The second question is perfectly clear to a human reading the transcript and nearly meaningless to an embedding, because everything that makes it a question about failure rates is in the previous turn.",
+     "Retrieval on a conversational interface fails on follow-ups long before it fails on hard questions, and it fails silently: the search runs, returns something, and nobody sees that the query never contained the subject. Rewriting is not an optimisation here, it is the difference between working and not."),
+
+    ("figure", "Three transformations, all of them a model call before retrieval. The question is rewritten, replaced by a drafted answer, or fanned out into several phrasings — and only then does the index get used.", '''<svg viewBox="0 0 640 232" role="img" aria-label="Query transformation before retrieval"><defs><marker id="qt" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="94" width="104" height="44" rx="6" class="d-box"/><text x="24" y="112" class="d-label-b">question</text><text x="24" y="130" class="d-label-sm">as typed</text>
+<path d="M116 116 L164 116" class="d-arrow-accent" marker-end="url(#qt)"/>
+<rect x="164" y="20" width="196" height="42" rx="6" class="d-box-accent"/><text x="176" y="38" class="d-label-b">rewrite</text><text x="176" y="55" class="d-label-sm">resolve what the turn assumed</text>
+<rect x="164" y="94" width="196" height="42" rx="6" class="d-box-accent"/><text x="176" y="112" class="d-label-b">draft an answer</text><text x="176" y="129" class="d-label-sm">embed that instead of the question</text>
+<rect x="164" y="168" width="196" height="42" rx="6" class="d-box-accent"/><text x="176" y="186" class="d-label-b">expand</text><text x="176" y="203" class="d-label-sm">several phrasings, fuse the results</text>
+<path d="M360 41 L432 108" class="d-arrow-accent" marker-end="url(#qt)"/>
+<path d="M360 115 L432 115" class="d-arrow-accent" marker-end="url(#qt)"/>
+<path d="M360 189 L432 124" class="d-arrow-accent" marker-end="url(#qt)"/>
+<rect x="432" y="94" width="196" height="44" rx="6" class="d-box"/><text x="444" y="112" class="d-label-b">retrieval, unchanged</text><text x="444" y="130" class="d-label-sm">chunk, search, fuse, rerank</text>
+<text x="164" y="228" class="d-label-sm">Each box is a model call, paid before the index is touched.</text>
+</svg>'''),
+
+    ("h2", "What it costs, in the place you just learned to look"),
+    ("p", "Every one of these is a model call that happens <em>before</em> retrieval. The measurement lesson showed retrieval running in milliseconds against a read measured in seconds, and a transformation moves a piece of that expensive second category in front of the cheap first one. It is still usually worth it — a generated draft is short, and short generations are quick — but it is the one change in this block that makes the cheap stage meaningfully less cheap, and it should be timed rather than assumed."),
+
+    ("callout", "pitfall", "A drafted answer can be confidently wrong and still steer retrieval",
+     "<p>The draft in a hypothetical-document approach is never shown to anyone, which makes it easy to forget it can be nonsense. A model that drafts a plausible wrong answer produces a vector pointing at the wrong region of the corpus, and retrieval then faithfully returns documents supporting the wrong thing. The failure is invisible: recall looks fine against the drafted answer and terrible against the actual question.</p>"),
+
+    ("callout", "matters", "Do not transform a query that was already good",
+     "<p>These techniques repair a mismatch between how questions and answers are phrased. Where users type keyword-shaped queries, or where the corpus is itself full of questions — a support knowledge base of FAQ entries, say — the mismatch is small and the transformation adds latency, cost and a new failure mode for very little. Measure the block's existing three numbers before and after; if they do not move, do not keep it.</p>"),
+
+    ("h2", "Where this sits in the block"),
+    ("p", "Chunking decides what can be found. Retrieval and reranking decide what is found. Transformation decides what is looked for, and it is the only stage that touches the request rather than the corpus — which is why it is the first thing to reach for on a conversational interface and among the last on a search box."),
+
+    ("quiz", [
+      ("Why can embedding a hypothetical answer retrieve better than embedding the question?",
+       ["Generated text is cleaner than user input",
+        "The corpus contains answers, so matching an answer-shaped vector against answer-shaped passages is closer to what the space is good at than matching a question against them",
+        "It gives the retriever more tokens to work with"],
+       1),
+      ("A conversational follow-up like \"And at Whitelee?\" retrieves badly. Why?",
+       ["It is too short for the encoder to represent",
+        "Its meaning lives in the previous turn, so the embedding contains almost none of what the question is actually about — measured at 0.149 similarity to the question it follows",
+        "Site names are poorly represented in general-purpose embeddings"],
+       1),
+      ("What does a query transformation cost that the rest of this block does not?",
+       ["A larger index and more storage",
+        "A model call before retrieval, which moves expensive generation work in front of the stage that was previously milliseconds",
+        "A second reranking pass over the results"],
+       1),
+    ]),
+  ],
+},
+{
   "slug": "measuring-retrieval",
   "title": "Measuring Retrieval",
   "subtitle": "Three numbers, measured separately, because they fail independently and have different fixes.",

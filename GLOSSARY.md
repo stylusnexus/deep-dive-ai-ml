@@ -570,6 +570,14 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Attention sink** — The disproportionate attention models place on the first token of a sequence. Concatenating separately-read blocks gives the model several of them instead of one, which is part of why naive concatenation fails.
 
+**Query transformation** — Changing the question before retrieval rather than tuning what retrieves it. The only stage of a retrieval pipeline that touches the request instead of the corpus, and the only one that adds a model call in front of the cheap stage.
+
+**Hypothetical document embedding (HyDE)** — Having the model draft the answer it expects, then retrieving with that draft's vector rather than the question's. It matches answer against answer, which suits the space better than matching a question against answers — and a confidently wrong draft steers retrieval confidently wrong.
+
+**Query rewriting** — Resolving what a question assumed from earlier turns so it stands alone before retrieval. Essential on conversational interfaces, where a follow-up carries almost none of its meaning in its own words.
+
+**Query expansion** — Generating several phrasings of one question, retrieving for each, and fusing the ranked lists. Reciprocal rank fusion applied across queries rather than across retrieval methods.
+
 **Hop limit** — A hard cap on how many retrieval rounds the loop may take, usually three or four, plus a token budget. The gains flatten quickly and the costs do not.
 
 ---

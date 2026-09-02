@@ -23,7 +23,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 75 lessons built, 75 diagrams, 13 executed notebooks.**
+**Status: 76 lessons built, 76 diagrams, 13 executed notebooks.**
 
 ---
 
@@ -75,7 +75,7 @@ demonstrably better, and a threshold chosen from costs.
   routed to rather than made the default ✅
 - Structured outputs and tool calling
 
-4 lessons in `lessons/block3-retrieval/`, 3 notebooks in `notebooks/03-retrieval/`,
+5 lessons in `lessons/block3-retrieval/`, 3 notebooks in `notebooks/03-retrieval/`,
 and Project 2 in `projects/p2-financial-rag/`.
 
 The corpus is synthetic on purpose: every fact lives in exactly one document, so

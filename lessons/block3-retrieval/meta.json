@@ -21,20 +21,26 @@
     },
     {
       "id": "lsn-1787600000001",
-      "title": "Measuring Retrieval",
-      "file": "lsn-1787600000001-measuring-retrieval.html",
+      "title": "Transforming the Query",
+      "file": "lsn-1787600000001-transforming-the-query.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787600000002",
-      "title": "Agentic RAG: Retrieval as a Loop",
-      "file": "lsn-1787600000002-agentic-rag.html",
+      "title": "Measuring Retrieval",
+      "file": "lsn-1787600000002-measuring-retrieval.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787600000003",
+      "title": "Agentic RAG: Retrieval as a Loop",
+      "file": "lsn-1787600000003-agentic-rag.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787600000004",
       "title": "Preloading Instead of Retrieving",
-      "file": "lsn-1787600000003-preloading-instead-of-retrieving.html",
+      "file": "lsn-1787600000004-preloading-instead-of-retrieving.html",
       "source": "skill"
     }
   ],
@@ -55,6 +61,11 @@
       "starred": false
     },
     "lsn-1787600000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787600000004": {
       "viewed": false,
       "completed": false,
       "starred": false
