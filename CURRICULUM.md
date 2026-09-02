@@ -162,6 +162,11 @@ non-completion column, without which the ranking is not defensible.
   Supervised tuning imitates answers; reinforcement tuning (GRPO and relatives) optimises
   against a reward or a verifier, which is how reasoning behaviour is trained rather than
   copied. Block 0 teaches what a reasoning model is and this is where it gets made.
+- **Pruning, and distillation as repair** — removing depth (whole layers) or width
+  (neurons and heads within layers) from a trained model, then using distillation to
+  recover what the surgery cost. The course teaches quantization and distillation and
+  currently presents neither as a member of the compression family that also contains
+  pruning and low-rank factorisation.
 - Evaluating before and after against a held-out set
 - Quantization for serving — lands directly on a production agent's GGUF and Q4_K_M
 

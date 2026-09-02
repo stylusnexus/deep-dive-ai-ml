@@ -1608,7 +1608,7 @@ LESSONS = [
     ("callout", "pitfall", "The two things that bite", "First, licensing — many providers' terms restrict using their outputs to train competing models. Check the terms for your teacher before building on this; it's a real constraint, not a formality. Second, the student inherits the teacher's mistakes, confidently and without the teacher's occasional self-correction. Evaluate the student on its own held-out set, never against the teacher's answers."),
 
     ("h2", "Where it sits relative to the alternatives"),
-    ("p", "Prompt engineering changes nothing about the model and costs tokens per call. Fine-tuning adapts a model to your format and domain. Distillation transfers capability from a bigger model into a smaller one. Quantization shrinks the same model by storing it less precisely. They compose — a distilled, fine-tuned, 4-bit student is a perfectly normal production artefact, and Block 7 builds toward exactly that."),
+    ("p", "Prompt engineering changes nothing about the model and costs tokens per call. Fine-tuning adapts a model to your format and domain. Distillation transfers capability from a bigger model into a smaller one. Quantization shrinks the same model by storing it less precisely. Pruning shrinks it by removing parts of it outright — whole layers, or neurons and heads within them — and is usually followed by a distillation pass to recover what the cut cost, which is the one place these two are used together rather than as alternatives. They compose — a distilled, fine-tuned, 4-bit student is a perfectly normal production artefact, and Block 7 builds toward exactly that."),
 
     ("links", [
       ("Distilling the Knowledge in a Neural Network (Hinton et al., 2015)", "https://arxiv.org/abs/1503.02531",

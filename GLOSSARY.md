@@ -254,6 +254,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Context distillation** — Distillation where teacher and student are the same model, differing only in what they have been handed: the teacher has a long document in its context, the student has a small trained cache standing in for it. The student learns to answer as though it had read something it never sees at inference.
 
+**Pruning (neural)** — Removing parts of a trained network outright: whole layers (depth) or neurons and attention heads within layers (width). Distinct from the decision-tree sense used in Block 0 — and usually followed by a distillation pass to recover the capability the cut cost.
+
 **Distillation flywheel** — A large model generating training data for a smaller one, round after round. The teacher is the external signal that keeps it from collapsing.
 
 **Held-out evaluation** — A set the training loop cannot see. If the loop can read the set that judges it, it will optimise the set rather than the task.
