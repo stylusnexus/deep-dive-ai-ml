@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calling an API You Do Not Control</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 1 of 4</span>
+  <h1>Calling an API You Do Not Control</h1>
+  <p class="subtitle">It will fail, it will be slow, and it will occasionally charge you twice for the same work.</p>
+
+  <p>Every project in this course has called a model over HTTP and every one of them has done it naively, because the endpoint was on the same machine. That is a fair simplification for learning and a poor one for anything else. A remote interface fails in ways a local one does not, and the failures are boring rather than dramatic, which is why they get skipped.</p>
+  <h2>Read the status code before deciding what to do</h2>
+  <p>The single most useful habit is to stop treating errors as one category. What the caller should do next is almost entirely determined by which failure it was, and code that catches everything and retries treats a malformed request as a transient outage.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">400 and 422 — you sent something wrong</div><div><div class="roadmap-title">Never retry</div><div class="roadmap-desc">The request is malformed or fails validation. Retrying sends the same wrong thing again, and does so as fast as the loop allows. These belong in a log with the payload, not in a retry.</div></div></div><div class="roadmap-item"><div class="roadmap-num">401 and 403 — you are not allowed</div><div><div class="roadmap-title">Never retry</div><div class="roadmap-desc">A credential problem does not resolve itself. Retrying a 401 in a loop is how a key gets rate-limited or revoked.</div></div></div><div class="roadmap-item"><div class="roadmap-num">429 — slow down</div><div><div class="roadmap-title">Retry, but only when told</div><div class="roadmap-desc">The response usually carries a Retry-After header. Honour it. Backing off on your own schedule while ignoring the one you were handed is how a client makes an overload worse.</div></div></div><div class="roadmap-item"><div class="roadmap-num">500 and 502 to 504 — their problem</div><div><div class="roadmap-title">Retry with backoff</div><div class="roadmap-desc">Genuinely transient much of the time. This is the category exponential backoff exists for, and the only one where blind retrying is defensible.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Timeouts — you do not know</div><div><div class="roadmap-title">The dangerous one</div><div class="roadmap-desc">You have no idea whether the work happened. The request may have completed and the response been lost, which is why this is the case that needs idempotency rather than a retry policy.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A timeout is not a failure. It is an absence of information.</p><p class="know-why">Every other error tells you something definite. A timeout tells you only that you stopped waiting, and the operation on the other side may have succeeded, failed, or still be running. Retrying is therefore a decision to possibly do the thing twice — which is free for a read, expensive for a paid generation, and unacceptable for anything that sends, charges or writes.</p><p class="know-eg"><span class="know-eg-label">For example</span>A model call that times out at thirty seconds and is retried has plausibly been billed twice for one answer. The same pattern on an endpoint that emails a customer has sent two emails, and no amount of logging on your side will tell you which happened.</p></blockquote>
+  <h2>Idempotency is the answer to the timeout</h2>
+  <p>An idempotent operation produces the same result whether it runs once or five times. Most interfaces are not naturally idempotent, so the mechanism is a key: the caller generates a unique identifier per logical operation and sends it with every attempt, and the server recognises a repeat and returns the original result rather than doing the work again. The important half is that the key belongs to the <em>operation</em>, not to the attempt — a new key per retry defeats the entire mechanism.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Two timeouts that look identical to the caller"><defs><marker id="api" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="14" y="26" width="120" height="36" rx="6" class="d-box"/><text x="26" y="49" class="d-label-sm">your request</text>
+<path d="M134 44 L214 44" class="d-arrow-accent" marker-end="url(#api)"/>
+<rect x="214" y="20" width="220" height="48" rx="6" class="d-box-accent"/><text x="226" y="40" class="d-label-b">work completed</text><text x="226" y="58" class="d-label-sm">response lost on the way back</text>
+<rect x="14" y="112" width="120" height="36" rx="6" class="d-box"/><text x="26" y="135" class="d-label-sm">your request</text>
+<path d="M134 130 L214 130" class="d-arrow-accent" marker-end="url(#api)"/>
+<rect x="214" y="106" width="220" height="48" rx="6" class="d-box"/><text x="226" y="126" class="d-label-b">never arrived</text><text x="226" y="144" class="d-label-sm">nothing happened at all</text>
+<path d="M434 44 L500 82" class="d-arrow-accent" marker-end="url(#api)"/>
+<path d="M434 130 L500 96" class="d-arrow-accent" marker-end="url(#api)"/>
+<rect x="500" y="66" width="126" height="44" rx="6" class="d-box"/><text x="512" y="86" class="d-label-b">timeout</text><text x="512" y="103" class="d-label-sm">identical to you</text>
+<text x="14" y="188" class="d-label-sm">Retry the first and you pay twice. Retry the second and you get the answer. You cannot tell which you have.</text>
+</svg><figcaption>The client cannot tell these apart, and the difference decides whether retrying is free or charges twice. An idempotency key makes the distinction irrelevant, which is the only reliable fix.</figcaption></figure>
+  <h2>Backoff, and the part everyone omits</h2>
+  <ul><li><strong>Exponential</strong> — double the wait each attempt, so a struggling service is not hammered by every client at once.</li><li><strong>Jittered</strong> — the omitted part. Without randomisation every client that failed together retries together, and the retry storm is a second outage arriving on a schedule.</li><li><strong>Capped, and bounded in total</strong> — a maximum interval and a maximum number of attempts, because a caller retrying for an hour has turned a fast failure into a slow one.</li><li><strong>Budgeted</strong> — with a paid model behind the call, the retry policy is also a spending policy. Three attempts at a large prompt is three times the bill for one answer.</li></ul>
+  <div class="callout pitfall"><span class="label">Streaming changes what a failure looks like</span><p>A streamed response can fail after you have already shown the user half an answer. There is no clean status code for that — the connection simply stops. Decide in advance whether a truncated stream is discarded, retried from the start, or kept with a marker, and make sure the answer is not "whatever the client library happens to do", because that is usually to leave the partial text on screen looking complete.</p></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Which failure category most needs idempotency rather than a retry policy?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">429, because the rate limit may persist across retries</div>
+      <div class="quiz-opt">A timeout, because you do not know whether the work happened — retrying is a decision to possibly do it twice</div>
+      <div class="quiz-opt">500, because the server state may be inconsistent</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why must an idempotency key belong to the operation rather than the attempt?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Keys are rate-limited per request</div>
+      <div class="quiz-opt">A fresh key on each retry looks like a new operation to the server, which defeats the entire mechanism</div>
+      <div class="quiz-opt">The server caches keys for a fixed window</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What does jitter add to exponential backoff?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A longer average wait, reducing load further</div>
+      <div class="quiz-opt">Randomisation, so clients that failed together do not all retry together and create a second outage</div>
+      <div class="quiz-opt">Protection against clock skew between client and server</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

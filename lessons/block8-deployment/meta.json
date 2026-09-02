@@ -1,0 +1,63 @@
+{
+  "title": "Block 8 \u00b7 Deployment and APIs",
+  "topic": "block8-deployment",
+  "icon": "\ud83d\udea2",
+  "description": "Calling an interface you do not control, serving one other people do not control, and what changes the moment either has a caller who is not you.",
+  "tags": [
+    "ai",
+    "deployment",
+    "apis"
+  ],
+  "colorScheme": "cyan",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-09-02",
+  "lessons": [
+    {
+      "id": "lsn-1788100000000",
+      "title": "Calling an API You Do Not Control",
+      "file": "lsn-1788100000000-calling-an-api-you-do-not-control.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788100000001",
+      "title": "Serving One Yourself",
+      "file": "lsn-1788100000001-serving-one-yourself.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788100000002",
+      "title": "The Image Is the Unit",
+      "file": "lsn-1788100000002-the-image-is-the-unit.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788100000003",
+      "title": "After It Ships",
+      "file": "lsn-1788100000003-after-it-ships.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1788100000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788100000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788100000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788100000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}

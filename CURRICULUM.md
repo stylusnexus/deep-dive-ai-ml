@@ -23,7 +23,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 82 lessons built, 82 diagrams, 13 executed notebooks.**
+**Status: 89 lessons built, 89 diagrams, 13 executed notebooks.**
 
 ---
 
@@ -186,11 +186,17 @@ Spine: `LLMS_from_Scratch` ch05–07 (Apache 2.0) plus the installed HF training
 ## Block 8 · Deployment & APIs — 2 weeks
 *Original: Module 05, expanded — they teach portability in Colab, which cannot demonstrate it*
 
-- Consuming APIs properly: auth, retries, backoff, streaming, idempotency, token budgeting
-- Serving APIs: FastAPI, validation, auth, rate limiting, versioning, health checks
-- Containerize a model; run locally; push the same image
-- Deploy to Render and to an HF Space (ZeroGPU)
-- Monitoring, drift, and when to retrain
+- Calling an API you do not control — status-code semantics, idempotency for the
+  timeout you cannot interpret, jittered backoff ✅
+- Serving one yourself — auth, rate limiting, validation, versioning, a health check
+  that reports readiness rather than liveness, worked against Project 4 ✅
+- The image is the unit — what goes inside, what stays configuration, and image size
+  as a decision rather than an outcome ✅
+- After it ships — availability against correctness, and why drift needs a scheduled
+  measurement rather than a dashboard ✅
+
+4 lessons in `lessons/block8-deployment/`. Deploying to Render or an HF Space remains
+a human action; `projects/p4-deployed-assistant/render.yaml` describes it.
 
 **Exit:** Project 4 — an authenticated, rate-limited, containerised endpoint, built and
 verified end to end ✅. The deploy itself is a human action: `render.yaml` describes it,
@@ -201,9 +207,23 @@ and a public URL has a bill and an audience attached.
 ## Block 9 · Electives — 2 weeks
 *Original: the self-paced modules*
 
-CNNs and computer vision · multimodal · recommendation systems · SQL · Claude workflows and MCP · cost and routing engineering.
+Originally six electives. Two are already taught: **Claude workflows and MCP** has four
+lessons in Block 0 (`tool-calls-and-mcp`, `building-an-mcp-server`, `mcp-dangers`,
+`skills`), and **routing** is covered by `routing-and-escalation`. Building either as an
+elective would have duplicated them.
 
-**Exit:** Each elective has lessons and at least one runnable notebook.
+Built:
+- When the input is not text — images as tokens, so every context-cost rule applies ✅
+- Asking the database properly — the SQL behind intake question one ✅
+- Where the money goes — spend attribution, and the four places cost hides. Complements
+  Block 0's routing (architecture) with the measurement ✅
+
+Still open: **CNNs and computer vision**, **recommendation systems**. Both are genuinely
+missing and both want a training notebook rather than a lesson alone, which is why they
+are not here yet.
+
+**Exit:** Each elective has lessons and at least one runnable notebook — met for none of
+the three yet; the lessons exist and the notebooks do not.
 
 ---
 

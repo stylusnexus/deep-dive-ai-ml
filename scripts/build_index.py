@@ -106,6 +106,10 @@ SECTIONS = [
      "Block 0 named the attack classes; this block runs them against the agent you built, starting with the injection your own retrieval pipeline invites."),
     ("block7-training", "Block 7 · Training and Fine-Tuning",
      "When changing the weights is the right answer — rarely — and the four ways to shrink a model, including the fact that compression does not remove capability evenly."),
+    ("block8-deployment", "Block 8 · Deployment and APIs",
+     "Calling an interface you do not control, serving one other people do not control, and what changes the moment either has a caller who is not you."),
+    ("block9-electives", "Block 9 · Electives",
+     "Three directions the spine does not cover: input that is not text, asking the database properly, and where the money actually goes."),
     ("engineering-practice", "Block 0 · Engineering Practice",
      "The three artifacts an LLM project accumulates — harness, recipes, decision records — how each one turns harmful, and the measurement procedure that corrects them."),
 ]

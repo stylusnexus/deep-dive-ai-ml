@@ -332,3 +332,31 @@ Sandboxing with egress control
 The trace itself
 Prompting
 Structural change
+400 and 422 — you sent something wrong
+401 and 403 — you are not allowed
+429 — slow down
+500 and 502 to 504 — their problem
+A health check that means something
+A version in the path
+Aggregate with GROUP BY
+Anything environment-specific
+Authentication
+Cached against uncached
+Code and dependencies
+Cost per successful outcome
+Data the system is defined by
+Detail settings
+Documents are often images
+Filtering before and after aggregation
+Generic error responses
+Is it right?
+Is it up?
+Joins, and their cardinality
+Per request, at the time
+Position still applies
+Rate limiting, per caller
+Resolution is a token count
+Secrets
+The long tail
+Timeouts — you do not know
+Validation with bounds

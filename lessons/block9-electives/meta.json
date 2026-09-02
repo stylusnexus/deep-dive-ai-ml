@@ -1,0 +1,52 @@
+{
+  "title": "Block 9 \u00b7 Electives",
+  "topic": "block9-electives",
+  "icon": "\ud83e\udded",
+  "description": "Three directions the spine does not cover: what happens when the input is not text, how to ask the database properly, and where the money actually goes.",
+  "tags": [
+    "ai",
+    "electives",
+    "cost"
+  ],
+  "colorScheme": "amber",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-09-02",
+  "lessons": [
+    {
+      "id": "lsn-1788200000000",
+      "title": "When the Input Is Not Text",
+      "file": "lsn-1788200000000-when-the-input-is-not-text.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788200000001",
+      "title": "Asking the Database Properly",
+      "file": "lsn-1788200000001-asking-the-database-properly.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788200000002",
+      "title": "Where the Money Goes",
+      "file": "lsn-1788200000002-where-the-money-goes.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1788200000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788200000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788200000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}

@@ -758,3 +758,33 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Slice evaluation** — Measuring per population or per domain rather than in aggregate. The only instrument that can detect uneven capability loss, and the one routinely skipped when compressing a model.
 
+---
+
+## Block 8 · Deployment and APIs
+
+**Idempotency key** — A caller-generated identifier for a logical operation, sent with every attempt, so a server recognises a repeat and returns the original result instead of doing the work twice. The key belongs to the operation, not the attempt — a fresh key per retry defeats the mechanism.
+
+**Jitter** — Randomisation added to backoff intervals so clients that failed together do not retry together. Without it, a retry storm is a second outage arriving on a schedule.
+
+**Retry-After** — The header a 429 or 503 uses to tell a client when to try again. Honouring it beats backing off on your own schedule, which makes an overload worse.
+
+**Readiness against liveness** — Whether a service can do its job, against whether its process exists. A health check that returns 200 regardless answers the second question, which nobody was asking.
+
+**Startup refusal** — Failing to boot when required configuration is absent, rather than falling back to a permissive default. The failure is then found by the person deploying, in the minute they deploy.
+
+**Image promotion** — Deploying the artefact you tested rather than rebuilding from source at deploy time. Rebuilding discards the guarantee that building an image was for.
+
+---
+
+## Block 9 · Electives
+
+**Image tokens** — What a multimodal encoder turns a picture into: vectors occupying context positions, priced and truncated like text. Resolution is therefore a context-cost dial, not only a quality one.
+
+**Window function** — A SQL construct that keeps every row while adding a group-level aggregate alongside it. What comparing a row against its own group requires, and what GROUP BY cannot do.
+
+**Join cardinality** — Whether a join multiplies rows. A one-to-many join inflates every sum downstream of it and produces a plausible wrong number rather than an error, which makes it the commonest way a confident analysis is wrong.
+
+**Cost per outcome** — Attributing the whole chain — retries, escalations, failed attempts — to the result it produced, rather than pricing individual calls. A cheap model needing three attempts is not cheap.
+
+**Spend attribution** — Recording input, output and cached tokens per request at the time it happens, since an invoice gives a total and cannot be decomposed afterwards.
+
