@@ -1,0 +1,22 @@
+[
+  {
+    "k": 2,
+    "context_words": 149,
+    "read_s": 5.899
+  },
+  {
+    "k": 4,
+    "context_words": 288,
+    "read_s": 5.437
+  },
+  {
+    "k": 8,
+    "context_words": 499,
+    "read_s": 10.499
+  },
+  {
+    "k": 16,
+    "context_words": 1073,
+    "read_s": 19.691
+  }
+]

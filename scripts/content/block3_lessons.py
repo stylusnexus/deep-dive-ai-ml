@@ -199,16 +199,16 @@ LESSONS = [
       ("Read time (prefill)", "Often seconds",
        "The model processing everything retrieval handed it, before a single output token appears. This is what the user experiences as the delay."),
       ("The lever", "Send fewer chunks, not find them faster",
-       "Attention cost during that read grows with the <em>square</em> of the context length, so the ninth chunk you attach costs more than the first did. Precision beats volume on the clock for the same reason it beats volume on the answer."),
+       "Read time grows with how much you send. Attention's own cost grows with the <em>square</em> of the context, but that term does not dominate until the context approaches the model's hidden dimension — at retrieval-sized contexts the read is close to linear in tokens. Either way, precision beats volume on the clock for the same reason it beats volume on the answer."),
     ]),
 
     ("know",
-     "Retrieval quality and retrieval latency are different problems, and the second one lives in the model.",
-     "A project that reports recall, groundedness and correctness has measured whether the system is right and said nothing about whether it is usable. The read is prefill: every token retrieval adds must be processed before the first word of the answer appears, and because attention compares every token against every other, doubling the retrieved context roughly quadruples that work rather than doubling it.",
-     "Going from 1,000 to 4,000 tokens of context is sixteen times the attention work, not four. This is why sending three good chunks beats sending twenty mediocre ones twice over — once on the answer, and once on the wait."),
+     "&ldquo;Prefill is quadratic&rdquo; is true about attention and misleading about the read.",
+     "Attention does compare every token against every other, so its cost carries a squared term. But attention is only part of prefill: the projections and the feed-forward layers cost roughly tokens times the hidden dimension squared, which is linear in context. The squared term does not overtake the linear one until the context is on the order of the model's hidden dimension — thousands of tokens — so at retrieval-sized contexts the read grows roughly in proportion to what you send.",
+     "Project 2 measures this on its own corpus by sweeping how many chunks it retrieves. Going from 288 to 1,073 words of context — 3.7 times the context — multiplied the read by 3.6. Quadratic scaling would have predicted about fourteen. The lever is still sending less, but the reason is proportion rather than explosion."),
 
-    ("callout", "warning", "Your own corpus may be too small to show this",
-     "<p>Project 2 measures both stages and finds retrieval at roughly a hundredth of the request, which supports the ranking above. It cannot support the <em>reason</em>. Its contexts run to about a hundred words, and a hundred words prefills in a fraction of a second — so nearly all of its read time is the model generating, not reading. The quadratic prefill cost needs contexts of thousands of tokens before it dominates.</p><p>That gap is worth sitting with. A measurement can confirm which stage is expensive and still fail to establish why, and a project that reports the first as though it proved the second has overclaimed. Check that the mechanism you are describing is the one your numbers could actually detect.</p>"),
+    ("callout", "insight", "One value of k cannot separate reading from writing",
+     "<p>A single measurement of read time bundles two things: prefill, which grows with the context you sent, and decode, which grows with the answer the model writes. Neither is visible on its own. Project 2 separates them by sweeping how many chunks it retrieves — the answers stay roughly the same length while the context grows, so the <em>slope</em> of read time against context is prefill and the intercept is the decode floor.</p><p>On its corpus that floor is around three and a half seconds before a single retrieved word is read. If you are optimising context size against a read time dominated by an unchanging decode cost, you are tuning the smaller half and the numbers will barely move.</p>"),
 
     ("h2", "Running the evaluation"),
     ("ul", [

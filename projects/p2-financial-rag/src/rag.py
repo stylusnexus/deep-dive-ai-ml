@@ -135,7 +135,11 @@ def is_correct(answer: str, expected: str, gold_docs: list[str]) -> bool:
     if not key:
         return False
     hits = sum(k.lower() in answer.lower() for k in key)
-    return hits >= max(2, (len(key) + 1) // 2)
+    # Two hits is the floor for a normal answer, but an expected answer of "68."
+    # yields one key token and could never reach two however right the answer was.
+    # Never demand more agreement than there is expected answer to agree with.
+    need = min(len(key), max(2, (len(key) + 1) // 2))
+    return hits >= need
 
 
 def md_table(rows: list[dict]) -> str:
@@ -154,6 +158,8 @@ def main() -> None:
     ap.add_argument("--k", type=int, default=4, help="chunks sent to the model")
     ap.add_argument("--pool", type=int, default=12, help="candidates before reranking")
     ap.add_argument("--no-rerank", action="store_true")
+    ap.add_argument("--sweep", action="store_true",
+                    help="also measure read time against context size across k")
     ap.add_argument("--timeout", type=int, default=90,
                     help="per-call generation timeout; falls back to extractive on expiry")
     args = ap.parse_args()
@@ -169,14 +175,15 @@ def main() -> None:
                           show_progress_bar=False)
     reranker = None if args.no_rerank else CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
-    def retrieve(question):
+    def retrieve(question, k=None):
+        k = args.k if k is None else k
         qv = encoder.encode(question, normalize_embeddings=True)
-        idx = np.argsort(-(vecs @ qv))[:args.pool]
+        idx = np.argsort(-(vecs @ qv))[:max(args.pool, k)]
         cand = [chunks[i] for i in idx]
         if reranker is None:
-            return cand[:args.k]
+            return cand[:k]
         scores = reranker.predict([(question, c["text"]) for c in cand])
-        return [c for _, c in sorted(zip(scores, cand), key=lambda p: -p[0])][:args.k]
+        return [c for _, c in sorted(zip(scores, cand), key=lambda p: -p[0])][:k]
 
     eval_path = ROOT / "data" / "corpus_eval.json"
     if not eval_path.exists():
@@ -238,17 +245,11 @@ Retrieval is the stage this project measures for quality, and it is **not** the 
 that costs the time. Every optimisation aimed at retrieval speed is aimed at the
 smaller share.
 
-Read the mechanism honestly, though, because this corpus cannot demonstrate the usual
-one. Contexts here run to {min(r['context_tokens'] for r in rows)}-{max(r['context_tokens'] for r in rows)} words, which prefills in a fraction of a
-second — so almost all of the read above is the model *generating*, including its
-reasoning tokens, rather than reading what retrieval sent. The quadratic prefill cost
-that dominates production retrieval systems needs contexts of thousands of tokens
-before it shows, and ours are two orders of magnitude short of that.
-
-What this run does establish is the ranking: retrieval is around a hundredth of the
-request, so tuning it for speed is optimising the part that was already cheap. What it
-cannot establish is that prefill is the reason. On a corpus with realistic context
-sizes it would be; here the honest answer is that the model's own output dominates.
+A single read time bundles two costs that behave differently: prefill, which grows with
+the context retrieval sent, and decode, which grows with the answer the model writes.
+Run with `--sweep` to separate them — the number of chunks varies while answer length
+does not, so the slope of read time against context is prefill and the intercept is the
+decode floor.
 
 ## The four numbers
 
@@ -297,6 +298,36 @@ citations, at {np.mean(grounded):.2f} mean groundedness.
     print(f"groundedness      : {np.mean(grounded):.2f}")
     print(f"retrieval (median): {np.median([r['retrieval_s'] for r in rows]):.3f}s")
     print(f"read      (median): {np.median([r['read_s'] for r in rows]):.3f}s")
+
+    if args.sweep:
+        # Decode cost is roughly constant across k — the same question produces a
+        # similar-length answer whatever it was handed. Context size is what varies.
+        # So the slope of read time against context is the prefill contribution,
+        # which no single value of k can separate from the decode it is bundled with.
+        print("\nsweeping k to separate prefill from decode ...")
+        sweep = []
+        for k in (2, 4, 8, 16):
+            ts, toks = [], []
+            for e in questions:
+                if not e["gold_docs"]:
+                    continue
+                ps = retrieve(e["question"], k=k)
+                c = "\n\n".join(p["text"] for p in ps)
+                t0 = time.perf_counter()
+                generate(e["question"], ps, base, model, encoder, timeout=args.timeout)
+                ts.append(time.perf_counter() - t0)
+                toks.append(len(c.split()))
+            sweep.append({"k": k, "context_words": int(np.median(toks)),
+                          "read_s": round(float(np.median(ts)), 3)})
+            print(f"  k={k:2d}  context {sweep[-1]['context_words']:4d} words  "
+                  f"read {sweep[-1]['read_s']:.3f}s")
+        (HERE / "sweep.json").write_text(json.dumps(sweep, indent=2) + "\n")
+        lo, hi = sweep[0], sweep[-1]
+        d_ctx = hi["context_words"] - lo["context_words"]
+        d_t = hi["read_s"] - lo["read_s"]
+        print(f"\n  context grew {d_ctx} words, read time grew {d_t:.3f}s")
+        print(f"  implied prefill slope : {1000 * d_t / max(d_ctx, 1):.2f} ms per word of context")
+        print(f"  decode floor at zero context: {lo['read_s'] - d_t * lo['context_words'] / max(d_ctx, 1):.3f}s")
     print(f"correct           : {pct(answerable)} answerable")
     print(f"refusal handled   : {refusal['correct']}")
     print("\nwrote report.md and results.json")

@@ -1,213 +1,388 @@
 qid,hops,question,answer,retrieved_docs,gold_docs,expected,context,groundedness,correct,diagnosis
-q01,1,What is the maximum gearbox oil temperature during continuous operation?,"According to [1], the maximum gearbox oil temperature during continuous operation must not exceed **82 degrees Celsius**.","['inc-2026-014', 'ops-std-04', 'site-ard', 'site-bat']",['ops-std-04'],82 degrees Celsius.,"## Gearbox temperature
+q01,1,What is the maximum gearbox oil temperature during continuous operation?,The maximum gearbox oil temperature during continuous operation is **82 degrees Celsius** [1].,"['inc-2026-014', 'ops-std-04', 'site-ard', 'site-bat']",['ops-std-04'],82 degrees Celsius.,"## Gearbox temperature
 
 The gearbox oil temperature must not exceed 82 degrees Celsius during
-continuous operation. Between 82 and 90 degrees the turbine enters
-derated operation automatically. Above 90 degrees the turbine performs a
-controlled shutdown.
+continuous operation. Between 82 and 90 degrees the turbine enters derated
+operation automatically, reducing output until the temperature returns
+below the continuous limit. Above 90 degrees the turbine performs a
+controlled shutdown. Derated operation is a normal control response and is
+not a fault in itself, but sustained derating indicates a developing
+problem: a turbine that derates on temperature for more than four hours in
+any twenty-four is raised to the regional desk for review even where it
+never approaches the shutdown threshold.
 
 ## Summary
 
 Turbine WHL-031 performed a controlled shutdown after gearbox oil
 temperature reached 91.4 degrees Celsius. The turbine had been in derated
-operation for approximately six hours prior to shutdown.
+operation for approximately six hours prior to shutdown. Derating began
+during the early afternoon and was visible on the regional dashboard
+throughout, but no alert was raised because sustained derating did not at
+that time trigger a review threshold. The shutdown itself operated
+correctly and within the expected sequence.
 
 ## Operating envelope
 
 Turbines at Beinn an Tuirc operate under the standard envelope defined in
-OPS-STD-04 unless a site variance is recorded. Gearbox temperature is
-logged every fifteen minutes and reported daily to the regional desk.
+OPS-STD-04 unless a site variance is recorded against a specific
+parameter. This profile does not restate those limits; the standard is
+the single authority for them and local copies are not maintained,
+because a local copy that drifts from the standard is worse than no
+local copy at all. Gearbox temperature is logged every fifteen minutes
+and reported daily to the regional desk. Vibration is logged
+continuously and summarised hourly. Where a logger fails, the affected
+turbine is treated as operating outside monitored conditions until the
+logger is restored, which is a deliberately conservative reading of
+the standard and is not a fault state in its own right.
 
 ## Operating envelope
 
 Turbines at Ardrossan operate under the standard envelope defined in
-OPS-STD-04 unless a site variance is recorded. Gearbox temperature is
-logged every fifteen minutes and reported daily to the regional desk.",0.818,False,grounded + WRONG  -> retrieval problem
-q02,1,How often must a turbine older than twelve years be inspected?,A turbine older than twelve years must be inspected every **90 days** [1].,"['maint-pol-11', 'ops-std-04', 'proc-restart-07']",['maint-pol-11'],Every 90 days.,"## Routine inspection
+OPS-STD-04 unless a site variance is recorded against a specific
+parameter. This profile does not restate those limits; the standard is
+the single authority for them and local copies are not maintained,
+because a local copy that drifts from the standard is worse than no
+local copy at all. Gearbox temperature is logged every fifteen minutes
+and reported daily to the regional desk. Vibration is logged
+continuously and summarised hourly. Where a logger fails, the affected
+turbine is treated as operating outside monitored conditions until the
+logger is restored, which is a deliberately conservative reading of
+the standard and is not a fault state in its own right.",0.875,False,grounded + WRONG  -> retrieval problem
+q02,1,How often must a turbine older than twelve years be inspected?,A turbine older than twelve years must be inspected every **90 days** [1].,"['maint-pol-11', 'proc-restart-07']",['maint-pol-11'],Every 90 days.,"## Routine inspection
 
 Every turbine receives a routine inspection every 180 days. The interval
-reduces to 90 days for any turbine older than twelve years.
+reduces to 90 days for any turbine older than twelve years. Age is counted
+from commissioning rather than from manufacture, and a turbine that has
+had a major component replaced does not reset its age: the interval
+reflects the accumulated fatigue of the structure as a whole rather than
+the age of any single part. Where a site operates turbines either side of
+the twelve-year boundary, the shorter interval is not applied fleet-wide
+for convenience, because doing so obscures which machines are genuinely in
+the reduced-interval population.
+
+## Records
+
+Inspection records are retained for the operating life of the turbine plus
+six years. Records are held against the turbine identifier rather than the
+site, so that a machine relocated between sites carries its history with
+it rather than starting fresh.
 
 ## Post-alert inspection
 
 A Level 2 vibration alert requires inspection within 14 days. A Level 3
-alert requires inspection before the turbine is returned to service.
+alert requires inspection before the turbine is returned to service. The
+distinction is that a Level 2 alert describes a turbine that may continue
+operating under observation, while a Level 3 alert describes one that has
+already stopped. Post-alert inspections are recorded separately from
+routine inspections and do not reset the routine interval, so a turbine
+inspected after an alert is still due its scheduled inspection on the
+original date.
 
 ## Restriction
 
 A turbine that has shut down twice within 30 days may not be returned to
-service without regional engineering approval.
-
-## Vibration
-
-Nacelle vibration above 0.55 mm/s RMS sustained for more than thirty
-minutes triggers a Level 2 alert. Above 0.80 mm/s the turbine shuts down
-immediately and requires physical inspection before restart.",0.667,False,ungrounded + wrong -> generation problem
-q03,1,What caused the shutdown of turbine WHL-031?,"According to the summary, turbine WHL-031 performed a controlled shutdown after its **gearbox oil temperature reached 91.4 degrees Celsius** [1]. The turbine had been in derated operation for approximately six hours prior to the shutdown [1].","['inc-2026-014', 'ops-std-04', 'proc-restart-07']",['inc-2026-014'],"A partially blocked oil cooler, caused by an incorrectly seated filter seal.","## Summary
+service without regional engineering approval. The counter runs on
+shutdowns rather than on faults, so two stops from unrelated causes still
+trigger the restriction. The intent is to catch machines that are
+developing a problem the individual investigations have each missed.",0.778,False,grounded + WRONG  -> retrieval problem
+q03,1,What caused the shutdown of turbine WHL-031?,"The shutdown of turbine WHL-031 was caused by its gearbox oil temperature reaching 91.4 degrees Celsius, which triggered a controlled thermal shutdown [1]. The incident was classified as a ""thermal shutdown"" [2].","['inc-2026-014', 'proc-restart-07']",['inc-2026-014'],"A partially blocked oil cooler, caused by an incorrectly seated filter seal.","## Summary
 
 Turbine WHL-031 performed a controlled shutdown after gearbox oil
 temperature reached 91.4 degrees Celsius. The turbine had been in derated
-operation for approximately six hours prior to shutdown.
+operation for approximately six hours prior to shutdown. Derating began
+during the early afternoon and was visible on the regional dashboard
+throughout, but no alert was raised because sustained derating did not at
+that time trigger a review threshold. The shutdown itself operated
+correctly and within the expected sequence.
 
 # Incident Report 2026-014
 
 Date: 14 March 2026. Site: Whitelee. Turbine: WHL-031.
+Classification: thermal shutdown, no injury, no third-party impact.
 
 ## Restriction
 
 A turbine that has shut down twice within 30 days may not be returned to
-service without regional engineering approval.
+service without regional engineering approval. The counter runs on
+shutdowns rather than on faults, so two stops from unrelated causes still
+trigger the restriction. The intent is to catch machines that are
+developing a problem the individual investigations have each missed.
 
-## Vibration
+## Timeline
 
-Nacelle vibration above 0.55 mm/s RMS sustained for more than thirty
-minutes triggers a Level 2 alert. Above 0.80 mm/s the turbine shuts down
-immediately and requires physical inspection before restart.",0.9,False,grounded + WRONG  -> retrieval problem
-q04,1,Which site had the highest failure rate in Q2 2026?,"Clyde had the highest site failure rate in Q2 2026, at 5.9 failures per hundred turbines [1].","['inc-2026-014', 'inc-2026-021', 'perf-2026-q2']",['perf-2026-q2'],"Clyde, at 5.9 failures per hundred turbines.","## Failure rate
+The turbine entered derated operation at 13:20 and remained derated
+through the afternoon with oil temperature oscillating in the derated
+band. Temperature crossed the shutdown threshold at 19:44 and the
+controlled shutdown completed at 19:46. The site was notified
+automatically and the on-call engineer attended the following morning,
+the shutdown having occurred outside working hours and the machine being
+in a safe stopped state with no evidence of secondary damage.",0.706,False,grounded + WRONG  -> retrieval problem
+q04,1,Which site had the highest failure rate in Q2 2026?,"Clyde had the highest site failure rate in Q2 2026, at 5.9 failures per hundred turbines [1].","['perf-2026-q2', 'site-cly']",['perf-2026-q2'],"Clyde, at 5.9 failures per hundred turbines.","## Failure rate
 
 The fleet failure rate for the quarter was 3.1 failures per hundred
 turbines. Clyde recorded the highest site failure rate at 5.9 per hundred
-turbines. Ardrossan recorded 2.4 and Whitelee 2.1.
+turbines. Ardrossan recorded 2.4 and Whitelee 2.1. The per-hundred
+convention allows sites of different sizes to be compared directly. A
+failure is counted when a turbine stops unscheduled, regardless of
+duration, so a brief self-clearing stop counts the same as a multi-day
+outage — a deliberate choice that makes the metric a measure of
+reliability rather than of lost generation.
+
+## Reading the failure rate
+
+A single site standing well above the fleet rate warrants investigation
+rather than immediate action, because the metric counts events and not
+severity. The quarter's figure for the highest site is driven by a cluster
+of vibration-related stops rather than by a broad deterioration across the
+machines, and the two are different problems with different responses.
+Reading a site-level rate without its composition is the most common
+misuse of this report.
 
 # Fleet Performance Summary — Q2 2026
 
-# Incident Report 2026-021
+## Reporting
 
-Date: 2 June 2026. Site: Clyde. Turbine: CLY-008.
+The site reports availability, generation and fault counts to the
+regional desk weekly, and to the fleet performance summary quarterly.
+Site-level failure rates are calculated per hundred turbines so that
+sites of different sizes can be compared directly; comparing absolute
+fault counts across sites of different sizes is a recurring error in
+internal reporting and the per-hundred convention exists to prevent it.
+Availability is reported net of scheduled maintenance windows.",1.0,True,grounded + correct
+q05,2,Who is the site manager responsible for the site with the highest Q2 failure rate?,NOT IN CONTEXT,"['perf-2026-q2', 'site-ard', 'site-bat']","['perf-2026-q2', 'site-cly']",S. Tran — Clyde had the highest failure rate and S. Tran manages Clyde.,"## Reading the failure rate
 
-# Incident Report 2026-014
-
-Date: 14 March 2026. Site: Whitelee. Turbine: WHL-031.",0.889,True,grounded + correct
-q05,2,Who is the site manager responsible for the site with the highest Q2 failure rate?,NOT IN CONTEXT,"['perf-2026-q2', 'proc-restart-07', 'site-bat', 'site-whl']","['perf-2026-q2', 'site-cly']",S. Tran — Clyde had the highest failure rate and S. Tran manages Clyde.,"## Failure rate
-
-The fleet failure rate for the quarter was 3.1 failures per hundred
-turbines. Clyde recorded the highest site failure rate at 5.9 per hundred
-turbines. Ardrossan recorded 2.4 and Whitelee 2.1.
-
-# Whitelee Site Profile
-
-Site code: WHL. Region: Central.
-Operational turbines: 68.
-Site manager: M. Lindqvist.
-
-# Beinn an Tuirc Site Profile
-
-Site code: BAT. Region: West.
-Operational turbines: 29.
-Site manager: R. Achebe.
-
-## Sequence
-
-1. Confirm the originating fault has been cleared and logged.
-2. Complete the inspection required by MAINT-POL-11 for the alert level.
-3. Obtain written release from the site manager.
-4. Restart under supervision and monitor for two hours at reduced output.",,False,refused + WRONG -> the answer was there and retrieval missed it
-q06,2,Was the inspection deferral before incident 2026-021 permitted under policy at the time?,"Yes, the inspection deferral before incident 2026-021 was permitted under policy at the time.
-
-According to [1], a routine inspection may be deferred once, by no more than 30 days, with written approval from the site manager. The deferral in question was 28 days under the single-deferral provision [2], which falls within that limit.
-
-The restriction in [4]—that deferral is no longer permitted for turbines with an open Level 2 alert—is a **corrective action** implemented *after* the incident, not the policy in force at the time of the deferral.","['inc-2026-021', 'maint-pol-11']","['inc-2026-021', 'maint-pol-11']","Yes — a single deferral of up to 30 days was permitted, and 28 days was used.","## Deferral
-
-A routine inspection may be deferred once, by no more than 30 days, with
-written approval from the site manager. A post-alert inspection may not
-be deferred under any circumstances.
-
-## Root cause
-
-Blade root bolt tension had relaxed below specification on two of three
-blades. The preceding routine inspection had been deferred by 28 days
-under the single-deferral provision.
-
-# Incident Report 2026-021
-
-Date: 2 June 2026. Site: Clyde. Turbine: CLY-008.
-
-## Corrective action
-
-Deferral is no longer permitted for turbines with an open Level 2 alert.",0.667,True,ungrounded + right -> answering from memory (warning)
-q07,2,"What vibration level triggers immediate shutdown, and how soon must inspection follow?","**Immediate shutdown threshold:** Above **0.80 mm/s RMS**, the turbine shuts down immediately [1].
-
-**Inspection timing:** Following an immediate shutdown, a physical inspection is required **before restart** [1]. This aligns with the Level 3 alert requirement, which mandates inspection before the turbine is returned to service [3].
-
-(For reference, the lower Level 2 threshold of 0.55 mm/s RMS sustained for more than thirty minutes triggers an alert requiring inspection within 14 days [1][3].)","['inc-2026-021', 'maint-pol-11', 'ops-std-04', 'proc-restart-07']","['ops-std-04', 'maint-pol-11']",0.80 mm/s RMS triggers immediate shutdown; a Level 3 alert requires inspection before return to service.,"## Vibration
-
-Nacelle vibration above 0.55 mm/s RMS sustained for more than thirty
-minutes triggers a Level 2 alert. Above 0.80 mm/s the turbine shuts down
-immediately and requires physical inspection before restart.
-
-## Summary
-
-Nacelle vibration on CLY-008 exceeded 0.80 mm/s RMS, triggering an
-immediate shutdown. Vibration had been rising steadily for eleven days
-prior, crossing the Level 2 threshold on 22 May.
-
-## Post-alert inspection
-
-A Level 2 vibration alert requires inspection within 14 days. A Level 3
-alert requires inspection before the turbine is returned to service.
-
-## Applicability
-
-This procedure applies after any automatic shutdown, including overspeed,
-vibration and thermal shutdowns.",0.756,True,grounded + correct
-q08,1,How many operational turbines are there at Whitelee?,"According to the Whitelee Site Profile, there are **68** operational turbines at Whitelee [1].","['inc-2026-014', 'perf-2026-q2', 'site-whl']",['site-whl'],68.,"# Whitelee Site Profile
-
-Site code: WHL. Region: Central.
-Operational turbines: 68.
-Site manager: M. Lindqvist.
-
-## Operating envelope
-
-Turbines at Whitelee operate under the standard envelope defined in
-OPS-STD-04 unless a site variance is recorded. Gearbox temperature is
-logged every fifteen minutes and reported daily to the regional desk.
+A single site standing well above the fleet rate warrants investigation
+rather than immediate action, because the metric counts events and not
+severity. The quarter's figure for the highest site is driven by a cluster
+of vibration-related stops rather than by a broad deterioration across the
+machines, and the two are different problems with different responses.
+Reading a site-level rate without its composition is the most common
+misuse of this report.
 
 ## Failure rate
 
 The fleet failure rate for the quarter was 3.1 failures per hundred
 turbines. Clyde recorded the highest site failure rate at 5.9 per hundred
-turbines. Ardrossan recorded 2.4 and Whitelee 2.1.
+turbines. Ardrossan recorded 2.4 and Whitelee 2.1. The per-hundred
+convention allows sites of different sizes to be compared directly. A
+failure is counted when a turbine stops unscheduled, regardless of
+duration, so a brief self-clearing stop counts the same as a multi-day
+outage — a deliberate choice that makes the metric a measure of
+reliability rather than of lost generation.
 
-# Incident Report 2026-014
+## Reporting
 
-Date: 14 March 2026. Site: Whitelee. Turbine: WHL-031.",0.75,False,grounded + WRONG  -> retrieval problem
-q09,1,What approval is needed to return a turbine to service after two shutdowns in 30 days?,"According to [1], a turbine that has shut down twice within 30 days may not be returned to service without **regional engineering approval**.","['inc-2026-014', 'maint-pol-11', 'proc-restart-07']",['proc-restart-07'],Regional engineering approval.,"## Restriction
+The site reports availability, generation and fault counts to the
+regional desk weekly, and to the fleet performance summary quarterly.
+Site-level failure rates are calculated per hundred turbines so that
+sites of different sizes can be compared directly; comparing absolute
+fault counts across sites of different sizes is a recurring error in
+internal reporting and the per-hundred convention exists to prevent it.
+Availability is reported net of scheduled maintenance windows.
 
-A turbine that has shut down twice within 30 days may not be returned to
-service without regional engineering approval.
+## Reporting
+
+The site reports availability, generation and fault counts to the
+regional desk weekly, and to the fleet performance summary quarterly.
+Site-level failure rates are calculated per hundred turbines so that
+sites of different sizes can be compared directly; comparing absolute
+fault counts across sites of different sizes is a recurring error in
+internal reporting and the per-hundred convention exists to prevent it.
+Availability is reported net of scheduled maintenance windows.",,False,refused + WRONG -> the answer was there and retrieval missed it
+q06,2,Was the inspection deferral before incident 2026-021 permitted under policy at the time?,"Yes. According to [1], ""The deferral was approved correctly and within policy as it stood."" The issue was not that the deferral itself violated policy, but rather that the policy did not account for the interaction between a deferred routine inspection and a subsequently opened alert on the same machine, which together left a developing fault unexamined for longer than either would have alone.","['inc-2026-021', 'maint-pol-11']","['inc-2026-021', 'maint-pol-11']","Yes — a single deferral of up to 30 days was permitted, and 28 days was used.","## Contributing factors
+
+The deferral was approved correctly and within policy as it stood. What
+the policy did not account for was the interaction between a deferred
+routine inspection and a subsequently opened alert on the same machine:
+each was individually compliant, and together they left a developing
+fault unexamined for longer than either would have alone.
+
+## Corrective action
+
+Deferral is no longer permitted for turbines with an open Level 2 alert.
+Where a routine inspection has already been deferred and an alert is
+subsequently raised, the deferred inspection is brought forward to the
+post-alert inspection date and both are completed together.
+
+## Deferral
+
+A routine inspection may be deferred once, by no more than 30 days, with
+written approval from the site manager. A post-alert inspection may not be
+deferred under any circumstances. The single-deferral provision exists to
+absorb genuine scheduling conflicts such as weather windows and crew
+availability, not to manage chronic under-resourcing; repeated use of
+deferrals across a site is treated as a resourcing signal and is reported
+to the regional desk quarterly rather than being handled turbine by
+turbine.
+
+## Appendix A — filter seating verification
+
+Following incident 2026-014, filter seating is verified by a second
+engineer on every filter change. The verification is recorded against the
+work order and the identity of the verifying engineer is captured. This
+appendix was added rather than the main body being revised, so that the
+provenance of the requirement remains legible to anyone reading the policy
+later and asking why it exists.",0.861,False,grounded + WRONG  -> retrieval problem
+q07,2,"What vibration level triggers immediate shutdown, and how soon must inspection follow?","The immediate-shutdown threshold is **above 0.80 mm/s RMS** [2]. Following an immediate shutdown, a physical inspection is required **before the turbine is returned to service** (i.e., before restart) [2][4].","['inc-2026-021', 'maint-pol-11', 'ops-std-04']","['ops-std-04', 'maint-pol-11']",0.80 mm/s RMS triggers immediate shutdown; a Level 3 alert requires inspection before return to service.,"## Summary
+
+Nacelle vibration on CLY-008 exceeded the immediate-shutdown threshold
+defined in OPS-STD-04, triggering an immediate shutdown. Vibration had been rising steadily for eleven days
+prior, crossing the Level 2 threshold on 22 May. The Level 2 alert was
+raised correctly and the required inspection was scheduled within the
+permitted window, but the shutdown occurred before that inspection took
+place.
+
+## Vibration
+
+Nacelle vibration above 0.55 mm/s RMS sustained for more than thirty
+minutes triggers a Level 2 alert. Above 0.80 mm/s the turbine shuts down
+immediately and requires physical inspection before restart. The
+thirty-minute qualifier matters: transient excursions above the Level 2
+threshold are common in turbulent inflow and do not indicate a developing
+fault, so alerting on instantaneous readings produces noise that trains
+operators to ignore the alert. The immediate-shutdown threshold has no
+such qualifier because the failure modes it guards against develop faster
+than any averaging window would tolerate.
+
+## Timeline
+
+Vibration first crossed the Level 2 threshold on 22 May and the alert was
+raised the same day. The required post-alert inspection was scheduled for
+5 June, inside the fourteen-day window. Vibration continued to rise
+through late May without crossing the immediate-shutdown threshold, and
+the turbine shut down on 2 June, three days before the scheduled
+inspection. The trend was visible in the hourly summaries throughout, but
+a rising trend inside an open alert did not at that time shorten the
+inspection deadline.
 
 ## Post-alert inspection
 
 A Level 2 vibration alert requires inspection within 14 days. A Level 3
-alert requires inspection before the turbine is returned to service.
+alert requires inspection before the turbine is returned to service. The
+distinction is that a Level 2 alert describes a turbine that may continue
+operating under observation, while a Level 3 alert describes one that has
+already stopped. Post-alert inspections are recorded separately from
+routine inspections and do not reset the routine interval, so a turbine
+inspected after an alert is still due its scheduled inspection on the
+original date.",0.778,True,grounded + correct
+q08,1,How many operational turbines are there at Whitelee?,"According to the Whitelee Site Profile, there are **68** operational turbines at Whitelee [1].","['inc-2026-014', 'perf-2026-q2', 'site-whl']",['site-whl'],68.,"# Whitelee Site Profile
 
-# PROC-RESTART-07 — Return to Service After Shutdown
+Site code: WHL. Region: Central.
+Operational turbines: 68.
+Site manager: M. Lindqvist.
+Commissioned: 2011. Turbine model: V90-2.0.
+Hub height: 80 metres.
 
-## Summary
+## Operating envelope
 
-Turbine WHL-031 performed a controlled shutdown after gearbox oil
-temperature reached 91.4 degrees Celsius. The turbine had been in derated
-operation for approximately six hours prior to shutdown.",0.846,True,grounded + correct
-q10,0,What is the average lifespan of a gearbox bearing?,NOT IN CONTEXT,"['inc-2026-014', 'maint-pol-11', 'ops-std-04', 'site-bat']",[],NOT IN CORPUS — the system should refuse rather than answer.,"## Routine inspection
+Turbines at Whitelee operate under the standard envelope defined in
+OPS-STD-04 unless a site variance is recorded against a specific
+parameter. This profile does not restate those limits; the standard is
+the single authority for them and local copies are not maintained,
+because a local copy that drifts from the standard is worse than no
+local copy at all. Gearbox temperature is logged every fifteen minutes
+and reported daily to the regional desk. Vibration is logged
+continuously and summarised hourly. Where a logger fails, the affected
+turbine is treated as operating outside monitored conditions until the
+logger is restored, which is a deliberately conservative reading of
+the standard and is not a fault state in its own right.
+
+## Failure rate
+
+The fleet failure rate for the quarter was 3.1 failures per hundred
+turbines. Clyde recorded the highest site failure rate at 5.9 per hundred
+turbines. Ardrossan recorded 2.4 and Whitelee 2.1. The per-hundred
+convention allows sites of different sizes to be compared directly. A
+failure is counted when a turbine stops unscheduled, regardless of
+duration, so a brief self-clearing stop counts the same as a multi-day
+outage — a deliberate choice that makes the metric a measure of
+reliability rather than of lost generation.
+
+# Incident Report 2026-014
+
+Date: 14 March 2026. Site: Whitelee. Turbine: WHL-031.
+Classification: thermal shutdown, no injury, no third-party impact.",0.75,False,grounded + WRONG  -> retrieval problem
+q09,1,What approval is needed to return a turbine to service after two shutdowns in 30 days?,"According to [1], a turbine that has shut down twice within 30 days may not be returned to service without **regional engineering approval**.","['proc-restart-07', 'site-ard', 'site-bat', 'site-cly']",['proc-restart-07'],Regional engineering approval.,"## Restriction
+
+A turbine that has shut down twice within 30 days may not be returned to
+service without regional engineering approval. The counter runs on
+shutdowns rather than on faults, so two stops from unrelated causes still
+trigger the restriction. The intent is to catch machines that are
+developing a problem the individual investigations have each missed.
+
+## Escalation and out-of-hours cover
+
+Faults at Ardrossan escalate to the North West regional desk during
+working hours. Out of hours, escalation passes to the national control
+room, which holds authority to shut down but not to return to service.
+That asymmetry is intentional: stopping a turbine is reversible and
+starting one is not, so the out-of-hours role is deliberately limited
+to the reversible half. Any overnight shutdown is reviewed by the site
+manager the following working morning before any restart sequence
+begins, regardless of how routine the originating fault appears.
+
+## Escalation and out-of-hours cover
+
+Faults at Beinn an Tuirc escalate to the West regional desk during
+working hours. Out of hours, escalation passes to the national control
+room, which holds authority to shut down but not to return to service.
+That asymmetry is intentional: stopping a turbine is reversible and
+starting one is not, so the out-of-hours role is deliberately limited
+to the reversible half. Any overnight shutdown is reviewed by the site
+manager the following working morning before any restart sequence
+begins, regardless of how routine the originating fault appears.
+
+## Escalation and out-of-hours cover
+
+Faults at Clyde escalate to the South regional desk during
+working hours. Out of hours, escalation passes to the national control
+room, which holds authority to shut down but not to return to service.
+That asymmetry is intentional: stopping a turbine is reversible and
+starting one is not, so the out-of-hours role is deliberately limited
+to the reversible half. Any overnight shutdown is reviewed by the site
+manager the following working morning before any restart sequence
+begins, regardless of how routine the originating fault appears.",0.846,True,grounded + correct
+q10,0,What is the average lifespan of a gearbox bearing?,NOT IN CONTEXT,"['maint-pol-11', 'ops-std-04', 'site-cly']",[],NOT IN CORPUS — the system should refuse rather than answer.,"## Records
+
+Inspection records are retained for the operating life of the turbine plus
+six years. Records are held against the turbine identifier rather than the
+site, so that a machine relocated between sites carries its history with
+it rather than starting fresh.
+
+## Routine inspection
 
 Every turbine receives a routine inspection every 180 days. The interval
-reduces to 90 days for any turbine older than twelve years.
+reduces to 90 days for any turbine older than twelve years. Age is counted
+from commissioning rather than from manufacture, and a turbine that has
+had a major component replaced does not reset its age: the interval
+reflects the accumulated fatigue of the structure as a whole rather than
+the age of any single part. Where a site operates turbines either side of
+the twelve-year boundary, the shorter interval is not applied fleet-wide
+for convenience, because doing so obscures which machines are genuinely in
+the reduced-interval population.
 
 ## Gearbox temperature
 
 The gearbox oil temperature must not exceed 82 degrees Celsius during
-continuous operation. Between 82 and 90 degrees the turbine enters
-derated operation automatically. Above 90 degrees the turbine performs a
-controlled shutdown.
-
-## Summary
-
-Turbine WHL-031 performed a controlled shutdown after gearbox oil
-temperature reached 91.4 degrees Celsius. The turbine had been in derated
-operation for approximately six hours prior to shutdown.
+continuous operation. Between 82 and 90 degrees the turbine enters derated
+operation automatically, reducing output until the temperature returns
+below the continuous limit. Above 90 degrees the turbine performs a
+controlled shutdown. Derated operation is a normal control response and is
+not a fault in itself, but sustained derating indicates a developing
+problem: a turbine that derates on temperature for more than four hours in
+any twenty-four is raised to the regional desk for review even where it
+never approaches the shutdown threshold.
 
 ## Operating envelope
 
-Turbines at Beinn an Tuirc operate under the standard envelope defined in
-OPS-STD-04 unless a site variance is recorded. Gearbox temperature is
-logged every fifteen minutes and reported daily to the regional desk.",,True,refused + correct
+Turbines at Clyde operate under the standard envelope defined in
+OPS-STD-04 unless a site variance is recorded against a specific
+parameter. This profile does not restate those limits; the standard is
+the single authority for them and local copies are not maintained,
+because a local copy that drifts from the standard is worse than no
+local copy at all. Gearbox temperature is logged every fifteen minutes
+and reported daily to the regional desk. Vibration is logged
+continuously and summarised hourly. Where a logger fails, the affected
+turbine is treated as operating outside monitored conditions until the
+logger is restored, which is a deliberately conservative reading of
+the standard and is not a fault state in its own right.",,True,refused + correct
