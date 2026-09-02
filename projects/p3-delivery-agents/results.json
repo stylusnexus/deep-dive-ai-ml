@@ -1,18 +1,18 @@
 {
   "model": "qwen3.8-27b-mlx-dwq",
-  "model_calls": 206,
+  "model_calls": 208,
   "exceptions": 132,
   "needing_judgement": 24,
   "baseline_correct": 108,
-  "pipeline_correct": 130,
+  "pipeline_correct": 132,
   "settled": 132,
   "halted": 0,
   "gate_hits": 30,
   "decided_by_guard": 4,
   "triage": {
-    "true_positive": 22,
+    "true_positive": 24,
     "false_positive": 0,
-    "false_negative": 2
+    "false_negative": 0
   },
   "parse_failures": [],
   "truncations": [],
@@ -40,7 +40,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Flooding on the access road is a straightforward weather-related cause consistent with WEATHER_DELAY.",
+          "reason": "The note simply explains the weather delay (flooding closing the depot), which is consistent with the code and appropriately addressed by notify_delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -86,7 +86,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the weather delay with a named storm and network suspension, fully consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply elaborates on the weather delay with a named storm and network suspension, which is consistent with the code and appropriately addressed by notify_delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -132,7 +132,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates damage in transit consistent with the event code.",
+          "reason": "The note confirms damage in transit and the standard refund_and_replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -184,7 +184,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply explains why the address is invalid (missing flat number), which directly supports the lookup action of requesting an address correction.",
+          "reason": "The note simply explains why the address was flagged invalid, and requesting a correction is the appropriate response.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -230,7 +230,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the ADDRESS_INVALID code without adding any complicating information.",
+          "reason": "The note simply restates the address-invalid code in different words, and requesting a correction is the appropriate response.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -276,7 +276,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the lost-in-network status with no contradicting or complicating information.",
+          "reason": "The note simply restates the lost-in-network code by confirming the parcel was not found at the depot.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -328,7 +328,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Parcel was marked lost but tracking shows it has been found and scanned at a local depot, contradicting the lost status that triggered the refund.",
+          "reason": "The parcel was marked lost but has since been scanned at a local depot, making the LOST_IN_NETWORK code untrue and a refund premature.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -341,7 +341,7 @@
           "model_calls": 1,
           "action": "notify_delay",
           "policy": "POL-GEN-06",
-          "reason": "The note contradicts the LOST_IN_NETWORK code: the parcel was scanned at a local depot this morning, so it is not lost but merely delayed and re-enters the network.",
+          "reason": "The note contradicts the LOST_IN_NETWORK code: the parcel was scanned at a local depot, so it is not lost but delayed, and POL-GEN-06 says to notify the customer of the delay.",
           "parsed": true,
           "handoff_dropped": [
             "carrier",
@@ -383,7 +383,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply explains why the address is invalid (missing flat number), which directly supports the lookup action of requesting an address correction.",
+          "reason": "The note simply explains why the address was flagged invalid, and requesting a correction is the appropriate response.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -429,7 +429,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Flooding on the access road is a straightforward weather-related cause consistent with WEATHER_DELAY.",
+          "reason": "The note simply specifies the weather cause (flooding) behind the delay, which is consistent with the code and addressed by notifying of the delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -475,7 +475,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply describes transit damage consistent with the DAMAGED_IN_TRANSIT code.",
+          "reason": "The note confirms damage in transit and the standard refund-and-replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -527,7 +527,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the reason for the customs hold (missing invoice), which directly aligns with the request_documents action.",
+          "reason": "The note simply restates the reason for the customs hold (missing invoice) and the action correctly addresses it by requesting documents.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -573,7 +573,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the weather delay with a named storm and network suspension, fully consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply elaborates on the weather delay with a named storm and network suspension, which is consistent with the code and appropriately addressed by notify_delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -619,7 +619,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Recipient cited bereavement and requested the parcel be held, which contradicts an automatic return-to-sender action.",
+          "reason": "The note reports a bereavement in the household, which is a personal circumstance affecting the recipient.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -674,7 +674,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply describes transit damage consistent with the DAMAGED_IN_TRANSIT code.",
+          "reason": "The note confirms damage in transit and the standard refund-and-replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -726,7 +726,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the weather delay with a named storm and network suspension, fully consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply elaborates on the weather delay with a named storm and network suspension, which is consistent with the code and appropriately addressed by notify_delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -772,7 +772,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the ADDRESS_INVALID code without adding any complicating information.",
+          "reason": "The note simply restates the address-invalid code in different words, and requesting a correction is the appropriate response.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -818,7 +818,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the reason for the customs hold (missing invoice), which directly aligns with the request_documents action.",
+          "reason": "The note simply restates the reason for the customs hold (missing invoice) and the action correctly addresses it by requesting documents.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -864,7 +864,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the refusal with no additional complicating information.",
+          "reason": "The note simply restates the refusal with no additional cause or complication, so return_to_sender is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -910,7 +910,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the expected condition for a lost-in-network event (no scan activity).",
+          "reason": "The note simply restates the LOST_IN_NETWORK code in plain language (no scans for eleven days).",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -962,7 +962,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Recipient cited bereavement and requested the parcel be held, which contradicts an automatic return-to-sender action.",
+          "reason": "The note reports a bereavement in the household, which is a personal circumstance affecting the recipient.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1017,7 +1017,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the lost-in-network status with no contradicting or complicating information.",
+          "reason": "The note simply confirms the parcel is lost in the network, consistent with the code and the refund action.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1069,7 +1069,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates the weather delay (snow) consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply restates the weather delay code with no additional complicating factors.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1115,7 +1115,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the invalid address, consistent with the code and action.",
+          "reason": "The note simply restates the reason for the ADDRESS_INVALID code and the standard action directly addresses it.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1161,7 +1161,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the lost-in-network status with no contradicting or complicating information.",
+          "reason": "The note simply confirms the parcel is lost in the network, consistent with the code and the refund action.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1213,7 +1213,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the weather delay with a named storm and network suspension, fully consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply elaborates on the weather delay with a named storm and network suspension, which is consistent with the code and appropriately addressed by notify_delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1259,7 +1259,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the invalid address, consistent with the code and action.",
+          "reason": "The note simply restates the reason for the ADDRESS_INVALID code and the standard action directly addresses it.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1305,7 +1305,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the expected condition for a lost-in-network event (no scan activity).",
+          "reason": "The note simply restates the LOST_IN_NETWORK code in plain language (no scans for eleven days).",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1357,7 +1357,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the reason for the customs hold (missing invoice), which directly aligns with the request_documents action.",
+          "reason": "The note simply restates the reason for the customs hold (missing invoice) and the action correctly addresses it by requesting documents.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1403,7 +1403,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the reason for the customs hold (missing invoice), which directly aligns with the request_documents action.",
+          "reason": "The note simply restates the reason for the customs hold (missing invoice) and the action correctly addresses it by requesting documents.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1449,7 +1449,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the expected condition for a lost-in-network event (no scan activity).",
+          "reason": "The note simply restates the LOST_IN_NETWORK code in plain language (no scans for eleven days).",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1501,7 +1501,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the event code with no additional complicating information.",
+          "reason": "The note simply restates the event code; recipient refusal at door correctly maps to return_to_sender.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1547,7 +1547,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Recipient reports a cut hand (personal injury) while opening the damaged packaging, which may create liability beyond a simple refund and replace.",
+          "reason": "The note reports a personal injury (cut hand) affecting the recipient, which goes beyond standard damage handling.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1601,7 +1601,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the missing document (EORI number) that triggered the customs hold, fully consistent with the request_documents action.",
+          "reason": "The note simply states the missing EORI number, which is exactly what requesting documents addresses.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1647,7 +1647,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Flooding on the access road is a straightforward weather-related cause consistent with WEATHER_DELAY.",
+          "reason": "The note simply specifies the weather cause (flooding) behind the delay, which is consistent with the code and addressed by notifying of the delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1693,7 +1693,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the refusal with no additional complicating information.",
+          "reason": "The note simply restates the refusal with no additional cause or complication, so return_to_sender is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1739,7 +1739,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the expected condition for a lost-in-network event (no scan activity).",
+          "reason": "The note simply restates the LOST_IN_NETWORK code in plain language (no scans for eleven days).",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1791,7 +1791,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Documents were already supplied and acknowledged a week ago, so re-requesting them is redundant; the hold appears stuck for another reason.",
+          "reason": "Documents were already supplied and acknowledged a week ago, so repeating the request would loop without resolving the hold.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1845,7 +1845,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates the weather delay (snow) consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply restates the weather delay code with no additional complicating factors.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1891,7 +1891,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Flooding on the access road is a straightforward weather-related cause consistent with WEATHER_DELAY.",
+          "reason": "The note simply specifies the weather cause (flooding) behind the delay, which is consistent with the code and addressed by notifying of the delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1937,7 +1937,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Damage is to packaging only, contents intact, and the recipient explicitly wants to keep the item, contradicting a refund_and_replace action.",
+          "reason": "Damage is to packaging only, contents are intact, and the recipient wants to keep the item, so refund_and_replace is inappropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -1992,7 +1992,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the refusal reason (not ordered), which is consistent with REFUSED_BY_RECIPIENT and return_to_sender.",
+          "reason": "The note restates the refusal and return_to_sender is the correct response when a recipient claims they did not order the item.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2038,7 +2038,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Recipient had rescheduled for Friday but carrier attended Thursday, indicating a scheduling error rather than genuine absence.",
+          "reason": "The carrier attended on the wrong day (Thursday instead of the recipient's requested Friday), making this a carrier error rather than a genuine absence.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2093,7 +2093,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates that the recipient was not available, consistent with RECIPIENT_ABSENT.",
+          "reason": "The note simply restates the event code: no one was home, so rescheduling is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2139,7 +2139,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the weather delay with a named storm and network suspension, fully consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply elaborates on the weather delay with a named storm and network suspension, which is consistent with the code and appropriately addressed by notify_delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2185,7 +2185,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the refusal reason (not ordered), which is consistent with REFUSED_BY_RECIPIENT and return_to_sender.",
+          "reason": "The note restates the refusal and return_to_sender is the correct response when a recipient claims they did not order the item.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2231,7 +2231,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Parcel was marked lost but tracking shows it has been found and scanned at a local depot, contradicting the lost status that triggered the refund.",
+          "reason": "The parcel was marked lost but has since been scanned at a local depot, making the LOST_IN_NETWORK code untrue and a refund premature.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2286,7 +2286,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates that the recipient was absent, consistent with the event code and lookup action.",
+          "reason": "The note simply restates the event code with no additional information that would change the standard action.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2332,7 +2332,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates that the recipient was absent, consistent with the code and action.",
+          "reason": "The note simply confirms the recipient was absent and a card was left, which is consistent with the code and standard return-to-depot action after three attempts.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2378,7 +2378,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the event code: water damage to contents is a standard in-transit damage case.",
+          "reason": "The note confirms the code with a specific detail (water damage to contents) and the standard refund_and_replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2463,7 +2463,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply explains why the parcel couldn't be left (no safe place), which is consistent with rescheduling after an absent recipient.",
+          "reason": "The note simply explains why the recipient was absent (no safe place), which is fully addressed by rescheduling.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2509,7 +2509,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the weather delay with a named storm and network suspension, fully consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply elaborates on the weather delay with a named storm and network suspension, which is consistent with the code and appropriately addressed by notify_delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2555,7 +2555,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates the weather delay (snow) consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply restates the weather delay code with no additional complicating factors.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2601,7 +2601,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Temperature-controlled medical supply with a 48-hour window makes a weather delay materially more urgent than a routine notify_delay.",
+          "reason": "Temperature-controlled medical supply with a 48-hour window is time-critical and unusual, so a standard delay notice would not suffice.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2655,7 +2655,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the event code: water damage to contents is a standard in-transit damage case.",
+          "reason": "The note confirms the code with a specific detail (water damage to contents) and the standard refund_and_replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2707,7 +2707,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates damage in transit consistent with the event code.",
+          "reason": "The note confirms damage in transit and the standard refund_and_replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2759,7 +2759,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the missing document (EORI number) that triggered the customs hold, fully consistent with the request_documents action.",
+          "reason": "The note simply states the missing EORI number, which is exactly what requesting documents addresses.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2805,7 +2805,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates the weather delay (snow) consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply restates the weather delay code with no additional complicating factors.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2851,7 +2851,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Recipient is hospitalised for two weeks, which materially complicates a simple reschedule.",
+          "reason": "The note reports the recipient is in hospital for a fortnight, a personal circumstance that a simple reschedule would not adequately address.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2906,7 +2906,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the missing document (EORI number) that triggered the customs hold, fully consistent with the request_documents action.",
+          "reason": "The note simply states the missing EORI number, which is exactly what requesting documents addresses.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2952,7 +2952,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates that the recipient was absent and a card was left, consistent with RECIPIENT_ABSENT.",
+          "reason": "The note simply restates the recipient's absence with no additional cause or complication.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -2998,7 +2998,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the RECIPIENT_ABSENT code with no complicating information.",
+          "reason": "The note simply restates the event code: recipient was absent and no one answered, so rescheduling is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3044,7 +3044,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the refusal reason (not ordered), which is consistent with REFUSED_BY_RECIPIENT and return_to_sender.",
+          "reason": "The note restates the refusal and return_to_sender is the correct response when a recipient claims they did not order the item.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3090,7 +3090,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Damage is to packaging only, contents intact, and the recipient explicitly wants to keep the item, contradicting a refund_and_replace action.",
+          "reason": "Damage is to packaging only, contents are intact, and the recipient wants to keep the item, so refund_and_replace is inappropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3145,7 +3145,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates that the recipient was absent, consistent with the code and action.",
+          "reason": "The note simply confirms the recipient was absent and a card was left, which is consistent with the code and standard return-to-depot action after three attempts.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3191,7 +3191,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the ADDRESS_INVALID code without adding any complicating information.",
+          "reason": "The note simply restates the address-invalid code in different words, and requesting a correction is the appropriate response.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3237,7 +3237,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the expected condition for a lost-in-network event (no scan activity).",
+          "reason": "The note simply restates the LOST_IN_NETWORK code in plain language (no scans for eleven days).",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3289,7 +3289,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the RECIPIENT_ABSENT code with no complicating information.",
+          "reason": "The note simply restates the event code: recipient was absent and no one answered, so rescheduling is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3335,7 +3335,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates the weather delay (snow) consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply restates the weather delay code with no additional complicating factors.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3381,7 +3381,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates the weather delay (snow) consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply restates the weather delay code with no additional complicating factors.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3427,7 +3427,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Flooding on the access road is a straightforward weather-related cause consistent with WEATHER_DELAY.",
+          "reason": "The note simply specifies the weather cause (flooding) behind the delay, which is consistent with the code and addressed by notifying of the delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3473,7 +3473,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Recipient reports a cut hand (personal injury) while opening the damaged packaging, which may create liability beyond a simple refund and replace.",
+          "reason": "The note reports a personal injury (cut hand) affecting the recipient, which goes beyond standard damage handling.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3527,7 +3527,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Recipient is hospitalised for two weeks, which materially complicates a simple reschedule.",
+          "reason": "The note reports the recipient is in hospital for a fortnight, a personal circumstance that a simple reschedule would not adequately address.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3582,7 +3582,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Flooding on the access road is a straightforward weather-related cause consistent with WEATHER_DELAY.",
+          "reason": "The note simply specifies the weather cause (flooding) behind the delay, which is consistent with the code and addressed by notifying of the delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3628,7 +3628,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Flooding on the access road is a straightforward weather-related cause consistent with WEATHER_DELAY.",
+          "reason": "The note simply specifies the weather cause (flooding) behind the delay, which is consistent with the code and addressed by notifying of the delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3674,7 +3674,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates damage in transit consistent with the event code.",
+          "reason": "The note confirms damage in transit and the standard refund_and_replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3726,7 +3726,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the lost-in-network status with no contradicting or complicating information.",
+          "reason": "The note simply restates the lost-in-network code by confirming the parcel was not found at the depot.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3778,7 +3778,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the weather delay with a named storm and network suspension, fully consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply elaborates on the weather delay with a named storm and network suspension, which is consistent with the code and appropriately addressed by notify_delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3824,7 +3824,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the refusal with no additional complicating information.",
+          "reason": "The note simply restates the refusal with no additional cause or complication, so return_to_sender is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3870,7 +3870,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the lost-in-network status with no contradicting or complicating information.",
+          "reason": "The note simply restates the lost-in-network code by confirming the parcel was not found at the depot.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3922,7 +3922,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "The note states the address is correct and the error was a driver navigation mistake, contradicting the ADDRESS_INVALID code and making an address correction request inappropriate.",
+          "reason": "The address was correct; the driver went to the wrong town, so requesting an address correction would be inappropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -3977,7 +3977,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the reason for the customs hold (missing invoice), which directly aligns with the request_documents action.",
+          "reason": "The note simply restates the reason for the customs hold (missing invoice) and the action correctly addresses it by requesting documents.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4023,7 +4023,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the missing document (EORI number) that triggered the customs hold, fully consistent with the request_documents action.",
+          "reason": "The note simply states the missing EORI number, which is exactly what requesting documents addresses.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4135,7 +4135,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the ADDRESS_INVALID code without adding any complicating information.",
+          "reason": "The note simply restates the address-invalid code in different words, and requesting a correction is the appropriate response.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4181,7 +4181,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates that no one was home, consistent with RECIPIENT_ABSENT.",
+          "reason": "The note simply restates the event code: recipient was absent, card left, reschedule is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4227,7 +4227,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the refusal with no additional complicating information.",
+          "reason": "The note simply restates the refusal with no additional cause or complication, so return_to_sender is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4273,7 +4273,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the ADDRESS_INVALID code without adding any complicating information.",
+          "reason": "The note simply restates the address-invalid code in different words, and requesting a correction is the appropriate response.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4319,7 +4319,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates that the recipient was not available, consistent with RECIPIENT_ABSENT.",
+          "reason": "The note simply restates the event code: no one was home, so rescheduling is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4365,7 +4365,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the ADDRESS_INVALID code without adding any complicating information.",
+          "reason": "The note simply restates the address-invalid code in different words, and requesting a correction is the appropriate response.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4411,7 +4411,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the event code: water damage to contents is a standard in-transit damage case.",
+          "reason": "The note confirms the code with a specific detail (water damage to contents) and the standard refund_and_replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4463,7 +4463,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the weather delay with a named storm and network suspension, fully consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply elaborates on the weather delay with a named storm and network suspension, which is consistent with the code and appropriately addressed by notify_delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4509,7 +4509,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply explains why the address is invalid (missing flat number), which directly supports the lookup action of requesting an address correction.",
+          "reason": "The note simply explains why the address was flagged invalid, and requesting a correction is the appropriate response.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4555,7 +4555,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply explains why the parcel is being returned (no safe place to leave it), which is consistent with RECIPIENT_ABSENT.",
+          "reason": "The note simply adds that no safe place was available, which is consistent with the recipient being absent and does not change the return-to-depot action.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4601,7 +4601,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates that the recipient was absent and a card was left, consistent with RECIPIENT_ABSENT.",
+          "reason": "The note simply restates the recipient's absence with no additional cause or complication.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4647,7 +4647,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply describes transit damage consistent with the DAMAGED_IN_TRANSIT code.",
+          "reason": "The note confirms damage in transit and the standard refund-and-replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4699,7 +4699,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the weather delay with a named storm and network suspension, fully consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply elaborates on the weather delay with a named storm and network suspension, which is consistent with the code and appropriately addressed by notify_delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4745,7 +4745,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Recipient had rescheduled for Friday but carrier attended Thursday, indicating a scheduling error rather than genuine absence.",
+          "reason": "The carrier attended on the wrong day (Thursday instead of the recipient's requested Friday), making this a carrier error rather than a genuine absence.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4800,7 +4800,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the expected condition for a lost-in-network event (no scan activity).",
+          "reason": "The note simply restates the LOST_IN_NETWORK code in plain language (no scans for eleven days).",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4852,7 +4852,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates damage in transit consistent with the event code.",
+          "reason": "The note confirms damage in transit and the standard refund_and_replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4904,7 +4904,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Flooding on the access road is a straightforward weather-related cause consistent with WEATHER_DELAY.",
+          "reason": "The note simply specifies the weather cause (flooding) behind the delay, which is consistent with the code and addressed by notifying of the delay.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -4983,7 +4983,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates that the recipient was absent and a card was left, consistent with RECIPIENT_ABSENT.",
+          "reason": "The note simply restates the recipient's absence with no additional cause or complication.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5029,7 +5029,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the reason for the customs hold (missing invoice), which directly aligns with the request_documents action.",
+          "reason": "The note simply restates the reason for the customs hold (missing invoice) and the action correctly addresses it by requesting documents.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5054,9 +5054,9 @@
     },
     {
       "exception_id": "exc-0106",
-      "action": "request_documents",
-      "decided_by": "rule",
-      "outcome": "sent \u2014 templated, no approval required",
+      "action": "escalate_to_human",
+      "decided_by": "model",
+      "outcome": "escalated \u2014 left the automated path, no message sent",
       "halted_at": null,
       "trace": [
         {
@@ -5074,8 +5074,8 @@
             }
           ],
           "model_calls": 1,
-          "verdict": "routine",
-          "reason": "The note simply restates the reason for the customs hold (restricted/prohibited goods) and does not contradict or complicate the request_documents action.",
+          "verdict": "needs_judgement",
+          "reason": "The hold is for a prohibited/restricted item, which requesting documents will not resolve.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5084,15 +5084,23 @@
           ]
         },
         {
-          "stage": "rule",
-          "model_calls": 0,
-          "action": "request_documents"
+          "stage": "policy",
+          "model_calls": 1,
+          "action": "escalate_to_human",
+          "policy": "POL-CUS-03",
+          "reason": "The note identifies a prohibited/restricted item, which is not a documentation problem and must be escalated to the trade compliance team rather than handled by requesting paperwork.",
+          "parsed": true,
+          "handoff_dropped": [
+            "carrier",
+            "customer_tier",
+            "exception_id",
+            "order_id"
+          ]
         },
         {
           "stage": "comms",
           "model_calls": 0,
-          "gated": false,
-          "result": "templated message, POL-COM-05 does not gate this action"
+          "result": "skipped: escalated cases are handled by a human"
         }
       ],
       "gold_action": "escalate_to_human",
@@ -5121,7 +5129,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the event code: water damage to contents is a standard in-transit damage case.",
+          "reason": "The note confirms the code with a specific detail (water damage to contents) and the standard refund_and_replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5173,7 +5181,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the missing document (EORI number) that triggered the customs hold, fully consistent with the request_documents action.",
+          "reason": "The note simply states the missing EORI number, which is exactly what requesting documents addresses.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5219,7 +5227,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply describes transit damage consistent with the DAMAGED_IN_TRANSIT code.",
+          "reason": "The note confirms damage in transit and the standard refund-and-replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5271,7 +5279,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply explains the reason for the customs hold, consistent with requesting documents.",
+          "reason": "The note explains the customs hold is due to an incomplete value declaration, which is exactly what requesting documents addresses.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5317,7 +5325,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply describes transit damage consistent with the DAMAGED_IN_TRANSIT code.",
+          "reason": "The note confirms damage in transit and the standard refund-and-replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5369,7 +5377,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply describes transit damage consistent with the DAMAGED_IN_TRANSIT code.",
+          "reason": "The note confirms damage in transit and the standard refund-and-replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5421,7 +5429,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates the weather delay (snow) consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply restates the weather delay code with no additional complicating factors.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5467,7 +5475,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates the weather delay (snow) consistent with the WEATHER_DELAY code.",
+          "reason": "The note simply restates the weather delay code with no additional complicating factors.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5513,7 +5521,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "The note states the address is correct and the error was a driver navigation mistake, contradicting the ADDRESS_INVALID code and making an address correction request inappropriate.",
+          "reason": "The address was correct; the driver went to the wrong town, so requesting an address correction would be inappropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5568,7 +5576,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the lost-in-network status with no contradicting or complicating information.",
+          "reason": "The note simply restates the lost-in-network code by confirming the parcel was not found at the depot.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5620,7 +5628,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the expected condition for a lost-in-network event (no scan activity).",
+          "reason": "The note simply restates the LOST_IN_NETWORK code in plain language (no scans for eleven days).",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5651,9 +5659,9 @@
     },
     {
       "exception_id": "exc-0118",
-      "action": "request_documents",
-      "decided_by": "rule",
-      "outcome": "sent \u2014 templated, no approval required",
+      "action": "escalate_to_human",
+      "decided_by": "model",
+      "outcome": "escalated \u2014 left the automated path, no message sent",
       "halted_at": null,
       "trace": [
         {
@@ -5671,8 +5679,8 @@
             }
           ],
           "model_calls": 1,
-          "verdict": "routine",
-          "reason": "The note simply restates the reason for the customs hold (restricted/prohibited goods) and does not contradict or complicate the request_documents action.",
+          "verdict": "needs_judgement",
+          "reason": "The hold is for a prohibited/restricted item, which requesting documents will not resolve.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5681,15 +5689,23 @@
           ]
         },
         {
-          "stage": "rule",
-          "model_calls": 0,
-          "action": "request_documents"
+          "stage": "policy",
+          "model_calls": 1,
+          "action": "escalate_to_human",
+          "policy": "POL-CUS-03",
+          "reason": "The note identifies a prohibited/restricted item, which is not a documentation problem and must be escalated to the trade compliance team rather than handled by requesting paperwork.",
+          "parsed": true,
+          "handoff_dropped": [
+            "carrier",
+            "customer_tier",
+            "exception_id",
+            "order_id"
+          ]
         },
         {
           "stage": "comms",
           "model_calls": 0,
-          "gated": false,
-          "result": "templated message, POL-COM-05 does not gate this action"
+          "result": "skipped: escalated cases are handled by a human"
         }
       ],
       "gold_action": "escalate_to_human",
@@ -5718,7 +5734,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the missing document (EORI number) that triggered the customs hold, fully consistent with the request_documents action.",
+          "reason": "The note simply states the missing EORI number, which is exactly what requesting documents addresses.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5764,7 +5780,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the invalid address, consistent with the code and action.",
+          "reason": "The note simply restates the reason for the ADDRESS_INVALID code and the standard action directly addresses it.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5810,7 +5826,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Documents were already supplied and acknowledged a week ago, so re-requesting them is redundant; the hold appears stuck for another reason.",
+          "reason": "Documents were already supplied and acknowledged a week ago, so repeating the request would loop without resolving the hold.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5864,7 +5880,7 @@
           ],
           "model_calls": 1,
           "verdict": "needs_judgement",
-          "reason": "Temperature-controlled medical supply with a 48-hour window makes a weather delay materially more urgent than a routine notify_delay.",
+          "reason": "Temperature-controlled medical supply with a 48-hour window is time-critical and unusual, so a standard delay notice would not suffice.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5918,7 +5934,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the refusal reason (not ordered), which is consistent with REFUSED_BY_RECIPIENT and return_to_sender.",
+          "reason": "The note restates the refusal and return_to_sender is the correct response when a recipient claims they did not order the item.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -5964,7 +5980,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply states the missing document (EORI number) that triggered the customs hold, fully consistent with the request_documents action.",
+          "reason": "The note simply states the missing EORI number, which is exactly what requesting documents addresses.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -6010,7 +6026,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply explains the reason for the customs hold, consistent with requesting documents.",
+          "reason": "The note explains the customs hold is due to an incomplete value declaration, which is exactly what requesting documents addresses.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -6056,7 +6072,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply describes transit damage consistent with the DAMAGED_IN_TRANSIT code.",
+          "reason": "The note confirms damage in transit and the standard refund-and-replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -6108,7 +6124,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates that the recipient was not available, consistent with RECIPIENT_ABSENT.",
+          "reason": "The note simply restates the event code: no one was home, so rescheduling is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -6154,7 +6170,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the ADDRESS_INVALID code without adding any complicating information.",
+          "reason": "The note simply restates the address-invalid code in different words, and requesting a correction is the appropriate response.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -6200,7 +6216,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates damage in transit consistent with the event code.",
+          "reason": "The note confirms damage in transit and the standard refund_and_replace action is appropriate.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -6252,7 +6268,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the reason for the invalid address, consistent with the code and action.",
+          "reason": "The note simply restates the reason for the ADDRESS_INVALID code and the standard action directly addresses it.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -6298,7 +6314,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "Note simply restates that the recipient was absent and a card was left, consistent with RECIPIENT_ABSENT.",
+          "reason": "The note simply restates the recipient's absence with no additional cause or complication.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",
@@ -6344,7 +6360,7 @@
           ],
           "model_calls": 1,
           "verdict": "routine",
-          "reason": "The note simply restates the lost-in-network status with no contradicting or complicating information.",
+          "reason": "The note simply confirms the parcel is lost in the network, consistent with the code and the refund action.",
           "parsed": true,
           "handoff_dropped": [
             "order_id",

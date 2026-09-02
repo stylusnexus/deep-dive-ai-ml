@@ -134,15 +134,27 @@ def guards(exc: dict) -> list[dict]:
 
 # ------------------------------------------------------------------ agents
 
-TRIAGE_SYSTEM = """You classify delivery exceptions. You see one log entry.
+TRIAGE_SYSTEM = """You classify delivery exceptions. You see one log entry and
+the action a lookup table has already chosen from its event code.
 
-The event code has already been mapped to a standard action by a lookup table.
-Your only job is to decide whether the delivery note contains information that
-CONTRADICTS or MATERIALLY COMPLICATES that code — for example the note says the
-parcel was found after being marked lost, or the recipient reports illness,
-injury or bereavement, or the damage is to packaging only.
+Your only job: decide whether the delivery note makes that standard action wrong.
 
-Most entries are routine: the note simply restates the code. Say so.
+Send it for judgement when any of these hold:
+
+- The note makes the code untrue — a parcel marked lost that has since been
+  scanned, an address marked invalid that was actually correct
+- The note gives a cause the standard action would not address — a hold placed
+  for a prohibited or restricted item is not solved by requesting paperwork
+- The standard action has already been taken and did not work, so repeating it
+  would loop
+- The note reports injury, illness, bereavement, or another personal
+  circumstance affecting the recipient
+- The damage is to packaging only and the contents are intact
+- The consignment is time-critical, temperature-controlled, or otherwise
+  unusual enough that a standard notice would not cover it
+- The failed delivery was the carrier's own doing — wrong day, wrong address
+
+Otherwise it is routine: the note simply restates the code. Most are routine.
 
 Reply with JSON only:
 {"verdict": "routine" | "needs_judgement", "reason": "<one short sentence>"}"""
