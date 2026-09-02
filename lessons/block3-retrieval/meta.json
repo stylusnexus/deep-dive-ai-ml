@@ -30,6 +30,12 @@
       "title": "Agentic RAG: Retrieval as a Loop",
       "file": "lsn-1787600000002-agentic-rag.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787600000003",
+      "title": "Preloading Instead of Retrieving",
+      "file": "lsn-1787600000003-preloading-instead-of-retrieving.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -44,6 +50,11 @@
       "starred": false
     },
     "lsn-1787600000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787600000003": {
       "viewed": false,
       "completed": false,
       "starred": false

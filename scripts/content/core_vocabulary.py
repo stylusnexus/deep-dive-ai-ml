@@ -1585,7 +1585,22 @@ LESSONS = [
       ("Logit distillation", "Student matches the full distribution", "The classical form. Needs access to the teacher's raw outputs, so it's mostly for open-weight teachers."),
       ("Rationale distillation", "Student copies the reasoning too", "Teacher produces chain-of-thought; student learns to reproduce it. Effective on reasoning-heavy tasks."),
       ("Task-specific distillation", "One narrow job", "Where the wins are largest — a 7B student can match a frontier teacher on one well-defined task while being useless outside it."),
-    ]),
+          ("Context distillation", "Teacher and student are the same model",
+       "The only form where nothing is transferred between two different models. The teacher is the model with a long document sitting in its context; the student is that same model with a small trained cache standing in for the document. Both see the same question, and the student learns to answer as though it had read something it never sees at inference."),
+]),
+
+    ("h3", "The objective decides what you get"),
+    ("p", "Context distillation is worth dwelling on because it comes with a result that generalises well past it. Suppose you want a small cache that behaves as though a corpus were present. The obvious way to train it is next-token prediction over that corpus — the objective language models are trained on in the first place, applied to exactly the text you care about."),
+
+    ("p", "It does not work. Researchers report it as not competitive with simply putting the corpus in the context, and the reason is not a tuning failure. Next-token prediction teaches the model to <em>continue</em> the document. A cache that has to serve questions needs to answer arbitrary things about the document, which is a different skill. Same corpus, same artefact, same size, and the objective alone decides whether you get something useful."),
+
+    ("know",
+     "Where the training starts decides where it ends, and the gap is not small.",
+     "The same work reports a trained cache initialised from random noise reaching 29.9% on a long-context benchmark, against 55.3% for one initialised from the model's real cache of the first stretch of the corpus. Identical size, identical recipe, identical data — only the starting point differed, and it nearly doubled the score. Initialisation is usually filed under implementation detail; here it is the difference between a working artefact and a broken one.",
+     "The practical form of this: when a training run underperforms and the recipe looks right, check what it started from before you change the recipe."),
+
+    ("callout", "insight", "The training data can come from the corpus itself",
+     "<p>If a cache is trained on questions, and nobody has asked any yet, where do the questions come from? One published recipe has the model hold a conversation with itself about each chunk in turn, playing both the asking and the answering side, steered by a handful of generic prompts that say nothing about any particular corpus. No human writes a question and no labelled set is needed — the only input is the document.</p>"),
 
     ("h2", "The economics"),
     ("p", "The pattern that works: use the expensive model to generate a few thousand high-quality examples for one specific task, fine-tune a small open model on them, then serve that locally. Your inference cost approaches zero, latency drops, the data stays on your machine, and — with 128GB of unified memory — you can run the result comfortably."),

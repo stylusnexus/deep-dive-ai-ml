@@ -308,3 +308,8 @@ Retrieval reorders the middle
 A high hit rate can cost more memory
 Retrieval time
 The lever
+Retrieval only
+Prefix cache
+Positions restart
+Cross-attention is missing
+Several attention sinks

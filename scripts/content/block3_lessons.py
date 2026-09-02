@@ -342,4 +342,91 @@ LESSONS = [
     ]),
   ],
 },
+{
+  "slug": "preloading-instead-of-retrieving",
+  "title": "Preloading Instead of Retrieving",
+  "subtitle": "If the corpus does not change between queries, nothing forces you to wait for a question before reading it.",
+  "body": [
+    ("p", "Every system in this block waits for a query, then retrieves, then reads what it retrieved. The previous lesson showed that the reading is where the time goes. This lesson asks a question that follows directly and that the rest of the block never raises: if the documents are the same for every user who asks, why is the model reading them at request time at all?"),
+
+    ("h2", "The spectrum"),
+    ("p", "This is not one technique. It is a range, and each step down it moves more work before the query arrives and keeps a different artefact afterwards. A real system usually sits at several points at once — a preloaded cache for stable documentation, ordinary retrieval for anything that changed this morning."),
+
+    ("terms", [
+      ("Retrieval only", "Nothing precomputed",
+       "Every query pays a full read of whatever came back. The whole block up to this point. Its limit is that the read is paid again for every question."),
+      ("Prefix cache", "Whatever an earlier request happened to leave",
+       "Free and automatic, and the previous lesson showed why it barely helps here: retrieval produces a shared set, not a shared prefix. Its limit is order sensitivity."),
+      ("Naive preload", "One read of the whole corpus, stored",
+       "Read the corpus once before any query, keep the resulting cache, and every question skips straight to answering. Its limit is the context ceiling — the corpus has to fit."),
+      ("Modular preload", "One read per passage, assembled on demand",
+       "Each passage read separately so it can be dropped into any position. Buys the order-independence the prefix cache cannot offer, and costs either recomputation at request time or a change to the model."),
+      ("Compressed preload", "The stored cache, shrunk",
+       "Smaller artefact, and it carries a requirement most compression methods fail: it has to be done before any query exists, so it cannot be guided by what was asked."),
+      ("Trained preload", "A cache produced by a training run",
+       "Not a copy of anything — a small set of trained vectors taught to behave as though the corpus were present. Its limit is that the corpus must be stable enough to justify the run."),
+    ]),
+
+    ("figure", "Each step trades more work done before the question for less work done after it, and keeps a different artefact. It is a spectrum rather than a ranking, and one system can sit at several points at once.", '''<svg viewBox="0 0 640 220" role="img" aria-label="The preload spectrum"><defs><marker id="pl" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<text x="14" y="20" class="d-label-b">More work before the query</text>
+<path d="M14 30 L620 30" class="d-arrow-accent" marker-end="url(#pl)"/>
+<rect x="14" y="44" width="96" height="52" rx="6" class="d-box"/><text x="24" y="66" class="d-label-sm">retrieval</text><text x="24" y="84" class="d-label-sm">only</text>
+<rect x="118" y="44" width="96" height="52" rx="6" class="d-box"/><text x="128" y="66" class="d-label-sm">prefix</text><text x="128" y="84" class="d-label-sm">cache</text>
+<rect x="222" y="44" width="96" height="52" rx="6" class="d-box-accent"/><text x="232" y="66" class="d-label-sm">naive</text><text x="232" y="84" class="d-label-sm">preload</text>
+<rect x="326" y="44" width="96" height="52" rx="6" class="d-box"/><text x="336" y="66" class="d-label-sm">modular</text><text x="336" y="84" class="d-label-sm">preload</text>
+<rect x="430" y="44" width="96" height="52" rx="6" class="d-box"/><text x="440" y="66" class="d-label-sm">compressed</text><text x="440" y="84" class="d-label-sm">preload</text>
+<rect x="534" y="44" width="92" height="52" rx="6" class="d-box"/><text x="544" y="66" class="d-label-sm">trained</text><text x="544" y="84" class="d-label-sm">preload</text>
+<text x="14" y="126" class="d-label-sm">stores: vector index</text>
+<text x="222" y="126" class="d-label-sm">stores: raw corpus cache</text>
+<text x="430" y="126" class="d-label-sm">stores: a trained artefact</text>
+<text x="14" y="164" class="d-label-b">Less work after it</text>
+<path d="M620 174 L14 174" class="d-arrow-accent" marker-end="url(#pl)"/>
+<text x="14" y="204" class="d-label-sm">The corpus must be stable across queries for any of this. Anything that changes per request is still fetched.</text>
+</svg>'''),
+
+    ("know",
+     "Preloading and retrieval are not competitors. They apply to different parts of the same system.",
+     "Everything on this spectrum assumes the knowledge is the same for every query. A product manual, a legal contract, a policy document and a codebase all qualify. A customer's current balance does not, and no amount of offline work will make it. The question is never which approach wins — it is which parts of your corpus are stable enough to read in advance.",
+     "A support system might serve a trained cache for its product documentation, which changes quarterly, and ordinary retrieval for ticket history, which changes continuously. Both in the same request."),
+
+    ("h2", "Why the obvious repair does not work"),
+    ("p", "Modular preloading sounds like it should be easy: read each passage on its own, store its cache, and glue the pieces together in whatever order retrieval returns them. It fails, and for three separate reasons that are worth knowing because they explain the shape of every real fix."),
+
+    ("terms", [
+      ("Positions restart", "Every block thinks it begins the sequence",
+       "Position is encoded into the keys by rotation, and an attention score depends on the distance between a query and a key. A key computed at position zero, replayed at position five hundred, measures the wrong distance and produces a wrong score. It has to be re-rotated to where it now sits."),
+      ("Cross-attention is missing", "No block ever saw the others",
+       "A passage read alone never attended to the passages before it, so the relationships between them were never computed and are not in the stored cache."),
+      ("Several attention sinks", "Each block anchors its own first token",
+       "Models place disproportionate attention on the first token of a sequence. Glue three blocks together and the model gets three starts instead of one."),
+    ]),
+
+    ("callout", "pitfall", "Precomputing blocks and hoping is measurably worse",
+     "<p>This is not theoretical caution. When researchers re-implemented the training-free version of this idea and tested it on retrieval, its accuracy landed at or below their weakest baselines. Something has to give: either you recompute a slice of tokens at request time, or you change the model so the blocks are genuinely independent by design. There is no free version.</p>"),
+
+    ("callout", "matters", "The trade is ownership, not just accuracy",
+     "<p>Recomputing a slice at request time works with any model you can download. Training the model to treat blocks as independent removes that cost permanently — and hands you a model variant to maintain, which every base-model upgrade obliges you to produce again. That is an architecture decision with a long tail, and it belongs in a decision record rather than in someone's head.</p>"),
+
+    ("h2", "Where this leaves the block"),
+    ("p", "The honest summary is that retrieval earns its place when the corpus moves and the read is short, and stops being obviously right when the corpus is fixed and the read is long. Most of this block taught you to retrieve well. This lesson is the boundary of that advice, and the measurement from the previous lesson — how much of your request is the read — is what tells you which side of it you are on."),
+
+    ("quiz", [
+      ("What has to be true before any preloading approach is worth considering?",
+       ["The corpus fits in the context window",
+        "The knowledge is stable across queries — anything changing per request still has to be fetched at request time",
+        "The model supports a long enough context"],
+       1),
+      ("Why can you not simply read each passage separately and concatenate the stored caches?",
+       ["The caches are too large to hold in memory together",
+        "Positions are encoded into the keys so they are wrong when replayed elsewhere, no passage ever attended to the others, and each block brings its own attention sink",
+        "Passages must be read in the order they were retrieved"],
+       1),
+      ("What is the real cost of training a model to treat retrieved blocks as independent?",
+       ["The training run itself, which is paid once",
+        "A model variant you now maintain, which every base-model upgrade obliges you to produce again",
+        "Reduced accuracy compared with recomputation"],
+       1),
+    ]),
+  ],
+},
 ]

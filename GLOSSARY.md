@@ -252,6 +252,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Verifier-guided retry** — Generate, run the tests, feed the failures back. The strongest inference-time loop, because the verifier is ground truth rather than an opinion.
 
+**Context distillation** — Distillation where teacher and student are the same model, differing only in what they have been handed: the teacher has a long document in its context, the student has a small trained cache standing in for it. The student learns to answer as though it had read something it never sees at inference.
+
 **Distillation flywheel** — A large model generating training data for a smaller one, round after round. The teacher is the external signal that keeps it from collapsing.
 
 **Held-out evaluation** — A set the training loop cannot see. If the loop can read the set that judges it, it will optimise the set rather than the task.
@@ -545,6 +547,18 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **Agentic RAG** — Retrieval as a loop rather than a single shot: retrieve, read what came back, then ask a better question. It works because the second query did not exist until the first result arrived.
 
 **Read time (prefill)** — How long the model takes to process everything retrieval handed it, before the first output token appears. Usually seconds where retrieval is milliseconds, and it is what the user experiences as the delay.
+
+**Preloading** — Reading a corpus before any query arrives and keeping the result, so requests skip straight to answering. Only valid for knowledge that is stable across queries; anything changing per request is still fetched at request time.
+
+**Naive preload** — Reading the whole corpus once and storing the resulting cache. The simplest preloading approach, also called cache-augmented generation, and bounded by whether the corpus fits the context.
+
+**Modular preload** — Reading each passage separately so it can be assembled in any order. Buys the order-independence a prefix cache cannot offer, and costs either recomputation at request time or a change to the model.
+
+**Compressed preload** — Shrinking the stored cache before saving it. Carries a requirement most compression methods fail: it happens before any query exists, so it cannot be guided by what was asked.
+
+**Trained preload** — A small set of trained vectors taught to behave as though the corpus were present, produced by a training run rather than copied from a read. Requires the corpus to be stable enough to justify the run.
+
+**Attention sink** — The disproportionate attention models place on the first token of a sequence. Concatenating separately-read blocks gives the model several of them instead of one, which is part of why naive concatenation fails.
 
 **Hop limit** — A hard cap on how many retrieval rounds the loop may take, usually three or four, plus a token budget. The gains flatten quickly and the costs do not.
 
