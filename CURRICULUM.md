@@ -23,7 +23,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 76 lessons built, 76 diagrams, 13 executed notebooks.**
+**Status: 80 lessons built, 80 diagrams, 13 executed notebooks.**
 
 ---
 
@@ -143,10 +143,15 @@ non-completion column, without which the ranking is not defensible.
 ## Block 6 · Security — 1 week
 *Not in the original at all.*
 
-- Prompt injection, direct and indirect
-- Tool abuse and data exfiltration through agents
-- Sandboxing agents in containers — the actual mitigation
-- Red-teaming your own Block 4 agent with `agent-armor` and SecLists corpora
+- Prompt injection, direct and indirect — and why the indirect form is the one this
+  course's own architecture invites ✅
+- Tool abuse and data exfiltration — every tool is a channel, and rendering is one too ✅
+- Sandboxing and what actually works: the mitigations ranked by whether the model can
+  talk its way past them ✅
+- Red-teaming your own Block 4 agent with `agent-armor` and SecLists corpora ✅
+
+4 lessons in `lessons/block6-security/`. No notebook yet — the exercise is run against
+Project 3 rather than in isolation, which is the point of it.
 
 **Exit:** You break your own multi-agent system, then fix it.
 

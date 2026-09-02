@@ -717,3 +717,26 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **Finish reason** — The model's own statement of why it stopped: it completed, it hit the budget, it was cut off. Record it, and a truncated run can never be misread as a failed one.
 
 **Non-completion** — A run that failed for infrastructure reasons — a timeout, a rate limit, a truncation — rather than because the model was wrong. Classify these out of capability scores, or a provider's bad afternoon becomes a permanent verdict about the model.
+
+---
+
+## Block 6 · Security
+
+**Direct injection** — An attempt to override a system's instructions typed by the user themselves. Bounded by what that user was already allowed to do, which is what makes it the less severe of the two forms.
+
+**Indirect injection** — An instruction that arrives inside content the system reads — a document, a tool result, a record field — rather than from the person using it. It borrows the agent's privileges rather than the attacker's, and the attacker need never touch the system; they only need to control something it will read.
+
+**Instruction hardening** — Telling the model in its system prompt to disregard instructions found in content. Free, worth doing, and defeated by a sufficiently determined payload, because it asks the model to police a boundary the input format never carried.
+
+**Input filtering** — Scanning incoming text for attack patterns. Catches the obvious and misses the quiet, and raises confidence faster than it raises safety — most useful logging rather than blocking, as a signal that you are being probed.
+
+**Output constraints** — Limiting what the model may emit: a closed action set, a schema, an enumerated tool list. Stronger than filtering because it depends on the shape of what you accept rather than on the unbounded input.
+
+**Egress control** — Restricting what a sandboxed agent may reach outbound. The half of containerisation people skip: default networking permits arbitrary outbound connections, which is the direction exfiltration uses.
+
+**Tool chaining** — Two individually harmless capabilities that compose into a harmful one — read plus send, fetch plus interpolate. Invisible to a per-tool review, which is why tool sets are audited as sets.
+
+**Attack battery** — A fixed, privately held set of adversarial cases with decided success criteria, run against a baseline. The security counterpart of the eval battery, and it grows to encode your own incidents rather than the field's.
+
+**Exfiltration channel** — Any path by which data in context reaches somewhere the attacker can see: a fetch tool, a written file read back later, a rendered image address, or a trace written to a lower-trust store.
+

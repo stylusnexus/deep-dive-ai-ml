@@ -1,0 +1,63 @@
+{
+  "title": "Block 6 \u00b7 Security",
+  "topic": "block6-security",
+  "icon": "\ud83d\udee1\ufe0f",
+  "description": "Block 0 named the attack classes. This block runs them against the agent you built, measures what got through, and fixes it \u2014 starting with the injection your own retrieval pipeline invites.",
+  "tags": [
+    "ai",
+    "security",
+    "agents"
+  ],
+  "colorScheme": "rose",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-09-02",
+  "lessons": [
+    {
+      "id": "lsn-1787900000000",
+      "title": "Prompt Injection, Direct and Indirect",
+      "file": "lsn-1787900000000-injection-direct-and-indirect.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787900000001",
+      "title": "Exfiltration and Tool Abuse",
+      "file": "lsn-1787900000001-exfiltration-and-tool-abuse.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787900000002",
+      "title": "Sandboxing, and What Actually Works",
+      "file": "lsn-1787900000002-sandboxing-and-what-actually-works.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787900000003",
+      "title": "Red-Teaming Your Own Agent",
+      "file": "lsn-1787900000003-red-teaming-your-own-agent.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1787900000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787900000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787900000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787900000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}

@@ -320,3 +320,13 @@ Noise and masking
 The rich get richer
 Load imbalance
 Active versus total parameters
+A baseline
+A fetch tool
+A success criterion per case
+An attack battery
+Human approval on the irreversible
+Least privilege and scoping
+Regression on every change
+Rendered content as a channel
+Sandboxing with egress control
+The trace itself
