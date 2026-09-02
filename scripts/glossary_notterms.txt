@@ -302,3 +302,4 @@ Guards-off
 Decomposed
 Oracle
 Explicit non-goals
+Shared memory and L1

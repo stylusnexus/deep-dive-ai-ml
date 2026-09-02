@@ -268,6 +268,28 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Retrieved memory** — Facts stored and fetched when relevant, by semantic search over past interactions. Powerful, and it means you now have a retrieval quality problem as well.
 
+**Arithmetic intensity** — Operations performed per byte fetched from main memory. A property of the work rather than the chip, and the number that decides whether the arithmetic units are the constraint or are sitting idle waiting on memory.
+
+**Break-even intensity** — A chip's peak arithmetic rate divided by its memory bandwidth, in operations per byte. Work above the line is compute-bound, work below it is memory-bound, and token generation sits roughly two orders of magnitude below.
+
+**High-bandwidth memory (HBM)** — The off-die memory where model weights live, around 300 times slower to reach than a register. Every byte the arithmetic units consume crosses this gap, which is why inference is usually a data-movement problem.
+
+**Shared memory (L1)** — On-chip scratchpad memory, roughly 100KB per unit, that you control directly. The lever behind kernel fusion and FlashAttention: work done here never crosses to main memory.
+
+**L2 cache** — Memory shared across the whole chip, tens of megabytes, managed by hardware rather than by you. You influence it only through access patterns.
+
+**Registers** — Per-thread storage holding a value while it is being operated on. Effectively instant, and the top of the memory hierarchy.
+
+**Warp** — The fixed group of thirty-two threads that execute one instruction together. Threads within a warp taking different branches idle each other; different warps taking different paths cost nothing.
+
+**Occupancy** — How much work a unit keeps resident relative to what it can execute at once. High occupancy is what hides memory latency: when one warp stalls, the scheduler switches to another in a single clock cycle.
+
+**Kernel fusion** — Combining chained operations so intermediate values stay on-chip. Three elementwise operations become one round trip to main memory instead of three.
+
+**Shared-memory tiling** — Loading a block of data into on-chip memory and doing many operations on it before writing back. FlashAttention is the well-known case, keeping the attention matrix out of main memory entirely.
+
+**Dispatch overhead** — The fixed cost of launching each operation on the device. A workload of very many tiny operations can be limited by this alone, rather than by memory or arithmetic.
+
 ---
 
 ## Block 0 · Orientation

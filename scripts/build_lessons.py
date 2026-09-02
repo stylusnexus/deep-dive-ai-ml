@@ -167,6 +167,15 @@ def build(mod):
         entries.append({"id": lid, "title": lsn["title"], "file": fname, "source": "skill"})
         completion[lid] = {"viewed": False, "completed": False, "starred": False}
 
+    # Lesson ids are index-based and filenames carry the slug, so inserting or
+    # renaming a lesson leaves the old file on disk — present to anyone browsing
+    # the directory, absent from meta.json. Drop what this build did not write.
+    written = {e["file"] for e in entries}
+    for stale in topic_dir.glob("lsn-*.html"):
+        if stale.name not in written:
+            print(f"  removed stale {mod.TOPIC}/{stale.name}")
+            stale.unlink()
+
     meta = {
         "title": mod.TITLE,
         "topic": mod.TOPIC,

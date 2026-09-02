@@ -2687,4 +2687,99 @@ LESSONS = [
     ]),
   ],
 },
+{
+  "slug": "why-the-gpu-is-waiting",
+  "title": "Why the Graphics Processing Unit (GPU) Is Waiting",
+  "subtitle": "One number — work done per byte fetched — explains quantization, batching, and why a chip rated for a quadrillion operations a second gives you thirty tokens a second.",
+  "body": [
+    ("p", "This course has already told you that quantization roughly doubles throughput, that batching raises it, that decode is memory-bandwidth bound, and that grouped-query attention exists to shrink the key-value cache. Those are four separate facts and they are all the same fact. This lesson is the number underneath them."),
+
+    ("h2", "The asymmetry everything rests on"),
+    ("p", "Doing arithmetic is cheap. Fetching the numbers to do arithmetic on is expensive. That gap is not a temporary engineering problem — arithmetic capability has grown faster than memory bandwidth for years, so every generation of hardware makes data movement relatively <em>more</em> of the bottleneck, not less."),
+
+    ("terms", [
+      ("Registers", "Per-thread, effectively instant", "Where a value lives while it is being worked on."),
+      ("Shared memory and L1", "On-chip scratchpad, around 100KB per unit", "Programmable — you decide what sits here. This is the lever the clever kernels pull."),
+      ("L2 cache", "Shared across the chip, tens of megabytes", "Hardware-managed; you influence it only through access patterns."),
+      ("High-bandwidth memory (HBM)", "Off-die, and roughly 300 times slower than a register", "Where the weights live. Every byte the arithmetic units consume has to cross this gap."),
+    ]),
+
+    ("h2", "Arithmetic intensity, and the line it has to cross"),
+    ("p", "Arithmetic intensity is operations performed divided by bytes fetched from main memory. It is a property of the <em>work</em>, not of the chip. The chip supplies a break-even value: its peak arithmetic rate divided by its memory bandwidth. Above that line the arithmetic units are the constraint; below it, they are idle and waiting on memory."),
+
+    ("code", """break-even (operations per byte) = peak arithmetic rate / memory bandwidth
+
+# One token from a 70-billion-parameter model at 16-bit precision:
+weights read   = 70e9 params x 2 bytes        = 140 GB
+work done      = 70e9 params x 2 operations   = 140 GFLOP
+intensity      = 140e9 / 140e9                = 1 operation per byte
+
+# On a card with 3.35 TB/s of bandwidth:
+time per token = 140 GB / 3.35 TB/s           = 42 ms   -> about 24 tokens/second"""),
+
+    ("p", "One operation per byte, against a break-even in the hundreds. Generating a token is roughly two orders of magnitude below the line, which is the whole explanation for why a chip advertised in the hundreds of trillions of operations per second hands you a few dozen tokens a second. The work simply does not contain enough arithmetic per byte to keep the arithmetic units busy."),
+
+    ("figure", "Every byte of weights crosses the slowest gap in the system, and generating one token does a single operation with it. The optimisations in this course are all attempts to move rightward on the lower bar.", '''<svg viewBox="0 0 640 250" role="img" aria-label="Memory hierarchy and arithmetic intensity"><defs><marker id="gpu1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<text x="14" y="20" class="d-label-b">The gap, top to bottom</text>
+<rect x="14" y="30" width="150" height="26" rx="5" class="d-box"/><text x="26" y="47" class="d-label-sm">registers — instant</text>
+<rect x="14" y="62" width="180" height="26" rx="5" class="d-box"/><text x="26" y="79" class="d-label-sm">shared memory / L1 — ~100KB</text>
+<rect x="14" y="94" width="215" height="26" rx="5" class="d-box"/><text x="26" y="111" class="d-label-sm">L2 — tens of megabytes</text>
+<rect x="14" y="126" width="270" height="30" rx="5" class="d-box-accent"/><text x="26" y="146" class="d-label-sm">HBM — the weights live here, ~300x slower</text>
+<path d="M300 141 L346 141" class="d-arrow-accent" marker-end="url(#gpu1)"/>
+<text x="356" y="138" class="d-label-sm">every weight, every token</text>
+<text x="14" y="188" class="d-label-b">Work per byte</text>
+<rect x="14" y="198" width="612" height="30" rx="5" class="d-box"/>
+<rect x="14" y="198" width="26" height="30" rx="5" class="d-box-accent"/>
+<text x="46" y="217" class="d-label-sm">1 op/byte: one token, decode</text>
+<text x="300" y="217" class="d-label-sm">break-even: hundreds of ops/byte</text>
+<text x="14" y="244" class="d-label-sm">Left of the line the arithmetic units are idle. Almost all of inference lives at the far left.</text>
+</svg>'''),
+
+    ("know",
+     "The same chip is compute-bound during prefill and memory-bound during decode.",
+     "Prefill reads each weight once and uses it across every token in the prompt, so the arithmetic per byte is high. Decode reads every weight again to produce one single token, so it is as low as it gets. These are opposite bottlenecks in the same request, which is why one number never describes a system's performance and why the two phases have to be measured separately.",
+     "Time to first token and tokens per second do not improve together, and a change that helps one can hurt the other. A larger batch raises throughput during decode and can raise the latency any individual request sees."),
+
+    ("h2", "Every optimisation in this course is the same move"),
+    ("p", "Once the number is in view, the techniques stop looking like a list of tricks and start looking like one idea applied in different places. Each either raises the work done per byte or lowers the bytes that must be moved."),
+
+    ("terms", [
+      ("Batching", "Reuse each weight across many requests", "The weight is fetched once and does arithmetic for every sequence in the batch, so intensity rises with batch size. This is why throughput and latency pull against each other."),
+      ("Quantization", "Halve the bytes per weight", "Sixteen-bit to eight-bit halves what must be moved and roughly doubles generation throughput. The accuracy cost is the price of the bandwidth saved — that is the whole trade."),
+      ("Grouped-query attention", "Shrink the cache that must be re-read", "Fewer key and value heads means fewer bytes streamed per decode step. The same lever as quantization, applied to the cache rather than the weights."),
+      ("Kernel fusion", "Keep intermediates on-chip", "Three chained elementwise operations become one trip to main memory instead of three, because the intermediate values never leave the fast memory."),
+      ("Shared-memory tiling", "Do many operations per fetch", "FlashAttention is the well-known case: it keeps the attention matrix in on-chip memory instead of writing it out to main memory and reading it back."),
+    ]),
+
+    ("h2", "Where the waiting is hidden"),
+    ("p", "The hardware does not try to avoid the wait — it arranges to always have other work available during it. Threads run in fixed groups of thirty-two, and a unit keeps many more of these groups resident than it can execute at once. When one stalls on memory, the scheduler switches to another in a single clock cycle. That is what keeps the arithmetic units fed, and it is why a workload with too few resident groups performs badly even when nothing about it looks slow."),
+
+    ("callout", "pitfall", "Vendor peak-FLOPS numbers often quote sparsity",
+     "<p>The break-even line is peak arithmetic rate over bandwidth, so the arithmetic rate you use decides the answer. Headline figures are frequently the sparsity-enabled number, which is double the dense one — and using it doubles your computed break-even. On one current card the same division gives 295 operations per byte with the headline figure and 148 with the dense figure. Check which one you have before quoting a threshold.</p>"),
+
+    ("callout", "matters", "Small operations have a third bottleneck",
+     "<p>Neither memory nor arithmetic. Every operation dispatched to the device carries a fixed launch cost paid by the processor driving it, so a workload made of very many tiny operations can be limited by dispatch overhead alone. The fix is the same as everywhere else — fewer, larger units of work.</p>"),
+
+    ("h2", "What will change and what will not"),
+    ("p", "Capacities, bandwidths, precision formats and every specific threshold in this lesson will move. The asymmetry will not: arithmetic keeps getting cheaper faster than data movement does, which means the techniques that trade computation for bytes moved get <em>more</em> valuable each generation rather than less."),
+
+    ("quiz", [
+      ("A card is rated for hundreds of trillions of operations per second, yet generates about 24 tokens a second on a 70-billion-parameter model. Why?",
+       ["The model is too large to fit the arithmetic units efficiently",
+        "Generating one token does about one operation per byte fetched, hundreds of times below the chip's break-even, so the arithmetic units spend the step waiting on memory",
+        "Token generation cannot be parallelised across the chip"],
+       1),
+      ("Why does quantization improve generation throughput?",
+       ["Smaller numbers are faster to multiply",
+        "It halves the bytes that must be moved per weight, and generation is limited by data movement rather than arithmetic",
+        "It allows a larger batch to fit in memory"],
+       1),
+      ("Prefill and decode have opposite bottlenecks. What follows from that?",
+       ["Decode should always be batched more aggressively than prefill",
+        "Time to first token and tokens per second must be measured separately, because a change that improves one can worsen the other",
+        "Prefill should be skipped whenever the prompt is cached"],
+       1),
+    ]),
+  ],
+},
 ]

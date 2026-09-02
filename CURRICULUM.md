@@ -23,7 +23,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 72 lessons built, 72 diagrams, 13 executed notebooks.**
+**Status: 73 lessons built, 73 diagrams, 13 executed notebooks.**
 
 ---
 
