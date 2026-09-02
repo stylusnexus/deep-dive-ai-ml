@@ -51,20 +51,26 @@
     },
     {
       "id": "lsn-1787100000006",
-      "title": "Nearest-Neighbour Search at Scale",
-      "file": "lsn-1787100000006-vector-search-algorithms.html",
+      "title": "Mixture of Experts",
+      "file": "lsn-1787100000006-mixture-of-experts.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787100000007",
-      "title": "Ranking and Hybrid Retrieval",
-      "file": "lsn-1787100000007-ranking-and-hybrid-retrieval.html",
+      "title": "Nearest-Neighbour Search at Scale",
+      "file": "lsn-1787100000007-vector-search-algorithms.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787100000008",
+      "title": "Ranking and Hybrid Retrieval",
+      "file": "lsn-1787100000008-ranking-and-hybrid-retrieval.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787100000009",
       "title": "Data Leakage",
-      "file": "lsn-1787100000008-data-leakage.html",
+      "file": "lsn-1787100000009-data-leakage.html",
       "source": "skill"
     }
   ],
@@ -110,6 +116,11 @@
       "starred": false
     },
     "lsn-1787100000008": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787100000009": {
       "viewed": false,
       "completed": false,
       "starred": false

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ranking and Hybrid Retrieval</title>
+<title>Data Leakage</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -213,71 +213,72 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 8 of 9</span>
-  <h1>Ranking and Hybrid Retrieval</h1>
-  <p class="subtitle">Best Matching 25 (BM25), reciprocal rank fusion and rerankers — why pure vector search is rarely the best answer.</p>
+  <span class="pill">Lesson 10 of 10</span>
+  <h1>Data Leakage</h1>
+  <p class="subtitle">The failure that produces a brilliant model and a worthless one, simultaneously.</p>
 
-  <p>The context-engineering lesson concluded that ranking matters more than recall — that getting the right chunk into the first position beats retrieving more chunks. This lesson is the algorithms that do the ranking.</p>
-  <h2>BM25: keyword search, done properly</h2>
-  <p><strong>BM25</strong> scores a document against a query using term frequency, adjusted two ways: rare terms count for more than common ones, and repeated occurrences give diminishing returns. It's decades old, needs no training, no GPU and no embedding model, and it is a genuinely strong baseline.</p>
-  <div class="callout matters"><span class="label">Where BM25 beats embeddings outright</span>Exact identifiers, error codes, product SKUs, function names, file paths, proper nouns, and any rare term. Embeddings compress meaning and lose precise tokens; BM25 matches them exactly. For a technical corpus this is not a small difference — it is frequently the difference between finding the answer and not.</div>
-  <h2>Why hybrid wins</h2>
-  <p>Vector search finds paraphrases and misses exact terms. BM25 finds exact terms and misses paraphrases. Their failures are largely independent, which is precisely the condition under which combining two methods helps — the same logic as ensembles in lesson 4.</p>
-  <h2>Reciprocal rank fusion</h2>
-  <p>The problem with combining them is that a BM25 score of 14.2 and a cosine similarity of 0.83 aren't comparable quantities. <strong>Reciprocal rank fusion</strong> sidesteps this entirely by ignoring the scores and using only the ranks: each document scores the sum of <code>1 / (k + rank)</code> across the lists it appears in, with k typically 60.</p>
-  <p>A document ranked highly by both methods rises to the top; one ranked highly by a single method still places well. No score normalisation, no tuning, no training. It's a two-line algorithm that reliably outperforms either input list.</p>
-  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Reciprocal rank fusion of two result lists">
-<text x="20" y="18" class="d-accent">BM25</text>
-<rect x="20" y="28" width="150" height="24" rx="4" class="d-box"/><text x="32" y="45" class="d-label-sm">1. doc-C</text>
-<rect x="20" y="58" width="150" height="24" rx="4" class="d-box"/><text x="32" y="75" class="d-label-sm">2. doc-A</text>
-<rect x="20" y="88" width="150" height="24" rx="4" class="d-box"/><text x="32" y="105" class="d-label-sm">3. doc-F</text>
-<text x="230" y="18" class="d-accent">Vector</text>
-<rect x="230" y="28" width="150" height="24" rx="4" class="d-box"/><text x="242" y="45" class="d-label-sm">1. doc-B</text>
-<rect x="230" y="58" width="150" height="24" rx="4" class="d-box"/><text x="242" y="75" class="d-label-sm">2. doc-C</text>
-<rect x="230" y="88" width="150" height="24" rx="4" class="d-box"/><text x="242" y="105" class="d-label-sm">3. doc-A</text>
-<text x="440" y="18" class="d-fill-green" font-size="12" font-weight="600">Fused</text>
-<rect x="440" y="28" width="170" height="24" rx="4" class="d-box-good"/><text x="452" y="45" class="d-label-sm">1. doc-C  (1/61 + 1/62)</text>
-<rect x="440" y="58" width="170" height="24" rx="4" class="d-box"/><text x="452" y="75" class="d-label-sm">2. doc-A  (1/62 + 1/63)</text>
-<rect x="440" y="88" width="170" height="24" rx="4" class="d-box"/><text x="452" y="105" class="d-label-sm">3. doc-B  (1/61)</text>
-<text x="20" y="146" class="d-label-sm">score(d) = Σ 1 / (k + rank), k = 60. Only positions are used, so incomparable scores never need normalising.</text>
-<text x="20" y="168" class="d-label-sm">doc-C placed well in both lists and wins. doc-B was first in one list and still ranks.</text>
-</svg><figcaption>Two independent rankings fused by position rather than score. The document both methods liked wins, without ever comparing incomparable numbers.</figcaption></figure>
-  <h2>Rerankers: the expensive final pass</h2>
-  <p>Retrieval embeds queries and documents separately, so it can never see them together. A <strong>cross-encoder reranker</strong> does — it takes the query and one document as a single input and scores their relevance directly. Far more accurate, and far too slow to run over a whole corpus.</p>
-  <p>So the standard architecture is a funnel: retrieve 100 candidates cheaply with hybrid search, rerank those 100 properly, keep the top 5 for the model. You get cross-encoder quality at nearly bi-encoder cost, and the top-of-list precision that context engineering demands.</p>
-  <h2>The pipeline worth defaulting to</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">1. Retrieve wide</div><div><div class="roadmap-title">BM25 + vector, ~50 each</div><div class="roadmap-desc">Independent failure modes, so coverage is better than either alone.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2. Fuse</div><div><div class="roadmap-title">Reciprocal rank fusion</div><div class="roadmap-desc">Two lines of code, no tuning, no normalisation.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3. Rerank</div><div><div class="roadmap-title">Cross-encoder over ~100</div><div class="roadmap-desc">The accuracy step. Only affordable because the candidate set is small.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4. Truncate</div><div><div class="roadmap-title">Top 3–5 into context</div><div class="roadmap-desc">Precision beats volume — distractors actively cost you.</div></div></div></div>
-  <h2>What BM25 is actually computing</h2>
-  <p>Three ideas, each fixing a flaw in the one before it.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Term frequency</div><div><div class="roadmap-title">A word appearing often signals relevance</div><div class="roadmap-desc">But not linearly. Ten mentions is not ten times more relevant than one, so BM25 saturates — the fifth occurrence adds far less than the second.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Inverse document frequency</div><div><div class="roadmap-title">Rare words carry more information</div><div class="roadmap-desc">A document matching "gearbox" tells you much more than one matching "the". Weight each term by how rare it is across the corpus.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Length normalisation</div><div><div class="roadmap-title">Long documents match everything</div><div class="roadmap-desc">A 50-page manual contains most words by accident. Divide the benefit by length, tuned so that being long is penalised but not fatal.</div></div></div></div>
-  <div class="callout insight"><span class="label">Saturation is the part people miss</span>Plain term-frequency scoring can be gamed by repetition, and worse, it genuinely misranks — a short document that says "gearbox" once is often more relevant than a long one that says it fifteen times in passing. BM25's saturation curve is a small piece of mathematics that encodes a real judgement about how language works, and it is most of why a 1990s algorithm still competes with embeddings.</div>
-  <h2>Chunking, which decides more than your retriever does</h2>
-  <p>Every retrieval method here operates on chunks you chose. Choose them badly and no amount of ranking recovers.</p>
-  <ul><li><strong>Too small</strong> and a chunk lacks the context to be understood — a paragraph referring to "this threshold" with the threshold defined two chunks earlier.</li><li><strong>Too large</strong> and the embedding averages several topics into a vector that represents none of them well, while burning context when retrieved.</li><li><strong>Split on structure, not on character count.</strong> Headings, sections, function boundaries. A chunk that ends mid-sentence embeds badly and reads worse.</li><li><strong>Overlap a little</strong> so a passage spanning a boundary is not lost by both chunks.</li><li><strong>Keep the parent reference.</strong> Retrieve the chunk, then optionally expand to its section for context — small to match, larger to read.</li></ul>
-  <div class="callout pitfall"><span class="label">Look at your chunks before tuning anything downstream</span>Print twenty at random and read them. If you cannot tell what a chunk is about without its neighbours, your retrieval will not be able to either, and every hour spent on embedding models or rerankers is spent on the wrong layer. This takes ten minutes and it is skipped almost universally.</div>
-  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Mining of Massive Datasets</span><span class="bk-a">Leskovec, Rajaraman &amp; Ullman</span><span class="bk-n">Chapter 5 on link analysis and ranking. Older than BM25's current use in retrieval-augmented generation (RAG) and still the clearest account of what ranking is doing.</span></li><li><span class="bk-t">Enterprise RAG</span><span class="bk-a">Manning MEAP</span><span class="bk-n">Chunking strategies and hybrid retrieval in a production framing, which is where this lesson's practical advice comes from.</span></li></ul></div>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf" target="_blank" rel="noopener">Reciprocal Rank Fusion (Cormack et al.)</a><span class="link-note">The original paper. Short, and the algorithm is a single formula.</span></li><li><a href="https://sbert.net/examples/applications/cross-encoder/README.html" target="_blank" rel="noopener">Cross-encoders in Sentence Transformers</a><span class="link-note">How to run the rerank step, with pretrained models you can use directly.</span></li></ul></div>
+  <p>Your statistics course covers overfitting thoroughly. <strong>Leakage</strong> is its more dangerous cousin, and it isn't covered there. Overfitting shows up as a gap between training and validation scores — visible, diagnosable. Leakage inflates <em>both</em>, so every number looks excellent right up until production, where the model collapses.</p>
+  <h2>What it is</h2>
+  <p>Leakage is when information reaches the model during training that will not be available at prediction time. The model learns to use it, scores brilliantly on your held-out data — because the leak is in that data too — and then fails completely on real inputs where the information doesn't exist.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 180" role="img" aria-label="Overfitting versus leakage in validation scores">
+<g>
+<text x="40" y="18" class="d-label-b">Overfitting</text>
+<line x1="30" y1="140" x2="270" y2="140" class="d-arrow"/>
+<line x1="30" y1="140" x2="30" y2="34" class="d-arrow"/>
+<path d="M40 120 Q120 70 260 48" stroke="var(--accent)" stroke-width="2.5" fill="none"/>
+<text x="196" y="42" class="d-accent">train</text>
+<path d="M40 124 Q120 100 260 104" stroke="var(--red)" stroke-width="2.5" fill="none"/>
+<text x="192" y="122" class="d-fill-red" font-size="11" font-weight="600">validation</text>
+<path d="M264 52 L264 100" stroke="var(--muted)" stroke-width="1.4" stroke-dasharray="3 3"/>
+<text x="120" y="166" class="d-fill-green" font-size="11" font-weight="600">visible gap — you can see it</text>
+</g>
+<g>
+<text x="380" y="18" class="d-label-b">Leakage</text>
+<line x1="370" y1="140" x2="610" y2="140" class="d-arrow"/>
+<line x1="370" y1="140" x2="370" y2="34" class="d-arrow"/>
+<path d="M380 120 Q460 66 600 44" stroke="var(--accent)" stroke-width="2.5" fill="none"/>
+<text x="536" y="38" class="d-accent">train</text>
+<path d="M380 124 Q460 74 600 52" stroke="var(--red)" stroke-width="2.5" fill="none"/>
+<text x="500" y="70" class="d-fill-red" font-size="11" font-weight="600">validation</text>
+<text x="424" y="166" class="d-fill-red" font-size="11" font-weight="600">no gap — nothing looks wrong</text>
+</g>
+</svg><figcaption>Overfitting announces itself as a gap. Leakage lifts both curves together, so the usual diagnostic shows nothing wrong.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Overfitting announces itself as a gap; leakage lifts both curves together.</p><p class="know-why">That is what makes leakage the more dangerous of the two. The train-versus-validation gap you would normally use to spot a problem shows nothing, because the leak is present in both halves.</p><p class="know-eg"><span class="know-eg-label">For example</span>A churn model reaches 0.99 area under the curve (AUC) and validation agrees. The feature list includes account_closed_date, populated only for customers who already churned. Every metric is excellent and the model is worthless, because at prediction time that field is empty for everyone you care about.</p></blockquote>
+  <h2>The forms it takes</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Target leakage</div><div><div class="roadmap-title">A feature encodes the answer</div><div class="roadmap-desc">Predicting customer churn using 'cancellation_date'. Predicting failure using 'maintenance_ticket_raised'. The feature only exists because the outcome already happened.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Train-test contamination</div><div><div class="roadmap-title">The same rows in both sets</div><div class="roadmap-desc">Duplicates, near-duplicates, or the same customer appearing under two IDs. Very common in scraped or merged data.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Preprocessing leakage</div><div><div class="roadmap-title">Fitting on all the data</div><div class="roadmap-desc">Scaling or imputing before splitting means your training set has seen the test set's statistics. Subtle, extremely common.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Temporal leakage</div><div><div class="roadmap-title">Training on the future</div><div class="roadmap-desc">Random splits on time-ordered data let the model learn from events after the ones it predicts. Split by time instead.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Group leakage</div><div><div class="roadmap-title">Related rows split apart</div><div class="roadmap-desc">Multiple readings from one turbine, or several notes on one patient, spread across train and test.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">The tell</span>A model that seems too good — 0.99 AUC on a hard problem — is far more likely to be leaking than to be brilliant. Treat a surprisingly good result as a bug report, not a success. The intake sheet's baseline question helps here: if your baseline also scores 0.97, something is wrong with the data, not right with your modelling.</div>
+  <h2>How to prevent it</h2>
+  <ul><li><strong>Split first, always.</strong> Before any scaling, imputation, encoding or feature selection. Everything is fitted on train and merely applied to validation and test.</li><li><strong>Use a pipeline.</strong> scikit-learn's <code>Pipeline</code> enforces fit-on-train mechanically inside cross-validation. This is what it's for.</li><li><strong>Split by time when time matters.</strong> Train on the past, validate on the future — matching how the model will actually be used.</li><li><strong>Split by group, not by row.</strong> All of a turbine's readings go to one side. <code>GroupKFold</code> exists for this.</li><li><strong>Interrogate every feature.</strong> For each one ask: would I have this value, with this content, at the moment I need the prediction? That single question catches most target leakage.</li></ul>
+  <h2>Where it reappears later</h2>
+  <p>Benchmark contamination in Block 5 is leakage at industry scale — the test set was in the training data, so the score measures memory. Tuning a prompt against the same examples you evaluate on is leakage by hand. The defence never changes: keep something back that the optimiser cannot see.</p>
+  <h2>Two more forms worth recognising</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Feature selection before the split</div><div><div class="roadmap-title">Subtle and common</div><div class="roadmap-desc">Choosing the top 20 features by correlation with the target, using all the data, then splitting. Your feature set has already seen the test rows. Select inside the pipeline.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Tuning against the test set</div><div><div class="roadmap-title">Leakage by repetition</div><div class="roadmap-desc">Every time you look at the test score and change something, a little of that set leaks into your choices. After thirty iterations it has become a validation set with a misleading name.</div></div></div></div>
+  <h2>How to actually catch it</h2>
+  <ul><li><strong>Rank the features by importance and interrogate the top one.</strong> If a single feature dominates a hard problem, ask why it is so informative. That question catches most target leakage.</li><li><strong>Drop your best feature and re-run.</strong> If performance collapses to near-baseline, you have a one-feature model, and that feature deserves scrutiny.</li><li><strong>Sort by time and re-split.</strong> If a time-ordered split scores far worse than a random one, you were learning from the future.</li><li><strong>Check for duplicate and near-duplicate rows across splits.</strong> Cheap, and it catches contamination in merged or scraped data.</li><li><strong>Ask what a human would need.</strong> If a person could not make this prediction from this information at that moment, your model should not be able to either.</li></ul>
+  <div class="callout matters"><span class="label">The organisational version of this problem</span>Leakage often enters through a column someone else created — a flag set by a downstream process, a field populated by the resolution workflow, a status updated after the fact. You cannot detect that from the data alone. Ask whoever owns the pipeline when each field is written, not just what it means. That conversation catches more leakage than any statistical check.</div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Designing Machine Learning Systems</span><span class="bk-a">Chip Huyen</span><span class="bk-n">Chapter 4 covers leakage, train-test contamination and the sampling decisions that produce them, in a production framing rather than an academic one.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/common_pitfalls.html" target="_blank" rel="noopener">Common pitfalls: data leakage (scikit-learn)</a><span class="link-note">The canonical treatment, with code showing the preprocessing mistake and its fix.</span></li><li><a href="https://scikit-learn.org/stable/modules/compose.html" target="_blank" rel="noopener">Pipelines (scikit-learn)</a><span class="link-note">The mechanism that makes preprocessing leakage structurally difficult to commit.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. Why does BM25 often beat embeddings on a technical corpus?</p>
+    <p class="quiz-q">1. Why is leakage harder to spot than overfitting?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">It&#x27;s faster, so more documents can be searched</div>
-      <div class="quiz-opt">Embeddings compress meaning and lose exact tokens; BM25 matches identifiers and rare terms precisely</div>
-      <div class="quiz-opt">BM25 is trained on technical documentation</div>
+      <div class="quiz-opt">It only appears in very large datasets</div>
+      <div class="quiz-opt">It inflates training and validation scores together, so the usual train/validation gap shows nothing</div>
+      <div class="quiz-opt">It only affects neural networks</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. What problem does reciprocal rank fusion avoid?</p>
+    <p class="quiz-q">2. You standardise your features, then split into train and test. What went wrong?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Having to run two retrieval systems</div>
-      <div class="quiz-opt">Comparing scores from different systems that aren&#x27;t on the same scale — it uses only rank positions</div>
-      <div class="quiz-opt">The need for an embedding model</div>
+      <div class="quiz-opt">Nothing — scaling is not a model</div>
+      <div class="quiz-opt">The scaler saw the test set&#x27;s statistics, so information about test data leaked into training</div>
+      <div class="quiz-opt">Standardising should happen after model fitting</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. Why can&#x27;t you just run the cross-encoder reranker over the whole corpus?</p>
+    <p class="quiz-q">3. You get 0.99 AUC on a hard churn problem, first attempt. What&#x27;s the right reaction?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">It only works on short documents</div>
-      <div class="quiz-opt">It scores query and document together, so cost is one model pass per document — far too slow at corpus scale</div>
-      <div class="quiz-opt">It requires the documents to be pre-embedded</div>
+      <div class="quiz-opt">Ship it — the features must be unusually informative</div>
+      <div class="quiz-opt">Suspect leakage and audit every feature for whether it exists at prediction time</div>
+      <div class="quiz-opt">Add regularisation to bring the score down</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

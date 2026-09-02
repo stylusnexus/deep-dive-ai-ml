@@ -313,3 +313,10 @@ Prefix cache
 Positions restart
 Cross-attention is missing
 Several attention sinks
+Experts
+Router
+Per token, per layer
+Noise and masking
+The rich get richer
+Load imbalance
+Active versus total parameters

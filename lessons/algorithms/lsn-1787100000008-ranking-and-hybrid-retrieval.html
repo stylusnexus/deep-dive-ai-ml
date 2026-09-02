@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nearest-Neighbour Search at Scale</title>
+<title>Ranking and Hybrid Retrieval</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -213,73 +213,71 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 7 of 9</span>
-  <h1>Nearest-Neighbour Search at Scale</h1>
-  <p class="subtitle">Exact search, HNSW, and the recall you quietly trade away for speed.</p>
+  <span class="pill">Lesson 9 of 10</span>
+  <h1>Ranking and Hybrid Retrieval</h1>
+  <p class="subtitle">Best Matching 25 (BM25), reciprocal rank fusion and rerankers — why pure vector search is rarely the best answer.</p>
 
-  <p>The previous lesson on k-NN described finding the nearest vectors. Doing that across ten million embeddings, in under fifty milliseconds, is a different problem — and the algorithm you choose has a failure mode most people never measure.</p>
-  <h2>Exact search, and when it&#x27;s fine</h2>
-  <p>Compare the query against every stored vector and keep the best matches. It's exhaustive, perfectly accurate, and linear in the number of vectors. For under roughly 100,000 vectors this is genuinely fine on modern hardware — often single-digit milliseconds.</p>
-  <div class="callout matters"><span class="label">Don&#x27;t optimise this early</span>Most retrieval-augmented generation (RAG) corpora are far smaller than people assume. A few thousand documents chunked into tens of thousands of vectors is comfortably exact-search territory. Reach for approximate indexing when you've measured that you need it, not because the tutorial used it.</div>
-  <h2>Approximate nearest neighbour</h2>
-  <p>Above that scale, <strong>ANN</strong> algorithms trade a small amount of accuracy for a large amount of speed. They don't guarantee finding the true nearest neighbours — they find <em>most</em> of them, most of the time.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">HNSW</div><div><div class="roadmap-title">Hierarchical navigable small world</div><div class="roadmap-desc">A layered graph. Search starts in a sparse top layer that covers ground quickly, then descends into denser layers to refine. The dominant choice — fast and accurate, at the cost of memory.</div></div></div><div class="roadmap-item"><div class="roadmap-num">IVF</div><div><div class="roadmap-title">Inverted file index</div><div class="roadmap-desc">Cluster the vectors, then search only the nearest few clusters. Lower memory, and misses anything sitting just outside a searched cluster.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Product quantization</div><div><div class="roadmap-title">Compress the vectors themselves</div><div class="roadmap-desc">Often paired with IVF to cut memory dramatically. Quantization again — same trade, different object.</div></div></div></div>
-  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="HNSW layered graph search">
-<text x="12" y="18" class="d-label-sm">layer 2 — sparse, long hops</text>
-<circle cx="120" cy="36" r="5" class="d-fill-accent"/><circle cx="330" cy="30" r="5" class="d-fill-muted"/><circle cx="520" cy="38" r="5" class="d-fill-muted"/>
-<line x1="120" y1="36" x2="330" y2="30" class="d-arrow"/><line x1="330" y1="30" x2="520" y2="38" class="d-arrow"/>
-<text x="12" y="86" class="d-label-sm">layer 1 — denser</text>
-<circle cx="120" cy="104" r="4.5" class="d-fill-muted"/><circle cx="230" cy="110" r="4.5" class="d-fill-muted"/>
-<circle cx="330" cy="98" r="4.5" class="d-fill-accent"/><circle cx="430" cy="112" r="4.5" class="d-fill-muted"/>
-<circle cx="520" cy="104" r="4.5" class="d-fill-muted"/>
-<line x1="120" y1="104" x2="230" y2="110" class="d-arrow"/><line x1="230" y1="110" x2="330" y2="98" class="d-arrow"/>
-<line x1="330" y1="98" x2="430" y2="112" class="d-arrow"/><line x1="430" y1="112" x2="520" y2="104" class="d-arrow"/>
-<text x="12" y="150" class="d-label-sm">layer 0 — every vector</text>
-<g class="d-fill-muted">
-<circle cx="80" cy="172" r="3.5"/><circle cx="140" cy="176" r="3.5"/><circle cx="200" cy="170" r="3.5"/>
-<circle cx="260" cy="178" r="3.5"/><circle cx="320" cy="172" r="3.5"/><circle cx="440" cy="176" r="3.5"/>
-<circle cx="500" cy="170" r="3.5"/><circle cx="560" cy="178" r="3.5"/>
-</g>
-<circle cx="380" cy="174" r="5" class="d-fill-green"/>
-<text x="392" y="164" class="d-fill-green" font-size="11" font-weight="600">answer</text>
-<path d="M120 44 L120 96" class="d-arrow-accent"/><path d="M330 106 L376 166" class="d-arrow-accent"/>
-</svg><figcaption>HNSW navigates a layered graph: coarse hops at the top cover distance fast, finer layers refine. Speed comes from never examining most of the data — which is also where recall is lost.</figcaption></figure>
-  <h2>The number nobody measures</h2>
-  <p><strong>Recall@k</strong> is the fraction of true nearest neighbours your index actually returned. An HNSW index at 95% recall silently misses one in twenty of the results it should have found — and because the results it does return look perfectly reasonable, nothing appears broken.</p>
-  <div class="callout pitfall"><span class="label">How this fails in production</span>RAG quality drops and everyone investigates the prompt, the chunking, the model. The actual cause is an index tuned for speed that never retrieves the right chunk in the first place. Measure recall against exact search on a sample before blaming anything downstream — it takes an hour and rules out an entire category of problem.</div>
-  <p>The tuning knobs trade directly: HNSW's <code>ef_search</code> and <code>M</code> raise recall and cost latency and memory. There is no setting that gives you both.</p>
-  <h2>The two knobs, and what each costs</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">M</div><div><div class="roadmap-title">Connections per node, set at build time</div><div class="roadmap-desc">Higher means a denser graph: better recall, more memory, slower to build. Changing it means rebuilding the index.</div></div></div><div class="roadmap-item"><div class="roadmap-num">ef_construction</div><div><div class="roadmap-title">Effort spent while building</div><div class="roadmap-desc">Higher builds a better graph, once, for a longer build. Cheap to be generous with — you pay it only at index time.</div></div></div><div class="roadmap-item"><div class="roadmap-num">ef_search</div><div><div class="roadmap-title">Candidates examined per query</div><div class="roadmap-desc">The one you tune live. Raise it for recall, pay in latency. This is the dial to move first when recall is low.</div></div></div></div>
-  <div class="callout matters"><span class="label">Tune ef_search before rebuilding anything</span>Low recall is far more often an ef_search that was left at a library default than a fundamentally wrong index. It costs nothing to raise, takes effect immediately, and its cost is latency you can measure. Only rebuild with a larger M when you have established that ef_search alone cannot reach the recall you need.</div>
-  <h2>Measuring recall, in about an hour</h2>
-  <p>Take a sample of real queries — two hundred is plenty. Run each through exact search over the full set and keep the true top-k. Run each through your index. Recall@k is the mean overlap. That number is the honest description of your retrieval layer, and almost nobody computes it.</p>
-  <p>Do this once at build time and re-run it on a schedule, because recall degrades as a corpus grows and shifts. An index tuned when you had 50,000 documents is not necessarily the same index at 500,000.</p>
-  <h2>The other reason to keep vectors in Postgres</h2>
-  <p>Specialist vector databases are faster at pure vector search. What they are not good at is the query you actually write, which almost always has a filter attached — this customer, this date range, this document type. Filtered vector search is genuinely hard: filter first and you may search too few candidates to find good neighbours; search first and you may filter away everything you found.</p>
-  <div class="callout insight"><span class="label">Filtering is where the real engineering is</span>A database that already holds your relational data can combine a vector search with a SQL predicate in one planner. Two separate stores means doing that join yourself, in application code, badly. At the scale most teams operate, one database that does both adequately beats two that each do half the job well.</div>
-  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Mining of Massive Datasets</span><span class="bk-a">Leskovec, Rajaraman &amp; Ullman</span><span class="bk-n">Chapter 3 on locality-sensitive hashing is the theoretical ancestor of everything in this lesson. Free online, and worth it for the intuition about why approximate methods work at all.</span></li></ul></div>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://github.com/pgvector/pgvector" target="_blank" rel="noopener">pgvector indexing</a><span class="link-note">HNSW and IVFFlat in Postgres, with the parameters and their recall implications.</span></li><li><a href="https://arxiv.org/abs/1603.09320" target="_blank" rel="noopener">Efficient and robust ANN search using HNSW (Malkov &amp; Yashunin)</a><span class="link-note">The HNSW paper. The layered-graph intuition is in the first few pages.</span></li></ul></div>
+  <p>The context-engineering lesson concluded that ranking matters more than recall — that getting the right chunk into the first position beats retrieving more chunks. This lesson is the algorithms that do the ranking.</p>
+  <h2>BM25: keyword search, done properly</h2>
+  <p><strong>BM25</strong> scores a document against a query using term frequency, adjusted two ways: rare terms count for more than common ones, and repeated occurrences give diminishing returns. It's decades old, needs no training, no GPU and no embedding model, and it is a genuinely strong baseline.</p>
+  <div class="callout matters"><span class="label">Where BM25 beats embeddings outright</span>Exact identifiers, error codes, product SKUs, function names, file paths, proper nouns, and any rare term. Embeddings compress meaning and lose precise tokens; BM25 matches them exactly. For a technical corpus this is not a small difference — it is frequently the difference between finding the answer and not.</div>
+  <h2>Why hybrid wins</h2>
+  <p>Vector search finds paraphrases and misses exact terms. BM25 finds exact terms and misses paraphrases. Their failures are largely independent, which is precisely the condition under which combining two methods helps — the same logic as ensembles in lesson 4.</p>
+  <h2>Reciprocal rank fusion</h2>
+  <p>The problem with combining them is that a BM25 score of 14.2 and a cosine similarity of 0.83 aren't comparable quantities. <strong>Reciprocal rank fusion</strong> sidesteps this entirely by ignoring the scores and using only the ranks: each document scores the sum of <code>1 / (k + rank)</code> across the lists it appears in, with k typically 60.</p>
+  <p>A document ranked highly by both methods rises to the top; one ranked highly by a single method still places well. No score normalisation, no tuning, no training. It's a two-line algorithm that reliably outperforms either input list.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Reciprocal rank fusion of two result lists">
+<text x="20" y="18" class="d-accent">BM25</text>
+<rect x="20" y="28" width="150" height="24" rx="4" class="d-box"/><text x="32" y="45" class="d-label-sm">1. doc-C</text>
+<rect x="20" y="58" width="150" height="24" rx="4" class="d-box"/><text x="32" y="75" class="d-label-sm">2. doc-A</text>
+<rect x="20" y="88" width="150" height="24" rx="4" class="d-box"/><text x="32" y="105" class="d-label-sm">3. doc-F</text>
+<text x="230" y="18" class="d-accent">Vector</text>
+<rect x="230" y="28" width="150" height="24" rx="4" class="d-box"/><text x="242" y="45" class="d-label-sm">1. doc-B</text>
+<rect x="230" y="58" width="150" height="24" rx="4" class="d-box"/><text x="242" y="75" class="d-label-sm">2. doc-C</text>
+<rect x="230" y="88" width="150" height="24" rx="4" class="d-box"/><text x="242" y="105" class="d-label-sm">3. doc-A</text>
+<text x="440" y="18" class="d-fill-green" font-size="12" font-weight="600">Fused</text>
+<rect x="440" y="28" width="170" height="24" rx="4" class="d-box-good"/><text x="452" y="45" class="d-label-sm">1. doc-C  (1/61 + 1/62)</text>
+<rect x="440" y="58" width="170" height="24" rx="4" class="d-box"/><text x="452" y="75" class="d-label-sm">2. doc-A  (1/62 + 1/63)</text>
+<rect x="440" y="88" width="170" height="24" rx="4" class="d-box"/><text x="452" y="105" class="d-label-sm">3. doc-B  (1/61)</text>
+<text x="20" y="146" class="d-label-sm">score(d) = Σ 1 / (k + rank), k = 60. Only positions are used, so incomparable scores never need normalising.</text>
+<text x="20" y="168" class="d-label-sm">doc-C placed well in both lists and wins. doc-B was first in one list and still ranks.</text>
+</svg><figcaption>Two independent rankings fused by position rather than score. The document both methods liked wins, without ever comparing incomparable numbers.</figcaption></figure>
+  <h2>Rerankers: the expensive final pass</h2>
+  <p>Retrieval embeds queries and documents separately, so it can never see them together. A <strong>cross-encoder reranker</strong> does — it takes the query and one document as a single input and scores their relevance directly. Far more accurate, and far too slow to run over a whole corpus.</p>
+  <p>So the standard architecture is a funnel: retrieve 100 candidates cheaply with hybrid search, rerank those 100 properly, keep the top 5 for the model. You get cross-encoder quality at nearly bi-encoder cost, and the top-of-list precision that context engineering demands.</p>
+  <h2>The pipeline worth defaulting to</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">1. Retrieve wide</div><div><div class="roadmap-title">BM25 + vector, ~50 each</div><div class="roadmap-desc">Independent failure modes, so coverage is better than either alone.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2. Fuse</div><div><div class="roadmap-title">Reciprocal rank fusion</div><div class="roadmap-desc">Two lines of code, no tuning, no normalisation.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3. Rerank</div><div><div class="roadmap-title">Cross-encoder over ~100</div><div class="roadmap-desc">The accuracy step. Only affordable because the candidate set is small.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4. Truncate</div><div><div class="roadmap-title">Top 3–5 into context</div><div class="roadmap-desc">Precision beats volume — distractors actively cost you.</div></div></div></div>
+  <h2>What BM25 is actually computing</h2>
+  <p>Three ideas, each fixing a flaw in the one before it.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Term frequency</div><div><div class="roadmap-title">A word appearing often signals relevance</div><div class="roadmap-desc">But not linearly. Ten mentions is not ten times more relevant than one, so BM25 saturates — the fifth occurrence adds far less than the second.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Inverse document frequency</div><div><div class="roadmap-title">Rare words carry more information</div><div class="roadmap-desc">A document matching "gearbox" tells you much more than one matching "the". Weight each term by how rare it is across the corpus.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Length normalisation</div><div><div class="roadmap-title">Long documents match everything</div><div class="roadmap-desc">A 50-page manual contains most words by accident. Divide the benefit by length, tuned so that being long is penalised but not fatal.</div></div></div></div>
+  <div class="callout insight"><span class="label">Saturation is the part people miss</span>Plain term-frequency scoring can be gamed by repetition, and worse, it genuinely misranks — a short document that says "gearbox" once is often more relevant than a long one that says it fifteen times in passing. BM25's saturation curve is a small piece of mathematics that encodes a real judgement about how language works, and it is most of why a 1990s algorithm still competes with embeddings.</div>
+  <h2>Chunking, which decides more than your retriever does</h2>
+  <p>Every retrieval method here operates on chunks you chose. Choose them badly and no amount of ranking recovers.</p>
+  <ul><li><strong>Too small</strong> and a chunk lacks the context to be understood — a paragraph referring to "this threshold" with the threshold defined two chunks earlier.</li><li><strong>Too large</strong> and the embedding averages several topics into a vector that represents none of them well, while burning context when retrieved.</li><li><strong>Split on structure, not on character count.</strong> Headings, sections, function boundaries. A chunk that ends mid-sentence embeds badly and reads worse.</li><li><strong>Overlap a little</strong> so a passage spanning a boundary is not lost by both chunks.</li><li><strong>Keep the parent reference.</strong> Retrieve the chunk, then optionally expand to its section for context — small to match, larger to read.</li></ul>
+  <div class="callout pitfall"><span class="label">Look at your chunks before tuning anything downstream</span>Print twenty at random and read them. If you cannot tell what a chunk is about without its neighbours, your retrieval will not be able to either, and every hour spent on embedding models or rerankers is spent on the wrong layer. This takes ten minutes and it is skipped almost universally.</div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Mining of Massive Datasets</span><span class="bk-a">Leskovec, Rajaraman &amp; Ullman</span><span class="bk-n">Chapter 5 on link analysis and ranking. Older than BM25's current use in retrieval-augmented generation (RAG) and still the clearest account of what ranking is doing.</span></li><li><span class="bk-t">Enterprise RAG</span><span class="bk-a">Manning MEAP</span><span class="bk-n">Chunking strategies and hybrid retrieval in a production framing, which is where this lesson's practical advice comes from.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf" target="_blank" rel="noopener">Reciprocal Rank Fusion (Cormack et al.)</a><span class="link-note">The original paper. Short, and the algorithm is a single formula.</span></li><li><a href="https://sbert.net/examples/applications/cross-encoder/README.html" target="_blank" rel="noopener">Cross-encoders in Sentence Transformers</a><span class="link-note">How to run the rerank step, with pretrained models you can use directly.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. You have 40,000 vectors. What should you use?</p>
+    <p class="quiz-q">1. Why does BM25 often beat embeddings on a technical corpus?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">HNSW, since it&#x27;s the industry standard</div>
-      <div class="quiz-opt">Exact search — at this scale it&#x27;s fast enough and perfectly accurate</div>
-      <div class="quiz-opt">IVF with product quantization to save memory</div>
+      <div class="quiz-opt">It&#x27;s faster, so more documents can be searched</div>
+      <div class="quiz-opt">Embeddings compress meaning and lose exact tokens; BM25 matches identifiers and rare terms precisely</div>
+      <div class="quiz-opt">BM25 is trained on technical documentation</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. What does &#x27;recall@10 = 0.95&#x27; mean for an ANN index?</p>
+    <p class="quiz-q">2. What problem does reciprocal rank fusion avoid?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">95% of returned results are relevant to the user</div>
-      <div class="quiz-opt">The index returns 95% of the true nearest neighbours it should have found</div>
-      <div class="quiz-opt">The index is 95% as fast as exact search</div>
+      <div class="quiz-opt">Having to run two retrieval systems</div>
+      <div class="quiz-opt">Comparing scores from different systems that aren&#x27;t on the same scale — it uses only rank positions</div>
+      <div class="quiz-opt">The need for an embedding model</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. RAG answers have got worse and the prompt hasn&#x27;t changed. What should you rule out first?</p>
+    <p class="quiz-q">3. Why can&#x27;t you just run the cross-encoder reranker over the whole corpus?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">The embedding model has drifted</div>
-      <div class="quiz-opt">Index recall — measure against exact search before investigating anything downstream</div>
-      <div class="quiz-opt">The LLM provider changed the model version</div>
+      <div class="quiz-opt">It only works on short documents</div>
+      <div class="quiz-opt">It scores query and document together, so cost is one model pass per document — far too slow at corpus scale</div>
+      <div class="quiz-opt">It requires the documents to be pre-embedded</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

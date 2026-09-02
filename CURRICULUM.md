@@ -23,7 +23,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 74 lessons built, 74 diagrams, 13 executed notebooks.**
+**Status: 75 lessons built, 75 diagrams, 13 executed notebooks.**
 
 ---
 
@@ -158,6 +158,10 @@ non-completion column, without which the ranking is not defensible.
 - When fine-tuning is the wrong answer (usually — prompt, then RAG, then this)
 - Dataset construction, and how little data you actually need
 - LoRA / QLoRA vs full fine-tune, locally on the M4 Max
+- **Supervised versus reinforcement fine-tuning** — the objective decides what you get.
+  Supervised tuning imitates answers; reinforcement tuning (GRPO and relatives) optimises
+  against a reward or a verifier, which is how reasoning behaviour is trained rather than
+  copied. Block 0 teaches what a reasoning model is and this is where it gets made.
 - Evaluating before and after against a held-out set
 - Quantization for serving — lands directly on a production agent's GGUF and Q4_K_M
 

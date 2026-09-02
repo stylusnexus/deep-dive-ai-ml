@@ -580,6 +580,90 @@ LESSONS = [
   ],
 },
 {
+  "slug": "mixture-of-experts",
+  "title": "Mixture of Experts",
+  "subtitle": "How a model gets larger without getting slower — and why that trade lands badly on the machine under your desk.",
+  "body": [
+    ("p", "The previous lesson built the transformer block: attention, then a feed-forward network applied to every position. Scaling that block means making both parts bigger, and the cost of running it rises in step. Mixture of experts breaks that link. It keeps the parameter count large and activates only a fraction of it per token, so capacity grows without compute growing with it."),
+
+    ("h2", "What actually changes"),
+    ("p", "Attention is untouched. The change is confined to the feed-forward part of each block, which is replaced by several smaller feed-forward networks — the experts — and a router that decides which of them a given token goes through."),
+
+    ("terms", [
+      ("Experts", "Several small feed-forward networks in place of one large one",
+       "Each is an ordinary feed-forward network. There is no specialisation designed in: what each expert becomes good at emerges during training and is generally not interpretable."),
+      ("Router", "A classifier over experts, trained with the network",
+       "It produces a score for every expert and the top K are selected. It is learned rather than configured, which means routing quality is a property the model can get wrong."),
+      ("Per token, per layer", "The choice is made again everywhere",
+       "Different tokens in the same sentence take different experts, and the same token takes different experts at each layer. A sequence does not travel one path through the model."),
+      ("Active versus total parameters", "The number that gets quoted is not the number you load",
+       "A model described as eight experts of seven billion holds roughly forty-seven billion parameters and activates around thirteen billion per token. Both figures are real and they answer different questions."),
+    ]),
+
+    ("figure", "Only the feed-forward half of the block changes. The router picks a few experts per token, so the arithmetic per token falls while every expert still has to be resident in memory.", '''<svg viewBox="0 0 640 236" role="img" aria-label="A transformer block beside a mixture-of-experts block"><defs><marker id="moe" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<text x="14" y="18" class="d-label-b">Transformer block</text>
+<rect x="14" y="28" width="240" height="34" rx="6" class="d-box"/><text x="26" y="50" class="d-label-sm">attention</text>
+<path d="M134 62 L134 82" class="d-arrow-accent" marker-end="url(#moe)"/>
+<rect x="14" y="82" width="240" height="44" rx="6" class="d-box"/><text x="26" y="102" class="d-label-sm">one large feed-forward network</text><text x="26" y="118" class="d-label-sm">every token goes through all of it</text>
+<text x="330" y="18" class="d-label-b">Mixture-of-experts block</text>
+<rect x="330" y="28" width="296" height="34" rx="6" class="d-box"/><text x="342" y="50" class="d-label-sm">attention — unchanged</text>
+<path d="M478 62 L478 78" class="d-arrow-accent" marker-end="url(#moe)"/>
+<rect x="330" y="78" width="296" height="26" rx="6" class="d-box-accent"/><text x="342" y="96" class="d-label-sm">router — scores every expert, keeps top K</text>
+<rect x="330" y="112" width="66" height="40" rx="5" class="d-box-accent"/><text x="342" y="136" class="d-label-sm">E1</text>
+<rect x="404" y="112" width="66" height="40" rx="5" class="d-box"/><text x="416" y="136" class="d-label-sm">E2</text>
+<rect x="478" y="112" width="66" height="40" rx="5" class="d-box-accent"/><text x="490" y="136" class="d-label-sm">E3</text>
+<rect x="552" y="112" width="66" height="40" rx="5" class="d-box"/><text x="564" y="136" class="d-label-sm">E4</text>
+<text x="330" y="172" class="d-label-sm">shaded = active for this token. All four are resident in memory.</text>
+<text x="14" y="204" class="d-label-sm">Arithmetic per token falls with the number of experts you skip.</text>
+<text x="14" y="222" class="d-label-sm">Bytes held does not fall at all — which is the half that decides decode speed.</text>
+</svg>'''),
+
+    ("h2", "Two things that go wrong in training"),
+    ("p", "A learned router creates a feedback loop, and both of its failure modes are worth knowing because the fixes look arbitrary until you have seen the problem."),
+
+    ("terms", [
+      ("The rich get richer", "One expert wins early and keeps winning",
+       "At the start every expert is equally poor, so the first choice is effectively random. The chosen expert improves, which makes it more likely to be chosen, which improves it further. Left alone, a handful of experts absorb the training and the rest stay undertrained."),
+      ("Noise and masking", "The fix for it",
+       "Noise is added to the router's scores so other experts occasionally win, and everything outside the top K is set to negative infinity before the softmax so it contributes nothing. Together they keep the field open long enough for the others to learn."),
+      ("Load imbalance", "Some experts see far more tokens than others",
+       "A different problem with the same symptom. The fix is a capacity limit: an expert that has taken its quota of tokens refuses more, and the overflow goes to the next best choice."),
+    ]),
+
+    ("know",
+     "A mixture of experts lowers arithmetic per token and does not lower bytes held — which is the wrong half for generation.",
+     "Generating a token is already memory-bound: the hardware spends the step waiting on weights rather than doing arithmetic. Skipping experts removes arithmetic that was not the constraint, while every expert still has to be resident because the router might select it for the next token. Work per byte therefore goes <em>down</em>, which is the opposite of what a memory-bound workload wants. The saving is real, but it lands on the cost you were not paying.",
+     "This is why a mixture-of-experts model can be uncomfortable to run locally despite an activated-parameter count that sounds small. You buy memory for the total and you get the speed of the active fraction, and on a machine chosen for its memory ceiling the total is the number that decides whether it runs at all."),
+
+    ("callout", "matters", "Read both parameter counts, and know which question each answers",
+     "<p>Total parameters tell you whether the model fits. Active parameters tell you roughly how fast a token will be. A specification quoting only one of them is answering only half of the question you have, and the half usually quoted is the flattering one.</p>"),
+
+    ("callout", "pitfall", "Serving one is a routing problem, not just a bigger model",
+     "<p>At scale the experts are split across devices while attention is replicated, so each device holds only some experts. The router then decides not merely which expert but effectively which machine a token is sent to, and that flow changes token by token. This is why mixture-of-experts models depend on a capable inference engine rather than running acceptably on a naive one.</p>"),
+
+    ("h2", "Where it sits against the other levers"),
+    ("p", "This course has now met three ways of making a large model cheaper to run, and they act on different quantities. Grouped-query attention shrinks the key-value cache, which is bytes. Quantization shrinks the weights, which is also bytes. A mixture of experts shrinks the arithmetic per token and leaves the bytes alone. Only the first two help a memory-bound decode directly; the third buys capacity at fixed compute, which is a training and quality argument more than a serving one."),
+
+    ("quiz", [
+      ("What part of a transformer block does a mixture of experts replace?",
+       ["The attention mechanism, which is split across experts",
+        "The feed-forward network, which becomes several smaller networks plus a router that selects among them",
+        "The residual connections between layers"],
+       1),
+      ("A model is described as eight experts of seven billion parameters. What must you hold in memory?",
+       ["Roughly seven billion, since only one expert runs at a time",
+        "Roughly forty-seven billion — every expert has to be resident because the router may select any of them for the next token",
+        "Roughly thirteen billion, the activated count"],
+       1),
+      ("Why does skipping experts help less than it appears during generation?",
+       ["Routing overhead cancels most of the saving",
+        "Generation is memory-bound, so it removes arithmetic that was not the constraint while the bytes that were the constraint still have to be loaded",
+        "The experts are too small for the saving to matter"],
+       1),
+    ]),
+  ],
+},
+{
   "slug": "vector-search-algorithms",
   "title": "Nearest-Neighbour Search at Scale",
   "subtitle": "Exact search, HNSW, and the recall you quietly trade away for speed.",

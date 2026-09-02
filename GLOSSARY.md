@@ -396,6 +396,16 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Silhouette score** — How well each point fits its own cluster against the next-nearest, from -1 to 1. More decisive than the elbow method and slower.
 
+**Mixture of experts (MoE)** — An architecture that replaces each block's feed-forward network with several smaller ones and activates only a few per token. Capacity grows without arithmetic growing with it — but every expert stays resident in memory, so the saving lands on compute rather than on the bytes that limit generation.
+
+**Expert** — One of the small feed-forward networks in a mixture-of-experts block. What each becomes good at emerges during training and is generally not interpretable.
+
+**Router (MoE)** — The learned classifier that scores every expert per token and keeps the top few. Trained alongside the network, so routing quality is something a model can get wrong.
+
+**Active versus total parameters** — Total is what you must hold in memory; active is roughly what decides token speed. A mixture-of-experts model quotes both, and a specification giving only one is answering half the question.
+
+**Expert load imbalance** — Some experts receiving far more tokens than others during training, leaving the rest undertrained. Managed with a per-expert capacity limit that overflows surplus tokens to the next best choice.
+
 **Multi-head attention (MHA)** — The original form, where every head keeps its own keys and values. Most expressive, and the largest KV cache.
 
 **Grouped-query attention (GQA)** — Heads sharing key and value projections in groups. The current default, because it cuts the KV cache substantially at little cost in quality.

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Leakage</title>
+<title>Mixture of Experts</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -213,72 +213,60 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 9 of 9</span>
-  <h1>Data Leakage</h1>
-  <p class="subtitle">The failure that produces a brilliant model and a worthless one, simultaneously.</p>
+  <span class="pill">Lesson 7 of 10</span>
+  <h1>Mixture of Experts</h1>
+  <p class="subtitle">How a model gets larger without getting slower — and why that trade lands badly on the machine under your desk.</p>
 
-  <p>Your statistics course covers overfitting thoroughly. <strong>Leakage</strong> is its more dangerous cousin, and it isn't covered there. Overfitting shows up as a gap between training and validation scores — visible, diagnosable. Leakage inflates <em>both</em>, so every number looks excellent right up until production, where the model collapses.</p>
-  <h2>What it is</h2>
-  <p>Leakage is when information reaches the model during training that will not be available at prediction time. The model learns to use it, scores brilliantly on your held-out data — because the leak is in that data too — and then fails completely on real inputs where the information doesn't exist.</p>
-  <figure class="diagram"><svg viewBox="0 0 640 180" role="img" aria-label="Overfitting versus leakage in validation scores">
-<g>
-<text x="40" y="18" class="d-label-b">Overfitting</text>
-<line x1="30" y1="140" x2="270" y2="140" class="d-arrow"/>
-<line x1="30" y1="140" x2="30" y2="34" class="d-arrow"/>
-<path d="M40 120 Q120 70 260 48" stroke="var(--accent)" stroke-width="2.5" fill="none"/>
-<text x="196" y="42" class="d-accent">train</text>
-<path d="M40 124 Q120 100 260 104" stroke="var(--red)" stroke-width="2.5" fill="none"/>
-<text x="192" y="122" class="d-fill-red" font-size="11" font-weight="600">validation</text>
-<path d="M264 52 L264 100" stroke="var(--muted)" stroke-width="1.4" stroke-dasharray="3 3"/>
-<text x="120" y="166" class="d-fill-green" font-size="11" font-weight="600">visible gap — you can see it</text>
-</g>
-<g>
-<text x="380" y="18" class="d-label-b">Leakage</text>
-<line x1="370" y1="140" x2="610" y2="140" class="d-arrow"/>
-<line x1="370" y1="140" x2="370" y2="34" class="d-arrow"/>
-<path d="M380 120 Q460 66 600 44" stroke="var(--accent)" stroke-width="2.5" fill="none"/>
-<text x="536" y="38" class="d-accent">train</text>
-<path d="M380 124 Q460 74 600 52" stroke="var(--red)" stroke-width="2.5" fill="none"/>
-<text x="500" y="70" class="d-fill-red" font-size="11" font-weight="600">validation</text>
-<text x="424" y="166" class="d-fill-red" font-size="11" font-weight="600">no gap — nothing looks wrong</text>
-</g>
-</svg><figcaption>Overfitting announces itself as a gap. Leakage lifts both curves together, so the usual diagnostic shows nothing wrong.</figcaption></figure>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Overfitting announces itself as a gap; leakage lifts both curves together.</p><p class="know-why">That is what makes leakage the more dangerous of the two. The train-versus-validation gap you would normally use to spot a problem shows nothing, because the leak is present in both halves.</p><p class="know-eg"><span class="know-eg-label">For example</span>A churn model reaches 0.99 area under the curve (AUC) and validation agrees. The feature list includes account_closed_date, populated only for customers who already churned. Every metric is excellent and the model is worthless, because at prediction time that field is empty for everyone you care about.</p></blockquote>
-  <h2>The forms it takes</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Target leakage</div><div><div class="roadmap-title">A feature encodes the answer</div><div class="roadmap-desc">Predicting customer churn using 'cancellation_date'. Predicting failure using 'maintenance_ticket_raised'. The feature only exists because the outcome already happened.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Train-test contamination</div><div><div class="roadmap-title">The same rows in both sets</div><div class="roadmap-desc">Duplicates, near-duplicates, or the same customer appearing under two IDs. Very common in scraped or merged data.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Preprocessing leakage</div><div><div class="roadmap-title">Fitting on all the data</div><div class="roadmap-desc">Scaling or imputing before splitting means your training set has seen the test set's statistics. Subtle, extremely common.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Temporal leakage</div><div><div class="roadmap-title">Training on the future</div><div class="roadmap-desc">Random splits on time-ordered data let the model learn from events after the ones it predicts. Split by time instead.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Group leakage</div><div><div class="roadmap-title">Related rows split apart</div><div class="roadmap-desc">Multiple readings from one turbine, or several notes on one patient, spread across train and test.</div></div></div></div>
-  <div class="callout pitfall"><span class="label">The tell</span>A model that seems too good — 0.99 AUC on a hard problem — is far more likely to be leaking than to be brilliant. Treat a surprisingly good result as a bug report, not a success. The intake sheet's baseline question helps here: if your baseline also scores 0.97, something is wrong with the data, not right with your modelling.</div>
-  <h2>How to prevent it</h2>
-  <ul><li><strong>Split first, always.</strong> Before any scaling, imputation, encoding or feature selection. Everything is fitted on train and merely applied to validation and test.</li><li><strong>Use a pipeline.</strong> scikit-learn's <code>Pipeline</code> enforces fit-on-train mechanically inside cross-validation. This is what it's for.</li><li><strong>Split by time when time matters.</strong> Train on the past, validate on the future — matching how the model will actually be used.</li><li><strong>Split by group, not by row.</strong> All of a turbine's readings go to one side. <code>GroupKFold</code> exists for this.</li><li><strong>Interrogate every feature.</strong> For each one ask: would I have this value, with this content, at the moment I need the prediction? That single question catches most target leakage.</li></ul>
-  <h2>Where it reappears later</h2>
-  <p>Benchmark contamination in Block 5 is leakage at industry scale — the test set was in the training data, so the score measures memory. Tuning a prompt against the same examples you evaluate on is leakage by hand. The defence never changes: keep something back that the optimiser cannot see.</p>
-  <h2>Two more forms worth recognising</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Feature selection before the split</div><div><div class="roadmap-title">Subtle and common</div><div class="roadmap-desc">Choosing the top 20 features by correlation with the target, using all the data, then splitting. Your feature set has already seen the test rows. Select inside the pipeline.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Tuning against the test set</div><div><div class="roadmap-title">Leakage by repetition</div><div class="roadmap-desc">Every time you look at the test score and change something, a little of that set leaks into your choices. After thirty iterations it has become a validation set with a misleading name.</div></div></div></div>
-  <h2>How to actually catch it</h2>
-  <ul><li><strong>Rank the features by importance and interrogate the top one.</strong> If a single feature dominates a hard problem, ask why it is so informative. That question catches most target leakage.</li><li><strong>Drop your best feature and re-run.</strong> If performance collapses to near-baseline, you have a one-feature model, and that feature deserves scrutiny.</li><li><strong>Sort by time and re-split.</strong> If a time-ordered split scores far worse than a random one, you were learning from the future.</li><li><strong>Check for duplicate and near-duplicate rows across splits.</strong> Cheap, and it catches contamination in merged or scraped data.</li><li><strong>Ask what a human would need.</strong> If a person could not make this prediction from this information at that moment, your model should not be able to either.</li></ul>
-  <div class="callout matters"><span class="label">The organisational version of this problem</span>Leakage often enters through a column someone else created — a flag set by a downstream process, a field populated by the resolution workflow, a status updated after the fact. You cannot detect that from the data alone. Ask whoever owns the pipeline when each field is written, not just what it means. That conversation catches more leakage than any statistical check.</div>
-  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Designing Machine Learning Systems</span><span class="bk-a">Chip Huyen</span><span class="bk-n">Chapter 4 covers leakage, train-test contamination and the sampling decisions that produce them, in a production framing rather than an academic one.</span></li></ul></div>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/common_pitfalls.html" target="_blank" rel="noopener">Common pitfalls: data leakage (scikit-learn)</a><span class="link-note">The canonical treatment, with code showing the preprocessing mistake and its fix.</span></li><li><a href="https://scikit-learn.org/stable/modules/compose.html" target="_blank" rel="noopener">Pipelines (scikit-learn)</a><span class="link-note">The mechanism that makes preprocessing leakage structurally difficult to commit.</span></li></ul></div>
+  <p>The previous lesson built the transformer block: attention, then a feed-forward network applied to every position. Scaling that block means making both parts bigger, and the cost of running it rises in step. Mixture of experts breaks that link. It keeps the parameter count large and activates only a fraction of it per token, so capacity grows without compute growing with it.</p>
+  <h2>What actually changes</h2>
+  <p>Attention is untouched. The change is confined to the feed-forward part of each block, which is replaced by several smaller feed-forward networks — the experts — and a router that decides which of them a given token goes through.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Experts</div><div><div class="roadmap-title">Several small feed-forward networks in place of one large one</div><div class="roadmap-desc">Each is an ordinary feed-forward network. There is no specialisation designed in: what each expert becomes good at emerges during training and is generally not interpretable.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Router</div><div><div class="roadmap-title">A classifier over experts, trained with the network</div><div class="roadmap-desc">It produces a score for every expert and the top K are selected. It is learned rather than configured, which means routing quality is a property the model can get wrong.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Per token, per layer</div><div><div class="roadmap-title">The choice is made again everywhere</div><div class="roadmap-desc">Different tokens in the same sentence take different experts, and the same token takes different experts at each layer. A sequence does not travel one path through the model.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Active versus total parameters</div><div><div class="roadmap-title">The number that gets quoted is not the number you load</div><div class="roadmap-desc">A model described as eight experts of seven billion holds roughly forty-seven billion parameters and activates around thirteen billion per token. Both figures are real and they answer different questions.</div></div></div></div>
+  <figure class="diagram"><svg viewBox="0 0 640 236" role="img" aria-label="A transformer block beside a mixture-of-experts block"><defs><marker id="moe" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<text x="14" y="18" class="d-label-b">Transformer block</text>
+<rect x="14" y="28" width="240" height="34" rx="6" class="d-box"/><text x="26" y="50" class="d-label-sm">attention</text>
+<path d="M134 62 L134 82" class="d-arrow-accent" marker-end="url(#moe)"/>
+<rect x="14" y="82" width="240" height="44" rx="6" class="d-box"/><text x="26" y="102" class="d-label-sm">one large feed-forward network</text><text x="26" y="118" class="d-label-sm">every token goes through all of it</text>
+<text x="330" y="18" class="d-label-b">Mixture-of-experts block</text>
+<rect x="330" y="28" width="296" height="34" rx="6" class="d-box"/><text x="342" y="50" class="d-label-sm">attention — unchanged</text>
+<path d="M478 62 L478 78" class="d-arrow-accent" marker-end="url(#moe)"/>
+<rect x="330" y="78" width="296" height="26" rx="6" class="d-box-accent"/><text x="342" y="96" class="d-label-sm">router — scores every expert, keeps top K</text>
+<rect x="330" y="112" width="66" height="40" rx="5" class="d-box-accent"/><text x="342" y="136" class="d-label-sm">E1</text>
+<rect x="404" y="112" width="66" height="40" rx="5" class="d-box"/><text x="416" y="136" class="d-label-sm">E2</text>
+<rect x="478" y="112" width="66" height="40" rx="5" class="d-box-accent"/><text x="490" y="136" class="d-label-sm">E3</text>
+<rect x="552" y="112" width="66" height="40" rx="5" class="d-box"/><text x="564" y="136" class="d-label-sm">E4</text>
+<text x="330" y="172" class="d-label-sm">shaded = active for this token. All four are resident in memory.</text>
+<text x="14" y="204" class="d-label-sm">Arithmetic per token falls with the number of experts you skip.</text>
+<text x="14" y="222" class="d-label-sm">Bytes held does not fall at all — which is the half that decides decode speed.</text>
+</svg><figcaption>Only the feed-forward half of the block changes. The router picks a few experts per token, so the arithmetic per token falls while every expert still has to be resident in memory.</figcaption></figure>
+  <h2>Two things that go wrong in training</h2>
+  <p>A learned router creates a feedback loop, and both of its failure modes are worth knowing because the fixes look arbitrary until you have seen the problem.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The rich get richer</div><div><div class="roadmap-title">One expert wins early and keeps winning</div><div class="roadmap-desc">At the start every expert is equally poor, so the first choice is effectively random. The chosen expert improves, which makes it more likely to be chosen, which improves it further. Left alone, a handful of experts absorb the training and the rest stay undertrained.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Noise and masking</div><div><div class="roadmap-title">The fix for it</div><div class="roadmap-desc">Noise is added to the router's scores so other experts occasionally win, and everything outside the top K is set to negative infinity before the softmax so it contributes nothing. Together they keep the field open long enough for the others to learn.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Load imbalance</div><div><div class="roadmap-title">Some experts see far more tokens than others</div><div class="roadmap-desc">A different problem with the same symptom. The fix is a capacity limit: an expert that has taken its quota of tokens refuses more, and the overflow goes to the next best choice.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A mixture of experts lowers arithmetic per token and does not lower bytes held — which is the wrong half for generation.</p><p class="know-why">Generating a token is already memory-bound: the hardware spends the step waiting on weights rather than doing arithmetic. Skipping experts removes arithmetic that was not the constraint, while every expert still has to be resident because the router might select it for the next token. Work per byte therefore goes <em>down</em>, which is the opposite of what a memory-bound workload wants. The saving is real, but it lands on the cost you were not paying.</p><p class="know-eg"><span class="know-eg-label">For example</span>This is why a mixture-of-experts model can be uncomfortable to run locally despite an activated-parameter count that sounds small. You buy memory for the total and you get the speed of the active fraction, and on a machine chosen for its memory ceiling the total is the number that decides whether it runs at all.</p></blockquote>
+  <div class="callout matters"><span class="label">Read both parameter counts, and know which question each answers</span><p>Total parameters tell you whether the model fits. Active parameters tell you roughly how fast a token will be. A specification quoting only one of them is answering only half of the question you have, and the half usually quoted is the flattering one.</p></div>
+  <div class="callout pitfall"><span class="label">Serving one is a routing problem, not just a bigger model</span><p>At scale the experts are split across devices while attention is replicated, so each device holds only some experts. The router then decides not merely which expert but effectively which machine a token is sent to, and that flow changes token by token. This is why mixture-of-experts models depend on a capable inference engine rather than running acceptably on a naive one.</p></div>
+  <h2>Where it sits against the other levers</h2>
+  <p>This course has now met three ways of making a large model cheaper to run, and they act on different quantities. Grouped-query attention shrinks the key-value cache, which is bytes. Quantization shrinks the weights, which is also bytes. A mixture of experts shrinks the arithmetic per token and leaves the bytes alone. Only the first two help a memory-bound decode directly; the third buys capacity at fixed compute, which is a training and quality argument more than a serving one.</p>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. Why is leakage harder to spot than overfitting?</p>
+    <p class="quiz-q">1. What part of a transformer block does a mixture of experts replace?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">It only appears in very large datasets</div>
-      <div class="quiz-opt">It inflates training and validation scores together, so the usual train/validation gap shows nothing</div>
-      <div class="quiz-opt">It only affects neural networks</div>
+      <div class="quiz-opt">The attention mechanism, which is split across experts</div>
+      <div class="quiz-opt">The feed-forward network, which becomes several smaller networks plus a router that selects among them</div>
+      <div class="quiz-opt">The residual connections between layers</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. You standardise your features, then split into train and test. What went wrong?</p>
+    <p class="quiz-q">2. A model is described as eight experts of seven billion parameters. What must you hold in memory?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Nothing — scaling is not a model</div>
-      <div class="quiz-opt">The scaler saw the test set&#x27;s statistics, so information about test data leaked into training</div>
-      <div class="quiz-opt">Standardising should happen after model fitting</div>
+      <div class="quiz-opt">Roughly seven billion, since only one expert runs at a time</div>
+      <div class="quiz-opt">Roughly forty-seven billion — every expert has to be resident because the router may select any of them for the next token</div>
+      <div class="quiz-opt">Roughly thirteen billion, the activated count</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. You get 0.99 AUC on a hard churn problem, first attempt. What&#x27;s the right reaction?</p>
+    <p class="quiz-q">3. Why does skipping experts help less than it appears during generation?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Ship it — the features must be unusually informative</div>
-      <div class="quiz-opt">Suspect leakage and audit every feature for whether it exists at prediction time</div>
-      <div class="quiz-opt">Add regularisation to bring the score down</div>
+      <div class="quiz-opt">Routing overhead cancels most of the saving</div>
+      <div class="quiz-opt">Generation is memory-bound, so it removes arithmetic that was not the constraint while the bytes that were the constraint still have to be loaded</div>
+      <div class="quiz-opt">The experts are too small for the saving to matter</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nearest-Neighbour Search at Scale</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 8 of 10</span>
+  <h1>Nearest-Neighbour Search at Scale</h1>
+  <p class="subtitle">Exact search, HNSW, and the recall you quietly trade away for speed.</p>
+
+  <p>The previous lesson on k-NN described finding the nearest vectors. Doing that across ten million embeddings, in under fifty milliseconds, is a different problem — and the algorithm you choose has a failure mode most people never measure.</p>
+  <h2>Exact search, and when it&#x27;s fine</h2>
+  <p>Compare the query against every stored vector and keep the best matches. It's exhaustive, perfectly accurate, and linear in the number of vectors. For under roughly 100,000 vectors this is genuinely fine on modern hardware — often single-digit milliseconds.</p>
+  <div class="callout matters"><span class="label">Don&#x27;t optimise this early</span>Most retrieval-augmented generation (RAG) corpora are far smaller than people assume. A few thousand documents chunked into tens of thousands of vectors is comfortably exact-search territory. Reach for approximate indexing when you've measured that you need it, not because the tutorial used it.</div>
+  <h2>Approximate nearest neighbour</h2>
+  <p>Above that scale, <strong>ANN</strong> algorithms trade a small amount of accuracy for a large amount of speed. They don't guarantee finding the true nearest neighbours — they find <em>most</em> of them, most of the time.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">HNSW</div><div><div class="roadmap-title">Hierarchical navigable small world</div><div class="roadmap-desc">A layered graph. Search starts in a sparse top layer that covers ground quickly, then descends into denser layers to refine. The dominant choice — fast and accurate, at the cost of memory.</div></div></div><div class="roadmap-item"><div class="roadmap-num">IVF</div><div><div class="roadmap-title">Inverted file index</div><div class="roadmap-desc">Cluster the vectors, then search only the nearest few clusters. Lower memory, and misses anything sitting just outside a searched cluster.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Product quantization</div><div><div class="roadmap-title">Compress the vectors themselves</div><div class="roadmap-desc">Often paired with IVF to cut memory dramatically. Quantization again — same trade, different object.</div></div></div></div>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="HNSW layered graph search">
+<text x="12" y="18" class="d-label-sm">layer 2 — sparse, long hops</text>
+<circle cx="120" cy="36" r="5" class="d-fill-accent"/><circle cx="330" cy="30" r="5" class="d-fill-muted"/><circle cx="520" cy="38" r="5" class="d-fill-muted"/>
+<line x1="120" y1="36" x2="330" y2="30" class="d-arrow"/><line x1="330" y1="30" x2="520" y2="38" class="d-arrow"/>
+<text x="12" y="86" class="d-label-sm">layer 1 — denser</text>
+<circle cx="120" cy="104" r="4.5" class="d-fill-muted"/><circle cx="230" cy="110" r="4.5" class="d-fill-muted"/>
+<circle cx="330" cy="98" r="4.5" class="d-fill-accent"/><circle cx="430" cy="112" r="4.5" class="d-fill-muted"/>
+<circle cx="520" cy="104" r="4.5" class="d-fill-muted"/>
+<line x1="120" y1="104" x2="230" y2="110" class="d-arrow"/><line x1="230" y1="110" x2="330" y2="98" class="d-arrow"/>
+<line x1="330" y1="98" x2="430" y2="112" class="d-arrow"/><line x1="430" y1="112" x2="520" y2="104" class="d-arrow"/>
+<text x="12" y="150" class="d-label-sm">layer 0 — every vector</text>
+<g class="d-fill-muted">
+<circle cx="80" cy="172" r="3.5"/><circle cx="140" cy="176" r="3.5"/><circle cx="200" cy="170" r="3.5"/>
+<circle cx="260" cy="178" r="3.5"/><circle cx="320" cy="172" r="3.5"/><circle cx="440" cy="176" r="3.5"/>
+<circle cx="500" cy="170" r="3.5"/><circle cx="560" cy="178" r="3.5"/>
+</g>
+<circle cx="380" cy="174" r="5" class="d-fill-green"/>
+<text x="392" y="164" class="d-fill-green" font-size="11" font-weight="600">answer</text>
+<path d="M120 44 L120 96" class="d-arrow-accent"/><path d="M330 106 L376 166" class="d-arrow-accent"/>
+</svg><figcaption>HNSW navigates a layered graph: coarse hops at the top cover distance fast, finer layers refine. Speed comes from never examining most of the data — which is also where recall is lost.</figcaption></figure>
+  <h2>The number nobody measures</h2>
+  <p><strong>Recall@k</strong> is the fraction of true nearest neighbours your index actually returned. An HNSW index at 95% recall silently misses one in twenty of the results it should have found — and because the results it does return look perfectly reasonable, nothing appears broken.</p>
+  <div class="callout pitfall"><span class="label">How this fails in production</span>RAG quality drops and everyone investigates the prompt, the chunking, the model. The actual cause is an index tuned for speed that never retrieves the right chunk in the first place. Measure recall against exact search on a sample before blaming anything downstream — it takes an hour and rules out an entire category of problem.</div>
+  <p>The tuning knobs trade directly: HNSW's <code>ef_search</code> and <code>M</code> raise recall and cost latency and memory. There is no setting that gives you both.</p>
+  <h2>The two knobs, and what each costs</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">M</div><div><div class="roadmap-title">Connections per node, set at build time</div><div class="roadmap-desc">Higher means a denser graph: better recall, more memory, slower to build. Changing it means rebuilding the index.</div></div></div><div class="roadmap-item"><div class="roadmap-num">ef_construction</div><div><div class="roadmap-title">Effort spent while building</div><div class="roadmap-desc">Higher builds a better graph, once, for a longer build. Cheap to be generous with — you pay it only at index time.</div></div></div><div class="roadmap-item"><div class="roadmap-num">ef_search</div><div><div class="roadmap-title">Candidates examined per query</div><div class="roadmap-desc">The one you tune live. Raise it for recall, pay in latency. This is the dial to move first when recall is low.</div></div></div></div>
+  <div class="callout matters"><span class="label">Tune ef_search before rebuilding anything</span>Low recall is far more often an ef_search that was left at a library default than a fundamentally wrong index. It costs nothing to raise, takes effect immediately, and its cost is latency you can measure. Only rebuild with a larger M when you have established that ef_search alone cannot reach the recall you need.</div>
+  <h2>Measuring recall, in about an hour</h2>
+  <p>Take a sample of real queries — two hundred is plenty. Run each through exact search over the full set and keep the true top-k. Run each through your index. Recall@k is the mean overlap. That number is the honest description of your retrieval layer, and almost nobody computes it.</p>
+  <p>Do this once at build time and re-run it on a schedule, because recall degrades as a corpus grows and shifts. An index tuned when you had 50,000 documents is not necessarily the same index at 500,000.</p>
+  <h2>The other reason to keep vectors in Postgres</h2>
+  <p>Specialist vector databases are faster at pure vector search. What they are not good at is the query you actually write, which almost always has a filter attached — this customer, this date range, this document type. Filtered vector search is genuinely hard: filter first and you may search too few candidates to find good neighbours; search first and you may filter away everything you found.</p>
+  <div class="callout insight"><span class="label">Filtering is where the real engineering is</span>A database that already holds your relational data can combine a vector search with a SQL predicate in one planner. Two separate stores means doing that join yourself, in application code, badly. At the scale most teams operate, one database that does both adequately beats two that each do half the job well.</div>
+  <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Mining of Massive Datasets</span><span class="bk-a">Leskovec, Rajaraman &amp; Ullman</span><span class="bk-n">Chapter 3 on locality-sensitive hashing is the theoretical ancestor of everything in this lesson. Free online, and worth it for the intuition about why approximate methods work at all.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://github.com/pgvector/pgvector" target="_blank" rel="noopener">pgvector indexing</a><span class="link-note">HNSW and IVFFlat in Postgres, with the parameters and their recall implications.</span></li><li><a href="https://arxiv.org/abs/1603.09320" target="_blank" rel="noopener">Efficient and robust ANN search using HNSW (Malkov &amp; Yashunin)</a><span class="link-note">The HNSW paper. The layered-graph intuition is in the first few pages.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. You have 40,000 vectors. What should you use?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">HNSW, since it&#x27;s the industry standard</div>
+      <div class="quiz-opt">Exact search — at this scale it&#x27;s fast enough and perfectly accurate</div>
+      <div class="quiz-opt">IVF with product quantization to save memory</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. What does &#x27;recall@10 = 0.95&#x27; mean for an ANN index?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">95% of returned results are relevant to the user</div>
+      <div class="quiz-opt">The index returns 95% of the true nearest neighbours it should have found</div>
+      <div class="quiz-opt">The index is 95% as fast as exact search</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. RAG answers have got worse and the prompt hasn&#x27;t changed. What should you rule out first?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The embedding model has drifted</div>
+      <div class="quiz-opt">Index recall — measure against exact search before investigating anything downstream</div>
+      <div class="quiz-opt">The LLM provider changed the model version</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>
