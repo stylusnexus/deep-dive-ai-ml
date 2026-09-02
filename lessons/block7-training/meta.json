@@ -1,0 +1,41 @@
+{
+  "title": "Block 7 \u00b7 Training and Fine-Tuning",
+  "topic": "block7-training",
+  "icon": "\ud83d\udd27",
+  "description": "When changing the weights is the right answer, which is rarely \u2014 then the four ways to make a model smaller, what each one costs, and the fact that compression does not remove capability evenly.",
+  "tags": [
+    "ai",
+    "training",
+    "fine-tuning"
+  ],
+  "colorScheme": "violet",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-09-02",
+  "lessons": [
+    {
+      "id": "lsn-1788000000000",
+      "title": "When Fine-Tuning Is the Wrong Answer",
+      "file": "lsn-1788000000000-when-fine-tuning-is-wrong.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788000000001",
+      "title": "The Four Ways to Shrink a Model",
+      "file": "lsn-1788000000001-the-four-ways-to-shrink-a-model.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1788000000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788000000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}

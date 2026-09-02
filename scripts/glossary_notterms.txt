@@ -330,3 +330,5 @@ Regression on every change
 Rendered content as a channel
 Sandboxing with egress control
 The trace itself
+Prompting
+Structural change

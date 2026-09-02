@@ -23,7 +23,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 80 lessons built, 80 diagrams, 13 executed notebooks.**
+**Status: 82 lessons built, 82 diagrams, 13 executed notebooks.**
 
 ---
 
@@ -160,18 +160,20 @@ Project 3 rather than in isolation, which is the point of it.
 ## Block 7 · Training & Fine-Tuning — 1.5 weeks
 *Not in the original at all.*
 
-- When fine-tuning is the wrong answer (usually — prompt, then RAG, then this)
+- When fine-tuning is the wrong answer (usually — prompt, then RAG, then this) ✅
 - Dataset construction, and how little data you actually need
 - LoRA / QLoRA vs full fine-tune, locally on the M4 Max
 - **Supervised versus reinforcement fine-tuning** — the objective decides what you get.
   Supervised tuning imitates answers; reinforcement tuning (GRPO and relatives) optimises
   against a reward or a verifier, which is how reasoning behaviour is trained rather than
   copied. Block 0 teaches what a reasoning model is and this is where it gets made.
-- **Pruning, and distillation as repair** — removing depth (whole layers) or width
-  (neurons and heads within layers) from a trained model, then using distillation to
-  recover what the surgery cost. The course teaches quantization and distillation and
-  currently presents neither as a member of the compression family that also contains
-  pruning and low-rank factorisation.
+- **The four ways to shrink a model** ✅ — quantization, pruning, distillation and
+  low-rank factorisation as one family; which compose (pruning then distillation as
+  repair) and which are alternatives; and that compression does not remove capability
+  evenly, so it needs slice evaluation rather than an aggregate.
+
+2 lessons in `lessons/block7-training/`. The remaining bullets need a training run and
+a GPU budget, which is where this block gets expensive.
 - Evaluating before and after against a held-out set
 - Quantization for serving — lands directly on a production agent's GGUF and Q4_K_M
 

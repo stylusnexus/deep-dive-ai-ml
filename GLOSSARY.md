@@ -740,3 +740,21 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Exfiltration channel** — Any path by which data in context reaches somewhere the attacker can see: a fetch tool, a written file read back later, a rendered image address, or a trace written to a lower-trust store.
 
+---
+
+## Block 7 · Training and Fine-Tuning
+
+**Fine-tuning** — Changing a model's weights so it responds differently: tone, structure, schema adherence, a domain's conventions. Good at installing behaviour and poor at installing facts, which is the distinction that decides whether it is the right tool or whether you needed retrieval.
+
+**Low-rank factorisation** — Approximating a large weight matrix as the product of two smaller ones. The fourth member of the compression family, and the one already familiar from LoRA, where the adapter is a low-rank pair standing in for a full-rank update.
+
+**Depth pruning** — Removing whole layers from a trained network.
+
+**Width pruning** — Removing neurons and attention heads from within layers, leaving the layer count unchanged.
+
+**Distillation as repair** — Using a distillation pass to recover capability a pruning cut removed, training the pruned model against the original as teacher. The one place in the compression family where two techniques compose rather than compete.
+
+**Uneven capability loss** — The fact that compression does not remove capability uniformly. What disappears tends to be what was rare — less-represented languages, minority dialects, uncommon domains — so an aggregate score can barely move while a narrow slice degrades badly, which makes compression a fairness question rather than only an efficiency one.
+
+**Slice evaluation** — Measuring per population or per domain rather than in aggregate. The only instrument that can detect uneven capability loss, and the one routinely skipped when compressing a model.
+

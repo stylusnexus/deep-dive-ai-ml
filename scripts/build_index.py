@@ -104,6 +104,8 @@ SECTIONS = [
      "The front door to the measurement material scattered across this course, then labels you can defend and a cross-model comparison that does not lie."),
     ("block6-security", "Block 6 · Security",
      "Block 0 named the attack classes; this block runs them against the agent you built, starting with the injection your own retrieval pipeline invites."),
+    ("block7-training", "Block 7 · Training and Fine-Tuning",
+     "When changing the weights is the right answer — rarely — and the four ways to shrink a model, including the fact that compression does not remove capability evenly."),
     ("engineering-practice", "Block 0 · Engineering Practice",
      "The three artifacts an LLM project accumulates — harness, recipes, decision records — how each one turns harmful, and the measurement procedure that corrects them."),
 ]
