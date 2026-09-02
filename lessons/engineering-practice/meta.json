@@ -70,20 +70,32 @@
     },
     {
       "id": "lsn-1787400000009",
-      "title": "Vibe Coding and Spec-Driven Development",
-      "file": "lsn-1787400000009-spec-driven-development.html",
+      "title": "Code Nobody Decided",
+      "file": "lsn-1787400000009-code-nobody-decided.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787400000010",
-      "title": "Version Control, and Why Agents Make It Non-Optional",
-      "file": "lsn-1787400000010-version-control-basics.html",
+      "title": "What AI Makes Worse",
+      "file": "lsn-1787400000010-what-ai-makes-worse.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787400000011",
+      "title": "Vibe Coding and Spec-Driven Development",
+      "file": "lsn-1787400000011-spec-driven-development.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000012",
+      "title": "Version Control, and Why Agents Make It Non-Optional",
+      "file": "lsn-1787400000012-version-control-basics.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000013",
       "title": "Rungs: Running Experiments on an Agent",
-      "file": "lsn-1787400000011-rungs-and-experiments.html",
+      "file": "lsn-1787400000013-rungs-and-experiments.html",
       "source": "skill"
     }
   ],
@@ -144,6 +156,16 @@
       "starred": false
     },
     "lsn-1787400000011": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000012": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000013": {
       "viewed": false,
       "completed": false,
       "starred": false

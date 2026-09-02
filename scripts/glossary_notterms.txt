@@ -360,3 +360,10 @@ Secrets
 The long tail
 Timeouts — you do not know
 Validation with bounds
+Comprehension, not typing
+Coupling and cohesion
+Legacy, defined usefully
+Technical debt, properly
+The delay
+The maintenance horizon
+Undecided behaviour

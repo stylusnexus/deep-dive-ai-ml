@@ -840,6 +840,157 @@ swebench report my-run-01 -d verified"""),
   ],
 },
 {
+  "slug": "code-nobody-decided",
+  "title": "Code Nobody Decided",
+  "subtitle": "The previous lesson asked whether to use a model. This one asks who chose the behaviour when you did.",
+  "body": [
+    ("p", "A pull request looks good. Clean structure, real error handling, sensible names, tests passing, and it matches the API contract. The reviewer approves it and moves on. Three weeks later the on-call engineer is paged: the endpoint returns a conflict for cancelled orders. The product team is baffled — they never asked for that. The engineer who raised the pull request cannot explain where the rule came from either. She prompted for the endpoint, read the output, thought it looked reasonable, and shipped it."),
+
+    ("p", "Nothing here is broken. The code works exactly as written. What went wrong is that <em>nobody chose this behaviour</em>, and the team is now maintaining business logic that arrived by autocomplete. That failure has no error message, no failing test and no bad reviewer. It has a three-week delay and somebody else's pager."),
+
+    ("h2", "Why review stops working"),
+    ("p", "Reviewing code and reviewing decisions are different activities, and generated code makes them easy to confuse. When a person writes something unusual, the oddity is a signal — they had a reason, and the reviewer asks about it. When a model writes something unusual, the oddity means nothing at all, because there was no reason. It was a plausible continuation."),
+
+    ("p", "So the reviewer's usual instrument stops reading. Approving output that looks correct is not the same as approving a decision, and if there is no decision underneath, review has quietly become proofreading. The output arrives with the surface features of considered work — structure, handled edge cases, tests — and none of the substance."),
+
+    ("terms", [
+      ("Decided behaviour", "Someone can say why",
+       "A person chose it, for a reason that survives being asked about, and the reason is recoverable later from a specification, a decision record or a commit message."),
+      ("Invented behaviour", "Plausible, and unowned",
+       "It appeared because it was a likely continuation. It may be sensible. Nobody weighed it, nobody can defend it, and nobody knows what it was trading off."),
+      ("The delay", "Weeks, and it lands on someone else",
+       "Invented behaviour is not detected at review, because it looks like the rest. It is detected in production by whoever is on call, which is the most expensive place and the least equipped person."),
+    ]),
+
+    ("know",
+     "Generated code arrives with the appearance of considered work and none of the substance.",
+     "Structure, error handling, naming and tests are the signals a reviewer uses to judge whether someone thought carefully. A model produces all of them regardless of whether anything was thought about, so the correlation those signals rely on is broken. This is why AI-assisted review degrades into rubber-stamping without anyone deciding to lower their standards — the instrument stopped measuring what it used to measure, and nothing announced it.",
+     "The practical test is not &ldquo;is this code good&rdquo; but &ldquo;can anyone say why it does this?&rdquo; Ask it of any behaviour a specification did not require. If the answer is that it looked reasonable, the behaviour is unowned, whatever its quality."),
+
+    ("figure", "The same output arrives by two routes. Review can distinguish them only if the intent was recorded somewhere before the code existed — afterwards the two are indistinguishable, which is why the check has to happen upstream.", '''<svg viewBox="0 0 640 204" role="img" aria-label="Decided and invented behaviour arriving at the same review"><defs><marker id="dec" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="14" y="18" width="196" height="46" rx="6" class="d-box"/><text x="26" y="38" class="d-label-b">intent, written down</text><text x="26" y="55" class="d-label-sm">spec, decision record, issue</text>
+<path d="M210 41 L286 76" class="d-arrow-accent" marker-end="url(#dec)"/>
+<rect x="14" y="112" width="196" height="46" rx="6" class="d-box-accent"/><text x="26" y="132" class="d-label-b">a plausible continuation</text><text x="26" y="149" class="d-label-sm">nobody weighed it</text>
+<path d="M210 135 L286 100" class="d-arrow-accent" marker-end="url(#dec)"/>
+<rect x="286" y="66" width="160" height="44" rx="6" class="d-box"/><text x="298" y="86" class="d-label-b">the same diff</text><text x="298" y="103" class="d-label-sm">clean, tested, plausible</text>
+<path d="M446 88 L510 88" class="d-arrow-accent" marker-end="url(#dec)"/>
+<rect x="510" y="66" width="116" height="44" rx="6" class="d-box"/><text x="522" y="92" class="d-label-sm">review</text>
+<text x="14" y="192" class="d-label-sm">By the time it reaches review the two are the same object. The distinction exists only upstream of it.</text>
+</svg>'''),
+
+    ("h2", "What actually helps"),
+    ("ul", [
+      "<strong>Prompt for the decision, not the implementation.</strong> Asking for options with trade-offs produces something to choose between; asking for the endpoint produces something to accept. The first leaves a decision in the transcript, the second leaves an artefact.",
+      "<strong>Write the intent before the code exists.</strong> The specification lesson that follows is this in practice, and its value here is specifically that it gives review something to check the diff <em>against</em>.",
+      "<strong>Review behaviour, not lines.</strong> The question is what this now does that it did not do before, and whether anyone asked for each of those things.",
+      "<strong>Treat unexplained behaviour as a defect.</strong> Not necessarily wrong — unowned. A behaviour nobody can justify is one nobody can safely change either, which is how it survives to become load-bearing.",
+    ]),
+
+    ("callout", "matters", "The cost is deferred, which is why it accumulates",
+     "<p>Nothing punishes you at the moment this happens. The code works, the tests pass, the feature ships and the sprint looks good. The bill arrives later as a codebase whose behaviour nobody can account for, one plausible addition at a time — and by then the person who could have explained any single piece has long moved on to the next ticket.</p>"),
+
+    ("quiz", [
+      ("Why does a reviewer's usual judgement work less well on generated code?",
+       ["Generated code contains subtler bugs than hand-written code",
+        "Structure, error handling and tests normally signal that someone thought carefully — a model produces them regardless, so the signal no longer means what it did",
+        "Reviewers read generated code faster and less carefully"],
+       1),
+      ("What makes unexplained behaviour a defect even when it is correct?",
+       ["It is likely to be wrong in edge cases nobody tested",
+        "Nobody can justify it, which means nobody can safely change it either — so it survives and becomes load-bearing",
+        "It usually indicates the specification was incomplete"],
+       1),
+      ("What is the practical test proposed for any behaviour a specification did not require?",
+       ["Whether it is covered by a test",
+        "Whether anyone can say why it does that — if the answer is that it looked reasonable, it is unowned",
+        "Whether it matches the conventions of the surrounding code"],
+       1),
+    ]),
+  ],
+},
+{
+  "slug": "what-ai-makes-worse",
+  "title": "What AI Makes Worse",
+  "subtitle": "You do not need to want to be a software engineer. You do need the parts of it that generation puts under pressure.",
+  "body": [
+    ("p", "This is the one lesson here that is not about models. If your goal is to build with them rather than to become a software engineer, it is tempting to treat everything below as somebody else's discipline — and that instinct is right about most of software engineering and wrong about a specific slice of it. Generation does not put uniform pressure on a codebase. It puts a great deal on four things, and those four are the ones worth knowing regardless of what you aspire to."),
+
+    ("h2", "The four it presses on"),
+    ("terms", [
+      ("Comprehension, not typing", "The bottleneck moved",
+       "Producing code stopped being the limit; understanding it did not get faster. A change you can generate in a minute and would need an hour to verify has not saved fifty-nine minutes — it has moved the cost somewhere less visible and usually onto someone else."),
+      ("Undecided behaviour", "It accumulates quietly",
+       "The previous lesson in full. Each plausible addition is individually fine and the sum is a system whose behaviour nobody can account for."),
+      ("Coupling", "Adding got cheaper; untangling did not",
+       "When writing a new call, a new field or a new dependency costs almost nothing, more of them get written. Every one is a connection that something later has to reason about, and the cost of removing one has not fallen at all."),
+      ("The maintenance horizon", "It arrives sooner",
+       "Code you did not write is code you have to maintain. Generation shortens the distance between a system being new and a system being legacy, because legacy means nobody remembers the reasoning, and the reasoning was never held by a person to begin with."),
+    ]),
+
+    ("know",
+     "Generation multiplies output. It does not multiply the capacity to understand output.",
+     "Everything difficult about a codebase scales with how much of it there is and how connected it is — reading it, changing it safely, onboarding someone, finding why it does something. Those costs were always there and were bounded by how fast people could type. Removing that bound does not remove the costs; it removes the thing that was limiting them, which is a different and much less comfortable situation.",
+     "The useful question before accepting a generated change is not whether it works. It is whether you could explain it to someone in a month, and whether you would notice if it were subtly wrong. If both answers are no, the change has added capability and subtracted control."),
+
+    ("figure", "Only one of these got faster. The uncomfortable part is that it was the one that used to set the pace for everything else.", '''<svg viewBox="0 0 640 176" role="img" aria-label="What generation accelerated and what it did not"><rect x="14" y="20" width="290" height="118" rx="8" class="d-box-accent"/>
+<text x="28" y="46" class="d-label-b">much faster now</text>
+<text x="28" y="76" class="d-label-sm">writing code</text>
+<text x="28" y="100" class="d-label-sm">adding a dependency, a field, a call</text>
+<rect x="336" y="20" width="290" height="118" rx="8" class="d-box"/>
+<text x="350" y="46" class="d-label-b">exactly as slow as before</text>
+<text x="350" y="70" class="d-label-sm">reading and understanding it</text>
+<text x="350" y="90" class="d-label-sm">changing it without breaking things</text>
+<text x="350" y="110" class="d-label-sm">explaining why it does that</text>
+<text x="14" y="166" class="d-label-sm">The bottleneck did not disappear. It moved to the column nobody measures.</text>
+</svg>'''),
+
+    ("h2", "The minimum, for anyone"),
+    ("ul", [
+      "<strong>Be able to explain what you shipped.</strong> Not line by line — what it does, why it does that, and what you would look at first if it misbehaved.",
+      "<strong>Prefer fewer connections.</strong> When something can be done with one less call into another part of the system, do that. This is most of what &ldquo;good design&rdquo; means in practice and it needs no vocabulary.",
+      "<strong>Leave the reasoning behind.</strong> A commit message or a comment saying why, not what. The diff already says what. In six months the why is the only part that is gone.",
+      "<strong>Make it reversible.</strong> Small changes, on branches, with a way back. Reversibility is worth more than correctness, because it is the thing that lets you be wrong cheaply.",
+    ]),
+
+    ("h2", "For engineers, or anyone who wants the deeper version"),
+    ("p", "The four pressures above have proper names and a substantial literature, and if you are going to work on these systems for a while the vocabulary earns its place. This section is skippable if the previous one was enough."),
+
+    ("terms", [
+      ("Coupling and cohesion", "The pair that explains most design advice",
+       "Coupling is how much one part must know about another; cohesion is how well the things inside one part belong together. Nearly every design guideline you will meet reduces to lowering the first or raising the second, and knowing that saves memorising the guidelines."),
+      ("Interface as a contract", "The boundary is the promise",
+       "What a component guarantees to callers, as distinct from how it currently achieves it. Generated code tends to reach through boundaries rather than across them, because the model can see everything and has no stake in what stays stable."),
+      ("Technical debt, properly", "A deliberate loan, not a mess",
+       "The term means a conscious trade — shipping something suboptimal now, knowing the interest. Code that is bad because nobody thought about it is not debt, it is just bad code, and calling it debt makes it sound like a decision was involved."),
+      ("Refactoring under test", "Changing shape without changing behaviour",
+       "Only meaningful when something can tell you the behaviour is unchanged. Without tests it is not refactoring, it is rewriting and hoping — a distinction that matters more when the code was generated, since nobody holds a mental model of what it did."),
+      ("Legacy, defined usefully", "Code without a living rationale",
+       "Not old code. Code whose reasoning is no longer held by anyone. On that definition generated code can be legacy the day it merges, which is the sharpest version of this lesson's point."),
+    ]),
+
+    ("callout", "insight", "The definition of legacy is the whole argument",
+     "<p>If legacy means code whose reasoning nobody holds, then the speed at which a codebase becomes legacy is set by how much of its reasoning was ever held by a person. That is the connection between this lesson and the one before it — undecided behaviour is legacy on arrival, and the remedy in both cases is the same unglamorous act of writing down why before writing what.</p>"),
+
+    ("quiz", [
+      ("Why is comprehension described as the new bottleneck?",
+       ["Models generate code faster than compilers can build it",
+        "Producing code got much faster while reading, verifying and changing it did not, so the constraint moved to the part nobody measures",
+        "Generated code is harder to read than hand-written code"],
+       1),
+      ("On the definition given, what makes code legacy?",
+       ["Its age, and whether the original authors have left",
+        "That nobody holds its reasoning any more — on which basis generated code can be legacy the day it merges",
+        "The absence of tests covering it"],
+       1),
+      ("Why is calling careless code \"technical debt\" misleading?",
+       ["Debt implies it can be repaid, and some code cannot be",
+        "Debt means a conscious trade with known interest — code that is bad because nobody thought about it involved no decision at all",
+        "The metaphor understates how expensive it is to fix"],
+       1),
+    ]),
+  ],
+},
+{
   "slug": "spec-driven-development",
   "title": "Vibe Coding and Spec-Driven Development",
   "subtitle": "A spectrum, not a binary — and the question that tells you where on it a task belongs.",

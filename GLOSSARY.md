@@ -720,6 +720,24 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 ---
 
+**Decided behaviour** — Behaviour a person chose for a reason that survives being asked about, and that is recoverable later from a specification, decision record or commit message.
+
+**Invented behaviour** — Behaviour that appeared because it was a plausible continuation rather than because anyone weighed it. It may be sensible; nobody can defend it or say what it traded off, which is what makes it unsafe to change.
+
+**Coupling** — How much one part of a system must know about another. Generation makes adding connections nearly free while removing one costs exactly what it always did.
+
+**Cohesion** — How well the things inside one component belong together. Most design guidance reduces to lowering coupling or raising cohesion.
+
+**Interface as a contract** — What a component guarantees to callers, as distinct from how it currently achieves it. Generated code tends to reach through boundaries rather than across them, because the model can see everything and has no stake in what stays stable.
+
+**Technical debt** — A conscious trade: shipping something suboptimal now with the interest understood. Code that is bad because nobody thought about it is not debt, and calling it debt implies a decision that never happened.
+
+**Refactoring under test** — Changing a system's shape without changing its behaviour, where something can actually verify the behaviour is unchanged. Without that, it is rewriting and hoping.
+
+**Legacy code** — Code whose reasoning nobody holds any more, rather than code that is old. On that definition generated code can be legacy the day it merges.
+
+**Comprehension bottleneck** — The consequence of generation multiplying output without multiplying the capacity to understand it. Reading, verifying and safely changing code cost what they always did, and used to be bounded by how fast people could type.
+
 ## Block 6 · Security
 
 **Direct injection** — An attempt to override a system's instructions typed by the user themselves. Bounded by what that user was already allowed to do, which is what makes it the less severe of the two forms.

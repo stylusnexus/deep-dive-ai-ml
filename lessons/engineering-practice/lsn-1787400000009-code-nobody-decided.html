@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Version Control, and Why Agents Make It Non-Optional</title>
+<title>Code Nobody Decided</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -213,91 +213,51 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 11 of 12</span>
-  <h1>Version Control, and Why Agents Make It Non-Optional</h1>
-  <p class="subtitle">Git and GitHub from zero — plus the argument for why this matters more now, not less.</p>
+  <span class="pill">Lesson 10 of 14</span>
+  <h1>Code Nobody Decided</h1>
+  <p class="subtitle">The previous lesson asked whether to use a model. This one asks who chose the behaviour when you did.</p>
 
-  <p>If you have never used version control, this is the lesson that unlocks several others: the course has already told you to commit at phase boundaries, to revert a fix to confirm it caused the improvement, and to isolate agent work on a branch. All three assume git. Here is enough to do them.</p>
-  <h2>The idea, in one paragraph</h2>
-  <p>Git records snapshots of your project over time. Each snapshot — a <strong>commit</strong> — captures every file as it stood, with a message saying why. You can compare any two, return to any one, and work on several versions at once without them interfering. GitHub is a hosted copy of that history, which gives you a backup, a place to collaborate, and somewhere to review changes before they land.</p>
-  <h2>The seven commands that cover most days</h2>
-  <pre><code>git status                    # what has changed but is not yet saved
-git diff                      # exactly what changed, line by line
-git add .                     # stage the changes you want in the next snapshot
-git commit -m &quot;fix: ...&quot;      # take the snapshot, with a reason
-git log --oneline             # the history, one line per commit
-git push                      # send commits to GitHub
-git pull                      # bring down what others (or another machine) pushed</code></pre>
-  <div class="callout matters"><span class="label">Run the first two before every commit</span><code>git status</code> and <code>git diff</code> take five seconds and prevent the two commonest mistakes: committing something you did not mean to (a key, a large data file, a debugging change), and committing only half of a change because the other half was never staged. A feature that ships with its configuration flag but not the code that reads the flag is a real and common bug — the flag exists, nothing uses it, and no test fails.</div>
-  <h2>Branches</h2>
-  <p>A <strong>branch</strong> is an independent line of work. You start one, make commits on it, and the main line is untouched until you deliberately merge. This is what lets you try something risky without endangering anything that works.</p>
-  <pre><code>git switch -c feat/turbine-baseline   # start a branch and move onto it
-# ... work, commit, work, commit ...
-git push -u origin feat/turbine-baseline
-# open a pull request on GitHub, review the diff, merge
-
-git switch main &amp;&amp; git pull            # back to the main line, now updated</code></pre>
-  <p>A <strong>pull request</strong> is a proposal to merge a branch, with the full diff laid out for review and discussion. Even working alone it is worth using, because reading your own change as a diff — separated from the act of writing it — catches things nothing else does.</p>
-  <h2>Why this matters more with an agent, not less</h2>
-  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Agent work with and without version control">
-<text x="12" y="18" class="d-fill-red" font-size="12" font-weight="600">NO VERSION CONTROL</text>
-<rect x="12" y="30" width="290" height="52" rx="6" class="d-box-warn"/>
-<text x="28" y="52" class="d-label-sm">40 files changed across 3 hours</text>
-<text x="28" y="70" class="d-label-sm">accept all of it, or lose all of it</text>
-<text x="12" y="112" class="d-fill-green" font-size="12" font-weight="600">WITH VERSION CONTROL</text>
-<circle cx="30" cy="146" r="7" class="d-fill-green"/>
-<circle cx="98" cy="146" r="7" class="d-fill-green"/>
-<circle cx="166" cy="146" r="7" class="d-fill-green"/>
-<circle cx="234" cy="146" r="7" class="d-fill-red"/>
-<circle cx="302" cy="146" r="7" class="d-fill-muted"/>
-<line x1="30" y1="146" x2="302" y2="146" stroke="var(--border)" stroke-width="2"/>
-<text x="12" y="176" class="d-label-sm">good · good · good · broke it · return here</text>
-<path d="M234 158 Q200 182 172 160" stroke="var(--accent)" stroke-width="1.8" fill="none"/>
-<rect x="340" y="30" width="288" height="140" rx="7" class="d-box"/>
-<text x="356" y="52" class="d-label-b">What the history buys you</text>
-<text x="356" y="74" class="d-label-sm">· the diff is how you review agent output</text>
-<text x="356" y="94" class="d-label-sm">· revert the fix, re-run, confirm it was the fix</text>
-<text x="356" y="114" class="d-label-sm">· branches isolate risky autonomous work</text>
-<text x="356" y="134" class="d-label-sm">· bisect finds which change broke it</text>
-<text x="356" y="154" class="d-label-sm">· the log says what changed when a run regressed</text>
-</svg><figcaption>Without version control an agent's changes accumulate into one indivisible blob you can only accept or abandon. With it, every step is a place you can return to, and the diff is the review surface.</figcaption></figure>
-  <ul><li><strong>The diff is your review surface.</strong> You did not write the code, so reading it as a diff is how you actually review it. Without commits there is no diff, only a changed working tree.</li><li><strong>Reverting is a measurement technique.</strong> The measurement checklist ends with removing the fix and re-running to confirm the number moves back. That step is impossible without version control, which is why it is the step people skip.</li><li><strong>Branches are isolation.</strong> An agent working autonomously on a branch cannot damage anything that works. This is the cheapest safety control available for unattended runs.</li><li><strong>Bisect finds the culprit.</strong> When something broke somewhere in forty commits, <code>git bisect</code> finds which one by binary search rather than by guesswork.</li><li><strong>Commits are the incident timeline.</strong> When an agent's behaviour regresses and nothing on your side changed, the log is the first place to check whether that is actually true.</li></ul>
-  <div class="callout insight"><span class="label">Commit more often than feels necessary</span>The course tells you to commit at every phase boundary rather than at feature end, and agent work makes the case stronger. A three-hour autonomous run that produces one enormous commit is nearly unreviewable; the same work as twelve commits is a sequence you can read, and revert partially. Reverting from a clean checkpoint costs nothing. Reverting from a snarl costs an afternoon.</div>
-  <h2>Three habits worth forming immediately</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Write why, not what</div><div><div class="roadmap-title">The diff already says what</div><div class="roadmap-desc">"fix: reject empty vibration readings before scaling" beats "updated file". Six weeks later, only one of those helps.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Never commit secrets</div><div><div class="roadmap-title">Once pushed, treat as leaked</div><div class="roadmap-desc">A <code>.env</code> in <code>.gitignore</code> before the first commit. History is hard to scrub and mirrors already exist.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Keep data out</div><div><div class="roadmap-title">Large files bloat forever</div><div class="roadmap-desc">Git stores every version of everything. A 400MB CSV committed once is in the history permanently. Generate data from a seeded script instead — which is how the Block 1 dataset works.</div></div></div></div>
-  <h2>The two commands worth being careful with</h2>
-  <p><code>git push --force</code> rewrites history on a shared branch and can destroy someone else's work. <code>git reset --hard</code> discards uncommitted changes irrecoverably. Both have legitimate uses and neither should be typed reflexively. Everything else in git is recoverable, which is worth knowing when you are new — the fear of breaking something is mostly unfounded.</p>
-  <h2>What GitHub adds</h2>
-  <p>Beyond hosting: pull requests for review, issues for tracking work, and Actions for running your tests automatically on every push. That last one connects directly to the evaluation material — a benchmark that runs itself on every change is the difference between measuring occasionally and measuring always.</p>
-  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://git-scm.com/book/en/v2" target="_blank" rel="noopener">Git Book — chapters 1 to 3</a><span class="link-note">Free and genuinely the best reference. The first three chapters cover everything above properly.</span></li><li><a href="https://docs.github.com/en/get-started/quickstart" target="_blank" rel="noopener">GitHub Quickstart</a><span class="link-note">Account through first pull request, with the interface shown.</span></li><li><a href="https://www.conventionalcommits.org/" target="_blank" rel="noopener">Conventional Commits</a><span class="link-note">The message format used throughout this course — type(scope): description. Machine-readable, so tooling can derive changelogs from it.</span></li></ul></div>
+  <p>A pull request looks good. Clean structure, real error handling, sensible names, tests passing, and it matches the API contract. The reviewer approves it and moves on. Three weeks later the on-call engineer is paged: the endpoint returns a conflict for cancelled orders. The product team is baffled — they never asked for that. The engineer who raised the pull request cannot explain where the rule came from either. She prompted for the endpoint, read the output, thought it looked reasonable, and shipped it.</p>
+  <p>Nothing here is broken. The code works exactly as written. What went wrong is that <em>nobody chose this behaviour</em>, and the team is now maintaining business logic that arrived by autocomplete. That failure has no error message, no failing test and no bad reviewer. It has a three-week delay and somebody else's pager.</p>
+  <h2>Why review stops working</h2>
+  <p>Reviewing code and reviewing decisions are different activities, and generated code makes them easy to confuse. When a person writes something unusual, the oddity is a signal — they had a reason, and the reviewer asks about it. When a model writes something unusual, the oddity means nothing at all, because there was no reason. It was a plausible continuation.</p>
+  <p>So the reviewer's usual instrument stops reading. Approving output that looks correct is not the same as approving a decision, and if there is no decision underneath, review has quietly become proofreading. The output arrives with the surface features of considered work — structure, handled edge cases, tests — and none of the substance.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Decided behaviour</div><div><div class="roadmap-title">Someone can say why</div><div class="roadmap-desc">A person chose it, for a reason that survives being asked about, and the reason is recoverable later from a specification, a decision record or a commit message.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Invented behaviour</div><div><div class="roadmap-title">Plausible, and unowned</div><div class="roadmap-desc">It appeared because it was a likely continuation. It may be sensible. Nobody weighed it, nobody can defend it, and nobody knows what it was trading off.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The delay</div><div><div class="roadmap-title">Weeks, and it lands on someone else</div><div class="roadmap-desc">Invented behaviour is not detected at review, because it looks like the rest. It is detected in production by whoever is on call, which is the most expensive place and the least equipped person.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Generated code arrives with the appearance of considered work and none of the substance.</p><p class="know-why">Structure, error handling, naming and tests are the signals a reviewer uses to judge whether someone thought carefully. A model produces all of them regardless of whether anything was thought about, so the correlation those signals rely on is broken. This is why AI-assisted review degrades into rubber-stamping without anyone deciding to lower their standards — the instrument stopped measuring what it used to measure, and nothing announced it.</p><p class="know-eg"><span class="know-eg-label">For example</span>The practical test is not &ldquo;is this code good&rdquo; but &ldquo;can anyone say why it does this?&rdquo; Ask it of any behaviour a specification did not require. If the answer is that it looked reasonable, the behaviour is unowned, whatever its quality.</p></blockquote>
+  <figure class="diagram"><svg viewBox="0 0 640 204" role="img" aria-label="Decided and invented behaviour arriving at the same review"><defs><marker id="dec" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="14" y="18" width="196" height="46" rx="6" class="d-box"/><text x="26" y="38" class="d-label-b">intent, written down</text><text x="26" y="55" class="d-label-sm">spec, decision record, issue</text>
+<path d="M210 41 L286 76" class="d-arrow-accent" marker-end="url(#dec)"/>
+<rect x="14" y="112" width="196" height="46" rx="6" class="d-box-accent"/><text x="26" y="132" class="d-label-b">a plausible continuation</text><text x="26" y="149" class="d-label-sm">nobody weighed it</text>
+<path d="M210 135 L286 100" class="d-arrow-accent" marker-end="url(#dec)"/>
+<rect x="286" y="66" width="160" height="44" rx="6" class="d-box"/><text x="298" y="86" class="d-label-b">the same diff</text><text x="298" y="103" class="d-label-sm">clean, tested, plausible</text>
+<path d="M446 88 L510 88" class="d-arrow-accent" marker-end="url(#dec)"/>
+<rect x="510" y="66" width="116" height="44" rx="6" class="d-box"/><text x="522" y="92" class="d-label-sm">review</text>
+<text x="14" y="192" class="d-label-sm">By the time it reaches review the two are the same object. The distinction exists only upstream of it.</text>
+</svg><figcaption>The same output arrives by two routes. Review can distinguish them only if the intent was recorded somewhere before the code existed — afterwards the two are indistinguishable, which is why the check has to happen upstream.</figcaption></figure>
+  <h2>What actually helps</h2>
+  <ul><li><strong>Prompt for the decision, not the implementation.</strong> Asking for options with trade-offs produces something to choose between; asking for the endpoint produces something to accept. The first leaves a decision in the transcript, the second leaves an artefact.</li><li><strong>Write the intent before the code exists.</strong> The specification lesson that follows is this in practice, and its value here is specifically that it gives review something to check the diff <em>against</em>.</li><li><strong>Review behaviour, not lines.</strong> The question is what this now does that it did not do before, and whether anyone asked for each of those things.</li><li><strong>Treat unexplained behaviour as a defect.</strong> Not necessarily wrong — unowned. A behaviour nobody can justify is one nobody can safely change either, which is how it survives to become load-bearing.</li></ul>
+  <div class="callout matters"><span class="label">The cost is deferred, which is why it accumulates</span><p>Nothing punishes you at the moment this happens. The code works, the tests pass, the feature ships and the sprint looks good. The bill arrives later as a codebase whose behaviour nobody can account for, one plausible addition at a time — and by then the person who could have explained any single piece has long moved on to the next ticket.</p></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. Why is reverting a change a measurement technique rather than just a recovery tool?</p>
+    <p class="quiz-q">1. Why does a reviewer&#x27;s usual judgement work less well on generated code?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">It restores a known-good state after a failed experiment</div>
-      <div class="quiz-opt">Removing the fix and re-running confirms the fix was what moved the number — otherwise you have learned the wrong lesson</div>
-      <div class="quiz-opt">It reduces the size of the repository</div>
+      <div class="quiz-opt">Generated code contains subtler bugs than hand-written code</div>
+      <div class="quiz-opt">Structure, error handling and tests normally signal that someone thought carefully — a model produces them regardless, so the signal no longer means what it did</div>
+      <div class="quiz-opt">Reviewers read generated code faster and less carefully</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. An agent runs autonomously for three hours. What should the output look like in git?</p>
+    <p class="quiz-q">2. What makes unexplained behaviour a defect even when it is correct?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">One commit, so the change is atomic and easy to revert</div>
-      <div class="quiz-opt">Many commits, so the work is reviewable as a sequence and can be reverted partially</div>
-      <div class="quiz-opt">No commits until a human has reviewed everything</div>
+      <div class="quiz-opt">It is likely to be wrong in edge cases nobody tested</div>
+      <div class="quiz-opt">Nobody can justify it, which means nobody can safely change it either — so it survives and becomes load-bearing</div>
+      <div class="quiz-opt">It usually indicates the specification was incomplete</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. What should you run before every commit?</p>
+    <p class="quiz-q">3. What is the practical test proposed for any behaviour a specification did not require?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">git log, to see recent history</div>
-      <div class="quiz-opt">git status and git diff — they catch unintended files and half-staged changes</div>
-      <div class="quiz-opt">git pull, to avoid conflicts</div>
-    </div>
-    <div class="quiz-feedback"></div>
-    <p class="quiz-q">4. Why keep large data files out of git?</p>
-    <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">GitHub rejects files over a size limit</div>
-      <div class="quiz-opt">Git stores every version permanently, so a large file committed once bloats the history forever — generate it from a seeded script instead</div>
-      <div class="quiz-opt">Binary files cannot be diffed</div>
+      <div class="quiz-opt">Whether it is covered by a test</div>
+      <div class="quiz-opt">Whether anyone can say why it does that — if the answer is that it looked reasonable, it is unowned</div>
+      <div class="quiz-opt">Whether it matches the conventions of the surrounding code</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>
