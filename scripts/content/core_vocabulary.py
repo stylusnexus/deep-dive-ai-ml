@@ -2483,6 +2483,33 @@ LESSONS = [
      "A prefix cache can only ever return what the model would have returned anyway, because it is replaying arithmetic that was already done. A semantic cache returns an answer to a <em>different question</em> that scored as similar — so its failure mode is not a slow response or a larger bill, but a confident wrong answer with nothing in the logs to suggest anything happened.",
      "Two support queries: &ldquo;how do I cancel my subscription?&rdquo; and &ldquo;how do I cancel my subscription without losing my data?&rdquo;. They embed close together. A semantic cache tuned loosely answers the second with the first, and the customer loses their data."),
 
+    ("h3", "The threshold, measured"),
+    ("p", "That is a strong claim, so here it is as a measurement rather than an assertion. Twelve question pairs through the same encoder the retrieval block uses, scored by cosine similarity, sorted by score. Reproduce it with <code>python3 scripts/measure_semantic_threshold.py</code>."),
+
+    ("code", """ score  may share?  class                pair
+ 0.992  YES         paraphrase           'How do I reset my password?' vs 'How can I reset my password?'
+ 0.984  NO          negation             'Should I restart the turbine?' vs 'Should I not restart the turbine?'
+ 0.969  NO          one value changed    'turbines under 5 years' vs 'turbines over 12 years'
+ 0.966  NO          one value changed    'threshold at 0.80 mm/s' vs 'threshold at 0.45 mm/s'
+ 0.949  YES         paraphrase           'What is the gearbox oil temperature limit?' vs "What's the maximum...?"
+ 0.940  YES         paraphrase           'How do I cancel my subscription?' vs "What's the process for cancelling...?"
+ 0.928  NO          negation             'Is the API rate limited?' vs 'Is the API not rate limited?'
+ 0.913  NO          one value changed    'Refund policy for annual plans' vs 'Refund policy for monthly plans'
+ 0.839  NO          negation             'Is this covered under warranty?' vs 'Is this excluded from warranty?'
+ 0.644  NO          added constraint     'How do I cancel my subscription?' vs '...without losing my data?'
+ 0.149  NO          missing prior turn   'What is the failure rate at Clyde?' vs 'And at Whitelee?'
+ 0.073  NO          unrelated (control)  'How do I reset my password?' vs 'What are your office hours?'
+
+lowest score among pairs that SHOULD share an answer : 0.940
+highest score among pairs that MUST NOT share one    : 0.984"""),
+
+    ("know",
+     "A negation that reverses the answer scores higher than a genuine paraphrase.",
+     "&ldquo;Should I restart the turbine?&rdquo; and &ldquo;Should I not restart the turbine?&rdquo; need opposite answers and score 0.984. Two of the three real paraphrases in the same run score lower than that. Since the must-differ pairs reach above the weakest should-share pair, no cut-off separates them: set it below 0.940 and you answer the negation with its opposite, set it above and you stop hitting on genuine rephrasings while still paying to embed every request.",
+     "Three of the twelve pairs — one negation and two where a single operational value changed — score at or above the weakest genuine paraphrase. Those are the hits that return a confident wrong answer, and nothing distinguishes them from a correct hit except reading both questions."),
+
+    ("p", "One honest note about that table: the follow-up needing its previous turn scored 0.149, far below anything a cache would hit on. In this run it would have been a miss rather than a wrong answer — a cost problem, not a correctness one. The failures that bite are the ones that look almost identical and mean the opposite."),
+
     ("callout", "pitfall", "The threshold is the whole design",
      "<p>Semantic caching lives or dies on the similarity threshold, and there is no setting that is safe everywhere. Tight enough to be correct and it almost never hits; loose enough to hit often and it starts answering questions nobody asked. If you cannot state what a near-miss costs, you are not ready to turn it on.</p>"),
 

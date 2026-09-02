@@ -596,7 +596,7 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Semantic caching** — Answering from a store of previous responses when an incoming question embeds close enough to an earlier one, without calling the model at all. Unrelated to the other three caches despite the name: it reuses answers rather than arithmetic, so a near-miss returns a confident answer to a question nobody asked.
 
-**Similarity threshold** — The cut-off a semantic cache uses to decide two questions are the same one. Tight enough to be safe and it rarely hits; loose enough to be useful and it starts answering the wrong question — there is no value that is correct everywhere.
+**Similarity threshold** — The cut-off a semantic cache uses to decide two questions are the same one. Measured on this course's own encoder, a negation that reverses the answer scores 0.984 while a genuine paraphrase scores 0.940, so no cut-off separates them — see <code>scripts/measure_semantic_threshold.py</code>.
 
 **Cache hit rate** — The fraction of calls that actually reused a cached prefix. Nothing errors on a miss, so a cache that quietly stopped working looks exactly like never having had one, except on the bill.
 
