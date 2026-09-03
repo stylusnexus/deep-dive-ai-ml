@@ -13,7 +13,7 @@ and the [glossary](GLOSSARY.md) accumulating throughout.
 
 Environment that runs, pacing map, and the vocabulary everything else assumes.
 
-- Docker environments for Torch and Keras, pgvector, MLflow
+- Docker environments for Torch and Keras, pgvector, MLflow ✅
 - `lessons/orientation/` — one map placing every term in the program ✅
 - `lessons/core-vocabulary/` — 29 lessons: the vocabulary an LLM system is built from, plus overfitting, agents and danger, RLHF and human-in-the-loop, context engineering, structured output, hallucination and grounding, in-context learning, class imbalance and thresholds, drift, distillation, chain-of-thought, and loops at inference and in training ✅
 - `lessons/engineering-practice/` — 16 lessons: harnesses, recipes and ADRs; the measurement discipline that corrects them; SWE-bench; invisible confounds; localising a failure; LLM-as-judge; deterministic-first; experiment tracking and continuous evaluation; and the trained artefact with its retraining triggers ✅
@@ -23,6 +23,10 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
 **Status: 102 lessons built, 13 executed notebooks, every lesson cross-referenced.**
+
+Every planned lesson is written. What remains is not lesson content: two Block 7
+bullets that need a GPU budget and a training run, notebooks for Blocks 5 to 9,
+and the Project 4 deployment, which is deliberately a human action.
 
 ---
 
@@ -66,13 +70,13 @@ demonstrably better, and a threshold chosen from costs.
 ## Block 3 · Retrieval and Agentic RAG — 1.5 weeks
 *Original: Module 03, extended — the original stops at single-shot retrieval*
 
-- LLMs and prompt engineering
-- Embeddings, chunking, vector search against real pgvector — not an in-memory list
-- Hybrid retrieval: BM25 and vectors fused by rank; rerankers over the shortlist
-- Retrieval quality: what actually makes RAG fail, and measuring index recall
+- LLMs and prompt engineering ✅
+- Embeddings, chunking, vector search against real pgvector — not an in-memory list ✅
+- Hybrid retrieval: BM25 and vectors fused by rank; rerankers over the shortlist ✅
+- Retrieval quality: what actually makes RAG fail, and measuring index recall ✅
 - **Agentic RAG** — retrieval as a loop, its failure modes, and why it should be
   routed to rather than made the default ✅
-- Structured outputs and tool calling
+- Structured outputs and tool calling ✅
 
 5 lessons in `lessons/block3-retrieval/`, 3 notebooks in `notebooks/03-retrieval/`,
 and Project 2 in `projects/p2-financial-rag/`.
