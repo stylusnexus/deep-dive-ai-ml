@@ -160,8 +160,10 @@ non-completion column, without which the ranking is not defensible.
   talk its way past them ✅
 - Red-teaming your own Block 4 agent with `agent-armor` and SecLists corpora ✅
 
-4 lessons in `lessons/block6-security/`. No notebook yet — the exercise is run against
-Project 3 rather than in isolation, which is the point of it.
+4 lessons in `lessons/block6-security/` and 1 notebook in `notebooks/06-security/`,
+run against Project 3 rather than in isolation, which is the point of it. The battery
+carries a positive control, because a red team that finds nothing is a claim about the
+battery until you have shown it can detect a change.
 
 **Exit:** You break your own multi-agent system, then fix it.
 
