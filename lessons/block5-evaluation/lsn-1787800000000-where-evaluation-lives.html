@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -252,6 +256,7 @@
   <h2>What this block adds</h2>
   <p>Two things the material above does not cover. The first is where the labels come from: a battery with indefensible labels measures your opinions rather than the system, and the failure is invisible because everything still runs. The second is comparing across models, where the same set can produce a different ranking depending on a budget you set without thinking about it.</p>
   <div class="callout matters"><span class="label">Read the procedure before the tools</span><p>How to Measure is six steps and takes ten minutes to read. Every tool in this block is worthless applied out of that order — a judge calibrated against an unproven instrument produces confident, reproducible, wrong numbers.</p></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../engineering-practice/lsn-1787400000002-why-measurement-decides.html">Why Measurement Decides</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The only thing that corrects a harness, a recipe or a decision is a number that disagrees with it.</span></li><li><a href="../core-vocabulary/lsn-1787000000007-eval-battery.html">The Eval Battery</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How you know any of this works — and why the number you trust must be one you built.</span></li><li><a href="lsn-1787800000002-one-set-many-models.html">One Set, Many Models</a><span class="link-note">The comparison is the point, and a budget you set without thinking is what breaks it.</span></li><li><a href="../block8-deployment/lsn-1788100000003-after-it-ships.html">After It Ships</a><span class="rel-set">Block 8 · Deployment and APIs</span><span class="link-note">What to watch, what to wake someone for, and the difference between the service being up and the service being right.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Your eval set gives every model you try the same score. What is the first thing to suspect?</p>

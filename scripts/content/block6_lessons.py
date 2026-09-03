@@ -93,6 +93,7 @@ LESSONS = [
       "<strong>Treat a memory write as an action with a gate on it.</strong> Anything persisted carries its source, directives are not persisted as directives, and the store is scoped to the user it was written for. Otherwise an injection you survived once returns on a schedule you do not control.",
     ]),
 
+    ("related", ["exfiltration-and-tool-abuse", "agents-autonomy-and-danger", "session-lifecycle", "red-teaming-your-own-agent"]),
     ("quiz", [
       ("Why is indirect injection more dangerous than direct injection?",
        ["It is harder for filters to detect in the input text",
@@ -153,6 +154,7 @@ LESSONS = [
     ("h2", "The audit that actually finds this"),
     ("p", "List every tool with two columns: what it can read, and what it can reach. Then look for any pair where one column touches something sensitive and the other touches something outside. That pairing is the finding, and it is invisible in a per-tool review because neither row is alarming by itself."),
 
+    ("related", ["injection-direct-and-indirect", "sandboxing-and-what-actually-works", "mcp-dangers", "red-teaming-your-own-agent"]),
     ("quiz", [
       ("Why can an injected instruction be harmless in one agent and severe in another with the same model?",
        ["The system prompts differ in strength",
@@ -211,6 +213,7 @@ LESSONS = [
     ("h2", "Where this course already built the pieces"),
     ("p", "Almost nothing here is new machinery. Block 0 taught scoping and least privilege for connected tooling. Block 4 built the approval gate that halts and persists, and the trace that records what happened. Block 3's project constrains the answer to retrieved context. What this block adds is the ordering, and the discipline of asking which layer would survive the model being on the attacker's side."),
 
+    ("related", ["exfiltration-and-tool-abuse", "the-image-is-the-unit", "agents-autonomy-and-danger", "red-teaming-your-own-agent"]),
     ("quiz", [
       ("What separates the strong mitigations from the weak ones?",
        ["Cost and implementation effort",
@@ -280,6 +283,7 @@ LESSONS = [
       "<strong>Write down what the fix does not cover.</strong> That sentence is the most useful artefact the exercise produces.",
     ]),
 
+    ("related", ["injection-direct-and-indirect", "eval-battery", "exfiltration-and-tool-abuse", "how-to-measure"]),
     ("quiz", [
       ("Why should a red-team exercise use a fixed battery rather than exploratory testing?",
        ["Fixed batteries are faster to run",

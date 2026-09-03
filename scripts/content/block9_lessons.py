@@ -50,6 +50,7 @@ LESSONS = [
     ("callout", "pitfall", "Extraction is often the better tool, and it is less interesting",
      "<p>Before sending a document to a multimodal model, ask whether the layout carries meaning. A form, a chart, a diagram or a signed page needs to be seen. A text report does not, and extracting its text costs a fraction of processing pictures of its pages. The multimodal route is more impressive and frequently the wrong answer, which is the same shape as the fine-tuning argument in Block 7.</p>"),
 
+    ("related", ["embeddings-and-retrieval", "attention-and-transformers", "inside-an-llm", "building-a-rag-system"]),
     ("quiz", [
       ("Why does image resolution matter beyond visual quality?",
        ["Larger images take longer to upload",
@@ -103,6 +104,7 @@ LESSONS = [
 <text x="360" y="118" class="d-label-sm">answers "which one is worst at its site"</text>
 </svg>'''),
 
+    ("related", ["deterministic-first", "tabular-data-and-dtypes", "structured-output-json", "agentic-rag"]),
     ("quiz", [
       ("What makes a one-to-many join dangerous?",
        ["It is slower than other join types",
@@ -172,6 +174,7 @@ LESSONS = [
     ("callout", "matters", "Set a ceiling that stops something, not one that emails you",
      "<p>A budget alert is a notification that money has already been spent. The control that works is a hard cap in the path — a per-key spend limit, a token budget per request, a turn cap on a loop — because the failure mode being guarded against is a runaway loop at three in the morning, and that is precisely when nobody is reading alerts.</p>"),
 
+    ("related", ["latency-and-caching", "routing-and-escalation", "loop-tradeoffs", "calling-an-api-you-do-not-control"]),
     ("quiz", [
       ("Why is cost per call a misleading metric?",
        ["It ignores infrastructure costs beyond the model",

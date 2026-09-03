@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -253,6 +257,7 @@
   <h2>Unattended is a different risk class</h2>
   <p>Everything above assumes someone is watching sometimes. An agent on a schedule or a trigger, acting without anyone present, needs more: a narrow job rather than a broad one, credentials scoped to that job, safe stopping points it can reach on its own, a complete action log, and a human approval gate before anything irreversible or outward-facing.</p>
   <p>The arithmetic is unforgiving — broad instructions plus wide access plus nobody watching is blast radius with no one to contain it. Narrow one of those three and the other two matter far less.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block4-agentic/lsn-1787700000003-telemetry-and-instrumentation.html">Telemetry: Making the Run Legible</a><span class="rel-set">Block 4 · Agentic AI</span><span class="link-note">You cannot reproduce an agent run. The trace is the only evidence it happened the way you think.</span></li><li><a href="lsn-1787000000027-session-lifecycle.html">Memory, Compaction and Session Decay</a><span class="link-note">A model has no memory. Everything that looks like memory is something you built — and all of it degrades.</span></li><li><a href="lsn-1787000000009-agents-autonomy-and-danger.html">Agents, Autonomy and the Danger Surface</a><span class="link-note">What actually makes something an agent, and every way it can hurt you.</span></li><li><a href="../block8-deployment/lsn-1788100000003-after-it-ships.html">After It Ships</a><span class="rel-set">Block 8 · Deployment and APIs</span><span class="link-note">What to watch, what to wake someone for, and the difference between the service being up and the service being right.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener">Effective harnesses for long-running agents — Anthropic</a><span class="link-note">What changes when an agent runs for hours, including the operational surface it creates.</span></li><li><a href="https://www.anthropic.com/engineering/multi-agent-research-system" target="_blank" rel="noopener">How we built our multi-agent research system — Anthropic</a><span class="link-note">Production experience, including the observability cost of fanning out.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

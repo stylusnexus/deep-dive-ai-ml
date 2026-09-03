@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -255,6 +259,7 @@
   <div class="callout matters"><span class="label">The order that matters</span>Record the flag, then impute — and impute inside a pipeline, after the split. Fitting an imputer on the full dataset means the training data has seen the test set's statistics. It's one of the most common leaks in practice precisely because it doesn't feel like model fitting.</div>
   <h2>Choosing a fill</h2>
   <ul><li><strong>Median</strong> — robust to skew and outliers. The sensible default for numeric columns.</li><li><strong>Mean</strong> — only for roughly symmetric distributions. Skew drags it.</li><li><strong>Most frequent</strong> — for categoricals, though a literal <code>"missing"</code> category is often more honest.</li><li><strong>Model-based (KNN, iterative)</strong> — predicts the gap from other columns. Genuinely better under MAR, and slower and easier to leak with.</li><li><strong>Leave it</strong> — gradient boosting implementations handle missing values natively and often do better than any fill you'd choose.</li></ul>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787300000001-first-fifteen-minutes.html">The First Fifteen Minutes</a><span class="link-note">A survey, not a clean-up — and the four things you must find before touching anything.</span></li><li><a href="lsn-1787300000000-tabular-data-and-dtypes.html">Tabular Data and the Lies dtypes Tell</a><span class="link-note">Rows, columns, types — and why the type a column loaded as is your first diagnostic.</span></li><li><a href="lsn-1787300000003-what-a-plot-is-for.html">What a Plot Is Actually For</a><span class="link-note">Exploration with intent — five questions worth asking, and the charts that answer them.</span></li><li><a href="lsn-1787300000005-labels-and-holdouts.html">Labels, and What You Hold Back</a><span class="link-note">Label quality caps model quality — and the data you refuse to look at is what makes any number believable.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/impute.html" target="_blank" rel="noopener">Imputation of missing values (scikit-learn)</a><span class="link-note">Simple, iterative and KNN imputers, and the missing-indicator feature discussed above.</span></li><li><a href="https://stefvanbuuren.name/fimd/" target="_blank" rel="noopener">Statistical Analysis with Missing Data — overview</a><span class="link-note">Van Buuren's open book on multiple imputation. Chapter 1 covers the three mechanisms properly.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -245,6 +249,7 @@
   <div class="callout pitfall"><span class="label">The evaluation trap</span>Tuning your examples against the same handful of test cases you evaluate on is leakage by hand. The prompt gets excellent at those five inputs and no better at anything else. Hold examples back, exactly as you would rows of data.</div>
   <h2>When to stop adding examples and fine-tune instead</h2>
   <p>Few-shot stops being the right answer when: the examples no longer fit comfortably in context; you're paying for the same tokens at high volume; the task needs knowledge the model doesn't have rather than a format it hasn't seen; or you've plateaued and adding examples no longer moves your eval. Block 7 covers what to do then — and opens by arguing you usually shouldn't.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000011-context-engineering.html">Context Engineering: What Goes In Decides What Comes Out</a><span class="link-note">For a model you've already chosen, context is the largest lever you still control.</span></li><li><a href="../block7-training/lsn-1788000000000-when-fine-tuning-is-wrong.html">When Fine-Tuning Is the Wrong Answer</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">Which is most of the time, and the order to exhaust before you reach for it.</span></li><li><a href="lsn-1787000000012-structured-output-json.html">Structured Output: JSON You Can Actually Parse</a><span class="link-note">The gap between 'the model returned JSON' and 'the model always returns valid JSON'.</span></li><li><a href="lsn-1787000000018-chain-of-thought-and-reasoning.html">Chain-of-Thought and Reasoning Tokens</a><span class="link-note">Why letting a model think out loud works — and why its explanation isn't necessarily its reason.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2005.14165" target="_blank" rel="noopener">Language Models are Few-Shot Learners (Brown et al., 2020)</a><span class="link-note">The GPT-3 paper that named the phenomenon. Section 3 is the evidence.</span></li><li><a href="https://arxiv.org/abs/2202.12837" target="_blank" rel="noopener">Rethinking the Role of Demonstrations (Min et al., 2022)</a><span class="link-note">The finding that label correctness matters less than format and label space. Genuinely surprising.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -247,6 +251,7 @@
   <p>Some systems write a placeholder rather than a null when a reading fails: <code>9999</code>, <code>-1</code>, <code>0</code>, <code>1900-01-01</code>. These are missing values in disguise, and because they're numeric they silently pollute every statistic.</p>
   <p>In the Block 1 data, 22 rotor-speed readings are exactly 9999.0. Left in place they drag the column mean from 14.4 to 53.3 — a nearly fourfold distortion from 22 rows in six thousand. The tell is a repeated, round, physically implausible value.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A numeric-looking column that loads as text is a question, not a detail.</p><p class="know-why">It means pandas found something it could not parse and fell back to strings. That is a free diagnostic, delivered before you have done any work, and it takes ten seconds to read.</p><p class="know-eg"><span class="know-eg-label">For example</span>operating_hours loads as object rather than float. The cause is thousands separators on every row and a stray 'hrs' suffix on about 140 of them — two different formatting problems in one column, which is what happens when data is assembled from more than one system.</p></blockquote>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787300000001-first-fifteen-minutes.html">The First Fifteen Minutes</a><span class="link-note">A survey, not a clean-up — and the four things you must find before touching anything.</span></li><li><a href="lsn-1787300000002-missing-data-mechanisms.html">Missing Data: The Mechanism Matters More Than the Amount</a><span class="link-note">Why 'fill it with the median' is a decision about the world, not a default.</span></li><li><a href="lsn-1787300000003-what-a-plot-is-for.html">What a Plot Is Actually For</a><span class="link-note">Exploration with intent — five questions worth asking, and the charts that answer them.</span></li><li><a href="../block9-electives/lsn-1788200000001-asking-the-database-properly.html">Asking the Database Properly</a><span class="rel-set">Block 9 · Electives</span><span class="link-note">The intake sheet keeps asking whether a query would do. This is what that query looks like.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://pandas.pydata.org/docs/user_guide/basics.html#dtypes" target="_blank" rel="noopener">pandas dtypes</a><span class="link-note">What each type is, and how missing values force type changes.</span></li><li><a href="https://vita.had.co.nz/papers/tidy-data.pdf" target="_blank" rel="noopener">Tidy Data (Wickham, 2014)</a><span class="link-note">The paper that defined what a well-shaped table looks like. Still the clearest statement of it.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

@@ -5,16 +5,19 @@ Usage: python3 scripts/build_lessons.py <content_module_name>
 Emits lessons/<topic>/*.html + meta.json in the same house format as
 statistics-for-ai and aigp-exam-prep.
 """
+import html
 import importlib.util
+import json
+import pathlib
 import re
+import sys
 import xml.dom.minidom
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from lesson_map import slug_map
 
 # Cyrillic and CJK never appear intentionally in this course; Greek (Σ, √) does.
 STRAY_SCRIPT = re.compile(r"[\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF]")
-import html
-import json
-import pathlib
-import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 STYLE = (ROOT / "scripts" / "_lesson_style.html").read_text()
@@ -56,7 +59,7 @@ E = html.escape
 CALLOUT_VARIANTS = set(re.findall(r"\.callout\.([a-z]+)", STYLE))
 
 
-def render_block(b):
+def render_block(b, topic=None, self_slug=None):
     kind = b[0]
     stray = STRAY_SCRIPT.findall(" ".join(str(x) for x in b[1:]))
     if stray:
@@ -129,6 +132,24 @@ def render_block(b):
         )
         return (f'  <div class="further shelf"><h3>On your shelf</h3>'
                 f'<ul class="books">{items}</ul></div>')
+    if kind == "related":
+        smap = slug_map()
+        items = []
+        for slug in b[1]:
+            if slug not in smap:
+                raise AssertionError(
+                    f"related: no lesson with slug {slug!r} — cross-references are "
+                    f"checked at build time so a rename cannot leave a dead link")
+            if slug == self_slug:
+                raise AssertionError(f"related: {slug!r} links to itself")
+            t = smap[slug]
+            href = t["file"] if t["topic"] == topic else f"../{t['topic']}/{t['file']}"
+            same = "" if t["topic"] == topic else f'<span class="rel-set">{E(t["set_title"])}</span>'
+            items.append(
+                f'<li><a href="{href}">{E(t["title"])}</a>{same}'
+                f'<span class="link-note">{t["subtitle"]}</span></li>')
+        return ('  <div class="further related"><h3>Related lessons</h3>'
+                f'<ul class="links">{"".join(items)}</ul></div>')
     if kind == "links":
         items = "".join(
             f'<li><a href="{u}" target="_blank" rel="noopener">{E(t)}</a>'
@@ -160,7 +181,7 @@ def build(mod):
     for idx, lsn in enumerate(mod.LESSONS):
         lid = f"lsn-{mod.ID_BASE}{idx:03d}"
         fname = f"{lid}-{lsn['slug']}.html"
-        body = "\n".join(render_block(b) for b in lsn["body"])
+        body = "\n".join(render_block(b, mod.TOPIC, lsn["slug"]) for b in lsn["body"])
         doc = f"""<!DOCTYPE html>
 <html lang="en">
 <head>

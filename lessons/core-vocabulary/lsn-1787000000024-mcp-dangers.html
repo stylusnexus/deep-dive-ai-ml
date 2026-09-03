@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -252,6 +256,7 @@
   <div class="callout pitfall"><span class="label">The pattern across all of it</span>Every mitigation here is the same shape as the rest of the course: put the control where it is enforceable rather than where it is stated. Consent gates in the client, scopes in the token, sandboxing in the transport, approval before irreversible actions. Not a note in a README saying the server should be used carefully. The specification asks implementors to do this precisely because the protocol cannot.</div>
   <h2>Where this connects</h2>
   <p>Block 6 red-teams a running setup against these classes with real payloads. The SOP checklist in <code>artifacts/sop/mcp.md</code> is the short version to run before connecting anything. And the deterministic-first question is still worth asking first: a server you do not connect has no attack surface at all.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block6-security/lsn-1787900000001-exfiltration-and-tool-abuse.html">Exfiltration and Tool Abuse</a><span class="rel-set">Block 6 · Security</span><span class="link-note">An injected instruction is worth nothing on its own. It needs a way out, and your agent is holding several.</span></li><li><a href="lsn-1787000000005-tool-calls-and-mcp.html">Tool Calls and MCP</a><span class="link-note">How a text model comes to run your code, and what the protocol standardises.</span></li><li><a href="lsn-1787000000009-agents-autonomy-and-danger.html">Agents, Autonomy and the Danger Surface</a><span class="link-note">What actually makes something an agent, and every way it can hurt you.</span></li><li><a href="../block6-security/lsn-1787900000002-sandboxing-and-what-actually-works.html">Sandboxing, and What Actually Works</a><span class="rel-set">Block 6 · Security</span><span class="link-note">Sorting the mitigations that hold from the ones that mostly produce confidence.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices" target="_blank" rel="noopener">MCP security best practices</a><span class="link-note">The source for every attack class above, with attack flows and required mitigations.</span></li><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization" target="_blank" rel="noopener">MCP authorization</a><span class="link-note">The authorization model, and why token passthrough is forbidden rather than merely discouraged.</span></li><li><a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" target="_blank" rel="noopener">OWASP (Open Worldwide Application Security Project) Top 10 for LLM Applications</a><span class="link-note">The wider taxonomy these attacks sit inside.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

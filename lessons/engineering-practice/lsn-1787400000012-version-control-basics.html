@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -269,6 +273,7 @@ git switch main &amp;&amp; git pull            # back to the main line, now upda
   <p><code>git push --force</code> rewrites history on a shared branch and can destroy someone else's work. <code>git reset --hard</code> discards uncommitted changes irrecoverably. Both have legitimate uses and neither should be typed reflexively. Everything else in git is recoverable, which is worth knowing when you are new — the fear of breaking something is mostly unfounded.</p>
   <h2>What GitHub adds</h2>
   <p>Beyond hosting: pull requests for review, issues for tracking work, and Actions for running your tests automatically on every push. That last one connects directly to the evaluation material — a benchmark that runs itself on every change is the difference between measuring occasionally and measuring always.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000000-three-artifacts.html">Recipes, ADRs and the Harness</a><span class="link-note">Three things every LLM project grows, answering three different questions.</span></li><li><a href="lsn-1787400000009-code-nobody-decided.html">Code Nobody Decided</a><span class="link-note">The previous lesson asked whether to use a model. This one asks who chose the behaviour when you did.</span></li><li><a href="../block8-deployment/lsn-1788100000002-the-image-is-the-unit.html">The Image Is the Unit</a><span class="rel-set">Block 8 · Deployment and APIs</span><span class="link-note">What goes inside, what stays configuration, and why the size is a design decision rather than an outcome.</span></li><li><a href="lsn-1787400000011-spec-driven-development.html">Vibe Coding and Spec-Driven Development</a><span class="link-note">A spectrum, not a binary — and the question that tells you where on it a task belongs.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://git-scm.com/book/en/v2" target="_blank" rel="noopener">Git Book — chapters 1 to 3</a><span class="link-note">Free and genuinely the best reference. The first three chapters cover everything above properly.</span></li><li><a href="https://docs.github.com/en/get-started/quickstart" target="_blank" rel="noopener">GitHub Quickstart</a><span class="link-note">Account through first pull request, with the interface shown.</span></li><li><a href="https://www.conventionalcommits.org/" target="_blank" rel="noopener">Conventional Commits</a><span class="link-note">The message format used throughout this course — type(scope): description. Machine-readable, so tooling can derive changelogs from it.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

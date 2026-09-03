@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -258,6 +262,7 @@ time per token = 140 GB / 3.35 TB/s           = 42 ms   -&gt; about 24 tokens/se
   <div class="callout matters"><span class="label">Small operations have a third bottleneck</span><p>Neither memory nor arithmetic. Every operation dispatched to the device carries a fixed launch cost paid by the processor driving it, so a workload made of very many tiny operations can be limited by dispatch overhead alone. The fix is the same as everywhere else — fewer, larger units of work.</p></div>
   <h2>What will change and what will not</h2>
   <p>Capacities, bandwidths, precision formats and every specific threshold in this lesson will move. The asymmetry will not: arithmetic keeps getting cheaper faster than data movement does, which means the techniques that trade computation for bytes moved get <em>more</em> valuable each generation rather than less.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000026-latency-and-caching.html">Latency, Prefills and Caching</a><span class="link-note">Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.</span></li><li><a href="../algorithms/lsn-1787100000005-attention-and-transformers.html">Attention and the Transformer</a><span class="rel-set">Algorithms That Matter Here</span><span class="link-note">The algorithm every model in this program is built from.</span></li><li><a href="lsn-1787000000002-weights-gguf-quantization.html">Weights, GGUF and Quantization</a><span class="link-note">What Q4_K_M actually means, and the trade you're making when you pick it.</span></li><li><a href="lsn-1787000000025-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. A card is rated for hundreds of trillions of operations per second, yet generates about 24 tokens a second on a 70-billion-parameter model. Why?</p>

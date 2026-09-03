@@ -90,6 +90,7 @@ LESSONS = [
      "The grounding lives in the pipeline, not in the model. If your prompt does not explicitly handle the empty case, the model falls back to its parameters and produces a fluent, uncited, unverifiable answer that looks exactly like the grounded ones.",
      "A support assistant answers a question about a product discontinued before its training cutoff. Retrieval returned nothing, because the product is not in the knowledge base. The answer is confident, plausible, and drawn entirely from training data — indistinguishable in tone from the answers that were genuinely retrieved."),
 
+    ("related", ["embeddings-and-retrieval", "measuring-retrieval", "ranking-and-hybrid-retrieval", "hallucination-and-grounding"]),
     ("links", [
       ("Retrieval-Augmented Generation (Lewis et al., 2020)", "https://arxiv.org/abs/2005.11401",
        "The original paper — grounding as an architecture rather than a prompting trick."),
@@ -171,6 +172,7 @@ LESSONS = [
     ("h2", "Where this sits in the block"),
     ("p", "Chunking decides what can be found. Retrieval and reranking decide what is found. Transformation decides what is looked for, and it is the only stage that touches the request rather than the corpus — which is why it is the first thing to reach for on a conversational interface and among the last on a search box."),
 
+    ("related", ["ranking-and-hybrid-retrieval", "agentic-rag", "building-a-rag-system", "measuring-retrieval"]),
     ("quiz", [
       ("Why can embedding a hypothetical answer retrieve better than embedding the question?",
        ["Generated text is cleaner than user input",
@@ -289,6 +291,7 @@ LESSONS = [
       "<strong>Record the manifest.</strong> Embedding model and version, index parameters, chunk strategy, k, prompt version. A score six weeks old is uninterpretable without it.",
     ]),
 
+    ("related", ["building-a-rag-system", "ranking-and-hybrid-retrieval", "how-to-measure", "hallucination-and-grounding"]),
     ("links", [
       ("Precision-recall — scikit-learn", "https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html",
        "The metric mechanics, transferable directly to retrieval."),
@@ -434,6 +437,7 @@ LESSONS = [
     ("p", "This is the loops lesson arriving at a new surface. A retrieval loop improves things only when signal enters from outside it — a de-duplication check, a coverage test, an explicit \"do I now have what I need\" evaluated against something other than the model's confidence. Without that, extra hops mostly amplify the framing of the first query."),
     ("callout", "pitfall", "\"Do I have enough information?\" is the model marking its own work", "Asking the model whether it can answer yet is the same circularity as asking an agent whether it succeeded. It will frequently say yes when it has the shape of an answer rather than the substance. Prefer a checkable condition — required entities present, a citation for each part of the question, a hop budget — over the model's self-assessment."),
 
+    ("related", ["building-a-rag-system", "loops-at-inference", "transforming-the-query", "context-engineering"]),
     ("links", [
       ("Agentic RAG: a survey (Singh et al., 2025)", "https://arxiv.org/abs/2501.09136",
        "The taxonomy of retrieval loops by agent count, control structure and autonomy."),
@@ -531,6 +535,7 @@ LESSONS = [
     ("h2", "Where this leaves the block"),
     ("p", "The honest summary is that retrieval earns its place when the corpus moves and the read is short, and stops being obviously right when the corpus is fixed and the read is long. Most of this block taught you to retrieve well. This lesson is the boundary of that advice, and the measurement from the previous lesson — how much of your request is the read — is what tells you which side of it you are on."),
 
+    ("related", ["building-a-rag-system", "latency-and-caching", "when-fine-tuning-is-wrong", "context-engineering"]),
     ("quiz", [
       ("What has to be true before any preloading approach is worth considering?",
        ["The corpus fits in the context window",

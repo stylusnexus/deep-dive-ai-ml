@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -228,6 +232,7 @@
 <text x="14" y="186" class="d-label-sm">A notebook is the dashed box. A service is the whole rectangle, and the rectangle is where the incidents are.</text>
 </svg><figcaption>Everything outside the dashed box exists because the caller is not you. Project 4 is roughly forty lines of retrieval and two hundred of this.</figcaption></figure>
   <div class="callout matters"><span class="label">Load the model once, at start</span><p>A handler that loads an encoder or opens a connection per request pays that cost on every call and times out on the first one. Project 4 does it in a startup hook, which also gives the health check something true to report: the service is ready because loading finished, not because a process exists.</p></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788100000002-the-image-is-the-unit.html">The Image Is the Unit</a><span class="link-note">What goes inside, what stays configuration, and why the size is a design decision rather than an outcome.</span></li><li><a href="../core-vocabulary/lsn-1787000000003-serving-locally.html">Serving Locally: Ollama, llama.cpp and tok/s</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">The most-mentioned tool in your codebase, and how to read a speed number.</span></li><li><a href="lsn-1788100000000-calling-an-api-you-do-not-control.html">Calling an API You Do Not Control</a><span class="link-note">It will fail, it will be slow, and it will occasionally charge you twice for the same work.</span></li><li><a href="../core-vocabulary/lsn-1787000000026-latency-and-caching.html">Latency, Prefills and Caching</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Why should a wrong API key and a missing one produce identical responses?</p>

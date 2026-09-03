@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -249,6 +253,7 @@
   <h2>What a disagreement is telling you</h2>
   <ul><li><strong>The label is wrong</strong> — a rule elsewhere forbids it. Fix the rules or fix the label, and record which you chose.</li><li><strong>The rules are incomplete</strong> — two answers are equally defensible and your label picked one. Add the clause that distinguishes them, or accept both.</li><li><strong>The system is wrong</strong> — the label is genuinely derivable and it failed to derive it. This is the case you wanted, and it is the rarest of the three on a first run.</li></ul>
   <div class="callout insight"><span class="label">This is why the corpus in Block 3 is synthetic</span><p>Every fact in that corpus lives in exactly one document, deliberately. That is what makes recall measurable rather than estimated — the gold set names the document, and the naming is correct because the document was written to contain the fact.</p></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block1-data-eda/lsn-1787300000005-labels-and-holdouts.html">Labels, and What You Hold Back</a><span class="rel-set">Block 1 · Python, Data and EDA</span><span class="link-note">Label quality caps model quality — and the data you refuse to look at is what makes any number believable.</span></li><li><a href="../algorithms/lsn-1787100000009-data-leakage.html">Data Leakage</a><span class="rel-set">Algorithms That Matter Here</span><span class="link-note">The failure that produces a brilliant model and a worthless one, simultaneously.</span></li><li><a href="lsn-1787800000003-rubrics-and-blind-reads.html">Rubrics and Blind Reads</a><span class="link-note">A rubric makes a judgement checkable. Blinding makes it honest. Neither works without the other.</span></li><li><a href="lsn-1787800000002-one-set-many-models.html">One Set, Many Models</a><span class="link-note">The comparison is the point, and a budget you set without thinking is what breaks it.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Your system disagrees with a gold label. What is the first thing to check?</p>

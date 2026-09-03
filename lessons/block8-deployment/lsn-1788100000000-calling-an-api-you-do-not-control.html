@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -239,6 +243,7 @@
   <h2>Backoff, and the part everyone omits</h2>
   <ul><li><strong>Exponential</strong> — double the wait each attempt, so a struggling service is not hammered by every client at once.</li><li><strong>Jittered</strong> — the omitted part. Without randomisation every client that failed together retries together, and the retry storm is a second outage arriving on a schedule.</li><li><strong>Capped, and bounded in total</strong> — a maximum interval and a maximum number of attempts, because a caller retrying for an hour has turned a fast failure into a slow one.</li><li><strong>Budgeted</strong> — with a paid model behind the call, the retry policy is also a spending policy. Three attempts at a large prompt is three times the bill for one answer.</li></ul>
   <div class="callout pitfall"><span class="label">Streaming changes what a failure looks like</span><p>A streamed response can fail after you have already shown the user half an answer. There is no clean status code for that — the connection simply stops. Decide in advance whether a truncated stream is discarded, retried from the start, or kept with a marker, and make sure the answer is not "whatever the client library happens to do", because that is usually to leave the partial text on screen looking complete.</p></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788100000003-after-it-ships.html">After It Ships</a><span class="link-note">What to watch, what to wake someone for, and the difference between the service being up and the service being right.</span></li><li><a href="../block9-electives/lsn-1788200000002-where-the-money-goes.html">Where the Money Goes</a><span class="rel-set">Block 9 · Electives</span><span class="link-note">Block 0 taught routing, which is architecture. This is the measurement — attributing spend, and the four places it hides.</span></li><li><a href="lsn-1788100000001-serving-one-yourself.html">Serving One Yourself</a><span class="link-note">The concerns that appear the moment the caller is not you — worked against Project 4.</span></li><li><a href="../core-vocabulary/lsn-1787000000006-routing-and-escalation.html">Routing, Escalation and Sampling Controls</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Cheap-first architecture — plus temperature and top-k, which decide how a model picks words.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Which failure category most needs idempotency rather than a retry policy?</p>

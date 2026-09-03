@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -259,6 +263,7 @@
   <p>Trees report which features drove the splits, and this is one of the most trusted and most misread outputs in machine learning. The default measure — total impurity reduction attributed to each feature — is biased toward high-cardinality features. A continuous variable offers hundreds of candidate thresholds; a binary flag offers one. The continuous variable wins more splits partly on opportunity rather than on merit.</p>
   <div class="callout pitfall"><span class="label">Use permutation importance when the answer matters</span>Shuffle one feature's values and measure how much performance drops. That directly answers the question people think they are asking — does the model actually rely on this? — and it is computed on held-out data, so it reflects generalisation rather than how the tree happened to be built. Slower, and worth it whenever the importance ranking will be shown to anyone who might act on it.</div>
   <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Grokking AI Algorithms</span><span class="bk-a">Rishal Hurbans</span><span class="bk-n">Visual, patient treatment of tree construction if the split calculation above went past too quickly.</span></li><li><span class="bk-t">Hands-On Machine Learning with Scikit-Learn and PyTorch</span><span class="bk-a">Aurelien Geron</span><span class="bk-n">Chapter 6 on trees, including exporting one as readable text — worth doing once on a real model.</span></li></ul></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787100000003-ensembles.html">Ensembles: Bagging, Forests and Boosting</a><span class="link-note">Why many mediocre models beat one good one — and which kind to reach for.</span></li><li><a href="../block2-classical-ml/lsn-1787500000001-baseline-to-model.html">From Baseline to Model</a><span class="rel-set">Block 2 · Predictive Modelling</span><span class="link-note">A ladder of increasing complexity, climbed only as far as the evidence justifies.</span></li><li><a href="../core-vocabulary/lsn-1787000000008-overfitting-and-underfitting.html">Overfitting and Underfitting</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">The single most important pair of words in machine learning — and the reason you always hold data back.</span></li><li><a href="lsn-1787100000001-regression-algorithms.html">Linear and Logistic Regression</a><span class="link-note">The two algorithms you should try before anything clever — and the baseline everything else must beat.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/tree.html" target="_blank" rel="noopener">Decision trees (scikit-learn)</a><span class="link-note">Splitting criteria, the pruning parameters, and how to export a tree as readable text.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

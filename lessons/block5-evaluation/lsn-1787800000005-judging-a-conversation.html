@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -244,6 +248,7 @@
   <div class="callout matters"><span class="label">Multi-turn state is where the eval set gets expensive</span><p>A single-turn set is a list of questions. A multi-turn set is a list of <em>situations</em> — a starting state, the turns so far, and often a scripted counterpart to play the other side. That is considerably more work to build and to keep correct, which is why most teams claim to test agents and actually test the last message. Start with a handful of realistic trajectories rather than a large set of shallow ones.</p></div>
   <h2>Where this connects</h2>
   <p>Block 4's telemetry lesson insisted the trace falls out of the loop for a few lines of code, and this is what it was for. The trace is not only for debugging an incident — it is the object you evaluate. A system with traces and no trajectory evaluation is recording the evidence and never reading it.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787800000003-rubrics-and-blind-reads.html">Rubrics and Blind Reads</a><span class="link-note">A rubric makes a judgement checkable. Blinding makes it honest. Neither works without the other.</span></li><li><a href="../engineering-practice/lsn-1787400000007-models-judging-models.html">Models Judging Models</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">LLM-as-judge — what it genuinely buys you, the four biases it ships with, and the failure that manufactures results.</span></li><li><a href="../core-vocabulary/lsn-1787000000027-session-lifecycle.html">Memory, Compaction and Session Decay</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">A model has no memory. Everything that looks like memory is something you built — and all of it degrades.</span></li><li><a href="../block4-agentic/lsn-1787700000004-loop-tradeoffs.html">Four Levers, and What Each Costs</a><span class="rel-set">Block 4 · Agentic AI</span><span class="link-note">Prefix caching, read accumulation, per-edit verification and reasoning effort — every one trades tokens against reliability.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Why is the final answer a poor unit for grading an agent?</p>

@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -253,6 +257,7 @@
   <div class="callout pitfall"><span class="label">A true narrow observation promoted to a false general one</span>In each case the specific measurement was correct. What was wrong was the scope of the claim built on it. Before writing "X cannot do Y", name exactly what you tested — which build, which configuration, which budget, which mode — and ask whether the claim you are about to make is larger than the evidence under it. It usually is.</div>
   <h2>In practice</h2>
   <ul><li>Put an easy control in every benchmark and read it first when a board looks uniform</li><li>When every model fails identically, investigate the harness before the models</li><li>Report engagement and correctness as separate numbers</li><li>Record what each passing test does not establish, at the time you record the pass</li><li>Write claims at the scope of the evidence — name the build, the config, the budget</li></ul>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000005-confounds-you-cannot-see.html">Confounds You Cannot See</a><span class="link-note">The limits, overrides and truncations that end a run silently — and get read as capability.</span></li><li><a href="lsn-1787400000013-rungs-and-experiments.html">Rungs: Running Experiments on an Agent</a><span class="link-note">A ladder of progressively more assistance — and the only design that tells you where the wall actually is.</span></li><li><a href="lsn-1787400000003-how-to-measure.html">How to Measure</a><span class="link-note">A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.</span></li><li><a href="lsn-1787400000004-swe-bench-and-how-to-run-it.html">SWE-bench, and How to Actually Run It</a><span class="link-note">The benchmark behind the numbers in lesson 2 — how it is built, how to run it, and what it does not tell you.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.swebench.com/" target="_blank" rel="noopener">SWE-bench</a><span class="link-note">Note that variants exist precisely to separate difficulty from capability — Lite versus Verified is a control-fixture argument at benchmark scale.</span></li><li><a href="https://arxiv.org/abs/2305.20050" target="_blank" rel="noopener">Let&#x27;s Verify Step by Step (Lightman et al., 2023)</a><span class="link-note">Process versus outcome scoring — the same idea as separating engagement from correctness, done at the step level.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

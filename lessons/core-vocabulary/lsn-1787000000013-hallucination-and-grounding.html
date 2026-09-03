@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -250,6 +254,7 @@
   <div class="callout pitfall"><span class="label">The mitigation that doesn&#x27;t work</span>Telling the model "do not hallucinate" or "only state facts" achieves close to nothing on its own. The model has no mechanism for distinguishing the two categories at generation time, so the instruction can't be acted on. It shifts tone, not accuracy. Architecture beats exhortation — the same conclusion as prompt injection.</div>
   <h2>Grounding is not a guarantee</h2>
   <p>A grounded system can still fail: retrieval returns nothing and the model answers from memory anyway; it returns the wrong passage and the model faithfully summarises the wrong thing; or the model blends retrieved content with parametric knowledge and produces something that half-matches its source. This is why Block 5 measures groundedness — whether the answer is actually supported by what was retrieved — separately from whether the answer is correct.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block3-retrieval/lsn-1787600000000-building-a-rag-system.html">Building a Retrieval System That Works</a><span class="rel-set">Block 3 · Retrieval and Agentic RAG</span><span class="link-note">Five stages, and the two that decide whether the other three matter.</span></li><li><a href="lsn-1787000000012-structured-output-json.html">Structured Output: JSON You Can Actually Parse</a><span class="link-note">The gap between 'the model returned JSON' and 'the model always returns valid JSON'.</span></li><li><a href="../block3-retrieval/lsn-1787600000002-measuring-retrieval.html">Measuring Retrieval</a><span class="rel-set">Block 3 · Retrieval and Agentic RAG</span><span class="link-note">Three numbers, measured separately, because they fail independently and have different fixes.</span></li><li><a href="../engineering-practice/lsn-1787400000007-models-judging-models.html">Models Judging Models</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">LLM-as-judge — what it genuinely buys you, the four biases it ships with, and the failure that manufactures results.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2311.05232" target="_blank" rel="noopener">Survey of hallucination in LLMs (Huang et al., 2023)</a><span class="link-note">The taxonomy of hallucination types and the mitigation landscape, with the evidence for each.</span></li><li><a href="https://arxiv.org/abs/2005.11401" target="_blank" rel="noopener">Retrieval-augmented generation (Lewis et al., 2020)</a><span class="link-note">The original RAG paper — grounding as an architecture rather than a prompt.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

@@ -44,6 +44,7 @@ LESSONS = [
     ("callout", "pitfall", "Every base-model upgrade repeats the work",
      "<p>A fine-tuned model is a fork. The moment a better base appears, your adapter was trained against the old one and the choice is to retrain or to stay behind. Over a year of frequent releases that is a recurring cost nobody budgets at the point of deciding, and it is the strongest practical argument for exhausting the reversible options first.</p>"),
 
+    ("related", ["building-a-rag-system", "building-the-dataset", "preloading-instead-of-retrieving", "shots-and-in-context-learning"]),
     ("quiz", [
       ("A model answers confidently and wrongly about your product's return policy. What is the right intervention?",
        ["Fine-tune on your policy documents so the model learns them",
@@ -126,6 +127,7 @@ LESSONS = [
       "The format is byte-for-byte what production sends, chat template included.",
     ]),
 
+    ("related", ["when-fine-tuning-is-wrong", "labels-and-holdouts", "loops-in-training", "data-leakage"]),
     ("quiz", [
       ("Why can five hundred consistent examples outperform fifty thousand inconsistent ones?",
        ["Smaller datasets overfit less, which improves generalisation",
@@ -211,6 +213,7 @@ LESSONS = [
     ("callout", "pitfall", "Both methods can lose capability you never measured",
      "<p>Training a model to be good at one narrow thing can make it worse at others, and adaptation reduces this without eliminating it because the frozen base is still being spoken over. The failure does not appear in the metric you are watching, since that metric is the task you tuned for and it improved. It appears the first time somebody asks the tuned model something ordinary and outside the tuning distribution.</p><p>The defence is the one the compression lesson already argues for: evaluate against the base model on slices, not on an aggregate. Keep a small set of general questions the tuning was never about, run it before and after, and treat a drop there as a cost of the change rather than as noise.</p>"),
 
+    ("related", ["when-the-training-run-does-not-fit", "building-the-dataset", "the-four-ways-to-shrink-a-model", "overfitting-and-underfitting"]),
     ("quiz", [
       ("Why does freezing the base weights save so much more memory than the parameter count suggests?",
        ["Frozen weights can be stored in lower precision automatically",
@@ -302,6 +305,7 @@ LESSONS = [
       "<strong>None of them, if the failure is knowledge.</strong> The first lesson in this block holds regardless of how the tuning is done, and no objective function installs facts that retrieval would supply exactly.",
     ]),
 
+    ("related", ["feedback-rlhf-and-humans", "chain-of-thought-and-reasoning", "models-judging-models", "building-the-dataset"]),
     ("quiz", [
       ("What determines the ceiling on supervised fine-tuning?",
        ["The size of the base model, which caps what any adaptation can add",
@@ -367,6 +371,7 @@ LESSONS = [
     ("h2", "What none of them fix"),
     ("p", "These are memory techniques, and the hardware lesson&#39;s first rule still governs: capacity is a hard wall and library support is what actually blocks people. A sixteen-bit format that has no implementation on your accelerator will fall back to something slower or fail outright, and no amount of accumulation makes a model fit that was never going to. Check that it fits, then check that the operations you need exist, and only then start trading time for room."),
 
+    ("related", ["lora-qlora-and-full-fine-tuning", "gradient-descent-and-backprop", "local-hardware-limits", "why-the-gpu-is-waiting"]),
     ("quiz", [
       ("Which of the four claims on training memory grows with your batch size and sequence length rather than with the model?",
        ["The optimiser state, since it tracks statistics per example",
@@ -435,6 +440,7 @@ LESSONS = [
     ("h2", "Where each one bites"),
     ("p", "Choose by the constraint you actually have. If the model will not fit in memory, quantization addresses it directly and cheaply. If it fits but generation is too slow, remember from Block 0 that generation is memory-bound — so fewer bytes helps and fewer operations does not, which favours quantization again over anything that only removes arithmetic. If you need a genuinely smaller model for a narrow task, distillation is the honest answer. Pruning sits between: real gains, real cost, and a repair pass attached."),
 
+    ("related", ["weights-gguf-quantization", "distillation", "lora-qlora-and-full-fine-tuning", "mixture-of-experts"]),
     ("quiz", [
       ("Which two of the four are used together rather than chosen between?",
        ["Quantization and pruning, since both reduce size",

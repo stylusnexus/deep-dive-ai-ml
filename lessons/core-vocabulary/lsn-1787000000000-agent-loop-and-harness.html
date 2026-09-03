@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -263,6 +267,7 @@
   <h2>The word you&#x27;ll see elsewhere</h2>
   <p>The loop above has a name you will meet constantly in the literature and almost never in a codebase: <strong>ReAct</strong>, for reason and act. It describes interleaving a reasoning step with an action &mdash; think, call a tool, read the result, think again &mdash; rather than planning everything up front or acting without deliberating. It is worth naming because of how the vocabulary settled: when the paper appeared this was a technique you chose, and it has since become simply what an agent is. If you have followed this lesson you have built a ReAct agent, and the papers describing one are describing the while-loop you already understand.</p>
   <p><strong>Harness</strong> is also used for an <em>evaluation</em> harness — the rig that runs a model against a test set. Most projects use it in both senses, which is a real ambiguity in the field rather than a misunderstanding on your part. Context disambiguates: an agent harness runs one task for a user, an eval harness runs many tasks for a score.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block4-agentic/lsn-1787700000000-the-loop-by-hand.html">The Agent Loop, By Hand</a><span class="rel-set">Block 4 · Agentic AI</span><span class="link-note">Forty lines. Build it once and every framework afterwards is legible.</span></li><li><a href="lsn-1787000000019-loops-at-inference.html">Loops at Inference: Control Flow, Limits and Dangers</a><span class="link-note">Running the model more than once — when that buys accuracy, and when it just buys tokens.</span></li><li><a href="lsn-1787000000009-agents-autonomy-and-danger.html">Agents, Autonomy and the Danger Surface</a><span class="link-note">What actually makes something an agent, and every way it can hurt you.</span></li><li><a href="lsn-1787000000005-tool-calls-and-mcp.html">Tool Calls and MCP</a><span class="link-note">How a text model comes to run your code, and what the protocol standardises.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener">ReAct (Yao et al., 2022)</a><span class="link-note">The paper that named reason-and-act interleaving, back when it was a technique you chose rather than the default.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents</a><span class="link-note">Anthropic's engineering write-up on when a loop is warranted and when a fixed workflow is better.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

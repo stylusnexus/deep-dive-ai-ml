@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -238,6 +242,7 @@
   <div class="callout pitfall"><span class="label">The failure that looks like the technique and is not</span><p>Sixteen-bit formats have a much narrower range than thirty-two-bit ones, and gradients are small numbers. In the older half-precision format they can underflow to zero, at which point training quietly stops learning &mdash; the loss flattens and nothing errors. The standard remedy is loss scaling: multiply the loss before the backward pass to lift the gradients into representable range, then divide it out before the update. Modern frameworks do this for you, and the newer sixteen-bit format designed for machine learning trades precision for range specifically to avoid the problem.</p><p>The reason to know this anyway is diagnostic. A flat loss curve immediately after enabling mixed precision is a numerics problem, not a learning-rate problem, and it will absorb an afternoon if you attack it as the latter.</p></div>
   <h2>What none of them fix</h2>
   <p>These are memory techniques, and the hardware lesson&#39;s first rule still governs: capacity is a hard wall and library support is what actually blocks people. A sixteen-bit format that has no implementation on your accelerator will fall back to something slower or fail outright, and no amount of accumulation makes a model fit that was never going to. Check that it fits, then check that the operations you need exist, and only then start trading time for room.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788000000002-lora-qlora-and-full-fine-tuning.html">LoRA, QLoRA and the Full Fine-Tune</a><span class="link-note">What low-rank adaptation actually changes, what rank buys you, and the one case where updating every weight is still right.</span></li><li><a href="../algorithms/lsn-1787100000000-gradient-descent-and-backprop.html">Gradient Descent and Backpropagation</a><span class="rel-set">Algorithms That Matter Here</span><span class="link-note">The one algorithm underneath every trained model you will ever use.</span></li><li><a href="../core-vocabulary/lsn-1787000000025-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li><li><a href="../core-vocabulary/lsn-1787000000028-why-the-gpu-is-waiting.html">Why the Graphics Processing Unit (GPU) Is Waiting</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">One number — work done per byte fetched — explains quantization, batching, and why a chip rated for a quadrillion operations a second gives you thirty tokens a second.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Which of the four claims on training memory grows with your batch size and sequence length rather than with the model?</p>

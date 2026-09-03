@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -251,6 +255,7 @@
   <p>The honest answer is to compare like with like — failure rate by site <em>within</em> age bands — or to let a model with both features estimate their separate contributions. What you must not do is read a raw group difference as a causal claim about the group.</p>
   <h2>What the exploration pass should produce</h2>
   <p>Not a folder of charts. A short list of findings that change what you do next: which features carry signal, which are redundant, which groups differ, and where you're uncertain. In Block 1 that list is five lines long and every line shapes the modelling that follows.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787300000001-first-fifteen-minutes.html">The First Fifteen Minutes</a><span class="link-note">A survey, not a clean-up — and the four things you must find before touching anything.</span></li><li><a href="lsn-1787300000002-missing-data-mechanisms.html">Missing Data: The Mechanism Matters More Than the Amount</a><span class="link-note">Why 'fill it with the median' is a decision about the world, not a default.</span></li><li><a href="../engineering-practice/lsn-1787400000005-confounds-you-cannot-see.html">Confounds You Cannot See</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The limits, overrides and truncations that end a run silently — and get read as capability.</span></li><li><a href="lsn-1787300000000-tabular-data-and-dtypes.html">Tabular Data and the Lies dtypes Tell</a><span class="link-note">Rows, columns, types — and why the type a column loaded as is your first diagnostic.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://seaborn.pydata.org/tutorial.html" target="_blank" rel="noopener">seaborn tutorial</a><span class="link-note">Distribution, relational and categorical plots, with guidance on which to reach for.</span></li><li><a href="https://en.wikipedia.org/wiki/Anscombe%27s_quartet" target="_blank" rel="noopener">Anscombe&#x27;s quartet</a><span class="link-note">Four datasets with identical summary statistics and completely different shapes. The case for plotting, in one image.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

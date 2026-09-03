@@ -55,6 +55,7 @@ LESSONS = [
 
     ("h2", "The test for whether an ADR is doing work"),
     ("p", "A decision record earns its place when it stops a future change that would otherwise look sensible. If you cannot name the reasonable-seeming thing it forbids, you have written a status update."),
+    ("related", ["spec-driven-development", "why-measurement-decides", "code-nobody-decided", "version-control-basics"]),
     ("links", [
       ('Documenting Architecture Decisions — Michael Nygard (2011)', 'https://www.cognitect.com/blog/2011/11/15/documenting-architecture-decisions',
        'The original ADR write-up. Short, and still the clearest statement of what belongs in one.'),
@@ -144,6 +145,7 @@ LESSONS = [
 
     ("callout", "pitfall", "Read it carefully, though", "These submissions differ in more than scaffold — different prompts, retrieval, retry budgets and token spend. The spread is an upper bound on what harness work can buy, not a controlled experiment. It tells you the harness matters enormously; it does not tell you which harness change is responsible. That distinction is the whole of the next two lessons."),
 
+    ("related", ["what-ai-makes-worse", "code-nobody-decided", "the-apprenticeship-problem", "deterministic-first"]),
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',
        'Agentic coding benchmark. Compare leaderboard entries that share a model but differ in scaffold — the spread is the harness effect.'),
@@ -209,6 +211,7 @@ LESSONS = [
     ("callout", "insight", "The older name for this", "Reading what a subject says while working, rather than only scoring the outcome, is <strong>think-aloud protocol analysis</strong> — formalised by Ericsson and Simon in the 1980s for human problem-solving. The machine-learning analogue is the distinction between <em>process supervision</em> and <em>outcome supervision</em>: scoring the steps rather than the final answer."),
     ("callout", "warning", "And the caveat that keeps it honest", "Verbalised reasoning is evidence, not ground truth. A model\u2019s stated chain of thought does not always reflect the computation that produced its answer, so a trace can be sincere and still misleading. Treat it as a witness statement: extremely valuable, independently checkable, occasionally wrong."),
 
+    ("related", ["how-to-measure", "confounds-you-cannot-see", "is-the-difference-real", "where-evaluation-lives"]),
     ("links", [
       ('Let\u2019s Verify Step by Step (Lightman et al., 2023)', 'https://arxiv.org/abs/2305.20050',
        'The process- versus outcome-supervision result: step-level feedback outperforms final-answer feedback.'),
@@ -300,6 +303,7 @@ LESSONS = [
     ]),
     ("callout", "matters", "Why this belongs in a module about documentation", "A recipe or an ADR built on an unmeasured result does not just fail \u2014 it hardens. It gets cited, followed, and defended long after the thing it claims was quietly falsified. Measurement is not a separate discipline from writing things down; it is the thing that earns you the right to."),
 
+    ("related", ["why-measurement-decides", "is-the-difference-real", "confounds-you-cannot-see", "rungs-and-experiments"]),
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',
        'Useful for the exercise below: find two leaderboard entries with the same base model and different scaffolds.'),
@@ -415,6 +419,7 @@ swebench report my-run-01 -d verified"""),
      'SWE-bench does this with two test sets. FAIL_TO_PASS proves the work happened; PASS_TO_PASS proves nothing else broke. Most homemade benchmarks implement only the first half.',
      "Score only on 'the failing test now passes' and an agent can delete the test. Score only on 'the suite is green' and an agent that changes nothing scores full marks on any task where the suite was already green. You need both halves, and the second is the one people leave out."),
 
+    ("related", ["one-set-many-models", "how-to-measure", "localising-a-failure", "eval-battery"]),
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',
        'Leaderboards for each variant. Read which variant a number refers to before comparing anything.'),
@@ -517,6 +522,7 @@ swebench report my-run-01 -d verified"""),
     ]),
     ("callout", "warning", "And the cheap habit that beats all of it", "Count before theorising. A separate incident on the same project was misdiagnosed three times — as a bad timeout argument, then a dead shell, then, confidently and in writing, as a fork bomb from background loops. One command listing running processes by name would have named the real cause at any point. When something is broken, enumerate before you explain."),
 
+    ("related", ["is-the-difference-real", "localising-a-failure", "rungs-and-experiments", "data-leakage"]),
     ("links", [
       ('Building effective agents — Anthropic', 'https://www.anthropic.com/engineering/building-effective-agents',
        'Argues for the simplest scaffold that works — partly because every added mechanism is another thing that can end a run invisibly.'),
@@ -604,6 +610,7 @@ swebench report my-run-01 -d verified"""),
       "Write claims at the scope of the evidence — name the build, the config, the budget",
     ]),
 
+    ("related", ["confounds-you-cannot-see", "rungs-and-experiments", "how-to-measure", "swe-bench-and-how-to-run-it"]),
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',
        'Note that variants exist precisely to separate difficulty from capability — Lite versus Verified is a control-fixture argument at benchmark scale.'),
@@ -702,6 +709,7 @@ swebench report my-run-01 -d verified"""),
     ("h2", "Where this connects"),
     ("p", "This is the same principle as the loops lesson, one level up: a loop or a score improves things only when signal enters from outside. A judge from the same family as the system under test is not outside. A grader whose error tracks your treatment is not outside. Human labels, a compiler, a test suite and a held-out answer key are."),
 
+    ("related", ["rubrics-and-blind-reads", "is-the-difference-real", "judging-a-conversation", "eval-data-you-can-trust"]),
     ("links", [
       ('Judging LLM-as-a-Judge (Zheng et al., 2023)', 'https://arxiv.org/abs/2306.05685',
        'The MT-Bench paper. Documents position, verbosity and self-enhancement bias, and reports agreement rates against human raters.'),
@@ -812,6 +820,7 @@ swebench report my-run-01 -d verified"""),
     ("h2", "Where this lands"),
     ("p", "Every block of this program has a version of this decision in it, and the intake sheet asks it first for a reason. Before the model selection, before the prompt, before the fine-tune: is there a bounded mechanism that does this job? Ask it early, because the answer is easy to act on at the start of a project and very expensive to act on once the model is load-bearing."),
 
+    ("related", ["what-ai-makes-worse", "structured-output-json", "baseline-to-model", "asking-the-database-properly"]),
     ("links", [
       ('Building effective agents — Anthropic', 'https://www.anthropic.com/engineering/building-effective-agents',
        'Opens with the same argument: find the simplest solution possible, and only increase complexity when it demonstrably improves outcomes.'),
@@ -889,6 +898,7 @@ swebench report my-run-01 -d verified"""),
     ("callout", "matters", "The cost is deferred, which is why it accumulates",
      "<p>Nothing punishes you at the moment this happens. The code works, the tests pass, the feature ships and the sprint looks good. The bill arrives later as a codebase whose behaviour nobody can account for, one plausible addition at a time — and by then the person who could have explained any single piece has long moved on to the next ticket.</p>"),
 
+    ("related", ["what-ai-makes-worse", "spec-driven-development", "version-control-basics", "when-scaffolding-turns"]),
     ("quiz", [
       ("Why does a reviewer's usual judgement work less well on generated code?",
        ["Generated code contains subtler bugs than hand-written code",
@@ -971,6 +981,7 @@ swebench report my-run-01 -d verified"""),
     ("callout", "insight", "The definition of legacy is the whole argument",
      "<p>If legacy means code whose reasoning nobody holds, then the speed at which a codebase becomes legacy is set by how much of its reasoning was ever held by a person. That is the connection between this lesson and the one before it — undecided behaviour is legacy on arrival, and the remedy in both cases is the same unglamorous act of writing down why before writing what.</p>"),
 
+    ("related", ["deterministic-first", "code-nobody-decided", "when-scaffolding-turns", "the-apprenticeship-problem"]),
     ("quiz", [
       ("Why is comprehension described as the new bottleneck?",
        ["Models generate code faster than compilers can build it",
@@ -1057,6 +1068,7 @@ swebench report my-run-01 -d verified"""),
      "Waterfall's specs were ignored; these are followed exactly. Every under-specified area becomes an invented answer, delivered confidently and consistently, so vagueness surfaces as working code rather than as questions.",
      'Your spec says the export should handle large files. You meant streaming rather than loading into memory. The agent implemented a 100MB size limit with a clear error message — a reasonable reading, faithfully built, and not what you wanted. You discovered what you meant by reading what you got.'),
 
+    ("related", ["three-artifacts", "rungs-and-experiments", "code-nobody-decided", "how-to-measure"]),
     ("links", [
       ("GitHub Spec Kit", "https://github.com/github/spec-kit",
        "The open-source toolkit that popularised the four-phase workflow. Agent-agnostic and CLI-first — the easiest place to see the shape of it."),
@@ -1161,6 +1173,7 @@ git switch main && git pull            # back to the main line, now updated"""),
     ("h2", "What GitHub adds"),
     ("p", "Beyond hosting: pull requests for review, issues for tracking work, and Actions for running your tests automatically on every push. That last one connects directly to the evaluation material — a benchmark that runs itself on every change is the difference between measuring occasionally and measuring always."),
 
+    ("related", ["three-artifacts", "code-nobody-decided", "the-image-is-the-unit", "spec-driven-development"]),
     ("links", [
       ("Git Book — chapters 1 to 3", "https://git-scm.com/book/en/v2",
        "Free and genuinely the best reference. The first three chapters cover everything above properly."),
@@ -1259,6 +1272,7 @@ git switch main && git pull            # back to the main line, now updated"""),
     ("h2", "The connection to everything else"),
     ("p", "This is the control-fixture idea from the localising lesson, made systematic. It is also the one-treatment-at-a-time rule from the measurement checklist, applied as a design rather than as discipline: because each rung differs by exactly one thing, the sweep is a set of controlled comparisons run in parallel rather than a sequence of experiments run over a fortnight."),
 
+    ("related", ["localising-a-failure", "how-to-measure", "confounds-you-cannot-see", "spec-driven-development"]),
     ("links", [
       ("SWE-bench experiments", "https://github.com/swe-bench/experiments",
        "Submissions differing in scaffold on identical tasks — the same comparison as a rung ladder, run across teams instead of within one."),

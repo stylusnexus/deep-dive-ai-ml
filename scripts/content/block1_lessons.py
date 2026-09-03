@@ -58,6 +58,7 @@ LESSONS = [
      'It means pandas found something it could not parse and fell back to strings. That is a free diagnostic, delivered before you have done any work, and it takes ten seconds to read.',
      "operating_hours loads as object rather than float. The cause is thousands separators on every row and a stray 'hrs' suffix on about 140 of them — two different formatting problems in one column, which is what happens when data is assembled from more than one system."),
 
+    ("related", ["first-fifteen-minutes", "missing-data-mechanisms", "what-a-plot-is-for", "asking-the-database-properly"]),
     ("links", [
       ("pandas dtypes", "https://pandas.pydata.org/docs/user_guide/basics.html#dtypes",
        "What each type is, and how missing values force type changes."),
@@ -133,6 +134,7 @@ LESSONS = [
       "<strong>Don't start engineering features.</strong> You'll build things you later throw away.",
     ]),
 
+    ("related", ["tabular-data-and-dtypes", "missing-data-mechanisms", "data-leakage", "ai-assisted-analysis"]),
     ("links", [
       ("pandas: essential basic functionality", "https://pandas.pydata.org/docs/user_guide/basics.html",
        "head, describe, value_counts, dtypes — the survey toolkit, documented."),
@@ -215,6 +217,7 @@ LESSONS = [
       "<strong>Leave it</strong> — gradient boosting implementations handle missing values natively and often do better than any fill you'd choose.",
     ]),
 
+    ("related", ["first-fifteen-minutes", "tabular-data-and-dtypes", "what-a-plot-is-for", "labels-and-holdouts"]),
     ("links", [
       ("Imputation of missing values (scikit-learn)", "https://scikit-learn.org/stable/modules/impute.html",
        "Simple, iterative and KNN imputers, and the missing-indicator feature discussed above."),
@@ -290,6 +293,7 @@ LESSONS = [
     ("h2", "What the exploration pass should produce"),
     ("p", "Not a folder of charts. A short list of findings that change what you do next: which features carry signal, which are redundant, which groups differ, and where you're uncertain. In Block 1 that list is five lines long and every line shapes the modelling that follows."),
 
+    ("related", ["first-fifteen-minutes", "missing-data-mechanisms", "confounds-you-cannot-see", "tabular-data-and-dtypes"]),
     ("links", [
       ("seaborn tutorial", "https://seaborn.pydata.org/tutorial.html",
        "Distribution, relational and categorical plots, with guidance on which to reach for."),
@@ -374,6 +378,7 @@ LESSONS = [
      'It is genuinely fast at syntax and boilerplate. It has not seen your data, does not know how it was collected, and cannot know which of several defensible cleaning choices is right for your problem.',
      'Ask a model to clean a dataset and it will fill nulls with the median, drop duplicates and encode categoricals — all reasonable-looking, all invisible decisions. On the turbine data the median fill is exactly wrong, and knowing that requires knowing that vibration sensors fail on shaking turbines. No column name carries that.'),
 
+    ("related", ["what-ai-makes-worse", "deterministic-first", "first-fifteen-minutes", "confounds-you-cannot-see"]),
     ("links", [
       ("Building effective agents", "https://www.anthropic.com/engineering/building-effective-agents",
        "On knowing which parts of a task to hand over and which to keep — the same division applied to agents."),
@@ -473,6 +478,7 @@ LESSONS = [
     ("h2", "The connection worth carrying forward"),
     ("p", "Label quality sets the ceiling. Holdouts tell you where you are against it. Neither is a modelling technique, both are cheap, and skipping either produces confident numbers that do not survive contact with production — which is the failure this entire course is arranged around preventing."),
 
+    ("related", ["data-leakage", "eval-data-you-can-trust", "building-the-dataset", "overfitting-and-underfitting"]),
     ("links", [
       ("Cross-validation — scikit-learn", "https://scikit-learn.org/stable/modules/cross_validation.html",
        "Nested cross-validation and the grouped and time-ordered variants, with the leakage-safe patterns."),

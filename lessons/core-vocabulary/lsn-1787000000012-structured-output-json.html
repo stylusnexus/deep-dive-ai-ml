@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -255,6 +259,7 @@
   <h2>Where this connects</h2>
   <p>This is the mechanism under tool calling from lesson 6 — a tool call <em>is</em> schema-constrained structured output, which is why providers that support tool calling support structured output essentially for free. It's also what makes deterministic grading possible in Block 5: an output that validates against a schema is machine-checkable without a judge.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Valid JSON is not correct JSON.</p><p class="know-why">Schema validation checks shape. It says nothing about whether the values correspond to anything real, and a model that is uncertain will still produce a perfectly-formed object rather than an error.</p><p class="know-eg"><span class="know-eg-label">For example</span>Your extraction returns a product_id of SKU-88213 with a confidence of 0.97. It parses, it validates, every field is the right type. The SKU does not exist — the model produced something SKU-shaped because the schema demanded a string there. The 0.97 is generated the same way as the SKU.</p></blockquote>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000006-routing-and-escalation.html">Routing, Escalation and Sampling Controls</a><span class="link-note">Cheap-first architecture — plus temperature and top-k, which decide how a model picks words.</span></li><li><a href="lsn-1787000000013-hallucination-and-grounding.html">Hallucination and Grounding</a><span class="link-note">Why a model states falsehoods with total confidence — and what actually reduces it.</span></li><li><a href="../engineering-practice/lsn-1787400000008-deterministic-first.html">Deterministic First</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The best AI engineering decision is frequently to use less of it.</span></li><li><a href="lsn-1787000000005-tool-calls-and-mcp.html">Tool Calls and MCP</a><span class="link-note">How a text model comes to run your code, and what the protocol standardises.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://platform.openai.com/docs/guides/structured-outputs" target="_blank" rel="noopener">Structured outputs (OpenAI)</a><span class="link-note">Rung 3 of the ladder, documented — schema-constrained generation and its limits.</span></li><li><a href="https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md" target="_blank" rel="noopener">GBNF grammars in llama.cpp</a><span class="link-note">Rung 4. Constrained decoding, where invalid output is made unrepresentable.</span></li><li><a href="https://docs.pydantic.dev" target="_blank" rel="noopener">Pydantic</a><span class="link-note">Validation that checks values, not just shape. The repair loop hangs off its error messages.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

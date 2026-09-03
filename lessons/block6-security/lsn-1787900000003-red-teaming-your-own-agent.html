@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -240,6 +244,7 @@
 </svg><figcaption>A red-team run has the shape of every other measurement in this course: a fixed battery, a recorded baseline, one change, a re-run. What makes it security work is that the battery grows each time something gets through.</figcaption></figure>
   <h2>The exercise for this block</h2>
   <ul><li><strong>Pick the system.</strong> The Block 4 multi-agent handler is the natural target: it reads free text written by other people, routes on it, and takes actions with an approval gate you can test.</li><li><strong>Plant an indirect payload.</strong> Put an instruction in the notes field of an exception record — the field the model already reads and reasons over.</li><li><strong>Decide what counts as broken</strong> before running it: the gate bypassed, an action taken that policy forbids, or the payload's instruction reflected into a customer-facing message.</li><li><strong>Record the baseline</strong>, apply exactly one mitigation from the previous lesson, and re-run the same battery.</li><li><strong>Write down what the fix does not cover.</strong> That sentence is the most useful artefact the exercise produces.</li></ul>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787900000000-injection-direct-and-indirect.html">Prompt Injection, Direct and Indirect</a><span class="link-note">The dangerous one is not the user typing something clever. It is the document you retrieved.</span></li><li><a href="../core-vocabulary/lsn-1787000000007-eval-battery.html">The Eval Battery</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How you know any of this works — and why the number you trust must be one you built.</span></li><li><a href="lsn-1787900000001-exfiltration-and-tool-abuse.html">Exfiltration and Tool Abuse</a><span class="link-note">An injected instruction is worth nothing on its own. It needs a way out, and your agent is holding several.</span></li><li><a href="../engineering-practice/lsn-1787400000003-how-to-measure.html">How to Measure</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Why should a red-team exercise use a fixed battery rather than exploratory testing?</p>

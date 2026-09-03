@@ -95,6 +95,7 @@ LESSONS = [
      'A correctly-wired network can memorise eight examples trivially, driving loss to near zero. If it cannot, the bug is in the loop, the data pipeline or the loss function — and no amount of hyperparameter tuning will find it.',
      'Your loss sits flat at 2.3 from the first step and you spend an afternoon sweeping learning rates. Training on one batch would have shown the same flat line in ninety seconds and told you it was not a learning-rate problem. The labels were being passed in the wrong argument position.'),
 
+    ("related", ["neural-networks-both-ways", "when-the-training-run-does-not-fit", "overfitting-and-underfitting", "loops-in-training"]),
     ("links", [
       ("Google ML Crash Course: gradient descent", "https://developers.google.com/machine-learning/crash-course/linear-regression/gradient-descent",
        "Interactive treatment of step size and convergence."),
@@ -194,6 +195,7 @@ LESSONS = [
        "Chapter 4 works through linear and logistic regression with the regularised variants, including the geometry of why Lasso zeroes coefficients and Ridge does not."),
     ]),
 
+    ("related", ["decision-trees", "baseline-to-model", "overfitting-and-underfitting", "is-the-difference-real"]),
     ("links", [
       ("Linear models (scikit-learn)", "https://scikit-learn.org/stable/modules/linear_model.html",
        "Ridge, Lasso and Elastic Net with the maths and the API side by side."),
@@ -286,6 +288,7 @@ LESSONS = [
        "Chapter 6 on trees, including exporting one as readable text — worth doing once on a real model."),
     ]),
 
+    ("related", ["ensembles", "baseline-to-model", "overfitting-and-underfitting", "regression-algorithms"]),
     ("links", [
       ("Decision trees (scikit-learn)", "https://scikit-learn.org/stable/modules/tree.html",
        "Splitting criteria, the pruning parameters, and how to export a tree as readable text."),
@@ -380,6 +383,7 @@ LESSONS = [
        "Chapter 7 covers bagging, forests, boosting and stacking with the parameter guidance that matters in practice."),
     ]),
 
+    ("related", ["decision-trees", "baseline-to-model", "overfitting-and-underfitting", "confusion-matrix-and-metrics"]),
     ("links", [
       ("Ensemble methods (scikit-learn)", "https://scikit-learn.org/stable/modules/ensemble.html",
        "Forests, gradient boosting and the histogram-based implementations, with parameter guidance."),
@@ -473,6 +477,7 @@ LESSONS = [
      'k-means partitions; it does not detect structure. Ask for five clusters and you get five, with centroids and a plot that looks entirely convincing, regardless of whether the data has any grouping in it.',
      "Run k-means with k=5 on uniform random noise. You get five tidy, roughly equal clusters and a plot you could put in a deck. Before believing a real clustering, run the same k on shuffled data — if the silhouette score is similar, you have found the algorithm's behaviour rather than your data's."),
 
+    ("related", ["vector-search-algorithms", "embeddings-and-retrieval", "what-a-plot-is-for", "confusion-matrix-and-metrics"]),
     ("links", [
       ("Clustering (scikit-learn)", "https://scikit-learn.org/stable/modules/clustering.html",
        "k-means alongside DBSCAN and hierarchical clustering, with a comparison chart of what each finds."),
@@ -604,6 +609,7 @@ LESSONS = [
        "By the author of the Illustrated Transformer. The visual explanations are the best available, and the code makes them concrete."),
     ]),
 
+    ("related", ["inside-an-llm", "tokens-context-and-kv-cache", "why-the-gpu-is-waiting", "mixture-of-experts"]),
     ("links", [
       ('FlashAttention (Dao et al., 2022)', 'https://arxiv.org/abs/2205.14135',
        'Exact attention made fast by moving fewer bytes — the memory-bandwidth argument applied to the attention kernel itself.'),
@@ -696,6 +702,7 @@ LESSONS = [
     ("h2", "Where it sits against the other levers"),
     ("p", "This course has now met three ways of making a large model cheaper to run, and they act on different quantities. Grouped-query attention shrinks the key-value cache, which is bytes. Quantization shrinks the weights, which is also bytes. A mixture of experts shrinks the arithmetic per token and leaves the bytes alone. Only the first two help a memory-bound decode directly; the third buys capacity at fixed compute, which is a training and quality argument more than a serving one."),
 
+    ("related", ["attention-and-transformers", "the-four-ways-to-shrink-a-model", "local-hardware-limits", "why-the-gpu-is-waiting"]),
     ("quiz", [
       ("What part of a transformer block does a mixture of experts replace?",
        ["The attention mechanism, which is split across experts",
@@ -781,6 +788,7 @@ LESSONS = [
        "Chapter 3 on locality-sensitive hashing is the theoretical ancestor of everything in this lesson. Free online, and worth it for the intuition about why approximate methods work at all."),
     ]),
 
+    ("related", ["embeddings-and-retrieval", "ranking-and-hybrid-retrieval", "measuring-retrieval", "clustering-and-knn"]),
     ("links", [
       ("pgvector indexing", "https://github.com/pgvector/pgvector",
        "HNSW and IVFFlat in Postgres, with the parameters and their recall implications."),
@@ -878,6 +886,7 @@ LESSONS = [
        "Chunking strategies and hybrid retrieval in a production framing, which is where this lesson's practical advice comes from."),
     ]),
 
+    ("related", ["vector-search-algorithms", "measuring-retrieval", "building-a-rag-system", "transforming-the-query"]),
     ("links", [
       ("Reciprocal Rank Fusion (Cormack et al.)", "https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf",
        "The original paper. Short, and the algorithm is a single formula."),
@@ -982,6 +991,7 @@ LESSONS = [
        "Chapter 4 covers leakage, train-test contamination and the sampling decisions that produce them, in a production framing rather than an academic one."),
     ]),
 
+    ("related", ["overfitting-and-underfitting", "labels-and-holdouts", "first-fifteen-minutes", "eval-data-you-can-trust"]),
     ("links", [
       ("Common pitfalls: data leakage (scikit-learn)", "https://scikit-learn.org/stable/common_pitfalls.html",
        "The canonical treatment, with code showing the preprocessing mistake and its fix."),

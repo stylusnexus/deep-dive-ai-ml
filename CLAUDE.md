@@ -52,6 +52,18 @@ python3 scripts/build_knows.py                   # Things to Know revision sheet
 python3 scripts/build_sop.py                     # the Master SOP page (make sop)
 ```
 
+`make lessons` rebuilds every set plus the index and revision sheet. Prefer it:
+lesson filenames carry their position, so inserting a lesson renames files that
+*other* sets cross-reference, and rebuilding one set alone leaves those stale.
+`make verify` runs the glossary, link and notebook checks together.
+
+Cross-references live in `scripts/related_map.py` (curated, slug to slugs) and
+are applied to the content modules by `scripts/apply_related.py`, which is
+idempotent. Slugs are resolved at build time from `scripts/lesson_map.py`, so a
+typo or a rename fails the build rather than shipping a dead link, and
+`scripts/check_links.py` re-checks the built HTML to catch staleness the source
+check cannot see.
+
 `artifacts/sop/index.html` is generated from the markdown checklists in the same
 directory. Edit the markdown; never the HTML. The builder asserts that every
 `- [ ]` in the markdown survives into the page, so a parse failure cannot
@@ -76,6 +88,7 @@ Lesson content is a list of tuples. Available blocks:
 | `links` | `("links", [(title, url, note), ...])` | verified external sources |
 | `books` | `("books", [(title, author, note), ...])` | titles in the local library |
 | `quiz` | `("quiz", [(q, [opts], answer_index), ...])` | 3–4 questions |
+| `related` | `("related", ["slug", ...])` | cross-links to other lessons; slugs validated at build |
 
 The builder asserts on undefined callout variants and on backticks in quiz text
 (quiz strings are HTML-escaped, so markdown does not render there).

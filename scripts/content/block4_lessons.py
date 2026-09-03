@@ -102,6 +102,7 @@ LESSONS = [
     ("p", "Run this loop for a while and a predictable list of wants appears: resuming after a crash without replaying everything, pausing for human approval mid-run, branching to different handling by task type, running two independent tool calls at once, and inspecting what happened on turn six of a run that finished yesterday."),
     ("p", "Each is a few days of careful work. All of them together is a graph runtime, which is what the next lesson is about — and having felt the want is what lets you judge whether the framework's answer is a good one."),
 
+    ("related", ["agent-loop-and-harness", "what-a-graph-buys", "tool-calls-and-mcp", "loop-tradeoffs"]),
     ("links", [
       ("Building effective agents — Anthropic", "https://www.anthropic.com/engineering/building-effective-agents",
        "The argument for the simplest loop that works, and when a fixed workflow beats an agent entirely."),
@@ -214,6 +215,7 @@ class AgentState(TypedDict):
     ("p", "The graph does not change what an agent is. The loop is the same loop, the model still only emits text, and <code>execute</code> is still the entire blast radius. What changes is that the control flow is now data rather than code, which is what lets something else — a checkpointer, a human, a debugger — get between the steps."),
     ("callout", "pitfall", "The framework does not supply judgement", "Nothing here decides your termination conditions, your tool permissions, your approval gates or your budget caps. A graph with no turn limit spins exactly as a <code>while True</code> does. Every discipline from the operating and danger lessons still applies, and the framework will happily let you skip all of it."),
 
+    ("related", ["the-loop-by-hand", "multi-agent-and-approval", "loop-tradeoffs", "operating-an-agent"]),
     ("links", [
       ("LangGraph documentation", "https://langchain-ai.github.io/langgraph/",
        "State, nodes, edges and the checkpointer, with the concepts in the order this lesson uses them."),
@@ -316,6 +318,7 @@ class AgentState(TypedDict):
     ("h2", "The honest default"),
     ("p", "Use the fewest agents that do the job. Start with one, add a sub-agent when a specific context is being polluted by a specific exploration, and gate only what cannot be undone. Every addition beyond that should be answering a constraint you have observed rather than a diagram you find appealing."),
 
+    ("related", ["what-a-graph-buys", "agents-autonomy-and-danger", "loop-tradeoffs", "operating-an-agent"]),
     ("links", [
       ("How we built our multi-agent research system — Anthropic", "https://www.anthropic.com/engineering/multi-agent-research-system",
        "Production experience with orchestrator-worker, including where it did not pay off."),
@@ -425,6 +428,7 @@ class AgentState(TypedDict):
     ]),
     ("callout", "pitfall", "Telemetry you never read is a storage bill", "The failure mode here is not under-instrumentation, it is instrumenting thoroughly and then only ever looking at the dashboard. The dashboard shows you the shape of what you already thought to measure. The individual traces are where you find the thing you did not."),
 
+    ("related", ["operating-an-agent", "after-it-ships", "loop-tradeoffs", "where-the-money-goes"]),
     ("links", [
       ("OpenTelemetry — traces", "https://opentelemetry.io/docs/concepts/signals/traces/",
        "Traces, spans and attributes, and why the model is worth adopting even without a vendor."),
@@ -547,6 +551,7 @@ class AgentState(TypedDict):
     ]),
     ("callout", "matters", "Change one lever at a time and re-run the whole battery", "These interact. Truncating reads improves cache hit rates by stabilising the prompt. Per-edit verification adds turns, which makes read accumulation worse. Adjust two at once and the result tells you something moved, not what — which is the measurement checklist arriving in a place people forget to apply it."),
 
+    ("related", ["loops-at-inference", "what-a-graph-buys", "telemetry-and-instrumentation", "where-the-money-goes"]),
     ("links", [
       ("Prompt caching", "https://docs.claude.com/en/docs/build-with-claude/prompt-caching",
        "The mechanics, the pricing asymmetry between writes and reads, and exactly what invalidates a prefix."),

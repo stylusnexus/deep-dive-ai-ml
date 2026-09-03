@@ -73,6 +73,7 @@ LESSONS = [
     ("callout", "matters", "Adoption is concentrated where the advantages already were",
      "<p>Adoption is heaviest among large, already-productive firms, and the complementary assets turn out to matter enormously — skilled staff, organisational process, data infrastructure. This is the least surprising and most consequential finding in the set: a technology that multiplies existing capability widens the gap between organisations that had it and those that did not, and the same logic applies to individuals.</p>"),
 
+    ("related", ["the-apprenticeship-problem", "what-ai-makes-worse", "why-measurement-decides", "the-map"]),
     ("quiz", [
       ("What do national-level studies find about AI's effect on overall employment?",
        ["A measurable decline concentrated in the last two years",
@@ -202,6 +203,7 @@ LESSONS = [
     ("callout", "matters", "Be wrong on purpose, in cheap places, on a schedule",
      "<p>If the corrected-mistake loop is no longer supplied by the job, it has to be arranged deliberately. Build the thing before reading how. Predict the number before running the eval. Write down what you expect and check. This course is full of moments where a check disagreed with a confident expectation, and every one of those was worth more than a lesson that went smoothly — which is the whole argument in miniature.</p>"),
 
+    ("related", ["what-the-evidence-shows", "what-ai-makes-worse", "code-nobody-decided", "when-scaffolding-turns"]),
     ("quiz", [
       ("What does the chapter argue becomes the scarce capability?",
        ["The ability to produce work quickly with AI assistance",

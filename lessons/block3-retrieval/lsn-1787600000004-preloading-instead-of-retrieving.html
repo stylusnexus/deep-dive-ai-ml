@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -245,6 +249,7 @@
   <div class="callout matters"><span class="label">The trade is ownership, not just accuracy</span><p>Recomputing a slice at request time works with any model you can download. Training the model to treat blocks as independent removes that cost permanently — and hands you a model variant to maintain, which every base-model upgrade obliges you to produce again. That is an architecture decision with a long tail, and it belongs in a decision record rather than in someone's head.</p></div>
   <h2>Where this leaves the block</h2>
   <p>The honest summary is that retrieval earns its place when the corpus moves and the read is short, and stops being obviously right when the corpus is fixed and the read is long. Most of this block taught you to retrieve well. This lesson is the boundary of that advice, and the measurement from the previous lesson — how much of your request is the read — is what tells you which side of it you are on.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787600000000-building-a-rag-system.html">Building a Retrieval System That Works</a><span class="link-note">Five stages, and the two that decide whether the other three matter.</span></li><li><a href="../core-vocabulary/lsn-1787000000026-latency-and-caching.html">Latency, Prefills and Caching</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.</span></li><li><a href="../block7-training/lsn-1788000000000-when-fine-tuning-is-wrong.html">When Fine-Tuning Is the Wrong Answer</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">Which is most of the time, and the order to exhaust before you reach for it.</span></li><li><a href="../core-vocabulary/lsn-1787000000011-context-engineering.html">Context Engineering: What Goes In Decides What Comes Out</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">For a model you've already chosen, context is the largest lever you still control.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. What has to be true before any preloading approach is worth considering?</p>

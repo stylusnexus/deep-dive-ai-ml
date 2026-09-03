@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -246,6 +250,7 @@
   <div class="callout pitfall"><span class="label">Serving one is a routing problem, not just a bigger model</span><p>At scale the experts are split across devices while attention is replicated, so each device holds only some experts. The router then decides not merely which expert but effectively which machine a token is sent to, and that flow changes token by token. This is why mixture-of-experts models depend on a capable inference engine rather than running acceptably on a naive one.</p></div>
   <h2>Where it sits against the other levers</h2>
   <p>This course has now met three ways of making a large model cheaper to run, and they act on different quantities. Grouped-query attention shrinks the key-value cache, which is bytes. Quantization shrinks the weights, which is also bytes. A mixture of experts shrinks the arithmetic per token and leaves the bytes alone. Only the first two help a memory-bound decode directly; the third buys capacity at fixed compute, which is a training and quality argument more than a serving one.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787100000005-attention-and-transformers.html">Attention and the Transformer</a><span class="link-note">The algorithm every model in this program is built from.</span></li><li><a href="../block7-training/lsn-1788000000005-the-four-ways-to-shrink-a-model.html">The Four Ways to Shrink a Model</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.</span></li><li><a href="../core-vocabulary/lsn-1787000000025-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li><li><a href="../core-vocabulary/lsn-1787000000028-why-the-gpu-is-waiting.html">Why the Graphics Processing Unit (GPU) Is Waiting</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">One number — work done per byte fetched — explains quantization, batching, and why a chip rated for a quadrillion operations a second gives you thirty tokens a second.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. What part of a transformer block does a mixture of experts replace?</p>

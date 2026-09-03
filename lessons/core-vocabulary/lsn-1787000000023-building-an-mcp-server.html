@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -253,6 +257,7 @@
   <h2>When not to build one</h2>
   <p>MCP solves an integration problem: write once, work across clients. If you have one client and one integration, a direct tool in your own harness is simpler, faster to change, and has no protocol surface to secure. The protocol earns its cost when the integration is reused — across clients, across agents, or by other people.</p>
   <p>And the deterministic-first question still applies. If the agent's job is to run a fixed sequence against your API, that sequence is a script, and the script can be a bundled resource in a skill rather than six tools the model has to orchestrate correctly.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000005-tool-calls-and-mcp.html">Tool Calls and MCP</a><span class="link-note">How a text model comes to run your code, and what the protocol standardises.</span></li><li><a href="lsn-1787000000024-mcp-dangers.html">Model Context Protocol (MCP): The Danger Surface</a><span class="link-note">Named attack classes from the specification itself — and why the protocol says it cannot enforce its own security principles.</span></li><li><a href="../block6-security/lsn-1787900000001-exfiltration-and-tool-abuse.html">Exfiltration and Tool Abuse</a><span class="rel-set">Block 6 · Security</span><span class="link-note">An injected instruction is worth nothing on its own. It needs a way out, and your agent is holding several.</span></li><li><a href="lsn-1787000000021-skills.html">Skills: Packaging What an Agent Should Know</a><span class="link-note">Procedural knowledge as a loadable folder — and why the scripts inside it matter as much as the prose.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/transports" target="_blank" rel="noopener">MCP specification</a><span class="link-note">Transports, the base protocol, and capability negotiation.</span></li><li><a href="https://modelcontextprotocol.io/docs/develop/build-server" target="_blank" rel="noopener">Build a server — MCP docs</a><span class="link-note">The practical walkthrough in Python and TypeScript.</span></li><li><a href="https://github.com/modelcontextprotocol/servers" target="_blank" rel="noopener">modelcontextprotocol/servers</a><span class="link-note">Reference implementations. Read two or three before writing your own, particularly how they shape return values.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

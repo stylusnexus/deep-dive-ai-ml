@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -258,6 +262,7 @@
   <div class="callout warning"><span class="label">Audit before installing</span>Read the SKILL.md body for instructions that direct the agent outward — fetching from a network, writing outside the working directory, contacting a service. Read the bundled scripts and their dependencies. A skill is a supply-chain surface and an injection surface at the same time, which is a combination worth being deliberate about. Block 6 treats this properly.</div>
   <h2>Where this lands in the program</h2>
   <p>Skills sit on top of nearly everything in Block 0: progressive disclosure is context engineering, bundled scripts are deterministic-first, the description is a tool description, and installing one is the trust question from the MCP lesson. That convergence is the point — a skill is not a new primitive so much as a container for the ones you already have.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000023-building-an-mcp-server.html">Building an Model Context Protocol (MCP) Server</a><span class="link-note">The full capability set, the two transports, and the design decisions that make a server usable rather than merely working.</span></li><li><a href="lsn-1787000000005-tool-calls-and-mcp.html">Tool Calls and MCP</a><span class="link-note">How a text model comes to run your code, and what the protocol standardises.</span></li><li><a href="lsn-1787000000011-context-engineering.html">Context Engineering: What Goes In Decides What Comes Out</a><span class="link-note">For a model you've already chosen, context is the largest lever you still control.</span></li><li><a href="../engineering-practice/lsn-1787400000011-spec-driven-development.html">Vibe Coding and Spec-Driven Development</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">A spectrum, not a binary — and the question that tells you where on it a task belongs.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills" target="_blank" rel="noopener">Equipping agents for the real world with Agent Skills — Anthropic</a><span class="link-note">The design rationale, the onboarding framing, and the guidance on iterating from real usage.</span></li><li><a href="https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview" target="_blank" rel="noopener">Agent Skills documentation</a><span class="link-note">The SKILL.md format, frontmatter fields and progressive-disclosure mechanics in detail.</span></li><li><a href="https://github.com/anthropics/skills" target="_blank" rel="noopener">anthropics/skills</a><span class="link-note">Working examples. Read a few end to end before writing your own — the descriptions in particular.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

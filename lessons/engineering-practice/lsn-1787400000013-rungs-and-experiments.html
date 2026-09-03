@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -249,6 +253,7 @@
   <p>That gap — between what makes the fixture pass and what you can actually run — is itself a finding worth recording. It tells you the size of the problem you still have.</p>
   <h2>The connection to everything else</h2>
   <p>This is the control-fixture idea from the localising lesson, made systematic. It is also the one-treatment-at-a-time rule from the measurement checklist, applied as a design rather than as discipline: because each rung differs by exactly one thing, the sweep is a set of controlled comparisons run in parallel rather than a sequence of experiments run over a fortnight.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000006-localising-a-failure.html">Localising a Failure</a><span class="link-note">Knowing something is broken is easy. Knowing which part is the whole job.</span></li><li><a href="lsn-1787400000003-how-to-measure.html">How to Measure</a><span class="link-note">A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.</span></li><li><a href="lsn-1787400000005-confounds-you-cannot-see.html">Confounds You Cannot See</a><span class="link-note">The limits, overrides and truncations that end a run silently — and get read as capability.</span></li><li><a href="lsn-1787400000011-spec-driven-development.html">Vibe Coding and Spec-Driven Development</a><span class="link-note">A spectrum, not a binary — and the question that tells you where on it a task belongs.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://github.com/swe-bench/experiments" target="_blank" rel="noopener">SWE-bench experiments</a><span class="link-note">Submissions differing in scaffold on identical tasks — the same comparison as a rung ladder, run across teams instead of within one.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">The argument for the simplest scaffold that works, which is what a ladder is for finding.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

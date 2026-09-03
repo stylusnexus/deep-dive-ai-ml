@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -244,6 +248,7 @@
   <ul><li><strong>Identical:</strong> the set, the prompt, the scoring, the number of repeats, and the rule for classifying non-completions.</li><li><strong>Sized to the greediest model:</strong> the output budget and the timeout. A shared value tuned to the cheapest model is a handicap, not a control.</li><li><strong>Genuinely different, and worth reporting:</strong> cost and latency per item. A model that wins on accuracy and loses on both is a decision, not a result.</li><li><strong>Recorded every run:</strong> a manifest naming model, endpoint, every budget and the config version. Without it, a comparison cannot be rerun and therefore cannot be trusted.</li></ul>
   <div class="callout warning"><span class="label">A ranking with no non-completion column is not finished</span><p>If the report does not say how many runs failed to complete and why, the ranking silently includes infrastructure failures as capability failures. The provider having a bad afternoon becomes the model being bad at your task, permanently, in a table somebody will cite next quarter.</p></div>
   <div class="callout matters"><span class="label">Cost and latency are results, not footnotes</span><p>The question was which model this system should use, and that question is never answered by accuracy alone. Put cost per item and latency per item in the same table as the score, or the table quietly recommends the most expensive option every time.</p></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787800000004-is-the-difference-real.html">Is the Difference Real?</a><span class="link-note">Pairing, spread, Bessel's correction and the peeking problem — the arithmetic that decides whether a number moved or wobbled.</span></li><li><a href="lsn-1787800000001-eval-data-you-can-trust.html">Eval Data You Can Trust</a><span class="link-note">A gold label is only correct if you can name the rule that produces it.</span></li><li><a href="lsn-1787800000000-where-evaluation-lives.html">Where Evaluation Lives</a><span class="link-note">The map. Which artefact answers which question, and the order that stops you wasting a week.</span></li><li><a href="../engineering-practice/lsn-1787400000004-swe-bench-and-how-to-run-it.html">SWE-bench, and How to Actually Run It</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The benchmark behind the numbers in lesson 2 — how it is built, how to run it, and what it does not tell you.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. A reasoning model scores badly on your set while a simpler model scores well. What do you check before concluding anything?</p>

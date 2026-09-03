@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -247,6 +251,7 @@
   <h2>The connection to everything else</h2>
   <p>This is the same principle as the rest of the program arriving early: verify rather than trust, hold something back that the optimiser can't see, and don't let the thing producing the work also be the thing judging it. Blocks 5 and 6 formalise it. Here it's just good practice.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Let it write the code. Do not let it make the decisions.</p><p class="know-why">It is genuinely fast at syntax and boilerplate. It has not seen your data, does not know how it was collected, and cannot know which of several defensible cleaning choices is right for your problem.</p><p class="know-eg"><span class="know-eg-label">For example</span>Ask a model to clean a dataset and it will fill nulls with the median, drop duplicates and encode categoricals — all reasonable-looking, all invisible decisions. On the turbine data the median fill is exactly wrong, and knowing that requires knowing that vibration sensors fail on shaking turbines. No column name carries that.</p></blockquote>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../engineering-practice/lsn-1787400000010-what-ai-makes-worse.html">What AI Makes Worse</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">You do not need to want to be a software engineer. You do need the parts of it that generation puts under pressure.</span></li><li><a href="../engineering-practice/lsn-1787400000008-deterministic-first.html">Deterministic First</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The best AI engineering decision is frequently to use less of it.</span></li><li><a href="lsn-1787300000001-first-fifteen-minutes.html">The First Fifteen Minutes</a><span class="link-note">A survey, not a clean-up — and the four things you must find before touching anything.</span></li><li><a href="../engineering-practice/lsn-1787400000005-confounds-you-cannot-see.html">Confounds You Cannot See</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The limits, overrides and truncations that end a run silently — and get read as capability.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents</a><span class="link-note">On knowing which parts of a task to hand over and which to keep — the same division applied to agents.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

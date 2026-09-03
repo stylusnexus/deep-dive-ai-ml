@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -279,6 +283,7 @@
   <h2>What you will want next, and that is the argument for a framework</h2>
   <p>Run this loop for a while and a predictable list of wants appears: resuming after a crash without replaying everything, pausing for human approval mid-run, branching to different handling by task type, running two independent tool calls at once, and inspecting what happened on turn six of a run that finished yesterday.</p>
   <p>Each is a few days of careful work. All of them together is a graph runtime, which is what the next lesson is about — and having felt the want is what lets you judge whether the framework's answer is a good one.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../core-vocabulary/lsn-1787000000000-agent-loop-and-harness.html">The Agent Loop and the Harness</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">The two words that appear most often in your own docs — and the difference between them.</span></li><li><a href="lsn-1787700000001-what-a-graph-buys.html">What a Graph Runtime Buys</a><span class="link-note">The five things you wanted after writing the loop by hand — and what they cost.</span></li><li><a href="../core-vocabulary/lsn-1787000000005-tool-calls-and-mcp.html">Tool Calls and MCP</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How a text model comes to run your code, and what the protocol standardises.</span></li><li><a href="lsn-1787700000004-loop-tradeoffs.html">Four Levers, and What Each Costs</a><span class="link-note">Prefix caching, read accumulation, per-edit verification and reasoning effort — every one trades tokens against reliability.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">The argument for the simplest loop that works, and when a fixed workflow beats an agent entirely.</span></li><li><a href="https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview" target="_blank" rel="noopener">Tool use overview</a><span class="link-note">The wire format for tool definitions and tool results.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

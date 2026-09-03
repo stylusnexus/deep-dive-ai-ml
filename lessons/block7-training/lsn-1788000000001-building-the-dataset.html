@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -249,6 +253,7 @@
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Deduplicate across the split, or your evaluation will tell you the training worked.</p><p class="know-why">Near-duplicates are ordinary in real corpora &mdash; the same ticket refiled, the same document in two formats, boilerplate repeated across records. If one copy lands in training and another in the held-out set, the model has seen the answer, and the score you read afterwards is measuring memorisation. This is data leakage from Block 1, arriving in a form the usual split-before-you-fit discipline does not catch, because the split was done correctly and the duplication was already in the data.</p><p class="know-eg"><span class="know-eg-label">For example</span>A support dataset of twelve hundred tickets contains roughly ninety near-identical password-reset requests. Split at random, the held-out set gets about eighteen of them and the model has trained on the rest. Accuracy comes back four points higher than the model deserves, and every one of those points is a ticket it had already been shown.</p></blockquote>
   <h2>What good looks like before you start</h2>
   <ul><li>The evaluation set exists, was split first, and nothing has been tuned against it.</li><li>You can state what a wrong answer looks like, and there are examples of the model getting it right in that specific way.</li><li>The hard cases and the ones where the correct answer is a refusal are both represented, in something like the proportion you expect to serve.</li><li>Two people reading a sample of the data agree on what the label should have been. If they do not, the model will not either.</li><li>The format is byte-for-byte what production sends, chat template included.</li></ul>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788000000000-when-fine-tuning-is-wrong.html">When Fine-Tuning Is the Wrong Answer</a><span class="link-note">Which is most of the time, and the order to exhaust before you reach for it.</span></li><li><a href="../block1-data-eda/lsn-1787300000005-labels-and-holdouts.html">Labels, and What You Hold Back</a><span class="rel-set">Block 1 · Python, Data and EDA</span><span class="link-note">Label quality caps model quality — and the data you refuse to look at is what makes any number believable.</span></li><li><a href="../core-vocabulary/lsn-1787000000020-loops-in-training.html">Loops in Training: Flywheels and Model Collapse</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How a model improves itself across generations — and the way that process eats itself.</span></li><li><a href="../algorithms/lsn-1787100000009-data-leakage.html">Data Leakage</a><span class="rel-set">Algorithms That Matter Here</span><span class="link-note">The failure that produces a brilliant model and a worthless one, simultaneously.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Why can five hundred consistent examples outperform fifty thousand inconsistent ones?</p>

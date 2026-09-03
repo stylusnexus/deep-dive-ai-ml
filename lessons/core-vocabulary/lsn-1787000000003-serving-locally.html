@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -259,6 +263,7 @@
   <h2>The thing to keep straight</h2>
   <p>Ollama is a convenience layer, not a requirement. <code>llama.cpp</code> serves models directly; vLLM and Text Generation Inference (TGI) are production-grade alternatives with better batching for concurrent users. Ollama optimises for one developer on one machine, and is a poor fit for serving many users at once. Block 8 covers what changes when you need the latter.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck.</p><p class="know-why">Inference has two phases with wildly different speeds — prefill processes your prompt in parallel and is fast; decode generates one token at a time and is slow. A benchmark measuring the phase that is not your constraint tells you nothing useful about your workload.</p><p class="know-eg"><span class="know-eg-label">For example</span>A serving runtime was widely reported as roughly three times faster than the alternative: 130 tokens per second against 43. Both figures were decode. Measured on a real agent loop — which re-sends a growing context every turn and is therefore prefill-bound — the end-to-end gain was nothing like 3x. The actual lever turned out to be prefix-KV caching, worth about tenfold, and no tokens-per-second figure would ever have surfaced it.</p></blockquote>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000025-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li><li><a href="lsn-1787000000002-weights-gguf-quantization.html">Weights, GGUF and Quantization</a><span class="link-note">What Q4_K_M actually means, and the trade you're making when you pick it.</span></li><li><a href="lsn-1787000000026-latency-and-caching.html">Latency, Prefills and Caching</a><span class="link-note">Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.</span></li><li><a href="../block8-deployment/lsn-1788100000002-the-image-is-the-unit.html">The Image Is the Unit</a><span class="rel-set">Block 8 · Deployment and APIs</span><span class="link-note">What goes inside, what stays configuration, and why the size is a design decision rather than an outcome.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a><span class="link-note">Model registry and the local OpenAI-compatible server.</span></li><li><a href="https://docs.vllm.ai" target="_blank" rel="noopener">vLLM documentation</a><span class="link-note">What you move to when one developer becomes many concurrent users — the contrast is instructive.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

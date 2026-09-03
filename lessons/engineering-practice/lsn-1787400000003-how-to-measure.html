@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -258,6 +262,7 @@
   <h2>The short version</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Before</div><div><div class="roadmap-title">Instrument honest? Prediction written with a number? Baseline defined? Guardrail named?</div><div class="roadmap-desc">All four, or do not start.</div></div></div><div class="roadmap-item"><div class="roadmap-num">During</div><div><div class="roadmap-title">Whole set, n ≥ 3, one variable, machine bookended.</div><div class="roadmap-desc">Deviations are fine if you say so in the result.</div></div></div><div class="roadmap-item"><div class="roadmap-num">After</div><div><div class="roadmap-title">Interval not fraction. Guardrail checked. Fix reverted and the number moved back.</div><div class="roadmap-desc">Then it is a finding, and only then does it belong in a recipe or an architecture decision record (ADR).</div></div></div></div>
   <div class="callout matters"><span class="label">Why this belongs in a module about documentation</span>A recipe or an ADR built on an unmeasured result does not just fail — it hardens. It gets cited, followed, and defended long after the thing it claims was quietly falsified. Measurement is not a separate discipline from writing things down; it is the thing that earns you the right to.</div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000002-why-measurement-decides.html">Why Measurement Decides</a><span class="link-note">The only thing that corrects a harness, a recipe or a decision is a number that disagrees with it.</span></li><li><a href="../block5-evaluation/lsn-1787800000004-is-the-difference-real.html">Is the Difference Real?</a><span class="rel-set">Block 5 · Evaluation</span><span class="link-note">Pairing, spread, Bessel's correction and the peeking problem — the arithmetic that decides whether a number moved or wobbled.</span></li><li><a href="lsn-1787400000005-confounds-you-cannot-see.html">Confounds You Cannot See</a><span class="link-note">The limits, overrides and truncations that end a run silently — and get read as capability.</span></li><li><a href="lsn-1787400000013-rungs-and-experiments.html">Rungs: Running Experiments on an Agent</a><span class="link-note">A ladder of progressively more assistance — and the only design that tells you where the wall actually is.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.swebench.com/" target="_blank" rel="noopener">SWE-bench</a><span class="link-note">Useful for the exercise below: find two leaderboard entries with the same base model and different scaffolds.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">On keeping the scaffold small enough that you can still attribute a result to it.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

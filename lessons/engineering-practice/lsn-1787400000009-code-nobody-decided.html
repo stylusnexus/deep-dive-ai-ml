@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -237,6 +241,7 @@
   <h2>What actually helps</h2>
   <ul><li><strong>Prompt for the decision, not the implementation.</strong> Asking for options with trade-offs produces something to choose between; asking for the endpoint produces something to accept. The first leaves a decision in the transcript, the second leaves an artefact.</li><li><strong>Write the intent before the code exists.</strong> The specification lesson that follows is this in practice, and its value here is specifically that it gives review something to check the diff <em>against</em>.</li><li><strong>Review behaviour, not lines.</strong> The question is what this now does that it did not do before, and whether anyone asked for each of those things.</li><li><strong>Treat unexplained behaviour as a defect.</strong> Not necessarily wrong — unowned. A behaviour nobody can justify is one nobody can safely change either, which is how it survives to become load-bearing.</li></ul>
   <div class="callout matters"><span class="label">The cost is deferred, which is why it accumulates</span><p>Nothing punishes you at the moment this happens. The code works, the tests pass, the feature ships and the sprint looks good. The bill arrives later as a codebase whose behaviour nobody can account for, one plausible addition at a time — and by then the person who could have explained any single piece has long moved on to the next ticket.</p></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000010-what-ai-makes-worse.html">What AI Makes Worse</a><span class="link-note">You do not need to want to be a software engineer. You do need the parts of it that generation puts under pressure.</span></li><li><a href="lsn-1787400000011-spec-driven-development.html">Vibe Coding and Spec-Driven Development</a><span class="link-note">A spectrum, not a binary — and the question that tells you where on it a task belongs.</span></li><li><a href="lsn-1787400000012-version-control-basics.html">Version Control, and Why Agents Make It Non-Optional</a><span class="link-note">Git and GitHub from zero — plus the argument for why this matters more now, not less.</span></li><li><a href="lsn-1787400000001-when-scaffolding-turns.html">When the Scaffolding Turns on You</a><span class="link-note">Each of the three artifacts has a characteristic way of becoming actively harmful.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Why does a reviewer&#x27;s usual judgement work less well on generated code?</p>

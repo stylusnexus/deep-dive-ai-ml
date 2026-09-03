@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -258,6 +262,7 @@
   <p>The methodology is young, the tooling is proliferating faster than the evidence, and much of what is written about it is advocacy. Treat claims about productivity gains the way you would treat any unmeasured claim in this course — as a hypothesis with a plausible mechanism. The mechanism here is sound, which is a reason to try it, not a reason to believe a number.</p>
   <p>The defensible version is modest and probably enough: when intent must survive multiple sessions, write it down before generating; keep it in version control; keep it current or delete it. Everything past that is tooling preference.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">An agent cannot tell a decision you made from a sentence you wrote carelessly.</p><p class="know-why">Waterfall's specs were ignored; these are followed exactly. Every under-specified area becomes an invented answer, delivered confidently and consistently, so vagueness surfaces as working code rather than as questions.</p><p class="know-eg"><span class="know-eg-label">For example</span>Your spec says the export should handle large files. You meant streaming rather than loading into memory. The agent implemented a 100MB size limit with a clear error message — a reasonable reading, faithfully built, and not what you wanted. You discovered what you meant by reading what you got.</p></blockquote>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000000-three-artifacts.html">Recipes, ADRs and the Harness</a><span class="link-note">Three things every LLM project grows, answering three different questions.</span></li><li><a href="lsn-1787400000013-rungs-and-experiments.html">Rungs: Running Experiments on an Agent</a><span class="link-note">A ladder of progressively more assistance — and the only design that tells you where the wall actually is.</span></li><li><a href="lsn-1787400000009-code-nobody-decided.html">Code Nobody Decided</a><span class="link-note">The previous lesson asked whether to use a model. This one asks who chose the behaviour when you did.</span></li><li><a href="lsn-1787400000003-how-to-measure.html">How to Measure</a><span class="link-note">A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://github.com/github/spec-kit" target="_blank" rel="noopener">GitHub Spec Kit</a><span class="link-note">The open-source toolkit that popularised the four-phase workflow. Agent-agnostic and CLI-first — the easiest place to see the shape of it.</span></li><li><a href="https://developer.microsoft.com/blog/spec-driven-development-ai-native-engineering/" target="_blank" rel="noopener">Spec-Driven Development: a spec-first approach — Microsoft</a><span class="link-note">The rationale written out, including the honest account of why specification-first failed the first time.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

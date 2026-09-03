@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -248,6 +252,7 @@
   <p>This is distinct from Hugging Face's <code>safetensors</code>, which stores full-precision weights for training and fine-tuning. The usual pipeline: fine-tune in safetensors, convert to GGUF, quantize, serve.</p>
   <div class="callout pitfall"><span class="label">Your orphaned 95GB</span>Your own audit found roughly 95GB of local weights that nothing actually serves — a very common outcome. Quantized models are cheap to download and easy to forget. Before pulling another, check what's already on disk.</div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Prefer the bigger model, more heavily quantized.</p><p class="know-why">Quantization stores each weight approximately, and large models tolerate that surprisingly well. Cutting parameters, by contrast, removes capability outright. Given a fixed memory budget, spend it on parameters and economise on precision.</p><p class="know-eg"><span class="know-eg-label">For example</span>You have 40GB. A 13B model at full 16-bit precision fits, and so does a 70B quantized to 4 bits — both around 35-40GB on disk. The 4-bit 70B will win on nearly every task, despite storing each of its weights far less precisely.</p></blockquote>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block7-training/lsn-1788000000005-the-four-ways-to-shrink-a-model.html">The Four Ways to Shrink a Model</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.</span></li><li><a href="lsn-1787000000025-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li><li><a href="lsn-1787000000003-serving-locally.html">Serving Locally: Ollama, llama.cpp and tok/s</a><span class="link-note">The most-mentioned tool in your codebase, and how to read a speed number.</span></li><li><a href="lsn-1787000000028-why-the-gpu-is-waiting.html">Why the Graphics Processing Unit (GPU) Is Waiting</a><span class="link-note">One number — work done per byte fetched — explains quantization, batching, and why a chip rated for a quadrillion operations a second gives you thirty tokens a second.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://huggingface.co/docs/hub/gguf" target="_blank" rel="noopener">GGUF on the Hugging Face Hub</a><span class="link-note">Format reference, and the quantization table naming every Q-variant.</span></li><li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a><span class="link-note">The engine. The README's quantization section is the primary source for the trade-offs here.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

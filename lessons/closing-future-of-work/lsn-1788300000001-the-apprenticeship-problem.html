@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -270,6 +274,7 @@
   <p>This course has an implicit answer to the question and it is worth making explicit, because it shaped what was taught. Almost nothing here was about producing output faster. It was about knowing what to measure, noticing when a measurement is lying, telling a real difference from a wobble, checking whether the model was needed at all, and recognising the failures that arrive looking like successes.</p>
   <p>That was a bet: that the durable skill is judgement about systems rather than fluency at producing them, and that judgement is built by being wrong on purpose in cheap places. Every fixture that failed before the work, every baseline written down before the run, every measurement that turned out to be measuring the instrument — those were rehearsals for being wrong somewhere expensive. If the argument in this chapter is right, that is the correct bet. If the historical prior is right, it is still not a bad one.</p>
   <div class="callout matters"><span class="label">Be wrong on purpose, in cheap places, on a schedule</span><p>If the corrected-mistake loop is no longer supplied by the job, it has to be arranged deliberately. Build the thing before reading how. Predict the number before running the eval. Write down what you expect and check. This course is full of moments where a check disagreed with a confident expectation, and every one of those was worth more than a lesson that went smoothly — which is the whole argument in miniature.</p></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788300000000-what-the-evidence-shows.html">What the Evidence Actually Shows</a><span class="link-note">Before anyone's thesis, including mine: the measured numbers, and how much weight they hold.</span></li><li><a href="../engineering-practice/lsn-1787400000010-what-ai-makes-worse.html">What AI Makes Worse</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">You do not need to want to be a software engineer. You do need the parts of it that generation puts under pressure.</span></li><li><a href="../engineering-practice/lsn-1787400000009-code-nobody-decided.html">Code Nobody Decided</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The previous lesson asked whether to use a model. This one asks who chose the behaviour when you did.</span></li><li><a href="../engineering-practice/lsn-1787400000001-when-scaffolding-turns.html">When the Scaffolding Turns on You</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">Each of the three artifacts has a characteristic way of becoming actively harmful.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. What does the chapter argue becomes the scarce capability?</p>

@@ -179,6 +179,10 @@
   }
 
   .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
   ul.books { list-style: none; padding: 0; margin: 0; }
   ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
   ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
@@ -240,6 +244,7 @@
   <div class="callout matters"><span class="label">Do not transform a query that was already good</span><p>These techniques repair a mismatch between how questions and answers are phrased. Where users type keyword-shaped queries, or where the corpus is itself full of questions — a support knowledge base of FAQ entries, say — the mismatch is small and the transformation adds latency, cost and a new failure mode for very little. Measure the block's existing three numbers before and after; if they do not move, do not keep it.</p></div>
   <h2>Where this sits in the block</h2>
   <p>Chunking decides what can be found. Retrieval and reranking decide what is found. Transformation decides what is looked for, and it is the only stage that touches the request rather than the corpus — which is why it is the first thing to reach for on a conversational interface and among the last on a search box.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../algorithms/lsn-1787100000008-ranking-and-hybrid-retrieval.html">Ranking and Hybrid Retrieval</a><span class="rel-set">Algorithms That Matter Here</span><span class="link-note">Best Matching 25 (BM25), reciprocal rank fusion and rerankers — why pure vector search is rarely the best answer.</span></li><li><a href="lsn-1787600000003-agentic-rag.html">Agentic RAG: Retrieval as a Loop</a><span class="link-note">When one retrieval cannot answer the question — and the failure modes that arrive with the loop.</span></li><li><a href="lsn-1787600000000-building-a-rag-system.html">Building a Retrieval System That Works</a><span class="link-note">Five stages, and the two that decide whether the other three matter.</span></li><li><a href="lsn-1787600000002-measuring-retrieval.html">Measuring Retrieval</a><span class="link-note">Three numbers, measured separately, because they fail independently and have different fixes.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Why can embedding a hypothetical answer retrieve better than embedding the question?</p>
