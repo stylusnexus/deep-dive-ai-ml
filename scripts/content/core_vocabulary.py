@@ -586,6 +586,8 @@ LESSONS = [
        "Scales with how many times the token has appeared, so it discourages overusing a word rather than merely reusing it. The distinction from presence penalty is that one asks &ldquo;has this appeared?&rdquo; and the other asks &ldquo;how often?&rdquo;"),
       ("repetition_penalty", "The open-weights formulation",
        "Serving stacks like vLLM and llama.cpp expose a multiplicative penalty on the logits of tokens already seen, typically a little above 1.0. Same intent, different arithmetic, and not interchangeable with the two above."),
+      ("Logit bias", "Named tokens, moved by hand",
+       "An adjustment added to specific tokens' logits before sampling, so you nudge or forbid particular tokens by name rather than shaping the whole distribution from history. At the extremes it is effectively a ban or a forced choice, which makes it the surgical instrument of this family and the easiest to cut yourself on."),
 ]),
     ("callout", "matters", "The practical setting", "For anything parsed by code — tool calls, structured output, classification, routing — use temperature 0 or very close. You want repeatability, not creativity. Save higher temperatures for prose where variation is the point. A surprising share of 'the agent is flaky' bugs are just an unnecessarily high temperature on a structured task."),
 
@@ -597,8 +599,19 @@ LESSONS = [
      "It is the natural thing to reach for when a model starts repeating itself, and it addresses a different problem than the one usually observed. Presence and frequency penalties discourage reusing individual tokens; they do not detect that the model has entered a cycle and is re-emitting a whole passage. Turning them up far enough to interrupt such a cycle tends to damage everything else first, because the model is now also penalised for reusing the words a coherent answer needs.",
      "Structured output is where that damage shows first. Code, JSON and technical prose legitimately reuse the same identifiers and keywords constantly, and a penalty that does not know the difference will start substituting synonyms into places that require an exact string."),
 
+    ("h3", "Logit bias, and the reason it disappoints people"),
+    ("p", "Presence and frequency penalties act on everything the model has already said. Logit bias acts on tokens you name, which sounds like the precise version of the same idea and behaves very differently. The problem is that you are naming <em>tokens</em>, not words, and the mapping between the two belongs to a particular tokenizer."),
+
+    ("know",
+     "Banning a word by its token is not banning the word.",
+     "A word is frequently several tokens, and the same word is a different token depending on whether it follows a space, opens a sentence, or is capitalised. Suppress the one you looked up and the model reaches the same idea by another route, hyphenates it, or picks a synonym. What you banned was one spelling of one path, and the result looks like the technique failing when it is doing exactly what you asked.",
+     "The corollary is that a bias table is tokenizer-specific and therefore model-specific. It is not portable, and it silently stops meaning anything the moment the model is swapped."),
+
+    ("callout", "insight", "Where it is genuinely the right tool",
+     "<p>Constraining output to a small closed set — a yes or no, a fixed list of category labels — where every permitted token can be enumerated and there is no paraphrase to route around. That is the argument the structured-output lesson makes for enums over free text, arriving one layer lower down. For anything with more structure than that, a schema or grammar constraint does the job properly and a hand-built bias table is a worse version of it.</p>"),
+
     ("callout", "matters", "The knobs are being removed, not added",
-     "<p>Worth noticing as a direction. Anthropic's interface never exposed presence or frequency penalties, and on the current generation of models the sampling controls above are rejected outright — sending temperature, top-p or top-k to Opus 5 or Sonnet 5 returns an error rather than being honoured. The bet being made is that a model good enough does not need the caller tuning its decoding, and whether or not that bet is right, it means a technique built on these parameters may simply have nowhere to attach in a year.</p>"),
+     "<p>Worth noticing as a direction. Anthropic's interface never exposed presence penalties, frequency penalties or logit bias, and on the current generation of models the sampling controls above are rejected outright — sending temperature, top-p or top-k to Opus 5 or Sonnet 5 returns an error rather than being honoured. The bet being made is that a model good enough does not need the caller tuning its decoding, and whether or not that bet is right, it means a technique built on these parameters may simply have nowhere to attach in a year.</p>"),
 
     ("h2", "Determinism, honestly"),
     ("p", "Temperature 0 makes sampling deterministic but does not guarantee identical outputs across runs. Batching, hardware differences, and floating-point non-associativity introduce variation, especially with hosted providers. Design evaluations to tolerate small differences rather than assuming byte-identical replies."),

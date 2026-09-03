@@ -242,6 +242,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **repetition_penalty** — The open-weights formulation of the same idea, a multiplicative penalty on the logits of seen tokens. Same intent as the two above, different arithmetic, not interchangeable with them.
 
+**Logit bias** — An adjustment added to named tokens' logits before sampling, forbidding or forcing specific tokens rather than shaping the whole distribution. Surgical, and tokenizer-specific: you are naming tokens rather than words, so banning one spelling leaves the model free to reach the same idea another way — and a bias table stops meaning anything when the model is swapped.
+
 **Reasoning model** — A model trained to produce an extended internal chain before its visible answer. That chain costs output tokens, which is why budgets sized for an answer alone return nothing.
 
 **Undersampling** — Discarding majority-class rows to balance a dataset. Fast, and it throws away real data, which is reasonable only when the majority class is enormous.
