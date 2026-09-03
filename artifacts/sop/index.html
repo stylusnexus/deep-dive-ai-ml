@@ -557,30 +557,29 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <blockquote><strong>Capacity is a hard wall; bandwidth is only a slope.</strong> A model that does not fit does not run at any speed. A model that fits but runs slowly still runs. Check that it fits before comparing tokens per second.</blockquote>
 <blockquote><strong>What blocks you is usually neither memory nor speed — it is library support.</strong> CUDA-only kernels do not run on Metal regardless of how much memory you have. Check the library before you check the chip.</blockquote>
 <blockquote><strong>A heavily quantised large model beats a precise small one.</strong> A 4-bit 70B almost always outperforms a 16-bit 13B of similar file size. Prefer the bigger model, more compressed.</blockquote>
-<h2>Mixture-of-experts models</h2>
-<label class="item killer" id="hardware-1"><input type="checkbox" data-id="hardware-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> Total parameters checked, not only the activated count — every expert stays</span></label>
-<p>resident because the router may pick any of them next, so total decides whether it fits and active only decides roughly how fast a token is</p>
-<label class="item" id="hardware-2"><input type="checkbox" data-id="hardware-2"><span class="tick"></span><span class="body">Understood that skipping experts removes arithmetic and not bytes, so it does not</span></label>
-<p>help a decode that is already memory-bound</p>
 <h2>0 · Does it need to be local at all?</h2>
-<label class="item" id="hardware-3"><input type="checkbox" data-id="hardware-3"><span class="tick"></span><span class="body">A real reason exists: privacy, cost at volume, or offline operation</span></label>
-<label class="item" id="hardware-4"><input type="checkbox" data-id="hardware-4"><span class="tick"></span><span class="body">Preference is not a reason — an API call is frequently cheaper than the electricity</span></label>
-<label class="item" id="hardware-5"><input type="checkbox" data-id="hardware-5"><span class="tick"></span><span class="body">Cost compared honestly at <em>your</em> volume, not at demo volume</span></label>
+<label class="item" id="hardware-1"><input type="checkbox" data-id="hardware-1"><span class="tick"></span><span class="body">A real reason exists: privacy, cost at volume, or offline operation</span></label>
+<label class="item" id="hardware-2"><input type="checkbox" data-id="hardware-2"><span class="tick"></span><span class="body">Preference is not a reason — an API call is frequently cheaper than the electricity</span></label>
+<label class="item" id="hardware-3"><input type="checkbox" data-id="hardware-3"><span class="tick"></span><span class="body">Cost compared honestly at <em>your</em> volume, not at demo volume</span></label>
 <h2>1 · Will it fit? ☠</h2>
-<label class="item killer" id="hardware-6"><input type="checkbox" data-id="hardware-6"><span class="tick"></span><span class="body"><b class=skull>☠</b> Weights computed: parameters × bits ÷ 8 (70B at 4-bit ≈ 35GB)</span></label>
-<label class="item killer" id="hardware-7"><input type="checkbox" data-id="hardware-7"><span class="tick"></span><span class="body"><b class=skull>☠</b> KV cache budgeted — grows with context and batch, and is what usually exhausts memory</span></label>
-<label class="item" id="hardware-8"><input type="checkbox" data-id="hardware-8"><span class="tick"></span><span class="body">Runtime and activation overhead added (a few GB)</span></label>
-<label class="item" id="hardware-9"><input type="checkbox" data-id="hardware-9"><span class="tick"></span><span class="body">Compared against <strong>addressable</strong> memory, not total system memory</span></label>
+<label class="item killer" id="hardware-4"><input type="checkbox" data-id="hardware-4"><span class="tick"></span><span class="body"><b class=skull>☠</b> Weights computed: parameters × bits ÷ 8 (70B at 4-bit ≈ 35GB)</span></label>
+<label class="item killer" id="hardware-5"><input type="checkbox" data-id="hardware-5"><span class="tick"></span><span class="body"><b class=skull>☠</b> For a mixture-of-experts model, <strong>total</strong> parameters used for this sum, not the</span></label>
+<p>activated count — every expert stays resident because the router may pick any of them next. Active parameters decide roughly how fast a token is, not whether it fits</p>
+<label class="item killer" id="hardware-6"><input type="checkbox" data-id="hardware-6"><span class="tick"></span><span class="body"><b class=skull>☠</b> KV cache budgeted — grows with context and batch, and is what usually exhausts memory</span></label>
+<label class="item" id="hardware-7"><input type="checkbox" data-id="hardware-7"><span class="tick"></span><span class="body">Runtime and activation overhead added (a few GB)</span></label>
+<label class="item" id="hardware-8"><input type="checkbox" data-id="hardware-8"><span class="tick"></span><span class="body">Compared against <strong>addressable</strong> memory, not total system memory</span></label>
 <p class="bullet">NVIDIA: VRAM only. Spilling to system RAM collapses throughput</p>
 <p class="bullet">Apple Silicon: the wired limit, ~75% of RAM by default and adjustable</p>
-<label class="item" id="hardware-10"><input type="checkbox" data-id="hardware-10"><span class="tick"></span><span class="body">If it does not fit: quantise further, or take a smaller model — in that order</span></label>
+<label class="item" id="hardware-9"><input type="checkbox" data-id="hardware-9"><span class="tick"></span><span class="body">If it does not fit: quantise further, or take a smaller model — in that order</span></label>
 <h2>2 · Is it supported? ☠</h2>
-<label class="item killer" id="hardware-11"><input type="checkbox" data-id="hardware-11"><span class="tick"></span><span class="body"><b class=skull>☠</b> The <em>library</em> checked, not the chip — this is the step that actually blocks people</span></label>
-<label class="item" id="hardware-12"><input type="checkbox" data-id="hardware-12"><span class="tick"></span><span class="body">No CUDA-only kernels in the path (several quantisation and attention implementations)</span></label>
-<label class="item" id="hardware-13"><input type="checkbox" data-id="hardware-13"><span class="tick"></span><span class="body">For PyTorch on Apple Silicon: fallback-to-error enabled during development, so an</span></label>
+<label class="item killer" id="hardware-10"><input type="checkbox" data-id="hardware-10"><span class="tick"></span><span class="body"><b class=skull>☠</b> The <em>library</em> checked, not the chip — this is the step that actually blocks people</span></label>
+<label class="item" id="hardware-11"><input type="checkbox" data-id="hardware-11"><span class="tick"></span><span class="body">No CUDA-only kernels in the path (several quantisation and attention implementations)</span></label>
+<label class="item" id="hardware-12"><input type="checkbox" data-id="hardware-12"><span class="tick"></span><span class="body">For PyTorch on Apple Silicon: fallback-to-error enabled during development, so an</span></label>
 <p>unimplemented operation announces itself instead of silently running on CPU</p>
-<label class="item" id="hardware-14"><input type="checkbox" data-id="hardware-14"><span class="tick"></span><span class="body">Containers understood to be CPU-only on macOS — reproducibility, not training</span></label>
+<label class="item" id="hardware-13"><input type="checkbox" data-id="hardware-13"><span class="tick"></span><span class="body">Containers understood to be CPU-only on macOS — reproducibility, not training</span></label>
 <h2>3 · Is it fast enough for the job?</h2>
+<label class="item" id="hardware-14"><input type="checkbox" data-id="hardware-14"><span class="tick"></span><span class="body">For a mixture-of-experts model, remembered that skipping experts removes arithmetic</span></label>
+<p>and not bytes — it does not help a decode that was already memory-bound</p>
 <label class="item" id="hardware-15"><input type="checkbox" data-id="hardware-15"><span class="tick"></span><span class="body">Decode speed measured, not quoted — vendor figures are usually decode-only</span></label>
 <label class="item" id="hardware-16"><input type="checkbox" data-id="hardware-16"><span class="tick"></span><span class="body">Time-to-first-token measured with a <em>realistic</em> prompt length, since prefill dominates it</span></label>
 <label class="item" id="hardware-17"><input type="checkbox" data-id="hardware-17"><span class="tick"></span><span class="body">Below ~10 tok/s interactive use is unpleasant; batch work tolerates much less</span></label>

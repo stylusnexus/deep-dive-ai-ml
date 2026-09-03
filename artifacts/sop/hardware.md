@@ -18,13 +18,6 @@ Run top to bottom. Most people fail at step 3 and spend their time on step 2.
 
 ---
 
-## Mixture-of-experts models
-- [ ] ☠ Total parameters checked, not only the activated count — every expert stays
-      resident because the router may pick any of them next, so total decides whether
-      it fits and active only decides roughly how fast a token is
-- [ ] Understood that skipping experts removes arithmetic and not bytes, so it does not
-      help a decode that is already memory-bound
-
 ## 0 · Does it need to be local at all?
 - [ ] A real reason exists: privacy, cost at volume, or offline operation
 - [ ] Preference is not a reason — an API call is frequently cheaper than the electricity
@@ -32,6 +25,9 @@ Run top to bottom. Most people fail at step 3 and spend their time on step 2.
 
 ## 1 · Will it fit? ☠
 - [ ] ☠ Weights computed: parameters × bits ÷ 8 (70B at 4-bit ≈ 35GB)
+- [ ] ☠ For a mixture-of-experts model, **total** parameters used for this sum, not the
+      activated count — every expert stays resident because the router may pick any of
+      them next. Active parameters decide roughly how fast a token is, not whether it fits
 - [ ] ☠ KV cache budgeted — grows with context and batch, and is what usually exhausts memory
 - [ ] Runtime and activation overhead added (a few GB)
 - [ ] Compared against **addressable** memory, not total system memory
@@ -47,6 +43,8 @@ Run top to bottom. Most people fail at step 3 and spend their time on step 2.
 - [ ] Containers understood to be CPU-only on macOS — reproducibility, not training
 
 ## 3 · Is it fast enough for the job?
+- [ ] For a mixture-of-experts model, remembered that skipping experts removes arithmetic
+      and not bytes — it does not help a decode that was already memory-bound
 - [ ] Decode speed measured, not quoted — vendor figures are usually decode-only
 - [ ] Time-to-first-token measured with a *realistic* prompt length, since prefill dominates it
 - [ ] Below ~10 tok/s interactive use is unpleasant; batch work tolerates much less
