@@ -21,6 +21,9 @@
 ## Structured output
 - [ ] Highest rung available used: constrained decoding > schema > JSON mode > asking
 - [ ] Schema field names and enums written as if explaining them — they're read by the model
+- [ ] ☠ The schema can express "I don't know" — an optional null, an `unknown` enum member or a
+      confidence field. Constraining the output removes the model's ability to abstain unless you
+      put it back, and a constrained system with no way to abstain fabricates instead
 - [ ] Validated on values, not just parsed
 - [ ] One repair retry, then fail loudly
 - [ ] Truncation ruled out as a cause before blaming the model
@@ -35,3 +38,4 @@
 - Answers confident and wrong → ungrounded; retrieval before prompt-tuning
 - RAG quality dropped with no prompt change → measure index recall first
 - Intermittent malformed JSON → check temperature, then max-tokens
+- Every record comes back with a confident category and none is ever `unknown` → the schema has no abstain path, so you are reading forced guesses, not findings

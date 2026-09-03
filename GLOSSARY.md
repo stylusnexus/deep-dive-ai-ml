@@ -244,6 +244,18 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Logit bias** — An adjustment added to named tokens' logits before sampling, forbidding or forcing specific tokens rather than shaping the whole distribution. Surgical, and tokenizer-specific: you are naming tokens rather than words, so banning one spelling leaves the model free to reach the same idea another way — and a bias table stops meaning anything when the model is swapped.
 
+**Constrained decoding** — Restricting generation so that invalid output cannot be produced at all: at each step the tokens that would break the required format are given zero probability before a token is drawn. The strongest rung of the structured-output ladder, because non-compliance is unrepresentable rather than merely discouraged.
+
+**Grammar** — The set of strings that count as valid, written formally. Backus-Naur Form and its variants are the usual notation, and llama.cpp's GBNF is one of them. A JSON Schema compiles to one; a regular expression is a small one.
+
+**GBNF** — GGML Backus-Naur Form, the grammar notation llama.cpp accepts for constrained decoding. Naming it matters because a grammar is only usable by the serving stack that parses that notation.
+
+**Masking at sampling time** — Setting the probability of illegal tokens to zero before sampling, which is where a constrained decoder's guarantee comes from. The distinction that matters: the failure is not made unlikely, it is made impossible.
+
+**Tokenizer reconciliation** — Working out which tokens are consistent with which grammar states, because grammars are written over characters and sampling happens over tokens. The same mismatch that makes logit bias frustrating, one layer up and solved properly.
+
+**Per-step masking overhead** — The cost of computing the legal token set at every decoding step. Usually worth paying, and worth measuring rather than assuming, particularly with a large grammar.
+
 **Reasoning model** — A model trained to produce an extended internal chain before its visible answer. That chain costs output tokens, which is why budgets sized for an answer alone return nothing.
 
 **Undersampling** — Discarding majority-class rows to balance a dataset. Fast, and it throws away real data, which is reasonable only when the majority class is enormous.

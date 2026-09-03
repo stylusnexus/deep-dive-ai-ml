@@ -260,18 +260,21 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <h2>Structured output</h2>
 <label class="item" id="generative-ai-15"><input type="checkbox" data-id="generative-ai-15"><span class="tick"></span><span class="body">Highest rung available used: constrained decoding &gt; schema &gt; JSON mode &gt; asking</span></label>
 <label class="item" id="generative-ai-16"><input type="checkbox" data-id="generative-ai-16"><span class="tick"></span><span class="body">Schema field names and enums written as if explaining them — they&#x27;re read by the model</span></label>
-<label class="item" id="generative-ai-17"><input type="checkbox" data-id="generative-ai-17"><span class="tick"></span><span class="body">Validated on values, not just parsed</span></label>
-<label class="item" id="generative-ai-18"><input type="checkbox" data-id="generative-ai-18"><span class="tick"></span><span class="body">One repair retry, then fail loudly</span></label>
-<label class="item" id="generative-ai-19"><input type="checkbox" data-id="generative-ai-19"><span class="tick"></span><span class="body">Truncation ruled out as a cause before blaming the model</span></label>
+<label class="item killer" id="generative-ai-17"><input type="checkbox" data-id="generative-ai-17"><span class="tick"></span><span class="body"><b class=skull>☠</b> The schema can express &quot;I don&#x27;t know&quot; — an optional null, an <code>unknown</code> enum member or a</span></label>
+<p>confidence field. Constraining the output removes the model&#x27;s ability to abstain unless you put it back, and a constrained system with no way to abstain fabricates instead</p>
+<label class="item" id="generative-ai-18"><input type="checkbox" data-id="generative-ai-18"><span class="tick"></span><span class="body">Validated on values, not just parsed</span></label>
+<label class="item" id="generative-ai-19"><input type="checkbox" data-id="generative-ai-19"><span class="tick"></span><span class="body">One repair retry, then fail loudly</span></label>
+<label class="item" id="generative-ai-20"><input type="checkbox" data-id="generative-ai-20"><span class="tick"></span><span class="body">Truncation ruled out as a cause before blaming the model</span></label>
 <h2>Evaluation</h2>
-<label class="item killer" id="generative-ai-20"><input type="checkbox" data-id="generative-ai-20"><span class="tick"></span><span class="body"><b class=skull>☠</b> Private eval set of ~20 real items exists</span></label>
-<label class="item" id="generative-ai-21"><input type="checkbox" data-id="generative-ai-21"><span class="tick"></span><span class="body">Groundedness measured separately from correctness</span></label>
-<label class="item" id="generative-ai-22"><input type="checkbox" data-id="generative-ai-22"><span class="tick"></span><span class="body">Model-as-judge used only as a last resort, never with the judge as the model under test</span></label>
-<label class="item" id="generative-ai-23"><input type="checkbox" data-id="generative-ai-23"><span class="tick"></span><span class="body">Cost per call and p95 latency measured, not estimated</span></label>
+<label class="item killer" id="generative-ai-21"><input type="checkbox" data-id="generative-ai-21"><span class="tick"></span><span class="body"><b class=skull>☠</b> Private eval set of ~20 real items exists</span></label>
+<label class="item" id="generative-ai-22"><input type="checkbox" data-id="generative-ai-22"><span class="tick"></span><span class="body">Groundedness measured separately from correctness</span></label>
+<label class="item" id="generative-ai-23"><input type="checkbox" data-id="generative-ai-23"><span class="tick"></span><span class="body">Model-as-judge used only as a last resort, never with the judge as the model under test</span></label>
+<label class="item" id="generative-ai-24"><input type="checkbox" data-id="generative-ai-24"><span class="tick"></span><span class="body">Cost per call and p95 latency measured, not estimated</span></label>
 <h2>Smells</h2>
 <p class="bullet">Answers confident and wrong → ungrounded; retrieval before prompt-tuning</p>
 <p class="bullet">RAG quality dropped with no prompt change → measure index recall first</p>
 <p class="bullet">Intermittent malformed JSON → check temperature, then max-tokens</p>
+<p class="bullet">Every record comes back with a confident category and none is ever <code>unknown</code> → the schema has no abstain path, so you are reading forced guesses, not findings</p>
 </section><section class="sop" id="sop-llm-engineering" hidden>
 <div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>LLM engineering — agents, tools, loops, production</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div></div>
 <h2>Do you need an agent?</h2>
