@@ -644,6 +644,22 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Blinding the calibration set** — Hand-labelling ground truth without knowing which system produced each answer. Skipped often, and skipping it makes the reported agreement rate a measure of how well the judge reproduces your expectations rather than your judgement.
 
+**Paired data** — Two sets of measurements where each value in one has a natural partner in the other: the same question scored under two systems, the same code before and after a change. An eval on a fixed set is paired by construction; an A/B test on live traffic is not, because no user appears in both arms.
+
+**Paired test** — A comparison that works on the per-item differences rather than on two separate groups. It cancels whatever the pair shares — usually question difficulty, which is often the largest source of variance — and using an unpaired test on paired data can take a real effect from almost always detected to almost never.
+
+**Bessel's correction** — Dividing a sample variance by n − 1 rather than n. The mean was fitted to the same data, so deviations from it are systematically too small; subtracting one accounts for the degree of freedom that fitting spent. Invisible at large samples and worth about a tenth of the variance at eval-sized ones.
+
+**Per-arm distribution** — Reporting the spread and shape of each arm rather than a difference in means. A change that helps most cases and badly harms a few moves the mean upward and hides the tail that should stop the release.
+
+**Peeking** — Repeatedly testing a running experiment and stopping when it crosses the threshold. Every look is another chance for noise to cross, which inflates the false-positive rate far past the nominal one.
+
+**Trajectory evaluation** — Scoring an agent's whole sequence of turns rather than its final answer. A correct ending can follow a wasteful or lucky run, and a wrong one can follow sound reasoning that hit a broken tool; only the sequence distinguishes them.
+
+**Recovery** — Whether an agent notices a failure and adapts. A run that failed a tool call, read the error and tried something sensible is better than one that succeeded by luck, and a final-answer score ranks them the other way round.
+
+**Guardrail metric** — A measure that must not get worse, checked alongside the primary metric but not permitted to declare success. Latency, cost and refusal rate are the usual ones.
+
 **Agreement rate** — How often a judge matches a blind human label on a calibration set. A judge score published without one is an opinion with a decimal point.
 
 **Similarity threshold** — The cut-off a semantic cache uses to decide two questions are the same one. Measured on this course's own encoder, a negation that reverses the answer scores 0.984 while a genuine paraphrase scores 0.940, so no cut-off separates them — see <code>scripts/measure_semantic_threshold.py</code>.

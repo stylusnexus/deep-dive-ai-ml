@@ -36,6 +36,18 @@
       "title": "Rubrics and Blind Reads",
       "file": "lsn-1787800000003-rubrics-and-blind-reads.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787800000004",
+      "title": "Is the Difference Real?",
+      "file": "lsn-1787800000004-is-the-difference-real.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787800000005",
+      "title": "Judging a Conversation",
+      "file": "lsn-1787800000005-judging-a-conversation.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -55,6 +67,16 @@
       "starred": false
     },
     "lsn-1787800000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787800000004": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787800000005": {
       "viewed": false,
       "completed": false,
       "starred": false

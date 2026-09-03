@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Is the Difference Real?</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 5 of 6</span>
+  <h1>Is the Difference Real?</h1>
+  <p class="subtitle">Pairing, spread, Bessel's correction and the peeking problem — the arithmetic that decides whether a number moved or wobbled.</p>
+
+  <p>Block 2 says two models whose confidence intervals overlap are not distinguishable however different their means look. Nothing carried that into this block, so every score here has been read as though it were exact. This lesson is the repair, and its numbers come from simulations in <code>scripts/measure_eval_statistics.py</code> rather than from assertion.</p>
+  <h2>What each of these costs you when you do not know it</h2>
+  <p>This is the only lesson in the course that looks like statistics, so it is worth being blunt about why it earns its place. Each item below has a failure attached, and every one of them is a failure that looks like success at the time.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Not knowing about pairing</div><div><div class="roadmap-title">You abandon improvements that worked</div><div class="roadmap-desc">You make a real change, test it wrongly, see nothing, and conclude the idea failed. The simulation later in this lesson takes a genuine effect from detected almost always to detected almost never purely by testing it the wrong way. The work was fine; the verdict was an artefact.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reporting only means</div><div><div class="roadmap-title">You ship a change that broke a subset</div><div class="roadmap-desc">The average moved up, so it looked good. Half your users got worse and nothing in the report said so, and you find out from them rather than from the measurement.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Dividing by n</div><div><div class="roadmap-title">You are most overconfident exactly when you should be least</div><div class="roadmap-desc">It understates spread, and the error is largest at small sample sizes — which is every eval set in this course. Overstated confidence on ten questions is how a coin-flip difference gets written into a document as a finding.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Peeking at a running test</div><div><div class="roadmap-title">You accumulate wins that never add up</div><div class="roadmap-desc">Each individual result looked significant when you stopped. None of them were, so none of them compound, and a year later the product is not better and nobody can say which of the twenty improvements failed to arrive.</div></div></div></div>
+  <p>None of this requires becoming a statistician. It requires knowing that a number produced by a measurement has a width, and four specific ways that width gets misread.</p>
+  <h2>Pairing, which is the one that matters most</h2>
+  <p>Two measurements are <strong>paired</strong> when each one in the first set has a natural partner in the second — the same unit, measured twice. An eval is paired by construction: question one is scored under system A and under system B, and those two numbers are about the same question. An A/B test on live traffic is not paired, because different users were assigned to different arms and no user appears in both.</p>
+  <p>The distinction decides which test to run, and the cost of getting it wrong is larger than it sounds. Question difficulty varies enormously — some questions are hard for everything and some are easy for everything — and in a paired comparison that difficulty affects both members of each pair equally, so subtracting one from the other removes it. An unpaired test cannot subtract it and leaves it in the noise, where it usually dwarfs the effect you are looking for.</p>
+  <pre><code>20 questions, a real effect of +0.30, question difficulty varying by ~1.0
+
+  unpaired test detects it:   0.3% of the time
+  paired   test detects it:  96.5% of the time</code></pre>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">The unpaired test is not wrong. It is answering a question nobody asked.</p><p class="know-why">It asks whether two unrelated piles of numbers have different means. The question you actually had was whether B beats A <em>question by question</em>, and the pairing is the information that turns one into the other. Throwing it away is not a conservative choice or a safe default — in the simulation above it took a real, large effect from almost always detected to almost never, on identical data.</p><p class="know-eg"><span class="know-eg-label">For example</span>The rule is simple: if you can line the two sets up one-to-one and the pairing means something, use a paired test. Same questions through two models, same code before and after a change, same document scored by two judges.</p></blockquote>
+  <h2>Report the distribution per arm, not just the mean</h2>
+  <p>A mean is one number standing in for a shape, and two arms with identical means can behave completely differently. The one that catches people is bimodality: a change that helps half the population and hurts the other half moves the mean not at all, and the summary reports success by reporting nothing.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Per-arm spread</div><div><div class="roadmap-title">The minimum honest report</div><div class="roadmap-desc">Mean and standard deviation for each arm separately, not a single difference. Two arms whose distributions overlap heavily are not distinguishable however far apart the means sit.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The shape, not only the width</div><div><div class="roadmap-title">Where bimodality hides</div><div class="roadmap-desc">Look at the distribution. A change that improved most cases slightly and broke a few badly has a mean that moved up and a tail that should stop the release.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Slices as arms</div><div><div class="roadmap-title">The connection to Block 7</div><div class="roadmap-desc">Uneven capability loss under compression is this same problem: an aggregate that barely moves while one population degrades. Per-arm distribution and per-slice evaluation are the same instrument pointed at different questions.</div></div></div></div>
+  <figure class="diagram"><svg viewBox="0 0 640 216" role="img" aria-label="Unpaired and paired readings of the same eval data"><defs><marker id="pr" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<text x="14" y="22" class="d-label-b">unpaired: two piles</text>
+<rect x="14" y="32" width="120" height="120" rx="6" class="d-box"/><text x="26" y="54" class="d-label-sm">A: 0.2 0.9 0.4</text><text x="26" y="74" class="d-label-sm">0.8 0.3 0.7</text><text x="26" y="94" class="d-label-sm">0.5 0.9 0.1</text><text x="26" y="126" class="d-label-sm">mean 0.53</text>
+<rect x="146" y="32" width="120" height="120" rx="6" class="d-box"/><text x="158" y="54" class="d-label-sm">B: 0.3 1.0 0.5</text><text x="158" y="74" class="d-label-sm">0.9 0.4 0.8</text><text x="158" y="94" class="d-label-sm">0.6 1.0 0.2</text><text x="158" y="126" class="d-label-sm">mean 0.63</text>
+<text x="14" y="176" class="d-label-sm">spread within each pile is huge,</text><text x="14" y="194" class="d-label-sm">so the gap drowns in it</text>
+<text x="330" y="22" class="d-label-b">paired: nine differences</text>
+<rect x="330" y="32" width="296" height="120" rx="6" class="d-box-accent"/>
+<text x="342" y="54" class="d-label-sm">q1 +0.1   q2 +0.1   q3 +0.1</text>
+<text x="342" y="74" class="d-label-sm">q4 +0.1   q5 +0.1   q6 +0.1</text>
+<text x="342" y="94" class="d-label-sm">q7 +0.1   q8 +0.1   q9 +0.1</text>
+<text x="342" y="126" class="d-label-b">every difference the same sign</text>
+<text x="330" y="176" class="d-label-sm">question difficulty cancelled out,</text><text x="330" y="194" class="d-label-sm">leaving only the effect</text>
+</svg><figcaption>The same nine questions under two systems. Read down the columns and the systems look indistinguishable; read across each row and B wins almost every one. Pairing is the second reading.</figcaption></figure>
+  <h2>Bessel&#x27;s correction, and when it matters</h2>
+  <p>Sample variance divides by <em>n − 1</em> rather than <em>n</em>, and the reason is that the mean was fitted to the same data. The sample mean is by definition the value that makes the squared deviations smallest, so deviations measured from it are systematically smaller than deviations from the true mean would be. Dividing by n inherits that and underestimates the spread. Subtracting one accounts for the single degree of freedom spent estimating the mean.</p>
+  <pre><code>true variance is 1.000 by construction
+
+     n     divide by n    divide by n-1
+     5      0.799 (-20%)   0.999 ( -0%)
+    10      0.898 (-10%)   0.998 ( -0%)
+    30      0.966 ( -3%)   1.000 ( -0%)
+  1000      0.999 ( -0%)   1.000 ( -0%)</code></pre>
+  <div class="callout matters"><span class="label">It matters at eval sizes and nowhere else</span><p>At a thousand samples the correction is invisible and arguing about it is pedantry. At ten — which is the size of the eval sets in this course — dividing by n understates the variance by a tenth, and understating variance means overstating confidence in exactly the situation where you have least of it. The correction is free, so the habit is simply to use it and stop thinking about it.</p></div>
+  <h2>A/B testing, and the peek that ruins it</h2>
+  <p>An A/B test assigns real traffic randomly between arms and compares outcomes. It answers a question an offline eval cannot — how the change behaves for actual users on actual requests — and it comes with a discipline the offline version does not need, because the data arrives continuously and you can watch it.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Random assignment</div><div><div class="roadmap-title">What makes the arms comparable</div><div class="roadmap-desc">Assign by a stable identifier so a user stays in one arm; assigning per request means the same person experiences both and the comparison is neither paired nor independent.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Sample size decided in advance</div><div><div class="roadmap-title">Before any data arrives</div><div class="roadmap-desc">The measurement procedure already says write the number down before you run. Here it is load-bearing: without a pre-declared stopping point there is no such thing as a significant result.</div></div></div><div class="roadmap-item"><div class="roadmap-num">One primary metric, plus guardrails</div><div><div class="roadmap-title">Decided beforehand</div><div class="roadmap-desc">One metric decides the call. Guardrail metrics are the things that must not get worse — latency, cost, refusal rate — and they are checked but do not get to declare victory.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Peeking</div><div><div class="roadmap-title">The failure that manufactures results</div><div class="roadmap-desc">Checking repeatedly and stopping when it looks significant. Every look is another chance for noise to cross the line, and noise eventually will.</div></div></div></div>
+  <pre><code>both arms drawn from the SAME distribution — every &#x27;significant&#x27;
+result below is a false positive by construction
+
+  tested once at the end                : 5.2%
+  peeked 10 times, stopped when p &lt; 0.05: 19.5%</code></pre>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Peeking turned a five percent error rate into nearly twenty, on data with no effect in it at all.</p><p class="know-why">The nominal rate is what you agreed to accept when you chose the threshold. Stopping the moment a running experiment crosses it converts a single test into ten, and the chance that at least one of ten crosses by luck is far higher than the chance that one does. Nothing about the arithmetic of the individual test is wrong; the error is in how many times it was consulted.</p><p class="know-eg"><span class="know-eg-label">For example</span>The first line of that output is also the instrument check. A test that did not land near five percent on data with no effect would have told me the implementation was broken before it told me anything about peeking.</p></blockquote>
+  <div class="callout pitfall"><span class="label">A t-test is the wrong tool for a proportion</span><p>Most of this course's headline numbers are proportions — six of nine correct, twenty-four of twenty-four flagged. A t-test assumes roughly normal continuous measurements and binary outcomes at small n are neither. Use a test built for proportions, or a bootstrap, and be aware that at nine items almost nothing will be significant. Project 2 moving from five of nine to six of nine is a direction, not a result, and this course said so at the time on judgement rather than on arithmetic.</p></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why is an eval on a fixed question set paired?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Because the questions were written together</div>
+      <div class="quiz-opt">Because each question is scored under both systems, so the two numbers have a natural one-to-one correspondence</div>
+      <div class="quiz-opt">Because the same model family produced both sets of answers</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. What does pairing remove from the comparison?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The measurement noise in each individual score</div>
+      <div class="quiz-opt">Question difficulty — it affects both members of a pair equally, so subtracting one from the other cancels it</div>
+      <div class="quiz-opt">The bias introduced by scoring order</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why does sample variance divide by n − 1?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">To make small samples appear more variable as a safety margin</div>
+      <div class="quiz-opt">The mean was fitted to the same data, so deviations from it are systematically too small — one degree of freedom was spent estimating it</div>
+      <div class="quiz-opt">It compensates for measurement error in the individual observations</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. What is wrong with stopping an A/B test as soon as it looks significant?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The effect may not have stabilised yet</div>
+      <div class="quiz-opt">Every look is another chance for noise to cross the threshold, which inflates the false-positive rate well past the nominal one</div>
+      <div class="quiz-opt">Early data is biased toward more engaged users</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

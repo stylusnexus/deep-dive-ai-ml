@@ -376,3 +376,20 @@ How do I score something with no right answer?
 Observable criteria, not adjectives
 Randomise the order
 Three or four levels, not seven
+Dividing by n
+Not knowing about pairing
+One primary metric, plus guardrails
+Peeking at a running test
+Per-arm spread
+Random assignment
+Reporting only means
+Sample size decided in advance
+Slices as arms
+The shape, not only the width
+Cost is part of the outcome
+Deterministically, wherever possible
+Per-step, against the step's own job
+Recovery is a property worth scoring
+Right for the wrong reasons
+The failure has a location
+The trajectory as a whole

@@ -336,4 +336,222 @@ LESSONS = [
     ]),
   ],
 },
+{
+  "slug": "is-the-difference-real",
+  "title": "Is the Difference Real?",
+  "subtitle": "Pairing, spread, Bessel's correction and the peeking problem — the arithmetic that decides whether a number moved or wobbled.",
+  "body": [
+    ("p", "Block 2 says two models whose confidence intervals overlap are not distinguishable however different their means look. Nothing carried that into this block, so every score here has been read as though it were exact. This lesson is the repair, and its numbers come from simulations in <code>scripts/measure_eval_statistics.py</code> rather than from assertion."),
+
+    ("h2", "What each of these costs you when you do not know it"),
+    ("p", "This is the only lesson in the course that looks like statistics, so it is worth being blunt about why it earns its place. Each item below has a failure attached, and every one of them is a failure that looks like success at the time."),
+
+    ("terms", [
+      ("Not knowing about pairing",
+       "You abandon improvements that worked",
+       "You make a real change, test it wrongly, see nothing, and conclude the idea failed. The simulation later in this lesson takes a genuine effect from detected almost always to detected almost never purely by testing it the wrong way. The work was fine; the verdict was an artefact."),
+      ("Reporting only means",
+       "You ship a change that broke a subset",
+       "The average moved up, so it looked good. Half your users got worse and nothing in the report said so, and you find out from them rather than from the measurement."),
+      ("Dividing by n",
+       "You are most overconfident exactly when you should be least",
+       "It understates spread, and the error is largest at small sample sizes — which is every eval set in this course. Overstated confidence on ten questions is how a coin-flip difference gets written into a document as a finding."),
+      ("Peeking at a running test",
+       "You accumulate wins that never add up",
+       "Each individual result looked significant when you stopped. None of them were, so none of them compound, and a year later the product is not better and nobody can say which of the twenty improvements failed to arrive."),
+    ]),
+
+    ("p", "None of this requires becoming a statistician. It requires knowing that a number produced by a measurement has a width, and four specific ways that width gets misread."),
+
+    ("h2", "Pairing, which is the one that matters most"),
+    ("p", "Two measurements are <strong>paired</strong> when each one in the first set has a natural partner in the second — the same unit, measured twice. An eval is paired by construction: question one is scored under system A and under system B, and those two numbers are about the same question. An A/B test on live traffic is not paired, because different users were assigned to different arms and no user appears in both."),
+
+    ("p", "The distinction decides which test to run, and the cost of getting it wrong is larger than it sounds. Question difficulty varies enormously — some questions are hard for everything and some are easy for everything — and in a paired comparison that difficulty affects both members of each pair equally, so subtracting one from the other removes it. An unpaired test cannot subtract it and leaves it in the noise, where it usually dwarfs the effect you are looking for."),
+
+    ("code", """20 questions, a real effect of +0.30, question difficulty varying by ~1.0
+
+  unpaired test detects it:   0.3% of the time
+  paired   test detects it:  96.5% of the time"""),
+
+    ("know",
+     "The unpaired test is not wrong. It is answering a question nobody asked.",
+     "It asks whether two unrelated piles of numbers have different means. The question you actually had was whether B beats A <em>question by question</em>, and the pairing is the information that turns one into the other. Throwing it away is not a conservative choice or a safe default — in the simulation above it took a real, large effect from almost always detected to almost never, on identical data.",
+     "The rule is simple: if you can line the two sets up one-to-one and the pairing means something, use a paired test. Same questions through two models, same code before and after a change, same document scored by two judges."),
+
+    ("h2", "Report the distribution per arm, not just the mean"),
+    ("p", "A mean is one number standing in for a shape, and two arms with identical means can behave completely differently. The one that catches people is bimodality: a change that helps half the population and hurts the other half moves the mean not at all, and the summary reports success by reporting nothing."),
+
+    ("terms", [
+      ("Per-arm spread", "The minimum honest report",
+       "Mean and standard deviation for each arm separately, not a single difference. Two arms whose distributions overlap heavily are not distinguishable however far apart the means sit."),
+      ("The shape, not only the width", "Where bimodality hides",
+       "Look at the distribution. A change that improved most cases slightly and broke a few badly has a mean that moved up and a tail that should stop the release."),
+      ("Slices as arms", "The connection to Block 7",
+       "Uneven capability loss under compression is this same problem: an aggregate that barely moves while one population degrades. Per-arm distribution and per-slice evaluation are the same instrument pointed at different questions."),
+    ]),
+
+    ("figure", "The same nine questions under two systems. Read down the columns and the systems look indistinguishable; read across each row and B wins almost every one. Pairing is the second reading.", '''<svg viewBox="0 0 640 216" role="img" aria-label="Unpaired and paired readings of the same eval data"><defs><marker id="pr" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<text x="14" y="22" class="d-label-b">unpaired: two piles</text>
+<rect x="14" y="32" width="120" height="120" rx="6" class="d-box"/><text x="26" y="54" class="d-label-sm">A: 0.2 0.9 0.4</text><text x="26" y="74" class="d-label-sm">0.8 0.3 0.7</text><text x="26" y="94" class="d-label-sm">0.5 0.9 0.1</text><text x="26" y="126" class="d-label-sm">mean 0.53</text>
+<rect x="146" y="32" width="120" height="120" rx="6" class="d-box"/><text x="158" y="54" class="d-label-sm">B: 0.3 1.0 0.5</text><text x="158" y="74" class="d-label-sm">0.9 0.4 0.8</text><text x="158" y="94" class="d-label-sm">0.6 1.0 0.2</text><text x="158" y="126" class="d-label-sm">mean 0.63</text>
+<text x="14" y="176" class="d-label-sm">spread within each pile is huge,</text><text x="14" y="194" class="d-label-sm">so the gap drowns in it</text>
+<text x="330" y="22" class="d-label-b">paired: nine differences</text>
+<rect x="330" y="32" width="296" height="120" rx="6" class="d-box-accent"/>
+<text x="342" y="54" class="d-label-sm">q1 +0.1   q2 +0.1   q3 +0.1</text>
+<text x="342" y="74" class="d-label-sm">q4 +0.1   q5 +0.1   q6 +0.1</text>
+<text x="342" y="94" class="d-label-sm">q7 +0.1   q8 +0.1   q9 +0.1</text>
+<text x="342" y="126" class="d-label-b">every difference the same sign</text>
+<text x="330" y="176" class="d-label-sm">question difficulty cancelled out,</text><text x="330" y="194" class="d-label-sm">leaving only the effect</text>
+</svg>'''),
+
+    ("h2", "Bessel's correction, and when it matters"),
+    ("p", "Sample variance divides by <em>n − 1</em> rather than <em>n</em>, and the reason is that the mean was fitted to the same data. The sample mean is by definition the value that makes the squared deviations smallest, so deviations measured from it are systematically smaller than deviations from the true mean would be. Dividing by n inherits that and underestimates the spread. Subtracting one accounts for the single degree of freedom spent estimating the mean."),
+
+    ("code", """true variance is 1.000 by construction
+
+     n     divide by n    divide by n-1
+     5      0.799 (-20%)   0.999 ( -0%)
+    10      0.898 (-10%)   0.998 ( -0%)
+    30      0.966 ( -3%)   1.000 ( -0%)
+  1000      0.999 ( -0%)   1.000 ( -0%)"""),
+
+    ("callout", "matters", "It matters at eval sizes and nowhere else",
+     "<p>At a thousand samples the correction is invisible and arguing about it is pedantry. At ten — which is the size of the eval sets in this course — dividing by n understates the variance by a tenth, and understating variance means overstating confidence in exactly the situation where you have least of it. The correction is free, so the habit is simply to use it and stop thinking about it.</p>"),
+
+    ("h2", "A/B testing, and the peek that ruins it"),
+    ("p", "An A/B test assigns real traffic randomly between arms and compares outcomes. It answers a question an offline eval cannot — how the change behaves for actual users on actual requests — and it comes with a discipline the offline version does not need, because the data arrives continuously and you can watch it."),
+
+    ("terms", [
+      ("Random assignment", "What makes the arms comparable",
+       "Assign by a stable identifier so a user stays in one arm; assigning per request means the same person experiences both and the comparison is neither paired nor independent."),
+      ("Sample size decided in advance", "Before any data arrives",
+       "The measurement procedure already says write the number down before you run. Here it is load-bearing: without a pre-declared stopping point there is no such thing as a significant result."),
+      ("One primary metric, plus guardrails", "Decided beforehand",
+       "One metric decides the call. Guardrail metrics are the things that must not get worse — latency, cost, refusal rate — and they are checked but do not get to declare victory."),
+      ("Peeking", "The failure that manufactures results",
+       "Checking repeatedly and stopping when it looks significant. Every look is another chance for noise to cross the line, and noise eventually will."),
+    ]),
+
+    ("code", """both arms drawn from the SAME distribution — every 'significant'
+result below is a false positive by construction
+
+  tested once at the end                : 5.2%
+  peeked 10 times, stopped when p < 0.05: 19.5%"""),
+
+    ("know",
+     "Peeking turned a five percent error rate into nearly twenty, on data with no effect in it at all.",
+     "The nominal rate is what you agreed to accept when you chose the threshold. Stopping the moment a running experiment crosses it converts a single test into ten, and the chance that at least one of ten crosses by luck is far higher than the chance that one does. Nothing about the arithmetic of the individual test is wrong; the error is in how many times it was consulted.",
+     "The first line of that output is also the instrument check. A test that did not land near five percent on data with no effect would have told me the implementation was broken before it told me anything about peeking."),
+
+    ("callout", "pitfall", "A t-test is the wrong tool for a proportion",
+     "<p>Most of this course's headline numbers are proportions — six of nine correct, twenty-four of twenty-four flagged. A t-test assumes roughly normal continuous measurements and binary outcomes at small n are neither. Use a test built for proportions, or a bootstrap, and be aware that at nine items almost nothing will be significant. Project 2 moving from five of nine to six of nine is a direction, not a result, and this course said so at the time on judgement rather than on arithmetic.</p>"),
+
+    ("quiz", [
+      ("Why is an eval on a fixed question set paired?",
+       ["Because the questions were written together",
+        "Because each question is scored under both systems, so the two numbers have a natural one-to-one correspondence",
+        "Because the same model family produced both sets of answers"],
+       1),
+      ("What does pairing remove from the comparison?",
+       ["The measurement noise in each individual score",
+        "Question difficulty — it affects both members of a pair equally, so subtracting one from the other cancels it",
+        "The bias introduced by scoring order"],
+       1),
+      ("Why does sample variance divide by n − 1?",
+       ["To make small samples appear more variable as a safety margin",
+        "The mean was fitted to the same data, so deviations from it are systematically too small — one degree of freedom was spent estimating it",
+        "It compensates for measurement error in the individual observations"],
+       1),
+      ("What is wrong with stopping an A/B test as soon as it looks significant?",
+       ["The effect may not have stabilised yet",
+        "Every look is another chance for noise to cross the threshold, which inflates the false-positive rate well past the nominal one",
+        "Early data is biased toward more engaged users"],
+       1),
+    ]),
+  ],
+},
+{
+  "slug": "judging-a-conversation",
+  "title": "Judging a Conversation",
+  "subtitle": "Every score so far graded one answer. An agent produces a trajectory, and the failure is usually three turns back.",
+  "body": [
+    ("p", "Everything this block has measured is a single response to a single question: was it grounded, was it correct, did it refuse when it should. Block 4 builds systems that do not work that way. An agent takes a sequence of turns, each one conditioned on everything before it, and grading the last message tells you almost nothing about what happened."),
+
+    ("h2", "Why the last turn is the wrong unit"),
+    ("p", "A final answer can be right after a run that was expensive, circular and lucky, or wrong after a run that reasoned correctly and hit a tool that was down. Scoring only the ending scores the outcome and not the behaviour, and the behaviour is the thing you can improve."),
+
+    ("terms", [
+      ("The failure has a location", "And it is rarely the last turn",
+       "A wrong final answer usually traces to a specific earlier step: a retrieval that returned nothing useful, a tool result misread, a plan abandoned. Grading the ending records that something went wrong and discards where."),
+      ("Right for the wrong reasons", "The score a single turn cannot catch",
+       "An agent that guessed, or that recovered from its own mistake by luck, produces the same final answer as one that worked correctly. On a single-turn metric they are indistinguishable, and only one of them will keep working."),
+      ("Recovery is a property worth scoring", "Not just success",
+       "Agents will hit failures. What separates a usable one is whether it notices and adapts. A trajectory that failed a tool call, read the error and tried something sensible is better than one that succeeded first time by luck, and a final-answer score ranks them the other way round."),
+      ("Cost is part of the outcome", "Turns, tokens and calls",
+       "Two runs reaching the same answer in three turns and in eleven are not equally good. This is the one dimension people do remember to record and then leave out of the judgement."),
+    ]),
+
+    ("know",
+     "Score the trajectory, and the final answer is one dimension of it rather than the whole grade.",
+     "The trace from Block 4 already contains what you need — every turn, every tool call, every result, the termination reason. Judging it as a sequence turns a pass or fail into a diagnosis, and the diagnosis is what tells you which of the loop, the tools, the prompt or the retrieval to fix. A single-turn score gives you a number that moves without telling you why, which is the position this course spent Block 5 arguing against.",
+     "This is the same argument as measuring index recall, retrieval quality and groundedness separately rather than as one accuracy number. Separate the dimensions that fail independently, because they have different fixes."),
+
+    ("figure", "The final answer is the last box. Everything that decides whether the run was any good happened before it, and a single-turn grade sees none of it.", '''<svg viewBox="0 0 640 194" role="img" aria-label="Grading a trajectory rather than a final answer"><defs><marker id="mt" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="14" y="42" width="104" height="42" rx="6" class="d-box"/><text x="26" y="62" class="d-label-sm">turn 1</text><text x="26" y="78" class="d-label-sm">retrieve</text>
+<path d="M118 63 L146 63" class="d-arrow-accent" marker-end="url(#mt)"/>
+<rect x="146" y="42" width="104" height="42" rx="6" class="d-box-accent"/><text x="158" y="62" class="d-label-sm">turn 2</text><text x="158" y="78" class="d-label-sm">wrong doc</text>
+<path d="M250 63 L278 63" class="d-arrow-accent" marker-end="url(#mt)"/>
+<rect x="278" y="42" width="104" height="42" rx="6" class="d-box"/><text x="290" y="62" class="d-label-sm">turn 3</text><text x="290" y="78" class="d-label-sm">retries</text>
+<path d="M382 63 L410 63" class="d-arrow-accent" marker-end="url(#mt)"/>
+<rect x="410" y="42" width="104" height="42" rx="6" class="d-box"/><text x="422" y="62" class="d-label-sm">turn 4</text><text x="422" y="78" class="d-label-sm">recovers</text>
+<path d="M514 63 L542 63" class="d-arrow-accent" marker-end="url(#mt)"/>
+<rect x="542" y="42" width="84" height="42" rx="6" class="d-box"/><text x="554" y="68" class="d-label-sm">answer</text>
+<text x="146" y="112" class="d-label-sm">the fault is here</text>
+<text x="410" y="112" class="d-label-sm">the merit is here</text>
+<text x="542" y="112" class="d-label-sm">the grade is here</text>
+<text x="14" y="152" class="d-label-sm">A single-turn score sees a correct answer and records a pass. It cannot see the wasted turns,</text>
+<text x="14" y="172" class="d-label-sm">the wrong retrieval, or the recovery — which is the only part that predicts the next run.</text>
+</svg>'''),
+
+    ("h2", "What to score, and by what"),
+    ("terms", [
+      ("Deterministically, wherever possible",
+       "Turn count, tool calls, cost, termination reason, guards fired",
+       "None of this needs a judge. It is in the trace already, it is exact, and it catches a large share of what goes wrong. Exhaust it before reaching for a model, exactly as the grading ladder says."),
+      ("Per-step, against the step's own job",
+       "Did this retrieval return the right document?",
+       "Each step has a checkable purpose. Scoring steps individually localises the failure, which is the whole point of doing this rather than grading the ending."),
+      ("The trajectory as a whole",
+       "Where a judge earns its place",
+       "Was the sequence sensible, did it recover, did it go in circles? This is the genuinely open-ended part and the one worth a rubric — and the rubric lesson's rules apply unchanged, including blinding."),
+    ]),
+
+    ("callout", "pitfall", "A judge shown a whole trajectory will grade the ending",
+     "<p>Hand a model a full transcript and ask how the run went, and it anchors on the final answer — a good ending makes the path look purposeful in hindsight. If you want the path judged, ask about the path specifically and separately: was any turn wasted, was the tool result read correctly, was the plan abandoned without reason. One question per property, or you get a summary of the outcome wearing a rubric.</p>"),
+
+    ("callout", "matters", "Multi-turn state is where the eval set gets expensive",
+     "<p>A single-turn set is a list of questions. A multi-turn set is a list of <em>situations</em> — a starting state, the turns so far, and often a scripted counterpart to play the other side. That is considerably more work to build and to keep correct, which is why most teams claim to test agents and actually test the last message. Start with a handful of realistic trajectories rather than a large set of shallow ones.</p>"),
+
+    ("h2", "Where this connects"),
+    ("p", "Block 4's telemetry lesson insisted the trace falls out of the loop for a few lines of code, and this is what it was for. The trace is not only for debugging an incident — it is the object you evaluate. A system with traces and no trajectory evaluation is recording the evidence and never reading it."),
+
+    ("quiz", [
+      ("Why is the final answer a poor unit for grading an agent?",
+       ["Final answers are often truncated by token limits",
+        "It records that something went wrong and discards where — and cannot distinguish a correct answer reached by luck from one reached by working",
+        "Agents frequently produce several candidate answers"],
+       1),
+      ("What should be scored deterministically before any judge is involved?",
+       ["Whether the reasoning in each turn was sound",
+        "Turn count, tool calls, cost, termination reason and which guards fired — all already in the trace, all exact",
+        "Whether the final answer matches a reference"],
+       1),
+      ("What happens when a judge is shown a whole trajectory and asked how the run went?",
+       ["It weights early turns too heavily because of position bias",
+        "It anchors on the ending — a good final answer makes the path look purposeful in hindsight, so you get an outcome summary rather than a path judgement",
+        "It runs out of context before reaching the final turn"],
+       1),
+    ]),
+  ],
+},
 ]

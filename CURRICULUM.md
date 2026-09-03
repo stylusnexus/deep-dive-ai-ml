@@ -23,7 +23,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 92 lessons built, 92 diagrams, 13 executed notebooks.**
+**Status: 94 lessons built, 94 diagrams, 13 executed notebooks.**
 
 ---
 
@@ -132,8 +132,12 @@ padding, so this block is a door plus the two genuine gaps.
 - Eval data you can trust: labels that follow from the rules, not from your opinion ✅
 - One set, many models: the comparison, and the output budget that silently breaks it ✅
 - Rubrics and blind reads — the two mechanics that make a judge usable ✅
+- Is the difference real? — pairing, per-arm distribution, Bessel's correction,
+  A/B discipline and the peeking problem, with the numbers simulated ✅
+- Judging a conversation — scoring the trajectory, since the failure is rarely
+  in the turn you graded ✅
 
-4 lessons in `lessons/block5-evaluation/`. No notebook yet — the natural one runs a
+6 lessons in `lessons/block5-evaluation/`. No notebook yet — the natural one runs a
 battery across providers, which needs API keys this repository does not assume.
 
 **Exit:** Your own eval set, run across ≥6 models, with a defensible ranking — and a
