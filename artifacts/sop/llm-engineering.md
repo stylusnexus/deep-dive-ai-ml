@@ -46,6 +46,8 @@
 - [ ] Tool results truncated or summarised before they enter context
 - [ ] History managed — window, compaction or structured memory
 - [ ] Long-session degradation understood; fresh context preferred to fighting a poisoned one
+- [ ] Eval battery runs automatically, tiered by cost, with thresholds set from measured
+      run-to-run spread — a gate that flakes gets disabled and takes the discipline with it
 - [ ] ☠ Shadowed against real traffic before any user sees it — and the shadow path has write
       access *removed*, not merely unused, or it is running in production regardless
 - [ ] Anything written into an always-loaded instruction file (`AGENTS.md`, `CLAUDE.md`) earns its

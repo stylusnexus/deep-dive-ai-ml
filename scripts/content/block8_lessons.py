@@ -67,7 +67,6 @@ LESSONS = [
 
     ("callout", "pitfall", "Streaming changes what a failure looks like",
      "<p>A streamed response can fail after you have already shown the user half an answer. There is no clean status code for that — the connection simply stops. Decide in advance whether a truncated stream is discarded, retried from the start, or kept with a marker, and make sure the answer is not \"whatever the client library happens to do\", because that is usually to leave the partial text on screen looking complete.</p>"),
-
     ("related", ["after-it-ships", "where-the-money-goes", "serving-one-yourself", "routing-and-escalation"]),
     ("quiz", [
       ("Which failure category most needs idempotency rather than a retry policy?",
@@ -125,7 +124,6 @@ LESSONS = [
 
     ("callout", "matters", "Load the model once, at start",
      "<p>A handler that loads an encoder or opens a connection per request pays that cost on every call and times out on the first one. Project 4 does it in a startup hook, which also gives the health check something true to report: the service is ready because loading finished, not because a process exists.</p>"),
-
     ("related", ["the-image-is-the-unit", "serving-locally", "calling-an-api-you-do-not-control", "latency-and-caching"]),
     ("quiz", [
       ("Why should a wrong API key and a missing one produce identical responses?",
@@ -187,7 +185,6 @@ LESSONS = [
 
     ("callout", "pitfall", "The same image, or you have tested nothing",
      "<p>The value of building an image is that the artefact you tested is the artefact that runs. Rebuilding from source at deploy time, or applying a different configuration path in production, throws that away and returns you to hoping the environments match. Promote the image; change only the configuration.</p>"),
-
     ("related", ["serving-one-yourself", "sandboxing-and-what-actually-works", "version-control-basics", "after-it-ships"]),
     ("quiz", [
       ("Why does Project 4 bake its corpus into the image rather than mounting it?",
@@ -271,7 +268,6 @@ LESSONS = [
 
     ("callout", "matters", "Drift has its own lesson, and this is where it lands",
      "<p>Block 0 covers why a deployed model degrades — the world moves, the traffic changes, the inputs stop resembling what you tested. What this block adds is that you will not notice unless something is measuring correctness on a schedule. Drift is not detected by the system getting worse; it is detected by a number you chose to keep watching.</p>"),
-
     ("related", ["drift", "telemetry-and-instrumentation", "where-evaluation-lives", "calling-an-api-you-do-not-control"]),
     ("quiz", [
       ("Why can a system be perfectly available and still be failing?",

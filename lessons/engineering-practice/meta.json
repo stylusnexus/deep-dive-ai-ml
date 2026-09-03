@@ -97,6 +97,18 @@
       "title": "Rungs: Running Experiments on an Agent",
       "file": "lsn-1787400000013-rungs-and-experiments.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000014",
+      "title": "Tracking Runs, and Running the Evals Automatically",
+      "file": "lsn-1787400000014-tracking-runs-and-automating-evals.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787400000015",
+      "title": "The Artifact, and When to Retrain",
+      "file": "lsn-1787400000015-the-artifact-and-when-to-retrain.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -166,6 +178,16 @@
       "starred": false
     },
     "lsn-1787400000013": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000014": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787400000015": {
       "viewed": false,
       "completed": false,
       "starred": false

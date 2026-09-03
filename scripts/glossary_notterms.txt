@@ -429,3 +429,13 @@ Summary statistics per feature
 Distribution tests and distances
 A domain classifier
 Output monitoring
+Artefacts
+The code version
+Its base
+Its data
+Its run
+Its evaluation
+On a schedule
+On a drift threshold
+On a performance drop
+On accumulated data

@@ -109,7 +109,6 @@ LESSONS = [
       ("MAPE", "Mean absolute percentage error", "Percentage terms, so it travels well between stakeholders. Breaks badly when true values approach zero."),
     ]),
     ("callout", "pitfall", "Report the error in units someone can act on", "\"RMSE 0.34\" means nothing to an operations manager. \"On average we are out by about four days, and occasionally by three weeks\" is the same information in a form that supports a decision. Translate before presenting, every time."),
-
     ("related", ["class-imbalance-and-thresholds", "baseline-to-model", "is-the-difference-real", "labels-and-holdouts"]),
     ("links", [
       ("Model evaluation — scikit-learn", "https://scikit-learn.org/stable/modules/model_evaluation.html",
@@ -226,7 +225,6 @@ LESSONS = [
       ("Aggregates over a group", "Context", "This turbine's vibration against its site's average."),
       ("Missingness indicators", "Absence as signal", "Already covered in Block 1, and worth repeating because it is so often left out."),
     ]),
-
     ("related", ["deterministic-first", "overfitting-and-underfitting", "confusion-matrix-and-metrics", "why-measurement-decides"]),
     ("links", [
       ("Model selection — scikit-learn", "https://scikit-learn.org/stable/model_selection.html",
@@ -342,7 +340,6 @@ for epoch in range(3):
       ("Early stopping on validation", "Always", "Networks will fit noise indefinitely if you let them."),
       ("Class weights for imbalance", "Same as elsewhere", "The rare class needs to cost more, or the network learns to predict the majority."),
     ]),
-
     ("related", ["gradient-descent-and-backprop", "when-the-training-run-does-not-fit", "overfitting-and-underfitting", "inside-an-llm"]),
     ("links", [
       ("Keras 3 — multi-backend", "https://keras.io/getting_started/",
@@ -450,7 +447,6 @@ for epoch in range(3):
       "<strong>Establish the naive baseline.</strong> \"Tomorrow equals today\" is remarkably hard to beat on many series, and it is the number your model must clear.",
     ]),
     ("callout", "insight", "The naive forecast is the majority-class baseline of time series", "Predicting that the next value equals the last one — or the value from the same day last week, for seasonal data — costs nothing and beats a surprising number of models. Compute it first, and if your model cannot clear it, you have learned that early and cheaply."),
-
     ("related", ["data-leakage", "drift", "baseline-to-model", "what-a-plot-is-for"]),
     ("links", [
       ("Time series splitting — scikit-learn", "https://scikit-learn.org/stable/modules/cross_validation.html#time-series-split",

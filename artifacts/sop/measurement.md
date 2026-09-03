@@ -44,6 +44,8 @@ If either half is untrue, stop. Everything below produces noise.
 - [ ] Everything else held fixed
 
 ## 3b · Make the result locatable
+- [ ] Logged to the tracker, not only to a notebook cell — including the commit hash, without
+      which the parameters describe a run you can no longer reconstruct
 - [ ] Engagement reported separately from correctness — a metric that merges them hides what to fix
 - [ ] Every model failing identically? Suspect the harness before the models
 - [ ] For each passing test, what it does **not** establish, written down now

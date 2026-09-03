@@ -932,6 +932,18 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 ## Block 8 · Deployment and APIs
 
+**Experiment tracking** — Recording each run's parameters, metrics and artefacts in a queryable store rather than in notes. The value is comparability across runs you did not plan to compare — which is the question that arrives months later, and the one notes cannot answer.
+
+**Continuous evaluation** — Running the eval battery automatically rather than when someone remembers, tiered by cost: model-free checks on every push, a sampled set per pull request, the full battery before release. A gate that flakes gets disabled, so thresholds must allow for measured run-to-run spread.
+
+**Model provenance** — What a trained artefact records about its own origin: which base, which dataset version, which tracked run, and the evaluation that justified shipping it. Without it a result cannot be reproduced and a rollback has nowhere to go.
+
+**Model rollback** — Reverting to a previous model, which unlike a code rollback requires the old artefact to still exist and still be servable. If it was overwritten in place or depends on a retired base version, the incident becomes an unplanned training run.
+
+**Retraining trigger** — What decides that a model is retrained: a schedule, a drift threshold, a measured performance drop, or accumulated new data. Each fails differently; a performance drop is the signal you want and it needs labels, which arrive late.
+
+**Retraining as deployment** — The discipline that a retrained model is a new model that can be worse, and earns the same shadow, canary and slice checks as any other change. Teams that would not ship code unreviewed routinely promote retrained models automatically, because the pipeline was unchanged.
+
 **Shadow deployment** — Sending the new version a copy of live traffic and discarding its output. Zero user risk on real inputs, and the only way to see behaviour on the cases a held-out set never contained. It stops being a shadow the moment the path can write.
 
 **Canary release** — Routing a small slice of real traffic to the new version and widening if the metrics hold. The first option that can measure user behaviour, with risk bounded by the slice.

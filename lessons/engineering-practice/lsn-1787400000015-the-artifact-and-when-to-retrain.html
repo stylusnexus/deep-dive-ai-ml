@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Artifact, and When to Retrain</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 16 of 16</span>
+  <h1>The Artifact, and When to Retrain</h1>
+  <p class="subtitle">What actually ships is not the code — and the drift lesson tells you something moved without telling you what to do about it.</p>
+
+  <p>Version control holds your code, and for ordinary software that is the whole system. For anything with a trained component it is roughly a quarter of it. What determines behaviour is a set of four things travelling together &mdash; the code, the weights or adapter, the data they were derived from, and the configuration they run under &mdash; and only the first is in the repository.</p>
+  <figure class="diagram"><svg viewBox="0 0 540 146" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Four components determine behaviour: code, weights, data and configuration.">
+<rect x="10" y="20" width="118" height="44" rx="6" class="d-box-good"/>
+<text x="69" y="40" class="d-label-b" text-anchor="middle">code</text>
+<text x="69" y="56" class="d-label-sm" text-anchor="middle">in git</text>
+<rect x="138" y="20" width="118" height="44" rx="6" class="d-box-accent"/>
+<text x="197" y="40" class="d-label-b" text-anchor="middle">weights</text>
+<text x="197" y="56" class="d-label-sm" text-anchor="middle">where?</text>
+<rect x="266" y="20" width="118" height="44" rx="6" class="d-box-accent"/>
+<text x="325" y="40" class="d-label-b" text-anchor="middle">data</text>
+<text x="325" y="56" class="d-label-sm" text-anchor="middle">which version?</text>
+<rect x="394" y="20" width="136" height="44" rx="6" class="d-box-accent"/>
+<text x="462" y="40" class="d-label-b" text-anchor="middle">configuration</text>
+<text x="462" y="56" class="d-label-sm" text-anchor="middle">prompt, thresholds</text>
+<text x="10" y="92" class="d-label-sm">a commit hash identifies one of the four</text>
+<text x="10" y="112" class="d-label-sm">rolling back the code while the other three stay put reverts almost nothing</text>
+<text x="10" y="132" class="d-label-sm">so the artefact has to carry its own provenance, or the run cannot be reconstructed</text>
+</svg><figcaption>The code is versioned, and on its own it does not determine behaviour. Three other things have to be identified for a result to be reproducible or a rollback to be possible.</figcaption></figure>
+  <h2>What a trained artefact has to know about itself</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Its base</div><div><div class="roadmap-title">What it was derived from</div><div class="roadmap-desc">For an adapter this is decisive: it is a difference against one specific base model at one specific version, and applied to a different base it is meaningless rather than merely worse.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Its data</div><div><div class="roadmap-title">Which version, not which dataset</div><div class="roadmap-desc">The dataset moved between March and June. A record naming the dataset without naming the version identifies a family of possible training runs, which is not enough to reproduce one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Its run</div><div><div class="roadmap-title">The experiment that produced it</div><div class="roadmap-desc">A pointer back to the tracked run, so the parameters, metrics and evaluation results are attached rather than remembered.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Its evaluation</div><div><div class="roadmap-title">Against the base, on the held-out set</div><div class="roadmap-desc">The numbers that justified shipping it, recorded with it. Otherwise the comparison that made the decision is gone by the time anyone questions the decision.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">You can roll back code in seconds. Rolling back a model requires that the previous one still exists and can still be served.</p><p class="know-why">A code rollback is a pointer moving to a commit that is still there by construction. A model rollback is only as fast as the old artefact is retrievable &mdash; and if it was overwritten in place, produced by a training run nobody recorded, or depends on a base version the provider has since retired, there is nothing to go back to. The incident then becomes a training run, under time pressure, which is the worst circumstance in which to do one.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team replaces a fine-tuned classifier with a newer adapter and deletes the old one from the bucket, since it is in the repository&#39;s history. The new one is worse on a customer segment nobody sliced for. Recovery is a retrain, because the repository held the training <em>script</em> and neither the weights nor the exact data snapshot that produced them.</p></blockquote>
+  <h2>When to retrain, which the drift lesson deliberately left open</h2>
+  <p>Detection was the subject there: what moved, and how you would know. This is the decision that detection exists to inform, and it has four common triggers with genuinely different failure modes.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">On a schedule</div><div><div class="roadmap-title">Simple, and wrong in both directions</div><div class="roadmap-desc">Monthly whether or not anything changed. Cheap to reason about, and it retrains when nothing moved while missing the week something did. Reasonable as a floor, poor as the only trigger.</div></div></div><div class="roadmap-item"><div class="roadmap-num">On a drift threshold</div><div><div class="roadmap-title">Responsive, and it needs a number you chose</div><div class="roadmap-desc">Fires when the input distribution has moved past a bound. Only as good as the threshold, which has to come from a period you know was healthy rather than from a default.</div></div></div><div class="roadmap-item"><div class="roadmap-num">On a performance drop</div><div><div class="roadmap-title">The one you actually care about</div><div class="roadmap-desc">The real signal, and it needs labels, which arrive late or never. Where they arrive late this is a trailing trigger: correct, and it tells you about a problem that has already been live for weeks.</div></div></div><div class="roadmap-item"><div class="roadmap-num">On accumulated data</div><div><div class="roadmap-title">Retrain when there is something new to learn</div><div class="roadmap-desc">Enough genuinely new examples to move the model. Predictable and cheap to compute, and it ignores whether the world changed &mdash; volume is not the same as novelty.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A retrain is a deployment, not a refresh, and it earns the same gate as any other change.</p><p class="know-why">The word makes it sound like maintenance &mdash; the same model, brought up to date &mdash; and it is not. It is a new model, trained on different data, which can be worse in ways the aggregate score will not show. Teams that would never ship a code change without review routinely promote a retrained model automatically, on the reasoning that the pipeline is unchanged. The pipeline is unchanged; the thing it produced is not.</p><p class="know-eg"><span class="know-eg-label">For example</span>The rollout options are the ones deployment already gave you. Shadow the retrained model against live traffic before it serves anything, compare it to the incumbent on the same held-out set rather than to its own training metrics, and check the slices &mdash; because a retrain that improves the aggregate while losing a minority segment is the ordinary outcome of training on data the world has reweighted.</p></blockquote>
+  <div class="callout matters"><span class="label">The cost nobody puts in the business case</span><p>The training run is usually the cheapest part. Each retrain also spends an evaluation cycle, a shadow period, a rollout and someone&#39;s attention, and if the model is judged rather than scored mechanically it spends human reading time too. A monthly retrain is a monthly evaluation commitment, and a team that budgets for the compute and not for that ends up promoting models on training metrics alone, which is the failure the evaluation block spends six lessons preventing.</p><p>The corollary is worth stating plainly: if you cannot afford to evaluate it, you cannot afford to retrain it. Retraining without evaluating is not maintenance, it is an unmeasured change to production made on a schedule.</p></div>
+  <h2>When not to retrain</h2>
+  <ul><li><strong>Drift detected, metric holding.</strong> The inputs moved and the model still performs. That is a model generalising, which is what you wanted; retraining on the new distribution may narrow it.</li><li><strong>The shift is seasonal.</strong> Retraining on December to serve January bakes in a pattern that is about to reverse, and the following retrain has to undo it.</li><li><strong>The labels are not in yet.</strong> Retraining on the period you have labels for means training on the past you already handled, not the present that is failing.</li><li><strong>The failure is not the model.</strong> The most common cause of a metric moving is an upstream data change &mdash; a feed, a schema, a unit. Retraining teaches the model to accommodate a bug rather than fixing it.</li></ul>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../core-vocabulary/lsn-1787000000016-drift.html">Drift: Why Deployment Isn&#x27;t the End</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">The model didn't change. The world did.</span></li><li><a href="../block8-deployment/lsn-1788100000003-after-it-ships.html">After It Ships</a><span class="rel-set">Block 8 · Deployment and APIs</span><span class="link-note">What to watch, what to wake someone for, and the difference between the service being up and the service being right.</span></li><li><a href="lsn-1787400000014-tracking-runs-and-automating-evals.html">Tracking Runs, and Running the Evals Automatically</a><span class="link-note">The measurement discipline this course teaches does not survive contact with fifty experiments unless something records them for you.</span></li><li><a href="../block7-training/lsn-1788000000002-lora-qlora-and-full-fine-tuning.html">LoRA, QLoRA and the Full Fine-Tune</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">What low-rank adaptation actually changes, what rank buys you, and the one case where updating every weight is still right.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why is a commit hash insufficient to identify what a trained system will do?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Commit hashes do not capture merge history accurately</div>
+      <div class="quiz-opt">Behaviour comes from code, weights, data and configuration together, and only the first is in the repository</div>
+      <div class="quiz-opt">The hash changes whenever the model is retrained, so it cannot be a stable reference</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. A retrained model scores better than the incumbent on the aggregate. What should you check before promoting it?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">That the training loss converged smoothly</div>
+      <div class="quiz-opt">The slices — a retrain that improves the aggregate while losing a minority segment is the ordinary outcome of training on reweighted data</div>
+      <div class="quiz-opt">That the new training set is larger than the previous one</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Drift is detected but the model&#x27;s performance metric has not moved. What does that suggest?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A retrain is overdue and the metric will follow shortly</div>
+      <div class="quiz-opt">The model is generalising across the shift — retraining on the new distribution may narrow it rather than help</div>
+      <div class="quiz-opt">The drift detector&#x27;s threshold is set too loosely</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

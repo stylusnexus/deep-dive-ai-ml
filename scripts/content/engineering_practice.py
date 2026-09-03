@@ -144,7 +144,6 @@ LESSONS = [
     ("callout", "matters", "What this licenses you to say", "A sixteen-point spread on identical model weights. If you swapped models and saw a gain that size you would call it a generational leap — here it is entirely scaffolding. Note also AutoCodeRover v2.0 to v2.1: the same team, the same model, 231 tasks to 258, from harness work alone. When something underperforms, the harness is the higher-yield place to look, and this is the evidence for it rather than the intuition."),
 
     ("callout", "pitfall", "Read it carefully, though", "These submissions differ in more than scaffold — different prompts, retrieval, retry budgets and token spend. The spread is an upper bound on what harness work can buy, not a controlled experiment. It tells you the harness matters enormously; it does not tell you which harness change is responsible. That distinction is the whole of the next two lessons."),
-
     ("related", ["what-ai-makes-worse", "code-nobody-decided", "the-apprenticeship-problem", "deterministic-first"]),
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',
@@ -210,7 +209,6 @@ LESSONS = [
     ("p", "In the case that opened this module, nine consecutive experiments were run against the second failure using fixes aimed at the first — because the reasoning that would have distinguished them was being parsed off the API response and discarded on every tool-calling turn. One trace, once logging was restored, answered what nine experiments had not."),
     ("callout", "insight", "The older name for this", "Reading what a subject says while working, rather than only scoring the outcome, is <strong>think-aloud protocol analysis</strong> — formalised by Ericsson and Simon in the 1980s for human problem-solving. The machine-learning analogue is the distinction between <em>process supervision</em> and <em>outcome supervision</em>: scoring the steps rather than the final answer."),
     ("callout", "warning", "And the caveat that keeps it honest", "Verbalised reasoning is evidence, not ground truth. A model\u2019s stated chain of thought does not always reflect the computation that produced its answer, so a trace can be sincere and still misleading. Treat it as a witness statement: extremely valuable, independently checkable, occasionally wrong."),
-
     ("related", ["how-to-measure", "confounds-you-cannot-see", "is-the-difference-real", "where-evaluation-lives"]),
     ("links", [
       ('Let\u2019s Verify Step by Step (Lightman et al., 2023)', 'https://arxiv.org/abs/2305.20050',
@@ -302,8 +300,7 @@ LESSONS = [
       ("After", "Interval not fraction. Guardrail checked. Fix reverted and the number moved back.", "Then it is a finding, and only then does it belong in a recipe or an architecture decision record (ADR)."),
     ]),
     ("callout", "matters", "Why this belongs in a module about documentation", "A recipe or an ADR built on an unmeasured result does not just fail \u2014 it hardens. It gets cited, followed, and defended long after the thing it claims was quietly falsified. Measurement is not a separate discipline from writing things down; it is the thing that earns you the right to."),
-
-    ("related", ["why-measurement-decides", "is-the-difference-real", "confounds-you-cannot-see", "rungs-and-experiments"]),
+    ("related", ["why-measurement-decides", "is-the-difference-real", "confounds-you-cannot-see", "tracking-runs-and-automating-evals"]),
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',
        'Useful for the exercise below: find two leaderboard entries with the same base model and different scaffolds.'),
@@ -418,7 +415,6 @@ swebench report my-run-01 -d verified"""),
      'A benchmark must make doing nothing and solving it score differently.',
      'SWE-bench does this with two test sets. FAIL_TO_PASS proves the work happened; PASS_TO_PASS proves nothing else broke. Most homemade benchmarks implement only the first half.',
      "Score only on 'the failing test now passes' and an agent can delete the test. Score only on 'the suite is green' and an agent that changes nothing scores full marks on any task where the suite was already green. You need both halves, and the second is the one people leave out."),
-
     ("related", ["one-set-many-models", "how-to-measure", "localising-a-failure", "eval-battery"]),
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',
@@ -521,7 +517,6 @@ swebench report my-run-01 -d verified"""),
       "<strong>Check the instrument when a finding is surprising.</strong> Three wrong claims in one hour on that project came from the measuring tooling, not the system — a filename inside a search result read as a file the agent chose, a ratio read as parallelism, a counter misread because the grep pattern only matched single digits.",
     ]),
     ("callout", "warning", "And the cheap habit that beats all of it", "Count before theorising. A separate incident on the same project was misdiagnosed three times — as a bad timeout argument, then a dead shell, then, confidently and in writing, as a fork bomb from background loops. One command listing running processes by name would have named the real cause at any point. When something is broken, enumerate before you explain."),
-
     ("related", ["is-the-difference-real", "localising-a-failure", "rungs-and-experiments", "data-leakage"]),
     ("links", [
       ('Building effective agents — Anthropic', 'https://www.anthropic.com/engineering/building-effective-agents',
@@ -609,7 +604,6 @@ swebench report my-run-01 -d verified"""),
       "Record what each passing test does not establish, at the time you record the pass",
       "Write claims at the scope of the evidence — name the build, the config, the budget",
     ]),
-
     ("related", ["confounds-you-cannot-see", "rungs-and-experiments", "how-to-measure", "swe-bench-and-how-to-run-it"]),
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',
@@ -708,7 +702,6 @@ swebench report my-run-01 -d verified"""),
 
     ("h2", "Where this connects"),
     ("p", "This is the same principle as the loops lesson, one level up: a loop or a score improves things only when signal enters from outside. A judge from the same family as the system under test is not outside. A grader whose error tracks your treatment is not outside. Human labels, a compiler, a test suite and a held-out answer key are."),
-
     ("related", ["rubrics-and-blind-reads", "is-the-difference-real", "judging-a-conversation", "eval-data-you-can-trust"]),
     ("links", [
       ('Judging LLM-as-a-Judge (Zheng et al., 2023)', 'https://arxiv.org/abs/2306.05685',
@@ -819,7 +812,6 @@ swebench report my-run-01 -d verified"""),
 
     ("h2", "Where this lands"),
     ("p", "Every block of this program has a version of this decision in it, and the intake sheet asks it first for a reason. Before the model selection, before the prompt, before the fine-tune: is there a bounded mechanism that does this job? Ask it early, because the answer is easy to act on at the start of a project and very expensive to act on once the model is load-bearing."),
-
     ("related", ["what-ai-makes-worse", "structured-output-json", "baseline-to-model", "asking-the-database-properly"]),
     ("links", [
       ('Building effective agents — Anthropic', 'https://www.anthropic.com/engineering/building-effective-agents',
@@ -897,7 +889,6 @@ swebench report my-run-01 -d verified"""),
 
     ("callout", "matters", "The cost is deferred, which is why it accumulates",
      "<p>Nothing punishes you at the moment this happens. The code works, the tests pass, the feature ships and the sprint looks good. The bill arrives later as a codebase whose behaviour nobody can account for, one plausible addition at a time — and by then the person who could have explained any single piece has long moved on to the next ticket.</p>"),
-
     ("related", ["what-ai-makes-worse", "spec-driven-development", "version-control-basics", "when-scaffolding-turns"]),
     ("quiz", [
       ("Why does a reviewer's usual judgement work less well on generated code?",
@@ -980,7 +971,6 @@ swebench report my-run-01 -d verified"""),
 
     ("callout", "insight", "The definition of legacy is the whole argument",
      "<p>If legacy means code whose reasoning nobody holds, then the speed at which a codebase becomes legacy is set by how much of its reasoning was ever held by a person. That is the connection between this lesson and the one before it — undecided behaviour is legacy on arrival, and the remedy in both cases is the same unglamorous act of writing down why before writing what.</p>"),
-
     ("related", ["deterministic-first", "code-nobody-decided", "when-scaffolding-turns", "the-apprenticeship-problem"]),
     ("quiz", [
       ("Why is comprehension described as the new bottleneck?",
@@ -1067,7 +1057,6 @@ swebench report my-run-01 -d verified"""),
      'An agent cannot tell a decision you made from a sentence you wrote carelessly.',
      "Waterfall's specs were ignored; these are followed exactly. Every under-specified area becomes an invented answer, delivered confidently and consistently, so vagueness surfaces as working code rather than as questions.",
      'Your spec says the export should handle large files. You meant streaming rather than loading into memory. The agent implemented a 100MB size limit with a clear error message — a reasonable reading, faithfully built, and not what you wanted. You discovered what you meant by reading what you got.'),
-
     ("related", ["three-artifacts", "rungs-and-experiments", "code-nobody-decided", "how-to-measure"]),
     ("links", [
       ("GitHub Spec Kit", "https://github.com/github/spec-kit",
@@ -1172,8 +1161,7 @@ git switch main && git pull            # back to the main line, now updated"""),
 
     ("h2", "What GitHub adds"),
     ("p", "Beyond hosting: pull requests for review, issues for tracking work, and Actions for running your tests automatically on every push. That last one connects directly to the evaluation material — a benchmark that runs itself on every change is the difference between measuring occasionally and measuring always."),
-
-    ("related", ["three-artifacts", "code-nobody-decided", "the-image-is-the-unit", "spec-driven-development"]),
+    ("related", ["three-artifacts", "code-nobody-decided", "the-artifact-and-when-to-retrain", "spec-driven-development"]),
     ("links", [
       ("Git Book — chapters 1 to 3", "https://git-scm.com/book/en/v2",
        "Free and genuinely the best reference. The first three chapters cover everything above properly."),
@@ -1271,7 +1259,6 @@ git switch main && git pull            # back to the main line, now updated"""),
 
     ("h2", "The connection to everything else"),
     ("p", "This is the control-fixture idea from the localising lesson, made systematic. It is also the one-treatment-at-a-time rule from the measurement checklist, applied as a design rather than as discipline: because each rung differs by exactly one thing, the sweep is a set of controlled comparisons run in parallel rather than a sequence of experiments run over a fortnight."),
-
     ("related", ["localising-a-failure", "how-to-measure", "confounds-you-cannot-see", "spec-driven-development"]),
     ("links", [
       ("SWE-bench experiments", "https://github.com/swe-bench/experiments",
@@ -1297,6 +1284,175 @@ git switch main && git pull            # back to the main line, now updated"""),
        ["To average out slow network calls",
         "Agent runs are stochastic, so a single run per cell cannot distinguish a real transition from noise",
         "Most benchmarks require it for submission"], 1),
+    ]),
+  ],
+},
+{
+  "slug": "tracking-runs-and-automating-evals",
+  "title": "Tracking Runs, and Running the Evals Automatically",
+  "subtitle": "The measurement discipline this course teaches does not survive contact with fifty experiments unless something records them for you.",
+  "body": [
+    ("p", "Two lessons in this set already argue that a result you cannot locate is not a result: record the model, the configuration, the seed, the data version and the per-item outcomes, so that months later you can tell <em>never tried</em> from <em>tried and failed</em>. That discipline is correct and it is described as something you do by hand. By hand it works for five runs. At fifty it quietly stops happening, and the first symptom is somebody re-running an experiment that was settled six weeks ago because nobody could find the answer."),
+
+    ("h2", "What a tracking server is for"),
+    ("p", "An experiment tracker is a database with a run as its unit. Each run carries its parameters, its metrics, its artefacts and its timestamp, and the point is not the recording &mdash; it is that runs become <em>comparable</em> without you having planned the comparison in advance. Sorting forty runs by a metric, or asking which configuration produced the best result at a given cost, is the operation a directory of notebook outputs cannot do."),
+
+    ("callout", "matters", "This repository has had one running the whole time",
+     "<p>The lab containers are started with a tracking URI already pointing at an MLflow server, the compose file marks it for the classical-ML and fine-tuning blocks, and it serves a web interface on the machine you are reading this on. It has been available since the environments were built. If you have been keeping run notes in a cell at the bottom of a notebook, the thing that replaces them is already up.</p>"),
+
+    ("terms", [
+      ("Parameters", "The inputs you chose",
+       "Model, configuration, learning rate, rank, prompt version, retrieval depth. Anything you would have to state to repeat the run."),
+      ("Metrics", "The numbers it produced",
+       "Logged over time rather than once, so a training curve is visible and a run that diverged is obvious at a glance rather than after re-reading a log."),
+      ("Artefacts", "The things it made",
+       "The adapter, the confusion matrix, the per-item results file. Held with the run that produced them, which is the part that makes a result auditable months later."),
+      ("The code version", "The field people omit",
+       "A commit hash logged alongside the run. Without it the parameters describe an experiment you can no longer reconstruct, because the code they were passed to has moved."),
+    ]),
+
+    ("know",
+     "The value is not in logging the runs. It is in being able to compare runs you did not plan to compare.",
+     "Anyone will record the experiment they are running now, because they care about it now. The question a tracker answers is the one that arrives later and unbidden: did we already try this, what did the version from before the refactor score, which of these forty configurations was best on cost rather than on accuracy. Notes written for your present self do not answer those, because your present self did not know they would be asked.",
+     "A team spends two days tuning retrieval depth and settles on eight chunks. Four months later, after a chunking change, somebody asks whether eight is still right. With a tracker it is a query against runs that already exist. Without one it is two days again, and the second answer is not comparable with the first because the corpus moved in between."),
+
+    ("h2", "The eval battery belongs in continuous integration"),
+    ("p", "This course builds an evaluation battery and argues at length that measurement is what separates a claim from a result. It then leaves the battery to be run by a person who remembers to run it &mdash; which in practice means it runs when someone is confident enough to check, and that is exactly the wrong distribution of moments."),
+    ("p", "Automating it is the same argument as the harness: a check that depends on discipline gets skipped under deadline, and a check that runs itself does not. The complication is that these evaluations are not unit tests. They cost money, they take minutes rather than milliseconds, and they do not return the same answer twice."),
+
+    ("figure", "Three tiers, by what they cost. The cheap deterministic layer runs on every push; the expensive layer runs where it is worth waiting for.", '''<svg viewBox="0 0 540 158" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three tiers of automated checks: fast deterministic on every push, sampled eval on pull requests, full battery before release.">
+<rect x="10" y="16" width="330" height="34" rx="5" class="d-box-good"/>
+<text x="24" y="38" class="d-label-sm">schema, parsing, refusal paths, golden fixtures &#8212; no model call</text>
+<text x="352" y="38" class="d-label-sm">every push, seconds</text>
+<rect x="10" y="58" width="330" height="34" rx="5" class="d-box"/>
+<text x="24" y="80" class="d-label-sm">sampled evaluation set, fixed seed, threshold with spread</text>
+<text x="352" y="80" class="d-label-sm">every pull request</text>
+<rect x="10" y="100" width="330" height="34" rx="5" class="d-box-accent"/>
+<text x="24" y="122" class="d-label-sm">full battery, adversarial suite, judged dimensions</text>
+<text x="352" y="122" class="d-label-sm">before release, nightly</text>
+<text x="10" y="150" class="d-label-sm">cost rises down the stack, so the gate that blocks a merge should be near the top of it</text>
+</svg>'''),
+
+    ("know",
+     "A gate that flakes gets disabled, and it takes the discipline with it.",
+     "The first time an evaluation fails on a change that was fine, somebody re-runs it and it passes. The second time, somebody adds a retry. The third time it is marked non-blocking and it never blocks anything again &mdash; and the damage is not the lost check, it is that the team has now learned the evaluations are noise. A threshold set without knowing the run-to-run spread guarantees this, which is why the repeats this course insists on are load-bearing here rather than pedantic.",
+     "An evaluation scoring 0.82 with a run-to-run spread of plus or minus 0.03 is gated at 0.82. It fails roughly half the time on changes that did nothing. Gated at 0.75 it fails when something is actually wrong, which is the only failure anyone will keep paying attention to."),
+
+    ("callout", "pitfall", "Two things that make an automated evaluation lie",
+     "<p><strong>The eval set leaks into the work.</strong> Running the same set on every pull request for six months means every developer has seen its failures and fixed toward them. That is the tuning-against-the-test-set problem from the overfitting lesson, arriving through automation, and the defence is the same: hold a portion back that only runs before release, and never show it in a pull-request comment.</p><p><strong>Nobody reads a green tick.</strong> An evaluation that reports only pass or fail throws away the number, so a metric sliding from 0.88 to 0.79 over two months passes every check on the way down. Record the value to the tracker on every run and watch the series, not the tick.</p>"),
+
+    ("h2", "What this costs, honestly"),
+    ("p", "Every automated run of a model-backed evaluation is a bill and a wait, and a team that puts the full battery on every push will turn it off within a fortnight. Tier it by what a failure would cost you: the checks that need no model call are effectively free and should gate everything, a sampled set is affordable per pull request, and the full battery belongs on a schedule or a release. If the honest answer is that you cannot afford to run the evaluations often, that is worth knowing explicitly &mdash; it means the quality claims are being made on less evidence than the process implies."),
+
+    ("related", ["how-to-measure", "eval-battery", "version-control-basics", "rungs-and-experiments"]),
+    ("quiz", [
+      ("What does an experiment tracker give you that careful notes do not?",
+       ["A guarantee that runs are reproducible",
+        "Comparability across runs you did not plan to compare — the question that arrives months later, which notes written for your present self cannot answer",
+        "Automatic detection of when a result is statistically significant"],
+       1),
+      ("An automated evaluation is gated at exactly its observed score. What happens?",
+       ["It correctly catches any regression, however small",
+        "It fails often on changes that did nothing, gets retried, then marked non-blocking — and the team learns to treat the evaluations as noise",
+        "It becomes more sensitive over time as the sample grows"],
+       1),
+      ("Why does running the same eval set on every pull request for months become a problem?",
+       ["The set becomes stale relative to production traffic",
+        "Everyone has seen its failures and fixed toward them, which is tuning against the test set arriving through automation",
+        "Repeated runs accumulate cost without adding information"],
+       1),
+    ]),
+  ],
+},
+{
+  "slug": "the-artifact-and-when-to-retrain",
+  "title": "The Artifact, and When to Retrain",
+  "subtitle": "What actually ships is not the code — and the drift lesson tells you something moved without telling you what to do about it.",
+  "body": [
+    ("p", "Version control holds your code, and for ordinary software that is the whole system. For anything with a trained component it is roughly a quarter of it. What determines behaviour is a set of four things travelling together &mdash; the code, the weights or adapter, the data they were derived from, and the configuration they run under &mdash; and only the first is in the repository."),
+
+    ("figure", "The code is versioned, and on its own it does not determine behaviour. Three other things have to be identified for a result to be reproducible or a rollback to be possible.", '''<svg viewBox="0 0 540 146" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Four components determine behaviour: code, weights, data and configuration.">
+<rect x="10" y="20" width="118" height="44" rx="6" class="d-box-good"/>
+<text x="69" y="40" class="d-label-b" text-anchor="middle">code</text>
+<text x="69" y="56" class="d-label-sm" text-anchor="middle">in git</text>
+<rect x="138" y="20" width="118" height="44" rx="6" class="d-box-accent"/>
+<text x="197" y="40" class="d-label-b" text-anchor="middle">weights</text>
+<text x="197" y="56" class="d-label-sm" text-anchor="middle">where?</text>
+<rect x="266" y="20" width="118" height="44" rx="6" class="d-box-accent"/>
+<text x="325" y="40" class="d-label-b" text-anchor="middle">data</text>
+<text x="325" y="56" class="d-label-sm" text-anchor="middle">which version?</text>
+<rect x="394" y="20" width="136" height="44" rx="6" class="d-box-accent"/>
+<text x="462" y="40" class="d-label-b" text-anchor="middle">configuration</text>
+<text x="462" y="56" class="d-label-sm" text-anchor="middle">prompt, thresholds</text>
+<text x="10" y="92" class="d-label-sm">a commit hash identifies one of the four</text>
+<text x="10" y="112" class="d-label-sm">rolling back the code while the other three stay put reverts almost nothing</text>
+<text x="10" y="132" class="d-label-sm">so the artefact has to carry its own provenance, or the run cannot be reconstructed</text>
+</svg>'''),
+
+    ("h2", "What a trained artefact has to know about itself"),
+    ("terms", [
+      ("Its base", "What it was derived from",
+       "For an adapter this is decisive: it is a difference against one specific base model at one specific version, and applied to a different base it is meaningless rather than merely worse."),
+      ("Its data", "Which version, not which dataset",
+       "The dataset moved between March and June. A record naming the dataset without naming the version identifies a family of possible training runs, which is not enough to reproduce one."),
+      ("Its run", "The experiment that produced it",
+       "A pointer back to the tracked run, so the parameters, metrics and evaluation results are attached rather than remembered."),
+      ("Its evaluation", "Against the base, on the held-out set",
+       "The numbers that justified shipping it, recorded with it. Otherwise the comparison that made the decision is gone by the time anyone questions the decision."),
+    ]),
+
+    ("know",
+     "You can roll back code in seconds. Rolling back a model requires that the previous one still exists and can still be served.",
+     "A code rollback is a pointer moving to a commit that is still there by construction. A model rollback is only as fast as the old artefact is retrievable &mdash; and if it was overwritten in place, produced by a training run nobody recorded, or depends on a base version the provider has since retired, there is nothing to go back to. The incident then becomes a training run, under time pressure, which is the worst circumstance in which to do one.",
+     "A team replaces a fine-tuned classifier with a newer adapter and deletes the old one from the bucket, since it is in the repository&#39;s history. The new one is worse on a customer segment nobody sliced for. Recovery is a retrain, because the repository held the training <em>script</em> and neither the weights nor the exact data snapshot that produced them."),
+
+    ("h2", "When to retrain, which the drift lesson deliberately left open"),
+    ("p", "Detection was the subject there: what moved, and how you would know. This is the decision that detection exists to inform, and it has four common triggers with genuinely different failure modes."),
+
+    ("terms", [
+      ("On a schedule", "Simple, and wrong in both directions",
+       "Monthly whether or not anything changed. Cheap to reason about, and it retrains when nothing moved while missing the week something did. Reasonable as a floor, poor as the only trigger."),
+      ("On a drift threshold", "Responsive, and it needs a number you chose",
+       "Fires when the input distribution has moved past a bound. Only as good as the threshold, which has to come from a period you know was healthy rather than from a default."),
+      ("On a performance drop", "The one you actually care about",
+       "The real signal, and it needs labels, which arrive late or never. Where they arrive late this is a trailing trigger: correct, and it tells you about a problem that has already been live for weeks."),
+      ("On accumulated data", "Retrain when there is something new to learn",
+       "Enough genuinely new examples to move the model. Predictable and cheap to compute, and it ignores whether the world changed &mdash; volume is not the same as novelty."),
+    ]),
+
+    ("know",
+     "A retrain is a deployment, not a refresh, and it earns the same gate as any other change.",
+     "The word makes it sound like maintenance &mdash; the same model, brought up to date &mdash; and it is not. It is a new model, trained on different data, which can be worse in ways the aggregate score will not show. Teams that would never ship a code change without review routinely promote a retrained model automatically, on the reasoning that the pipeline is unchanged. The pipeline is unchanged; the thing it produced is not.",
+     "The rollout options are the ones deployment already gave you. Shadow the retrained model against live traffic before it serves anything, compare it to the incumbent on the same held-out set rather than to its own training metrics, and check the slices &mdash; because a retrain that improves the aggregate while losing a minority segment is the ordinary outcome of training on data the world has reweighted."),
+
+    ("callout", "matters", "The cost nobody puts in the business case",
+     "<p>The training run is usually the cheapest part. Each retrain also spends an evaluation cycle, a shadow period, a rollout and someone&#39;s attention, and if the model is judged rather than scored mechanically it spends human reading time too. A monthly retrain is a monthly evaluation commitment, and a team that budgets for the compute and not for that ends up promoting models on training metrics alone, which is the failure the evaluation block spends six lessons preventing.</p><p>The corollary is worth stating plainly: if you cannot afford to evaluate it, you cannot afford to retrain it. Retraining without evaluating is not maintenance, it is an unmeasured change to production made on a schedule.</p>"),
+
+    ("h2", "When not to retrain"),
+    ("ul", [
+      "<strong>Drift detected, metric holding.</strong> The inputs moved and the model still performs. That is a model generalising, which is what you wanted; retraining on the new distribution may narrow it.",
+      "<strong>The shift is seasonal.</strong> Retraining on December to serve January bakes in a pattern that is about to reverse, and the following retrain has to undo it.",
+      "<strong>The labels are not in yet.</strong> Retraining on the period you have labels for means training on the past you already handled, not the present that is failing.",
+      "<strong>The failure is not the model.</strong> The most common cause of a metric moving is an upstream data change &mdash; a feed, a schema, a unit. Retraining teaches the model to accommodate a bug rather than fixing it.",
+    ]),
+
+    ("related", ["drift", "after-it-ships", "tracking-runs-and-automating-evals", "lora-qlora-and-full-fine-tuning"]),
+    ("quiz", [
+      ("Why is a commit hash insufficient to identify what a trained system will do?",
+       ["Commit hashes do not capture merge history accurately",
+        "Behaviour comes from code, weights, data and configuration together, and only the first is in the repository",
+        "The hash changes whenever the model is retrained, so it cannot be a stable reference"],
+       1),
+      ("A retrained model scores better than the incumbent on the aggregate. What should you check before promoting it?",
+       ["That the training loss converged smoothly",
+        "The slices — a retrain that improves the aggregate while losing a minority segment is the ordinary outcome of training on reweighted data",
+        "That the new training set is larger than the previous one"],
+       1),
+      ("Drift is detected but the model's performance metric has not moved. What does that suggest?",
+       ["A retrain is overdue and the metric will follow shortly",
+        "The model is generalising across the shift — retraining on the new distribution may narrow it rather than help",
+        "The drift detector's threshold is set too loosely"],
+       1),
     ]),
   ],
 },

@@ -74,7 +74,6 @@ LESSONS = [
 
     ("callout", "matters", "Read the procedure before the tools",
      "<p>How to Measure is six steps and takes ten minutes to read. Every tool in this block is worthless applied out of that order — a judge calibrated against an unproven instrument produces confident, reproducible, wrong numbers.</p>"),
-
     ("related", ["why-measurement-decides", "eval-battery", "one-set-many-models", "after-it-ships"]),
     ("quiz", [
       ("Your eval set gives every model you try the same score. What is the first thing to suspect?",
@@ -156,7 +155,6 @@ LESSONS = [
 
     ("callout", "insight", "This is why the corpus in Block 3 is synthetic",
      "<p>Every fact in that corpus lives in exactly one document, deliberately. That is what makes recall measurable rather than estimated — the gold set names the document, and the naming is correct because the document was written to contain the fact.</p>"),
-
     ("related", ["labels-and-holdouts", "data-leakage", "rubrics-and-blind-reads", "one-set-many-models"]),
     ("quiz", [
       ("Your system disagrees with a gold label. What is the first thing to check?",
@@ -237,7 +235,6 @@ LESSONS = [
 
     ("callout", "matters", "Cost and latency are results, not footnotes",
      "<p>The question was which model this system should use, and that question is never answered by accuracy alone. Put cost per item and latency per item in the same table as the score, or the table quietly recommends the most expensive option every time.</p>"),
-
     ("related", ["is-the-difference-real", "eval-data-you-can-trust", "where-evaluation-lives", "swe-bench-and-how-to-run-it"]),
     ("quiz", [
       ("A reasoning model scores badly on your set while a simpler model scores well. What do you check before concluding anything?",
@@ -319,7 +316,6 @@ LESSONS = [
 
     ("callout", "matters", "Blind the calibration set, or the whole exercise is circular",
      "<p>This is the failure that quietly voids a result. You label the ground truth knowing which system produced each answer, the judge is then tuned until it agrees with those labels, and the reported agreement rate measures how well the judge reproduces your expectations. Everything downstream inherits it, and nothing in the numbers looks wrong.</p>"),
-
     ("related", ["models-judging-models", "judging-a-conversation", "labels-and-holdouts", "eval-data-you-can-trust"]),
     ("quiz", [
       ("What is the test of whether a rubric is a rubric?",
@@ -460,7 +456,6 @@ result below is a false positive by construction
 
     ("callout", "pitfall", "A t-test is the wrong tool for a proportion",
      "<p>Most of this course's headline numbers are proportions — six of nine correct, twenty-four of twenty-four flagged. A t-test assumes roughly normal continuous measurements and binary outcomes at small n are neither. Use a test built for proportions, or a bootstrap, and be aware that at nine items almost nothing will be significant. Project 2 moving from five of nine to six of nine is a direction, not a result, and this course said so at the time on judgement rather than on arithmetic.</p>"),
-
     ("related", ["how-to-measure", "confounds-you-cannot-see", "one-set-many-models", "models-judging-models"]),
     ("quiz", [
       ("Why is an eval on a fixed question set paired?",
@@ -550,7 +545,6 @@ result below is a false positive by construction
 
     ("h2", "Where this connects"),
     ("p", "Block 4's telemetry lesson insisted the trace falls out of the loop for a few lines of code, and this is what it was for. The trace is not only for debugging an incident — it is the object you evaluate. A system with traces and no trajectory evaluation is recording the evidence and never reading it."),
-
     ("related", ["rubrics-and-blind-reads", "models-judging-models", "session-lifecycle", "loop-tradeoffs"]),
     ("quiz", [
       ("Why is the final answer a poor unit for grading an agent?",

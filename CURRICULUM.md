@@ -15,15 +15,14 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 - Docker environments for Torch and Keras, pgvector, MLflow
 - `lessons/orientation/` — one map placing every term in the program ✅
-- `lessons/core-vocabulary/` — 28 lessons: the vocabulary an LLM system is built from, plus overfitting, agents and danger, RLHF and human-in-the-loop, context engineering, structured output, hallucination and grounding, in-context learning, class imbalance and thresholds, drift, distillation, chain-of-thought, and loops at inference and in training ✅
-- `lessons/engineering-practice/` — 9 lessons: harnesses, recipes and ADRs; the measurement discipline that corrects them; SWE-bench; invisible confounds; localising a failure; LLM-as-judge; and deterministic-first ✅
-- `lessons/algorithms/` — 9 lessons on the algorithms this domain runs on, from gradient descent to HNSW and data leakage ✅
-- `lessons/engineering-practice/` — 4 lessons: the three artifacts an LLM project accumulates (harness, recipes, ADRs), how each one turns harmful, why measurement is the only thing that corrects them, and the measurement procedure itself ✅
+- `lessons/core-vocabulary/` — 29 lessons: the vocabulary an LLM system is built from, plus overfitting, agents and danger, RLHF and human-in-the-loop, context engineering, structured output, hallucination and grounding, in-context learning, class imbalance and thresholds, drift, distillation, chain-of-thought, and loops at inference and in training ✅
+- `lessons/engineering-practice/` — 16 lessons: harnesses, recipes and ADRs; the measurement discipline that corrects them; SWE-bench; invisible confounds; localising a failure; LLM-as-judge; deterministic-first; experiment tracking and continuous evaluation; and the trained artefact with its retraining triggers ✅
+- `lessons/algorithms/` — 10 lessons on the algorithms this domain runs on, from gradient descent to HNSW and data leakage ✅
 - Wire in the two finished courses (statistics, governance) ✅
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 96 lessons built, 96 diagrams, 13 executed notebooks.**
+**Status: 102 lessons built, 13 executed notebooks, every lesson cross-referenced.**
 
 ---
 
@@ -35,7 +34,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 - Missing data: MCAR, MAR, MNAR, and why the mechanism decides the fix ✅
 - AI-assisted analysis, and where it lies to you ✅
 
-5 lessons in `lessons/block1-data-eda/` and 4 runnable notebooks in
+6 lessons in `lessons/block1-data-eda/` and 4 runnable notebooks in
 `notebooks/01-python-eda/`, all verified executing end to end.
 
 **Exit:** A clean EDA notebook on a dataset nobody handed you pre-cleaned. ✅
@@ -177,7 +176,7 @@ Project 3 rather than in isolation, which is the point of it.
   repair) and which are alternatives; and that compression does not remove capability
   evenly, so it needs slice evaluation rather than an aggregate.
 
-5 lessons in `lessons/block7-training/`. The remaining bullets need a training run and
+6 lessons in `lessons/block7-training/`. The remaining bullets need a training run and
 a GPU budget, which is where this block gets expensive.
 - Evaluating before and after against a held-out set
 - Quantization for serving — lands directly on a production agent's GGUF and Q4_K_M

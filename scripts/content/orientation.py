@@ -95,7 +95,6 @@ LESSONS = [
 
     ("h2", "One honest caveat about the picture"),
     ("p", "Neat diagrams like the one above are simplifications, and this one has a visible seam: reinforcement learning doesn't sit tidily inside any ring — it's a third learning paradigm alongside supervised and unsupervised, and it shows up both in classical ML and in how LLMs are aligned. Treat the rings as a map for orientation rather than a taxonomy to defend."),
-
     ("related", ["inside-an-llm", "deterministic-first", "why-measurement-decides", "agents-autonomy-and-danger"]),
     ("links", [
       ("Google ML Crash Course: framing", "https://developers.google.com/machine-learning/intro-to-ml/supervised",
@@ -203,7 +202,6 @@ LESSONS = [
 
     ("h2", "The size numbers, made concrete"),
     ("p", "A 7-billion-parameter model has roughly 32 blocks, a hidden size around 4096, 32 attention heads, and a vocabulary near 32,000. At 16-bit precision the weights alone are about 14GB — most of it in the feed-forward layers. Every one of those parameters is touched for every token generated, which is why local inference is memory-bandwidth bound and why quantization speeds things up as well as shrinking them."),
-
     ("related", ["attention-and-transformers", "tokens-context-and-kv-cache", "weights-gguf-quantization", "the-map"]),
     ("links", [
       ("The Illustrated Transformer", "https://jalammar.github.io/illustrated-transformer/",

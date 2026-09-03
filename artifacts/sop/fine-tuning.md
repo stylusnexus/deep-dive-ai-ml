@@ -31,7 +31,11 @@ If the first three aren't all yes, stop. Most fine-tuning projects should end he
 - [ ] ☠ Evaluated against the **base model** on the same held-out set — not just "it looks better"
 - [ ] Checked for capability loss outside the fine-tuned task
 - [ ] Overfitting checked — does it parrot training examples verbatim?
-- [ ] Adapter versioned and stored somewhere real, not a local folder
+- [ ] ☠ Adapter versioned and stored somewhere real, not a local folder — and carrying its
+      provenance: which base and version, which dataset version, which tracked run, and the
+      evaluation that justified shipping it
+- [ ] The model it replaces still exists and is still servable — a rollback you cannot perform
+      turns an incident into an unplanned training run
 - [ ] Quantized for serving if it's going local; re-evaluated after quantizing
 
 ## Smells
