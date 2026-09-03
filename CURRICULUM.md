@@ -233,14 +233,17 @@ Built:
 - Where the money goes — spend attribution, and the four places cost hides. Complements
   Block 0's routing (architecture) with the measurement ✅
 
-Still open: **CNNs and computer vision**, **recommendation systems**. Both are genuinely
-missing and both want a training notebook rather than a lesson alone, which is why they
-are not here yet.
+- Convolutions, and what a CNN assumes — the clearest inductive bias in the program ✅
+- Recommendation systems, and the loop they sit in — the one system whose training
+  data is its own past output ✅
 
-3 lessons in `lessons/block9-electives/` and 1 notebook in `notebooks/09-electives/`.
+5 lessons in `lessons/block9-electives/` and 3 notebooks in `notebooks/09-electives/`.
+The convolution notebook hand-rolls the sliding window rather than calling a library,
+and the recommender notebook runs the feedback loop until the catalogue narrows.
 
-**Exit:** Each elective has lessons and at least one runnable notebook — met for
-`where-the-money-goes`; the other two electives still have lessons only.
+**Exit:** Each elective has lessons and at least one runnable notebook — met for cost,
+convolutions and recommenders; `when-the-input-is-not-text` and
+`asking-the-database-properly` still have lessons only.
 
 ---
 

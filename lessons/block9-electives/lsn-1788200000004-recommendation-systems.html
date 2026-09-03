@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recommendation Systems, and the Loop They Sit In</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 5 of 5</span>
+  <h1>Recommendation Systems, and the Loop They Sit In</h1>
+  <p class="subtitle">The one system in this course whose training data is its own past output.</p>
+
+  <p>Recommenders are the most widely deployed machine learning systems in existence and the ones whose published accuracy numbers correspond least well to whether they work. Both facts have the same cause, and it is not the algorithm. A recommender is trained on data that a recommender produced, evaluated against behaviour it shaped, and judged on a metric that stops meaning what it meant the moment anyone optimises it.</p>
+  <h2>The two families, and why every real system is both</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Collaborative filtering</div><div><div class="roadmap-title">People like you liked this</div><div class="roadmap-desc">Uses only the interaction matrix &mdash; who engaged with what. It knows nothing about the items themselves, which is its strength: it finds affinities nobody could have described in advance.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Content-based recommendation</div><div><div class="roadmap-title">This is like what you liked</div><div class="roadmap-desc">Uses features of the items &mdash; text, tags, an embedding. It can recommend something nobody has touched yet, which is precisely where collaborative filtering has nothing to say.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The hybrid</div><div><div class="roadmap-title">Content for the cold, collaborative for the warm</div><div class="roadmap-desc">Almost every production system. Content-based handles new items and new users; collaborative takes over once there is enough interaction to be worth using.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The matrix</div><div><div class="roadmap-title">Overwhelmingly empty</div><div class="roadmap-desc">A million users and a hundred thousand items is 100 billion cells, of which perhaps 0.01% are filled. Sparsity is not an inconvenience here, it is the defining property of the problem.</div></div></div></div>
+  <h2>What the data is actually telling you</h2>
+  <p>Explicit feedback &mdash; a rating, a star, a thumbs down &mdash; is unambiguous and almost absent, because most people never rate anything. Implicit feedback &mdash; a click, a watch, a purchase &mdash; is abundant and means considerably less than it appears to.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A click is not a like, and a non-click is not a dislike. Most of the empty cells mean &ldquo;never shown&rdquo;.</p><p class="know-why">Treating unobserved interactions as negative examples is the standard shortcut and it is wrong in a specific direction: the items a user did not interact with are overwhelmingly items they were never offered, and what they were offered was decided by the previous version of the recommender. The zeros in your matrix are a record of a past policy&#39;s choices, not of user preference &mdash; which makes this the Block 1 missing-data problem in its most consequential form. The data is missing not at random, and the mechanism generating the missingness is your own system.</p><p class="know-eg"><span class="know-eg-label">For example</span>A user has never watched a documentary. Two explanations: they dislike documentaries, or the homepage has never shown them one because an early model decided they were a comedy viewer and every subsequent model trained on the resulting history. The matrix looks identical in both cases and the correct action is opposite.</p></blockquote>
+  <h2>Cold start, in three flavours</h2>
+  <ul><li><strong>New user.</strong> No history, so collaborative filtering has nothing. Ask a few questions, use whatever context exists, or serve popular items and accept that the first session is weak.</li><li><strong>New item.</strong> Nobody has touched it, so it cannot be recommended, so nobody touches it. Content features are the only way out, and without them a catalogue addition is invisible indefinitely.</li><li><strong>New system.</strong> The one people forget. With no interaction history at all, the collaborative half cannot start, and the choices you make to bootstrap it become the data everything afterwards learns from.</li></ul>
+  <h2>Popularity bias, and the loop that produces it</h2>
+  <p>Popular items are recommended more, which gets them engaged with more, which makes them more popular. Nothing in the objective asks for this &mdash; it falls out of training on data the system generated. Left alone it narrows the catalogue in front of every user and concentrates engagement on a shrinking set of items, and the metrics improve throughout, because the metric is engagement and engagement is what is being concentrated.</p>
+  <figure class="diagram"><svg viewBox="0 0 520 156" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A cycle: model recommends, user sees a narrowed slate, engagement is logged, and the log trains the next model.">
+<rect x="16" y="20" width="108" height="38" rx="6" class="d-box"/><text x="70" y="44" class="d-label" text-anchor="middle">model</text>
+<path d="M124 39 L172 39" class="d-arrow"/>
+<rect x="176" y="20" width="128" height="38" rx="6" class="d-box"/><text x="240" y="38" class="d-label-sm" text-anchor="middle">what gets shown</text><text x="240" y="52" class="d-label-sm" text-anchor="middle">(a narrow slate)</text>
+<path d="M304 39 L352 39" class="d-arrow"/>
+<rect x="356" y="20" width="148" height="38" rx="6" class="d-box"/><text x="430" y="44" class="d-label-sm" text-anchor="middle">clicks on what was shown</text>
+<path d="M430 58 L430 88" class="d-arrow"/>
+<rect x="356" y="92" width="148" height="38" rx="6" class="d-box-bad"/><text x="430" y="116" class="d-label-sm" text-anchor="middle">becomes the training set</text>
+<path d="M356 111 L128 111" class="d-arrow"/>
+<rect x="16" y="92" width="108" height="38" rx="6" class="d-box-bad"/><text x="70" y="116" class="d-label-sm" text-anchor="middle">next model</text>
+<text x="150" y="146" class="d-label-sm">nothing outside the loop ever enters it</text>
+</svg><figcaption>The recommender chooses what is shown, what is shown determines what is engaged with, and engagement becomes the next training set. The loop closes with no adversary in it.</figcaption></figure>
+  <h2>Why the offline number does not predict the online one</h2>
+  <p>This is the part that surprises people arriving from ordinary supervised learning. You hold out interactions, train, and measure error against them &mdash; and the resulting figure is a famously poor predictor of what happens when the system is deployed. Three reasons, each sufficient on its own.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">You are ranking, not predicting</div><div><div class="roadmap-title">The metric is the wrong shape</div><div class="roadmap-desc">Nobody sees a predicted rating. They see the top ten. Error averaged over all held-out interactions is dominated by items that will never be shown, so it can improve while the top of the list gets worse. Ranking metrics &mdash; precision at k, normalised discounted cumulative gain &mdash; at least measure the part anyone experiences.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The held-out data came from the old policy</div><div><div class="roadmap-title">You cannot observe the counterfactual</div><div class="roadmap-desc">Your test set records what users did when shown the previous model&#39;s choices. A new model that would have recommended something better has no evidence for it in that data, because nobody was ever shown it. Offline evaluation systematically favours models that agree with the one already running.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Position and presentation dominate</div><div><div class="roadmap-title">The slot is doing the work</div><div class="roadmap-desc">The top slot gets clicked far more than the fifth regardless of what is in it. Without correcting for it you measure position, and conclude that the model improved when the layout changed.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">The clearest Goodhart case in the whole course</span><p>Engagement is chosen as the objective because it correlates with value: people spend time on things they like. Optimise it hard and the correlation is what breaks first. What reliably increases engagement is not what people value most, it is what is hardest to stop doing &mdash; and a system with enough capacity finds that distinction long before anyone reviewing a dashboard does.</p><p>The measurement lesson&#39;s remedy applies directly and is unglamorous: pair the target with guardrails chosen in advance and permitted to veto. Catalogue coverage, repeat-visit rate at a week, explicit negative feedback, the share of engagement concentrated in the top one per cent of items. A recommender improving on engagement while every one of those degrades is not improving, and only the guardrails can say so.</p></div>
+  <h2>What to do about the loop</h2>
+  <ul><li><strong>Log what was shown, not only what was clicked.</strong> Without the slate, you cannot tell an item that was rejected from one that was never offered, and every analysis afterwards is guesswork.</li><li><strong>Reserve a fraction of traffic for exploration.</strong> A small share of randomised or deliberately diverse recommendations is the only source of evidence about items the current policy would never show. It costs measurable engagement and it is what keeps the training data from being purely self-generated.</li><li><strong>Measure coverage as a first-class metric.</strong> What share of the catalogue was recommended to anyone this week? A number that falls steadily is the loop closing, visible before the engagement number turns.</li><li><strong>Test online.</strong> The offline number is for filtering obviously bad candidates. The decision belongs to an experiment with real traffic, and the deployment lesson&#39;s interleaved comparison is unusually well suited here, since each user acts as their own control.</li></ul>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../core-vocabulary/lsn-1787000000020-loops-in-training.html">Loops in Training: Flywheels and Model Collapse</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How a model improves itself across generations — and the way that process eats itself.</span></li><li><a href="../core-vocabulary/lsn-1787000000016-drift.html">Drift: Why Deployment Isn&#x27;t the End</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">The model didn't change. The world did.</span></li><li><a href="../engineering-practice/lsn-1787400000002-why-measurement-decides.html">Why Measurement Decides</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The only thing that corrects a harness, a recipe or a decision is a number that disagrees with it.</span></li><li><a href="../core-vocabulary/lsn-1787000000004-embeddings-and-retrieval.html">Embeddings, Vectors and Semantic Routing</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How a machine decides two things 'mean' something similar — and where that fails.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why is treating unobserved user-item pairs as negative examples problematic?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It creates severe class imbalance that biases the loss</div>
+      <div class="quiz-opt">Most unobserved pairs mean &#x27;never shown&#x27; rather than &#x27;not wanted&#x27;, and what was shown was chosen by the previous model — so the zeros record a past policy, not preference</div>
+      <div class="quiz-opt">It makes the matrix too sparse for factorisation to converge</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why does offline evaluation systematically favour models similar to the one in production?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Because the held-out split is drawn from the same distribution as training</div>
+      <div class="quiz-opt">Because the test data only records behaviour under the old policy&#x27;s choices, so a better recommendation nobody was ever shown has no supporting evidence</div>
+      <div class="quiz-opt">Because ranking metrics are biased towards popular items</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Catalogue coverage falls steadily while engagement rises. What is the most likely reading?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The model is getting better at identifying what users actually want</div>
+      <div class="quiz-opt">The feedback loop is narrowing what gets shown — engagement is concentrating rather than improving, and coverage is the guardrail detecting it</div>
+      <div class="quiz-opt">The catalogue has grown faster than the model has been retrained</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

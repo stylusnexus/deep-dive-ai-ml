@@ -2032,7 +2032,7 @@ LESSONS = [
      "Something outside the model's own opinion must decide what gets kept.",
      'Training loops that work all have a filter: a verifier, a human rater, a game result, a written constitution. Remove the filter and you are training on your own unfiltered output, which narrows the distribution a little more each generation.',
      "STaR generates many attempts and keeps only those reaching a verified correct answer — self-training that improves. Fine-tuning repeatedly on whatever your model produced last time, with nothing checking it, loses the rare and unusual cases first and converges toward the model's own habits."),
-    ("related", ["building-the-dataset", "distillation", "drift", "labels-and-holdouts"]),
+    ("related", ["building-the-dataset", "recommendation-systems", "drift", "labels-and-holdouts"]),
     ("links", [
       ("AI models collapse when trained on recursively generated data (Nature, 2024)", "https://www.nature.com/articles/s41586-024-07566-y",
        "The primary result. Successive generations lose the tails first, then the centre."),

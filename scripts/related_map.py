@@ -206,7 +206,7 @@ RELATED = {
                               "overfitting-and-underfitting", "is-the-difference-real"],
 
     # --- misc spine
-    "loops-in-training": ["building-the-dataset", "distillation",
+    "loops-in-training": ["building-the-dataset", "recommendation-systems",
                           "drift", "labels-and-holdouts"],
     "feedback-rlhf-and-humans": ["supervised-versus-reinforcement-tuning", "models-judging-models",
                                  "rubrics-and-blind-reads", "chain-of-thought-and-reasoning"],
@@ -218,7 +218,7 @@ RELATED = {
                 "why-measurement-decides", "agents-autonomy-and-danger"],
     "asking-the-database-properly": ["deterministic-first", "tabular-data-and-dtypes",
                                      "structured-output-json", "agentic-rag"],
-    "when-the-input-is-not-text": ["embeddings-and-retrieval", "attention-and-transformers",
+    "when-the-input-is-not-text": ["convolutions-and-computer-vision", "attention-and-transformers",
                                    "inside-an-llm", "building-a-rag-system"],
     "the-apprenticeship-problem": ["what-the-evidence-shows", "what-ai-makes-worse",
                                    "code-nobody-decided", "when-scaffolding-turns"],
@@ -237,6 +237,10 @@ RELATED = {
     "the-artifact-and-when-to-retrain": ["drift", "after-it-ships",
                                          "tracking-runs-and-automating-evals",
                                          "lora-qlora-and-full-fine-tuning"],
+    "convolutions-and-computer-vision": ["when-the-input-is-not-text", "attention-and-transformers",
+                                         "neural-networks-both-ways", "deterministic-first"],
+    "recommendation-systems": ["loops-in-training", "drift",
+                               "why-measurement-decides", "embeddings-and-retrieval"],
     "ai-assisted-analysis": ["what-ai-makes-worse", "deterministic-first",
                              "first-fifteen-minutes", "confounds-you-cannot-see"],
 }

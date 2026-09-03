@@ -441,3 +441,10 @@ On a performance drop
 On accumulated data
 The relation
 What it must not be
+Sliding it
+Stacking and pooling
+The hybrid
+The matrix
+You are ranking, not predicting
+The held-out data came from the old policy
+Position and presentation dominate

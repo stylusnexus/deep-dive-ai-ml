@@ -30,6 +30,18 @@
       "title": "Where the Money Goes",
       "file": "lsn-1788200000002-where-the-money-goes.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1788200000003",
+      "title": "Convolutions, and What a CNN Assumes",
+      "file": "lsn-1788200000003-convolutions-and-computer-vision.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788200000004",
+      "title": "Recommendation Systems, and the Loop They Sit In",
+      "file": "lsn-1788200000004-recommendation-systems.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -44,6 +56,16 @@
       "starred": false
     },
     "lsn-1788200000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788200000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788200000004": {
       "viewed": false,
       "completed": false,
       "starred": false

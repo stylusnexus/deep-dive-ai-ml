@@ -265,7 +265,6 @@ LESSONS = [
 
     ("callout", "matters", "Three habits that keep a measure honest for longer",
      "<p><strong>Pair every target with a guardrail.</strong> The primary metric may improve only if the guardrail does not degrade. Latency, cost and refusal rate are the usual ones, and the point is that they are chosen <em>before</em> you look, so they cannot be selected to flatter the result.</p><p><strong>Hold something back from optimisation.</strong> A slice of evaluation data nobody tunes against, opened rarely. The moment every set is being optimised against, you have no uncorrupted reading left.</p><p><strong>Re-derive the metric periodically.</strong> Ask whether it still correlates with the outcome it was chosen for, rather than assuming the correlation that justified it survived being targeted. It usually has not survived intact.</p>"),
-
     ("related", ["how-to-measure", "confounds-you-cannot-see", "is-the-difference-real", "where-evaluation-lives"]),
     ("links", [
       ('Let\u2019s Verify Step by Step (Lightman et al., 2023)', 'https://arxiv.org/abs/2305.20050',
@@ -1400,7 +1399,6 @@ git switch main && git pull            # back to the main line, now updated"""),
 
     ("h2", "What this costs, honestly"),
     ("p", "Every automated run of a model-backed evaluation is a bill and a wait, and a team that puts the full battery on every push will turn it off within a fortnight. Tier it by what a failure would cost you: the checks that need no model call are effectively free and should gate everything, a sampled set is affordable per pull request, and the full battery belongs on a schedule or a release. If the honest answer is that you cannot afford to run the evaluations often, that is worth knowing explicitly &mdash; it means the quality claims are being made on less evidence than the process implies."),
-
     ("related", ["how-to-measure", "eval-battery", "version-control-basics", "rungs-and-experiments"]),
     ("quiz", [
       ("What does an experiment tracker give you that careful notes do not?",
@@ -1492,7 +1490,6 @@ git switch main && git pull            # back to the main line, now updated"""),
       "<strong>The labels are not in yet.</strong> Retraining on the period you have labels for means training on the past you already handled, not the present that is failing.",
       "<strong>The failure is not the model.</strong> The most common cause of a metric moving is an upstream data change &mdash; a feed, a schema, a unit. Retraining teaches the model to accommodate a bug rather than fixing it.",
     ]),
-
     ("related", ["drift", "after-it-ships", "tracking-runs-and-automating-evals", "lora-qlora-and-full-fine-tuning"]),
     ("quiz", [
       ("Why is a commit hash insufficient to identify what a trained system will do?",

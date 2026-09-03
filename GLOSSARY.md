@@ -180,7 +180,7 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Scope inflation** — Publishing every scope up front so one stolen token reaches everything. Fixed by minimal initial scopes and elevation on demand.
 
-**Cold start** — Time before a system can serve any request: loading weights, allocating the cache, warming the runtime. Distinct from a cache miss, and fixed by keeping something warm rather than making it faster.
+**Cold start (serving)** — Time before a system can serve any request: loading weights, allocating the cache, warming the runtime. Distinct from a cache miss, and fixed by keeping something warm rather than making it faster.
 
 **Warm states** — Fully cold (nothing loaded), model-warm/cache-cold (the common case), fully warm (new tokens only), and evicted (was warm, silently is not any more).
 
@@ -985,6 +985,28 @@ to someone non-technical in two sentences, it hasn't landed yet.
 ---
 
 ## Block 9 · Electives
+
+**Convolution (kernel)** — A small window of weights placed over a patch of a grid, multiplied elementwise and summed to one number. Slid across the whole input with the weights unchanged, which is what makes it a convolution rather than a dense layer.
+
+**Weight sharing** — Using the same kernel weights at every position. Encodes the assumption that a feature worth detecting is worth detecting anywhere, and is most of why a CNN needs far fewer parameters than a dense layer on the same image.
+
+**Locality** — Combining only neighbouring inputs, so a unit sees a patch rather than the whole image. The second assumption a convolution builds in.
+
+**Receptive field** — How much of the original input one unit can see. Grows with depth, which is how a stack of small windows ends up responding to whole objects.
+
+**Inductive bias** — An assumption about the data built into the architecture rather than learned from examples. It buys data efficiency and costs generality, which is why CNNs beat vision transformers on small datasets and lose on large ones.
+
+**Collaborative filtering** — Recommending from the interaction matrix alone: people like you engaged with this. Knows nothing about the items, which lets it find affinities nobody could describe in advance, and leaves it helpless on anything new.
+
+**Content-based recommendation** — Recommending from features of the items themselves. Handles items nobody has touched yet, which is exactly where collaborative filtering has nothing to say.
+
+**Cold start (recommenders)** — Having no interaction history to recommend from: for a new user, a new item, or a whole new system. The third is the one people forget, and its bootstrap choices become the data everything afterwards learns from. Unrelated to the serving sense of the same phrase — context disambiguates, and the two are frequently in the same conversation.
+
+**Popularity bias** — Popular items being recommended more, engaged with more, and so becoming more popular. Nothing asks for it; it falls out of training on data the system generated.
+
+**Exploration traffic** — A reserved share of randomised or deliberately diverse recommendations. The only source of evidence about items the current policy would never show, and the thing that keeps training data from being purely self-generated.
+
+**Catalogue coverage** — What share of the catalogue was recommended to anyone in a period. A guardrail metric that detects the feedback loop closing before the engagement number turns.
 
 **Image tokens** — What a multimodal encoder turns a picture into: vectors occupying context positions, priced and truncated like text. Resolution is therefore a context-cost dial, not only a quality one.
 
