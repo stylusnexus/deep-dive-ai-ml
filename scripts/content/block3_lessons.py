@@ -328,6 +328,54 @@ LESSONS = [
     ]),
     ("callout", "matters", "The last one is a warning, not a use case", "Aggregative questions are usually the wrong shape for retrieval entirely. Counting, filtering and grouping are what a database does exactly and cheaply, and what a retrieval loop does approximately and expensively. If the question is really SQL, write SQL — the deterministic-first argument applies here as much as anywhere."),
 
+    ("h2", "The other answer to the same question"),
+    ("p", "The loop is one way to reach a fact that lives in two places. The other is to stop searching for the relationship each time and store it: extract the entities and the connections between them from the corpus ahead of time, and the multi-hop question becomes a traversal instead of a search. This is what people mean by a knowledge graph, and by <strong>GraphRAG</strong> when it is wired into retrieval."),
+
+    ("p", "Take the question above. Under retrieval it is two searches and a model holding the intermediate result in its head. Under a graph, <em>turbine</em> and <em>site</em> are nodes, <em>installed at</em> is an edge, the failure rate is a property, and the answer is a query that walks from one to the other &mdash; no iteration, no intermediate context, and the same answer every time."),
+
+    ("figure", "The same multi-hop question, two ways: iterate at query time, or extract the relationships once and traverse them.", '''<svg viewBox="0 0 520 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Agentic retrieval loops at query time; a knowledge graph extracts relationships at build time and traverses them.">
+<text x="8" y="16" class="d-label-sm">agentic loop &#8212; pays at query time</text>
+<rect x="8" y="24" width="74" height="30" rx="5" class="d-box"/><text x="45" y="43" class="d-label" text-anchor="middle">search</text>
+<path d="M82 39 L106 39" class="d-arrow"/>
+<rect x="110" y="24" width="74" height="30" rx="5" class="d-box"/><text x="147" y="43" class="d-label" text-anchor="middle">reason</text>
+<path d="M184 39 L208 39" class="d-arrow"/>
+<rect x="212" y="24" width="74" height="30" rx="5" class="d-box"/><text x="249" y="43" class="d-label" text-anchor="middle">search</text>
+<path d="M286 39 L310 39" class="d-arrow"/>
+<rect x="314" y="24" width="86" height="30" rx="5" class="d-box-good"/><text x="357" y="43" class="d-label" text-anchor="middle">answer</text>
+<text x="408" y="43" class="d-label-sm">turns, tokens,</text>
+<text x="408" y="55" class="d-label-sm">latency each ask</text>
+<text x="8" y="88" class="d-label-sm">knowledge graph &#8212; pays once, at build time</text>
+<rect x="8" y="96" width="112" height="30" rx="5" class="d-box"/><text x="64" y="115" class="d-label" text-anchor="middle">extract entities</text>
+<path d="M120 111 L144 111" class="d-arrow"/>
+<circle cx="168" cy="111" r="13" class="d-box"/><text x="168" y="115" class="d-label-sm" text-anchor="middle">trb</text>
+<path d="M181 111 L211 111" class="d-arrow"/>
+<circle cx="228" cy="111" r="13" class="d-box"/><text x="228" y="115" class="d-label-sm" text-anchor="middle">site</text>
+<text x="176" y="100" class="d-label-sm">installed at</text>
+<path d="M243 111 L300 111" class="d-arrow"/>
+<rect x="304" y="96" width="96" height="30" rx="5" class="d-box-good"/><text x="352" y="115" class="d-label" text-anchor="middle">traverse</text>
+<text x="408" y="115" class="d-label-sm">one query,</text>
+<text x="408" y="127" class="d-label-sm">same answer twice</text>
+</svg>'''),
+
+    ("terms", [
+      ("Where it genuinely wins", "Questions about relationships, not passages",
+       "Anything phrased as which, how many, who else, what connects &mdash; where the answer is a join across entities rather than a passage that contains it. Also anything you need to be repeatable, because a traversal is deterministic and a loop is not."),
+      ("What it costs", "An extraction pipeline, and its upkeep",
+       "Something has to read the corpus and decide what the entities and relationships are. That is usually a model, run over everything, once per corpus and again whenever the corpus changes."),
+      ("The failure that matters", "Extraction errors become structure",
+       "A retrieval mistake affects one answer. A wrong edge in the graph is reused by every question that walks through it, and it is invisible at query time because the traversal is working perfectly on bad data."),
+      ("How it is usually deployed", "Alongside vectors, not instead of them",
+       "The graph answers the structural part and the vector index still finds the prose. Most working systems are hybrids, in the same way that Block 3&#39;s ranking lesson ends up combining keyword and vector search rather than choosing."),
+    ]),
+
+    ("know",
+     "A knowledge graph moves the work from query time to build time. That is the entire trade.",
+     "The loop is cheap to build and expensive per question &mdash; every ask pays the turns, the tokens and the latency again, and gets a slightly different path each time. The graph is expensive to build and cheap per question, and gives the same answer twice. Neither is more advanced than the other; they bill differently, and which one is right depends on whether your questions are numerous and repetitive or few and varied.",
+     "A corpus of ten thousand maintenance reports, queried a hundred times a day with questions about which sites and which components. Extracting a graph once costs a few hours of model time and makes every one of those hundred queries a fast, repeatable traversal. The same corpus queried twice a week with open-ended questions does not repay the pipeline, and the loop is the right answer."),
+
+    ("callout", "pitfall", "The same discipline this lesson already applies to the loop",
+     "<p>Everything the lesson says about not making the loop the default applies here with more force, because a graph costs more up front. The majority of questions are single-hop and a well-built vector index answers them. Build the graph when you can point at a class of question you are actually asked, repeatedly, that needs relationships &mdash; not because the architecture is appealing.</p><p>And be suspicious of a graph built entirely by a model with nobody checking the edges. Extraction quality is the whole system: a graph with plausible wrong relationships is a machine for producing confident wrong answers, and it will be more convincing than a bad retrieval because it arrives with structure attached.</p>"),
+
     ("h2", "What the loop adds"),
     ("p", "Retrieve, reason about what came back, decide what is still missing, retrieve again. The model controls the query rather than receiving results of one it never saw."),
 

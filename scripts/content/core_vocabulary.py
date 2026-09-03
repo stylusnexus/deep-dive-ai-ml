@@ -2786,7 +2786,7 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
       ("Conversation history", "Re-sent every turn", "The default. Simple, and grows without limit until something manages it."),
       ("Compaction", "History replaced by a summary", "Preserves the thread at a fraction of the tokens. Lossy, and the loss is not visible."),
       ("External notes", "Written to a file, read back", "Survives resets because it was never in the context to begin with. The most durable option."),
-      ("Retrieved memory", "Facts stored, fetched when relevant", "Semantic search over past interactions. Powerful, and now you have a retrieval quality problem in addition to a memory one."),
+      ("Retrieved memory", "Facts stored, fetched when relevant", "Semantic search over past interactions &mdash; the same embeddings, vector index and ranking machinery Block 3 builds for documents, pointed at your own history instead of a corpus. Powerful, and it means every retrieval failure mode from that block is now a memory failure mode: the fact is stored, ranks below something else, and the agent reports not knowing it. Where the questions are about relationships between things rather than passages, the graph option from that block applies here too."),
     ]),
 
     ("h2", "Compaction, and what it costs"),

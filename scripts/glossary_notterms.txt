@@ -412,3 +412,7 @@ The mechanism — formally modelled
 The model decides
 A rule decides
 A person confirms
+Where it genuinely wins
+What it costs
+The failure that matters
+How it is usually deployed

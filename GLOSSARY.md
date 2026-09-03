@@ -588,6 +588,12 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 ## Block 3 · Retrieval and Agentic RAG
 
+**Knowledge graph** — Entities stored as nodes and their relationships as edges, extracted from a corpus ahead of time. Turns a multi-hop question from a search into a traversal: deterministic, repeatable, and answerable without the model holding intermediate results.
+
+**GraphRAG** — Retrieval that queries a knowledge graph rather than, or alongside, a vector index. It moves the work from query time to build time, which is the entire trade — cheap per question, expensive to build and to keep current.
+
+**Entity extraction** — The pipeline step that reads a corpus and decides what the entities and relationships are, usually with a model. Its quality is the whole system: a wrong edge is reused by every question that walks through it, and is invisible at query time because the traversal works perfectly on bad data.
+
 **Chunking** — Cutting documents into retrievable pieces before embedding them. Split on structure — headings, sections, functions — because a chunk that ends mid-sentence embeds badly and reads worse.
 
 **Chunk overlap** — Repeating a little of each chunk in its neighbour, usually 10–15%. Without it, a passage that straddles a boundary is lost by both sides.

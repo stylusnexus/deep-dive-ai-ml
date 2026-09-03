@@ -17,6 +17,11 @@
 - [ ] ☠ Index recall measured against exact search — the failure nobody checks
 - [ ] Small number of chunks in context; ranked, most relevant first or last, never buried mid-context
 - [ ] Empty-retrieval path defined — the model must not answer from memory when nothing came back
+- [ ] Before building a knowledge graph: a class of question you are *actually asked, repeatedly*,
+      whose answer is a relationship rather than a passage. It moves cost from query time to build
+      time, which only repays at volume
+- [ ] If a graph exists, its edges spot-checked by a human — extraction errors become structure,
+      get reused by every question that traverses them, and are invisible at query time
 
 ## Structured output
 - [ ] Highest rung available used: constrained decoding > schema > JSON mode > asking
