@@ -308,6 +308,18 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **External notes** — Memory an agent writes to a file and reads back. It survives resets because it was never in the context to begin with, which makes it the most durable kind.
 
+**Instruction file** — A markdown file at the project root, read by an agent at startup: `AGENTS.md` as the cross-tool convention, `CLAUDE.md` and others as tool-specific names. Authored rather than learned — it is static, and it is loaded in full whether or not the task needs it, so every line is spent from every session's context budget.
+
+**AGENTS.md** — The cross-tool instruction-file convention. Plain markdown, no required fields and no schema; used by 60,000+ open-source projects across 30+ tools, and stewarded by the Agentic AI Foundation under the Linux Foundation. Not a memory system: it does not learn or update itself.
+
+**Notes or memory directory** — Accumulated written memory, typically one fact per file, searched rather than read in full. The retrieval half of written memory, where the instruction file is the preloading half.
+
+**Linked notes (markdown wiki)** — A notes directory whose entries cross-reference each other, so recall is a few small reads along a thread rather than one large one. What keeps an accumulating store usable past a few dozen entries.
+
+**Task or state file** — The plan and statuses for the current piece of work. Distinct from accumulated memory in being disposable: it belongs to this run and is meant to be discarded after.
+
+**Memory staleness** — A written memory records what was true when written. Once wrong it is worse than absent, because absence prompts a look while a stale note prompts confident action on something that no longer exists. Date entries; verify anything naming a file or flag before acting.
+
 **Retrieved memory** — Facts stored and fetched when relevant, by semantic search over past interactions. Powerful, and it means you now have a retrieval quality problem as well.
 
 **Arithmetic intensity** — Operations performed per byte fetched from main memory. A property of the work rather than the chip, and the number that decides whether the arithmetic units are the constraint or are sitting idle waiting on memory.

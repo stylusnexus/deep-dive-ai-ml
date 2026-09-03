@@ -46,6 +46,11 @@
 - [ ] Tool results truncated or summarised before they enter context
 - [ ] History managed — window, compaction or structured memory
 - [ ] Long-session degradation understood; fresh context preferred to fighting a poisoned one
+- [ ] Anything written into an always-loaded instruction file (`AGENTS.md`, `CLAUDE.md`) earns its
+      place on *every* task, not just the one that prompted it — it is spent from every session's
+      budget. Facts needed occasionally belong in a searchable note instead
+- [ ] Written memory dated, and anything naming a file, flag or command verified before it is acted
+      on — a stale note is worse than a missing one, because absence prompts a look
 
 ## Production
 - [ ] ☠ Human approval before anything irreversible or outward-facing
@@ -59,3 +64,4 @@
 - Agent loops without progress → no external verifier; nothing tells it that it failed
 - Wrong tool chosen repeatedly → rewrite descriptions before upgrading the model
 - Works alone, fails in production → context differs; log what actually went in
+- Agent slightly worse at everything, no error anywhere → check the size of the always-loaded instruction file; it is distractors on every task it does not apply to

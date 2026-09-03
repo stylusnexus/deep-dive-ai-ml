@@ -2837,6 +2837,55 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
      "Context is working memory: fast, expensive and volatile. Constraints, decisions and state that matter should live in the system prompt or in a file, both of which survive compaction, resets and restarts.",
      "Two agents are given the same three-hour task. One holds its plan in conversation and, after compaction, rebuilds a slightly different plan from a summary. The other writes the plan to a file at the start and re-reads it after every reset. Only the second finishes the task it was actually given."),
 
+    ("h2", "What \u201cwrite it down\u201d looks like in practice"),
+    ("p", "The advice above is sound and uselessly abstract, so here is the shape the industry has actually converged on. A markdown file at the root of the project, read by the agent when it starts. <code>AGENTS.md</code> is the cross-tool version of this &mdash; plain markdown, no required fields, no frontmatter, no schema &mdash; and it is used by more than 60,000 open-source projects across some thirty tools including Codex, Cursor, Aider, Zed and Jules, stewarded by the Agentic AI Foundation under the Linux Foundation. <code>CLAUDE.md</code> is the same idea under a tool-specific name. Neither is a clever format; the value is entirely in the convention that a predictable file exists."),
+
+    ("p", "That file is not the only kind of written memory, and conflating the kinds is where most of the trouble starts:"),
+
+    ("terms", [
+      ("Instruction file", "Authored by you, loaded every session",
+       "<code>AGENTS.md</code>, <code>CLAUDE.md</code> and their equivalents. Static: it does not learn, it does not update itself, and it is read in full at startup whether or not this task needs it."),
+      ("Notes or memory directory", "Accumulated during work, fetched when relevant",
+       "One fact per file, written as the work happens. It grows, and unlike the instruction file nothing forces you to read all of it &mdash; you search it."),
+      ("Linked notes (markdown wiki)", "Files that point at each other",
+       "The same directory with cross-references between entries, so following a thread is a few small reads rather than one large one. This is what makes a growing store stay usable past a few dozen entries."),
+      ("Task or state file", "The current run, not the accumulated past",
+       "The plan and its statuses. Distinct from the two above because it is disposable: it belongs to this piece of work and is meant to be thrown away after."),
+    ]),
+
+    ("figure", "The same trade-off as preloading versus retrieval, one layer up: what is loaded every time versus what is fetched when needed.", '''<svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="An instruction file is loaded into every session; a notes directory is searched and only matching entries are loaded.">
+<rect x="8" y="20" width="150" height="46" rx="6" class="d-box"/>
+<text x="83" y="40" class="d-label-b" text-anchor="middle">instruction file</text>
+<text x="83" y="56" class="d-label-sm" text-anchor="middle">loaded in full, every time</text>
+<rect x="8" y="86" width="150" height="46" rx="6" class="d-box"/>
+<text x="83" y="106" class="d-label-b" text-anchor="middle">notes directory</text>
+<text x="83" y="122" class="d-label-sm" text-anchor="middle">searched, matches only</text>
+<path d="M158 43 L232 63" class="d-arrow"/>
+<path d="M158 109 L232 83" class="d-arrow"/>
+<rect x="236" y="50" width="120" height="46" rx="6" class="d-box-good"/>
+<text x="296" y="70" class="d-label-b" text-anchor="middle">context window</text>
+<text x="296" y="86" class="d-label-sm" text-anchor="middle">the scarce resource</text>
+<text x="368" y="62" class="d-label-sm">every line in the top box</text>
+<text x="368" y="76" class="d-label-sm">is a tax on every task,</text>
+<text x="368" y="90" class="d-label-sm">including the ones it</text>
+<text x="368" y="104" class="d-label-sm">has nothing to do with</text>
+</svg>'''),
+
+    ("know",
+     "An instruction file is preloading; a notes directory is retrieval. The choice between them is the trade this course has already made twice.",
+     "Everything in the always-loaded file is spent from the context budget on every session, whether or not this task needed it &mdash; the same economics as a cached prompt prefix, and the same economics as preloading a corpus instead of retrieving from it. Everything in the searchable directory costs nothing until something fetches it. So the question to ask of a fact is not whether it is useful, but whether it is useful <em>every single time</em>.",
+     "&ldquo;Run the tests with the project&#39;s task runner rather than invoking pytest directly&rdquo; applies to every task and belongs in the instruction file. &ldquo;The staging database was migrated to a new host in March and the old credentials still work but point at stale data&rdquo; applies to roughly one task a year and belongs in a note, where it costs nothing until the day someone searches for it."),
+
+    ("callout", "pitfall", "The instruction file that became the problem it was meant to solve",
+     "<p>These files grow, because adding a line is free and deleting one requires deciding it is no longer true. A file that has reached several hundred lines is read into every session, so on any task it does not apply to it is several hundred lines of distractor &mdash; and this course has already measured what distractors do, which is cost more than empty space. The failure is quiet: nothing errors, the agent just does slightly worse at everything, for a reason that never appears in a log.</p><p>Prune it the way you would prune a test suite. If a line has not been load-bearing in months, it is not documentation, it is ballast.</p>"),
+
+    ("know",
+     "A written memory records what was true when it was written, and nothing tells the agent it has expired.",
+     "A note naming a file, a flag or a command is a claim about a codebase that keeps moving. Once it is wrong it is worse than absent, because absence prompts a look and a stale note prompts confident action on something that no longer exists. This is the same failure as silent compaction loss, arriving from the opposite direction &mdash; there the fact vanished, here it persists past its truth.",
+     "A note says the deployment flag is <code>--legacy-build</code>. The flag was renamed four months ago. An agent reading that note does not check, passes the old flag, gets an error it cannot connect to the note, and starts debugging the build system. Date every entry, and verify anything that names a specific file or flag before acting on it."),
+
+    ("p", "Markdown is doing real work here rather than being an arbitrary choice. It is read natively by both the model and the person, so there is no format that one of them has to be taught. It diffs in version control, which means changes to an agent&#39;s instructions get reviewed like any other change rather than accumulating unexamined. It needs no parser and therefore cannot fail to parse. And it degrades gracefully: a tool that ignores the frontmatter, the headings or the cross-references still reads the prose underneath and gets most of the value."),
+
     ("h2", "Context length is a ceiling, not a target"),
     ("p", "A larger window is frequently sold as a solution to everything above. It is not, for three separate reasons that compound."),
     ("ul", [
@@ -2853,6 +2902,8 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
     ("links", [
       ("Effective context engineering for AI agents", "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
        "Compaction, structured note-taking and sub-agent isolation, with the attention-budget framing behind this lesson."),
+      ("AGENTS.md", "https://agents.md/",
+       "The cross-tool instruction-file convention: plain markdown, no required fields, stewarded by the Agentic AI Foundation under the Linux Foundation."),
       ("Lost in the Middle (Liu et al., 2023)", "https://arxiv.org/abs/2307.03172",
        "The evidence for why the middle of a long session is where information goes to be ignored."),
     ]),

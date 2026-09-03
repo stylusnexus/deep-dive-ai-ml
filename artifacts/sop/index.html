@@ -320,17 +320,22 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="llm-engineering-29"><input type="checkbox" data-id="llm-engineering-29"><span class="tick"></span><span class="body">Tool results truncated or summarised before they enter context</span></label>
 <label class="item" id="llm-engineering-30"><input type="checkbox" data-id="llm-engineering-30"><span class="tick"></span><span class="body">History managed — window, compaction or structured memory</span></label>
 <label class="item" id="llm-engineering-31"><input type="checkbox" data-id="llm-engineering-31"><span class="tick"></span><span class="body">Long-session degradation understood; fresh context preferred to fighting a poisoned one</span></label>
+<label class="item" id="llm-engineering-32"><input type="checkbox" data-id="llm-engineering-32"><span class="tick"></span><span class="body">Anything written into an always-loaded instruction file (<code>AGENTS.md</code>, <code>CLAUDE.md</code>) earns its</span></label>
+<p>place on <em>every</em> task, not just the one that prompted it — it is spent from every session&#x27;s budget. Facts needed occasionally belong in a searchable note instead</p>
+<label class="item" id="llm-engineering-33"><input type="checkbox" data-id="llm-engineering-33"><span class="tick"></span><span class="body">Written memory dated, and anything naming a file, flag or command verified before it is acted</span></label>
+<p>on — a stale note is worse than a missing one, because absence prompts a look</p>
 <h2>Production</h2>
-<label class="item killer" id="llm-engineering-32"><input type="checkbox" data-id="llm-engineering-32"><span class="tick"></span><span class="body"><b class=skull>☠</b> Human approval before anything irreversible or outward-facing</span></label>
-<label class="item" id="llm-engineering-33"><input type="checkbox" data-id="llm-engineering-33"><span class="tick"></span><span class="body">Full action log — you cannot investigate what you didn&#x27;t record</span></label>
-<label class="item" id="llm-engineering-34"><input type="checkbox" data-id="llm-engineering-34"><span class="tick"></span><span class="body">Model versions pinned, not floating on an alias</span></label>
-<label class="item" id="llm-engineering-35"><input type="checkbox" data-id="llm-engineering-35"><span class="tick"></span><span class="body">Eval set re-run on a schedule, not only when something looks wrong</span></label>
-<label class="item" id="llm-engineering-36"><input type="checkbox" data-id="llm-engineering-36"><span class="tick"></span><span class="body">Rate limits on every paid endpoint</span></label>
-<label class="item" id="llm-engineering-37"><input type="checkbox" data-id="llm-engineering-37"><span class="tick"></span><span class="body">Unattended runs: narrow job, scoped access, safe stopping points, someone reachable</span></label>
+<label class="item killer" id="llm-engineering-34"><input type="checkbox" data-id="llm-engineering-34"><span class="tick"></span><span class="body"><b class=skull>☠</b> Human approval before anything irreversible or outward-facing</span></label>
+<label class="item" id="llm-engineering-35"><input type="checkbox" data-id="llm-engineering-35"><span class="tick"></span><span class="body">Full action log — you cannot investigate what you didn&#x27;t record</span></label>
+<label class="item" id="llm-engineering-36"><input type="checkbox" data-id="llm-engineering-36"><span class="tick"></span><span class="body">Model versions pinned, not floating on an alias</span></label>
+<label class="item" id="llm-engineering-37"><input type="checkbox" data-id="llm-engineering-37"><span class="tick"></span><span class="body">Eval set re-run on a schedule, not only when something looks wrong</span></label>
+<label class="item" id="llm-engineering-38"><input type="checkbox" data-id="llm-engineering-38"><span class="tick"></span><span class="body">Rate limits on every paid endpoint</span></label>
+<label class="item" id="llm-engineering-39"><input type="checkbox" data-id="llm-engineering-39"><span class="tick"></span><span class="body">Unattended runs: narrow job, scoped access, safe stopping points, someone reachable</span></label>
 <h2>Smells</h2>
 <p class="bullet">Agent loops without progress → no external verifier; nothing tells it that it failed</p>
 <p class="bullet">Wrong tool chosen repeatedly → rewrite descriptions before upgrading the model</p>
 <p class="bullet">Works alone, fails in production → context differs; log what actually went in</p>
+<p class="bullet">Agent slightly worse at everything, no error anywhere → check the size of the always-loaded instruction file; it is distractors on every task it does not apply to</p>
 </section><section class="sop" id="sop-tuning" hidden>
 <div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>Tuning a working agent loop</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div></div>
 <p><strong>Different moment from <a class="jump" data-to="llm-engineering"><code>llm-engineering.md</code> &rarr;</a>.</strong> That one asks <em>am I building this correctly?</em> This one asks <em>this works — how do I make it cheaper and more reliable without breaking it?</em></p>
