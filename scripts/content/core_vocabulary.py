@@ -2691,6 +2691,36 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
      "Retrieval, prefill, decode, tool round trips and queueing all live inside one end-to-end number. Teams routinely spend weeks on model selection when most of their latency was a reranker scoring 500 candidates.",
      "A 6-second p95 broke down as: 2.4s retrieval, 1.9s prefill, 0.9s decode, 0.8s in two sequential tool calls. The model accounted for under a sixth of it. Capping the rerank candidate set at 50 removed two seconds in a one-line change."),
 
+    ("h2", "Speculative decoding, which attacks the decode bound directly"),
+    ("p", "Decode is slow for a structural reason this lesson has already established: producing one token means reading the whole model out of memory, and the arithmetic done with those bytes is trivial by comparison. You are paying for byte movement, and one token is all you get for it. Speculative decoding is the trick that gets more than one."),
+
+    ("p", "A small, cheap draft model runs ahead and proposes the next few tokens. The real model then <em>checks all of them in a single forward pass</em> — because verifying a handful of tokens is one pass over the weights, in the same way a prefill is, not one pass per token. Where the draft was right, you keep the tokens and have got several for roughly the price of one. Where it was wrong, you discard from the first mismatch onwards and have lost only the draft model's cheap work."),
+
+    ("figure", "The draft proposes several tokens; one pass of the target model verifies them all, and the run is kept up to the first disagreement.", '''<svg viewBox="0 0 520 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A draft model proposes four tokens; the target model verifies them in one pass and accepts the first three.">
+<text x="8" y="16" class="d-label-sm">draft model proposes (cheap, one small pass each)</text>
+<rect x="8" y="24" width="86" height="30" rx="5" class="d-box"/><text x="51" y="43" class="d-label" text-anchor="middle">the</text>
+<rect x="100" y="24" width="86" height="30" rx="5" class="d-box"/><text x="143" y="43" class="d-label" text-anchor="middle">cat</text>
+<rect x="192" y="24" width="86" height="30" rx="5" class="d-box"/><text x="235" y="43" class="d-label" text-anchor="middle">sat</text>
+<rect x="284" y="24" width="86" height="30" rx="5" class="d-box"/><text x="327" y="43" class="d-label" text-anchor="middle">down</text>
+<text x="8" y="78" class="d-label-sm">target model verifies all four in ONE pass</text>
+<rect x="8" y="86" width="86" height="30" rx="5" class="d-box-good"/><text x="51" y="105" class="d-label" text-anchor="middle">accept</text>
+<rect x="100" y="86" width="86" height="30" rx="5" class="d-box-good"/><text x="143" y="105" class="d-label" text-anchor="middle">accept</text>
+<rect x="192" y="86" width="86" height="30" rx="5" class="d-box-good"/><text x="235" y="105" class="d-label" text-anchor="middle">accept</text>
+<rect x="284" y="86" width="86" height="30" rx="5" class="d-box-bad"/><text x="327" y="105" class="d-label" text-anchor="middle">reject</text>
+<text x="382" y="105" class="d-label-sm">3 tokens for</text>
+<text x="382" y="118" class="d-label-sm">one pass&#39;s cost</text>
+</svg>'''),
+
+    ("know",
+     "Speculative decoding changes when tokens arrive, not what they are.",
+     "With the standard acceptance rule the output is drawn from exactly the target model&#39;s distribution — the draft model only proposes, and every proposal is checked against the real model before it survives. This is what separates it from every other technique in this course that makes inference cheaper. Quantisation, pruning and distillation all trade some quality for speed and therefore oblige you to re-evaluate. Speculative decoding does not, so it needs no quality re-check.",
+     "Leviathan and colleagues, who introduced it, report a 2&ndash;3&times; acceleration on T5-XXL &ldquo;without changing the distribution&rdquo;. If a vendor quotes you a speculative-decoding speedup, the right question is not whether the answers got worse — they did not — but which batch size the figure was measured at."),
+
+    ("callout", "pitfall", "It buys latency with spare compute, so a busy server has none to sell",
+     "<p>Speculation does more arithmetic, not less: you run the draft model as well, and you verify tokens you may throw away. At batch size one that is free, because the hardware was idle waiting on memory anyway — this is the memory-bound decode the lesson opened with, and the win is large. Under heavy batching the machine is already compute-saturated, the spare capacity speculation was exploiting has been sold to the other requests, and the extra work can leave throughput flat or slightly worse.</p><p>The rule of thumb: speculation is a <em>latency</em> technique for small batches, batching is a <em>throughput</em> technique for large ones, and they compete for the same headroom. Which of the two you want depends on whether one user is waiting or a thousand are.</p>"),
+
+    ("p", "How well it works depends entirely on how often the draft agrees with the target, so predictable text speeds up more than genuinely surprising text. That also explains the cheapest variant: rather than running a second model, draft by copying from the prompt itself. For work with a lot of quoting — editing a document, summarising with quotations, rewriting code in place — the next tokens are frequently already sitting in the context, and this costs almost nothing to attempt. You will not find any of this as an API parameter; it is a property of the serving stack, configured by whoever runs the model."),
+
     ("h2", "Concurrency, which changes the shape of everything"),
     ("p", "Everything above describes one request in isolation. Under concurrent load the picture changes, and the change is not proportional."),
     ("terms", [
@@ -2711,6 +2741,10 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
     ("links", [
       ("Prompt caching", "https://docs.claude.com/en/docs/build-with-claude/prompt-caching",
        "The mechanics, including what invalidates a cached prefix and how the pricing differs for writes and reads."),
+      ("Fast Inference from Transformers via Speculative Decoding", "https://arxiv.org/abs/2211.17192",
+       "Leviathan, Kalman and Matias. The original method and the proof that the output distribution is unchanged."),
+      ("Speculative decoding in vLLM", "https://docs.vllm.ai/en/latest/features/speculative_decoding/",
+       "The serving-side view: draft models, n-gram prompt lookup, and where the speedup goes at higher batch sizes."),
       ("vLLM documentation", "https://docs.vllm.ai",
        "Continuous batching and prefix caching from the serving side — the engine-level versions of the levers above."),
     ]),

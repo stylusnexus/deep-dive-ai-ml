@@ -49,6 +49,9 @@ Run top to bottom. Most people fail at step 3 and spend their time on step 2.
 - [ ] Time-to-first-token measured with a *realistic* prompt length, since prefill dominates it
 - [ ] Below ~10 tok/s interactive use is unpleasant; batch work tolerates much less
 - [ ] Prefix-KV reuse available if this is a multi-turn agent loop — usually the biggest lever
+- [ ] Speculative decoding considered if one user is waiting rather than a thousand — it spends
+      spare compute to cut latency, so it wins at low concurrency and does nothing for a server
+      already compute-saturated by batching. It costs no quality: the output distribution is unchanged
 
 ## 4 · Before concluding "it cannot run here"
 - [ ] Which artifact did you actually test? A load failure in one build format is not a

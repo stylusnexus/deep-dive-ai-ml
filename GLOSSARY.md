@@ -22,6 +22,14 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Prefill / decode** — Processing the prompt (parallel, fast) versus generating the answer one token at a time (sequential, slower). Quoted tok/s almost always means decode.
 
+**Speculative decoding** — A small draft model proposes several tokens; the target model verifies them all in a single forward pass and keeps the run up to the first disagreement. With the standard acceptance rule the output distribution is identical to the target model's, so it costs no quality — unlike quantisation, pruning or distillation. It buys latency by spending spare compute, so the win is large at batch size one and small on a compute-saturated server.
+
+**Draft model** — The small, cheap model that proposes tokens in speculative decoding. It never decides anything: every proposal is checked against the target model before it survives.
+
+**Acceptance rate** — How often the draft model's proposals survive verification. It sets the speedup, which is why predictable text speculates well and genuinely surprising text does not.
+
+**Prompt lookup / n-gram speculation** — Speculative decoding that drafts by copying from the prompt instead of running a second model. Nearly free, and effective on work with heavy quoting — editing, summarising with quotations, rewriting code in place.
+
 **Weights / parameters** — The numbers that constitute a trained model. "7B" means seven billion of them.
 
 **Quantization** — Storing each weight in fewer bits (4, 5, 8) instead of 16. Shrinks and speeds up the model at a small cost in precision.
