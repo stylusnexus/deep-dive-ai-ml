@@ -8,6 +8,9 @@ statistics-for-ai and aigp-exam-prep.
 import importlib.util
 import re
 import xml.dom.minidom
+
+# Cyrillic and CJK never appear intentionally in this course; Greek (Σ, √) does.
+STRAY_SCRIPT = re.compile(r"[\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF]")
 import html
 import json
 import pathlib
@@ -55,6 +58,11 @@ CALLOUT_VARIANTS = set(re.findall(r"\.callout\.([a-z]+)", STYLE))
 
 def render_block(b):
     kind = b[0]
+    stray = STRAY_SCRIPT.findall(" ".join(str(x) for x in b[1:]))
+    if stray:
+        raise AssertionError(
+            f"stray non-Latin characters {sorted(set(stray))} in a {kind} block — "
+            f"almost always a slip; Greek maths symbols are allowed, Cyrillic/CJK are not")
     # prose blocks are emitted as raw HTML, so a stray backtick renders literally
     if kind in ("p", "h2", "h3"):
         assert "`" not in b[1], f"backtick in prose (use <code>): {b[1][:60]}"

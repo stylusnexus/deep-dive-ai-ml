@@ -470,7 +470,21 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Multi-head attention (MHA)** — The original form, where every head keeps its own keys and values. Most expressive, and the largest KV cache.
 
+**Multi-query attention (MQA)** — Every query head sharing a single key-value head. The smallest possible cache and the largest quality concession of the three, which is why the grouped compromise is more common.
+
 **Grouped-query attention (GQA)** — Heads sharing key and value projections in groups. The current default, because it cuts the KV cache substantially at little cost in quality.
+
+**Scaled dot-product attention** — The operation's full name. Scores are divided by the square root of the key dimension before the softmax; without that division the scores grow with dimension, the softmax saturates and gradients vanish.
+
+**Softmax (in attention)** — What turns raw scores into weights that are positive and sum to one, so attention distributes a fixed budget rather than adding more of it.
+
+**FlashAttention** — An exact attention algorithm that never materialises the n-by-n score matrix in main memory, working in tiles inside fast on-chip memory and recomputing rather than storing. Same numbers as standard attention; the speed is entirely from moving fewer bytes, which is why it needs no quality re-check when the other variants do.
+
+**Self-attention vs cross-attention** — In self-attention the queries, keys and values come from one sequence. In cross-attention the queries come from one and the keys and values from another, which is how a text model reads an image encoder's output. Identical arithmetic, different sources.
+
+**Linear attention** — Approximating the softmax so the computation reorders into something linear in sequence length. Trades exactness for scaling, unlike FlashAttention which trades nothing.
+
+**State-space model (SSM)** — An alternative to attention carrying a fixed-size recurrent state, designed so training still parallelises — the thing older recurrent architectures could not do. Mamba is the best-known.
 
 **Causal masking** — Preventing a token from attending to tokens after it. Not a variant but a requirement: during generation the future does not exist yet.
 
