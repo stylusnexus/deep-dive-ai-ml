@@ -15,7 +15,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "artifacts" / "sop"
 
 ORDER = ["README", "training", "deep-learning", "fine-tuning", "generative-ai",
-         "llm-engineering", "tuning", "measurement", "mcp", "hardware", "incident"]
+         "llm-engineering", "tuning", "measurement", "judging", "security",
+         "mcp", "hardware", "incident"]
 
 E = html.escape
 

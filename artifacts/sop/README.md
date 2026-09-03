@@ -71,6 +71,7 @@ you reach for when something is already wrong. Don't mix it into normal flow.
 - [ ] Guardrail metric chosen before looking at results
 - [ ] Process recorded, not only outcome — you can tell *never tried* from *tried and failed*
 - [ ] → full procedure in [`measurement.md`](measurement.md)
+- [ ] Scoring something with no right answer, or comparing two runs? → [`judging.md`](judging.md)
 
 **GATE — an unvalidated instrument makes every later number noise.**
 
@@ -87,7 +88,7 @@ you reach for when something is already wrong. Don't mix it into normal flow.
 - [ ] ☠ Threshold chosen deliberately, with its error trade written down
 - [ ] ☠ Failure path defined — what happens when it's wrong, who hears about it
 - [ ] ☠ Human approval gate on anything irreversible or outward-facing
-- [ ] Adversarial pass done: injection, tool abuse, over-permission → [`llm-engineering.md`](llm-engineering.md)
+- [ ] ☠ Adversarial pass done against the whole system, not a component → [`security.md`](security.md)
 - [ ] Credentials least-privilege and scoped; production connected last
 - [ ] Cost at 100× computed; rate limits in place on anything paid
 - [ ] Monitoring live: input distributions, prediction distribution, data quality
@@ -110,4 +111,6 @@ you reach for when something is already wrong. Don't mix it into normal flow.
 | [`hardware.md`](hardware.md) | Deciding whether a model can run on the machine in front of you |
 | [`mcp.md`](mcp.md) | Connecting someone else's MCP server, or shipping your own |
 | [`measurement.md`](measurement.md) | Any time you need a number you can trust |
+| [`judging.md`](judging.md) | Scoring open-ended output, or deciding whether a number really moved |
+| [`security.md`](security.md) | Before an agent touches anything real |
 | [`incident.md`](incident.md) | **Non-normal.** Something is already wrong |
