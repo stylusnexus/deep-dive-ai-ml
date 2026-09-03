@@ -64,6 +64,9 @@ LESSONS = [
     ("callout", "pitfall", "Firms report more gain than their own revenue shows",
      "<p>A consistent finding is that firms report larger productivity gains from AI than their contemporaneous revenue and employment changes imply. The generous reading is a timing lag — output and quality improvements arriving later than the adoption. The ungenerous reading is that self-reported gains from a technology everyone is invested in believing in are exactly the measurement this course would tell you not to trust. Both readings are live, and the data does not yet separate them.</p>"),
 
+    ("callout", "warning", "Exposure scores are a proxy, and they miss things",
+     "<p>Several figures above are reported for &ldquo;highly AI-exposed occupations&rdquo;, and exposure is an estimate of how much of a job's task content a model could plausibly do. It is a reasonable instrument and it is not the thing itself. It cannot see how a particular employer actually organises the work, which parts of a role are tacit, or which tasks turn out to matter more than their share of the hours suggests — and the Shih conversation gives a section to precisely this gap. Treat exposure as a bucket label rather than a measurement of any individual job.</p>"),
+
     ("h2", "How much weight this evidence holds"),
     ("p", "Not as much as its precision suggests, and the statistics lesson in the evaluation block is the reason. Many of these figures are single studies of an early deployment, measuring an unstable target during a period of rapid change. A relative decline of 9% and one of 16% are not necessarily in conflict — they are different populations, methods and windows. Treat them as a direction with wide error bars rather than as constants."),
 
@@ -135,25 +138,61 @@ LESSONS = [
 <text x="14" y="182" class="d-label-sm">a policy. It was a by-product.</text>
 </svg>'''),
 
-    ("h2", "Why giving people the tools is necessary and not sufficient"),
-    ("p", "Shih's remedy — put AI in the hands of the people being displaced — is clearly right as far as it goes, and the evidence supports it: the largest measured gains went to the least experienced. Someone entering work without these tools is at a straightforward disadvantage."),
+    ("h2", "Where Shih already agrees, which I initially got wrong"),
+    ("p", "An earlier draft of this chapter set up a disagreement that does not exist. It rendered her remedy as &ldquo;give people AI&rdquo; and then argued that tools alone cannot rebuild an apprenticeship. Her own material is more careful than that: alongside the tooling, the conversation devotes a section to <em>why beginners should not use AI to learn something new</em>."),
 
-    ("p", "But what the junior loses is not access. It is the corrected-mistake loop. A person handed a capable tool and no one to tell them when its output is wrong learns to produce faster, not to judge better — and the 19-point accuracy penalty says that is precisely the failure mode past the frontier. Tools raise the floor of output. They do not by themselves build the thing that was being built accidentally, and I have not seen a convincing account of what replaces it."),
+    ("p", "Her formulation is sharper than the one this chapter had. On beginners learning something new, whether creative writing or programming, her position is that you should not use AI, because &ldquo;it's through that struggle and making mistakes and getting that feedback and working through and correcting those mistakes that we build the foundation that we need to become experts. And we need expertise in order to critique AI's outputs.&rdquo; On why that ordering cannot be skipped: before you have that expertise, &ldquo;you really are in no position to use AI, because you're delegating to something that you can't judge.&rdquo;"),
+
+    ("p", "That last clause is the whole argument in nine words, and it is hers rather than mine. It also matters as corroboration: someone who deployed this technology at scale at two large companies, with the hiring data in front of her, arrives at the position that the tool which most raises a novice's output is the wrong thing to hand them while they are acquiring judgement."),
+
+    ("p", "What survives of my original point is narrower and I think still stands. If beginners should not learn with the tool, and the junior tasks that used to teach them are the ones being automated, then somebody has to deliberately arrange the corrected-mistake loop that used to be a by-product of employing them. Access to tools does not do it. Neither does advice not to use them. Someone has to pay for work whose output is worse than the alternative, on purpose, because the point of it was never the output."),
 
     ("callout", "insight", "The most valuable thing an organisation can do is probably unfashionable",
      "<p>If this argument holds, the highest-leverage move available to an employer is to keep hiring juniors and deliberately spend senior time correcting them, while accepting that the same output could be produced faster another way. That is a cost with no visible return in the quarter it is paid, which is precisely why it will not happen by default and why the shortfall shows up years later as an absence nobody can attribute.</p>"),
 
-    ("h2", "The case against everything I have just said"),
-    ("p", "This argument has been made before, repeatedly, and it was wrong. Compilers were going to end programming and produced more programmers. Spreadsheets were going to end accounting; the accounting profession grew. Computer-aided design did not empty drawing offices. In each case the apprenticeship did not vanish, it reformed around the new tool, and the people predicting otherwise were reasoning exactly as I have — from the tasks being automated to the skills that would no longer be learned."),
+    ("h2", "How far the evidence carries this, and where it stops"),
+    ("p", "Balance for its own sake is a distortion too, so it is worth being precise about which parts of this argument the data supports and which are extrapolation. They are not the same, and treating them alike would be its own kind of dishonesty."),
 
     ("terms", [
-      ("The historical prior is against me", "And it is a strong prior",
-       "Every previous automation of a professional task produced a new layer of work above it, and the entry point moved rather than closing. There is no reason to be confident this is the exception, and considerable reason for humility about it."),
-      ("The evidence is thin and early", "Single studies, unstable target",
-       "A 9% relative decline in one dataset and 16% in another are a direction, not a law, measured during a period of rapid change. This course's own statistics lesson says what to do with a handful of studies at small effect sizes, and it does not say build a worldview on them."),
-      ("The mechanism may be right and the magnitude wrong", "The most likely outcome",
-       "It is entirely possible that the apprenticeship is genuinely disrupted, reforms within a decade around reviewing and directing rather than producing, and the disruption is a rough transition rather than a structural break. That would make this chapter partly right in a way that is not very useful."),
+      ("The compositional claim — well supported",
+       "Four independent lines, one direction",
+       "Junior employment down 9% in adopting firms and 16% in exposed occupations with seniors unaffected; graduate unemployment up 1.6 points in three years; a quarter of employers reporting reduced entry-level task need; UK firms with high exposure slowing junior hiring specifically. Different countries, methods and instruments, pointing the same way. Strong enough to state as a finding."),
+      ("The frontier asymmetry — well supported",
+       "And it is the load-bearing observation",
+       "Largest gains for the least experienced inside the model's competence; roughly 19 points <em>less</em> accurate outside it. Two measurements that only make sense together, and together they say the scarce capability is knowing where the boundary sits."),
+      ("The mechanism — formally modelled",
+       "And the model says something sharper than this chapter did",
+       "Ide's task-based overlapping-generations model of novice-expert knowledge transmission (CEPR DP20940) finds that improvements in entry-level automation raise output on adoption but can reduce growth and welfare <em>even without reducing entry-level employment</em>. The damage does not require job losses; it requires novices being reallocated away from the most productive experts, which slows the diffusion of best practice."),
+      ("Magnitude and endpoint — unsupported",
+       "The confident do not know either",
+       "How large, how fast and where it settles are not in this data. The productivity figures include a forecast and a self-report gap the research itself flags. Anyone quoting a number for 2030 is guessing, and this chapter does not have one."),
     ]),
+
+    ("know",
+     "The entry point is narrowing while the total holds. That much is a finding; what it means for 2030 is not.",
+     "The strongest honest position is narrower than the argument on either side. It is not that AI is destroying employment — the aggregate says otherwise, in two countries, clearly. It is not that nothing is happening — the junior-senior split says otherwise, from four directions. It is that the composition is shifting against the entry point, that the entry point was also the training mechanism, and that nobody has yet shown what replaces it.",
+     "You can act on that without knowing the magnitude, which is fortunate, because the magnitude is the part nobody has."),
+
+    ("h2", "The refinement that makes the argument harder to dismiss"),
+    ("p", "The chapter as first drafted argued from junior job losses, and that turns out to be the weaker version. Ide's model assumes that joint production is necessary for skill acquisition — a novice executing routine tasks alongside an expert gains direct insight into how that expert turns inputs into output, &ldquo;unconsciously learning the rules of the art&rdquo;. On that account the transmission depends on <em>who you work beside</em>, not merely on being employed."),
+
+    ("p", "Which means the reassuring statistic is not reassuring. If junior headcount holds steady but the work is restructured so novices no longer sit alongside the best practitioners, the mechanism breaks anyway and the employment figures show nothing at all. This is the same reading problem as the aggregate-versus-composition finding, one level deeper: a number can hold while the thing it was standing in for disappears underneath it."),
+
+    ("callout", "insight", "The design of the automation decides the sign",
+     "<p>The same model contains the hopeful half, and it is actionable rather than consoling. Technological improvements that <em>increase</em> the number of novices learning from top experts strengthen transmission and raise growth. So this is not an argument that automation harms learning — it is an argument that automation which reallocates novices away from the best experts does, and that automation which brings more of them into contact with the best does the opposite. That is a design decision somebody makes, usually without knowing they are making it.</p>"),
+
+    ("p", "The evidence outside economics points the same way. Beane's ethnography of robotic surgery (<em>Administrative Science Quarterly</em>, 2019) documents surgical residents losing the hands-on participation that built skill, and resorting to informal workarounds he calls shadow learning to get it back. That is the mechanism observed directly, in a domain with nothing to do with software, where the stakes make it very hard to argue the apprenticeship was ornamental."),
+
+    ("h2", "The strongest objection, which does not go away"),
+    ("p", "Every previous automation of professional work produced exactly this prediction and it was wrong each time. Compilers were going to end programming and produced more programmers. Spreadsheets were going to gut accounting and the profession grew. Computer-aided design did not empty the drawing offices. In each case the apprenticeship reformed around the tool rather than disappearing, and those forecasting otherwise reasoned precisely as this chapter does — from the tasks being automated to the skills that would stop being learned."),
+
+    ("p", "I take that seriously and it does not move me all the way, for one specific reason. Those tools automated the <em>tedious</em> part of junior work and left the judgement-forming part behind: a compiler removed the manual translation and left you debugging your own logic. What is being automated now is the whole task, including the part where you were wrong and found out. That is a difference in kind rather than degree, and it is the only reason I weight the present case above the historical prior rather than below it."),
+
+    ("callout", "matters", "Unemployment does not have to rise much for the harm to be real",
+     "<p>This defuses the most common dismissal. Aggregate unemployment barely moved through the manufacturing shock in the American rust belt, and the damage to the places and cohorts absorbing it was severe and durable. A national figure that stays flat is entirely compatible with one cohort — here, people entering work now — bearing a concentrated cost. &ldquo;The unemployment rate is fine&rdquo; is not the reassurance it sounds like.</p>"),
+
+    ("callout", "insight", "The organisational version, which is speculation and marked as such",
+     "<p>A harder possibility raised in the same conversation: that the way a person conceives of what a job should entail may not be the optimal way to construct a job, and that this could apply at the level of a whole organisation. Marketing, sales, customer service, finance, HR are human-designed constructs of fairly recent vintage. If general methods with enough compute tend to beat hand-crafted structure — the argument this course already accepts about hand-engineered features in a model — the same reasoning might apply to hand-engineered departments in a company.</p><p>There is no evidence for this whatsoever, which is why it sits in a callout rather than in the argument. Hold it as a possibility, not a forecast.</p>"),
 
     ("h2", "What follows for someone who has read this far"),
     ("p", "This course has an implicit answer to the question and it is worth making explicit, because it shaped what was taught. Almost nothing here was about producing output faster. It was about knowing what to measure, noticing when a measurement is lying, telling a real difference from a wobble, checking whether the model was needed at all, and recognising the failures that arrive looking like successes."),

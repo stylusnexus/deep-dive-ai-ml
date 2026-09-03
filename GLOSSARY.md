@@ -840,6 +840,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Capability frontier** — The boundary of what a model does reliably. Inside it, measured gains are largest for the least experienced; outside it, people using AI were about 19 percentage points less accurate than people without it — so knowing which side you are on is the skill the tool does not supply.
 
+**Tacit knowledge** — Practical, hard-to-codify skill acquired through working alongside someone who has it, rather than from instruction. The thing an apprenticeship transmits, and the reason its transmission does not scale: expertise is embodied in a person, so one expert can only oversee so much at once.
+
 **The apprenticeship problem** — That junior work is simultaneously output and the mechanism by which judgement is built, so automating it removes the second function as an unintended consequence of removing the first. An argument in this course's closing chapter, not a finding.
 
 **Complementary assets** — The skilled staff, organisational processes and data infrastructure that decide whether AI adoption produces a gain. Their importance is why adoption concentrates among firms that were already productive.

@@ -404,3 +404,8 @@ The headline figure
 The historical prior is against me
 The mechanism may be right and the magnitude wrong
 Visible in graduate outcomes
+Magnitude and endpoint — unsupported
+The compositional claim — well supported
+The frontier asymmetry — well supported
+The mechanism — plausible, not demonstrated
+The mechanism — formally modelled
