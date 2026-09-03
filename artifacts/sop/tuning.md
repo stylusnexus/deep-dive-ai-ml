@@ -52,6 +52,9 @@ Cheapest real win. One line, and it caps the worst case immediately.
 - [ ] Verification cost measured — it is a turn, and turns compound
 
 ## 4 · Tune reasoning effort last
+- [ ] Repetition penalties reached for only after the harness — they act per token and a
+      degenerate loop repeats a block, so turning them high enough to break one damages
+      ordinary output first, structured output soonest
 
 - [ ] Routed by turn shape, not set globally
 - [ ] High effort where the model must plan or diagnose

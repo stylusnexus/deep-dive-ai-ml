@@ -356,17 +356,19 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="tuning-17"><input type="checkbox" data-id="tuning-17"><span class="tick"></span><span class="body">The agent can tell which regime it is in</span></label>
 <label class="item" id="tuning-18"><input type="checkbox" data-id="tuning-18"><span class="tick"></span><span class="body">Verification cost measured — it is a turn, and turns compound</span></label>
 <h2>4 · Tune reasoning effort last</h2>
-<label class="item" id="tuning-19"><input type="checkbox" data-id="tuning-19"><span class="tick"></span><span class="body">Routed by turn shape, not set globally</span></label>
-<label class="item" id="tuning-20"><input type="checkbox" data-id="tuning-20"><span class="tick"></span><span class="body">High effort where the model must plan or diagnose</span></label>
-<label class="item" id="tuning-21"><input type="checkbox" data-id="tuning-21"><span class="tick"></span><span class="body">Low or none where it is executing a decision already made, extracting, or formatting</span></label>
-<label class="item" id="tuning-22"><input type="checkbox" data-id="tuning-22"><span class="tick"></span><span class="body">Reasoning tokens counted — they are billed whether or not you see them</span></label>
-<label class="item" id="tuning-23"><input type="checkbox" data-id="tuning-23"><span class="tick"></span><span class="body">Measured, not assumed: on recall and extraction the gain is usually zero</span></label>
+<label class="item" id="tuning-19"><input type="checkbox" data-id="tuning-19"><span class="tick"></span><span class="body">Repetition penalties reached for only after the harness — they act per token and a</span></label>
+<p>degenerate loop repeats a block, so turning them high enough to break one damages ordinary output first, structured output soonest</p>
+<label class="item" id="tuning-20"><input type="checkbox" data-id="tuning-20"><span class="tick"></span><span class="body">Routed by turn shape, not set globally</span></label>
+<label class="item" id="tuning-21"><input type="checkbox" data-id="tuning-21"><span class="tick"></span><span class="body">High effort where the model must plan or diagnose</span></label>
+<label class="item" id="tuning-22"><input type="checkbox" data-id="tuning-22"><span class="tick"></span><span class="body">Low or none where it is executing a decision already made, extracting, or formatting</span></label>
+<label class="item" id="tuning-23"><input type="checkbox" data-id="tuning-23"><span class="tick"></span><span class="body">Reasoning tokens counted — they are billed whether or not you see them</span></label>
+<label class="item" id="tuning-24"><input type="checkbox" data-id="tuning-24"><span class="tick"></span><span class="body">Measured, not assumed: on recall and extraction the gain is usually zero</span></label>
 <h2>After each change</h2>
-<label class="item killer" id="tuning-24"><input type="checkbox" data-id="tuning-24"><span class="tick"></span><span class="body"><b class=skull>☠</b> One lever moved, not two</span></label>
-<label class="item" id="tuning-25"><input type="checkbox" data-id="tuning-25"><span class="tick"></span><span class="body">Whole battery re-run, not a spot check</span></label>
-<label class="item" id="tuning-26"><input type="checkbox" data-id="tuning-26"><span class="tick"></span><span class="body">Guardrail metric checked before declaring a win</span></label>
-<label class="item killer" id="tuning-27"><input type="checkbox" data-id="tuning-27"><span class="tick"></span><span class="body"><b class=skull>☠</b> Change reverted once to confirm it caused the improvement</span></label>
-<label class="item" id="tuning-28"><input type="checkbox" data-id="tuning-28"><span class="tick"></span><span class="body">Manifest updated — the settings are now part of what a score means</span></label>
+<label class="item killer" id="tuning-25"><input type="checkbox" data-id="tuning-25"><span class="tick"></span><span class="body"><b class=skull>☠</b> One lever moved, not two</span></label>
+<label class="item" id="tuning-26"><input type="checkbox" data-id="tuning-26"><span class="tick"></span><span class="body">Whole battery re-run, not a spot check</span></label>
+<label class="item" id="tuning-27"><input type="checkbox" data-id="tuning-27"><span class="tick"></span><span class="body">Guardrail metric checked before declaring a win</span></label>
+<label class="item killer" id="tuning-28"><input type="checkbox" data-id="tuning-28"><span class="tick"></span><span class="body"><b class=skull>☠</b> Change reverted once to confirm it caused the improvement</span></label>
+<label class="item" id="tuning-29"><input type="checkbox" data-id="tuning-29"><span class="tick"></span><span class="body">Manifest updated — the settings are now part of what a score means</span></label>
 <h2>Smells</h2>
 <p class="bullet">Cost fell and correctness fell with it → you traded away the thing you were protecting; check the guardrail</p>
 <p class="bullet">Cache hit rate near zero with no code change → something variable crept into the prefix</p>

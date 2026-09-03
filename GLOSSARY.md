@@ -236,6 +236,12 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Few-shot chain-of-thought** — Examples that show the working rather than only the answers, to demonstrate the reasoning style you want.
 
+**Presence penalty** — A flat penalty applied to any token that has already appeared, regardless of how often. Pushes a model toward new material rather than what it has already said.
+
+**Frequency penalty** — A penalty that scales with how many times a token has appeared, discouraging overuse rather than reuse. Presence asks whether a token has appeared; frequency asks how often.
+
+**repetition_penalty** — The open-weights formulation of the same idea, a multiplicative penalty on the logits of seen tokens. Same intent as the two above, different arithmetic, not interchangeable with them.
+
 **Reasoning model** — A model trained to produce an extended internal chain before its visible answer. That chain costs output tokens, which is why budgets sized for an answer alone return nothing.
 
 **Undersampling** — Discarding majority-class rows to balance a dataset. Fast, and it throws away real data, which is reasonable only when the majority class is enormous.

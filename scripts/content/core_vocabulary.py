@@ -580,8 +580,25 @@ LESSONS = [
       ("Temperature", "Flattens or sharpens the distribution", "0 means always take the most likely token — deterministic and repetitive. Around 0.7 is a conversational default. Above ~1.2, coherence degrades."),
       ("top-k", "Consider only the k most likely tokens", "Discards the long tail of nonsense before sampling."),
       ("top-p", "Consider the smallest set summing to probability p", "Adapts to the distribution's shape — more choices when the model is unsure, fewer when it's confident. Usually preferred over top-k."),
-    ]),
+          ("Presence penalty", "A flat penalty on any token already used",
+       "Applied once to a token that has appeared at all, regardless of how often. Pushes the model toward introducing something new rather than staying on what it has said. An OpenAI-family parameter."),
+      ("Frequency penalty", "A penalty that grows with each reuse",
+       "Scales with how many times the token has appeared, so it discourages overusing a word rather than merely reusing it. The distinction from presence penalty is that one asks &ldquo;has this appeared?&rdquo; and the other asks &ldquo;how often?&rdquo;"),
+      ("repetition_penalty", "The open-weights formulation",
+       "Serving stacks like vLLM and llama.cpp expose a multiplicative penalty on the logits of tokens already seen, typically a little above 1.0. Same intent, different arithmetic, and not interchangeable with the two above."),
+]),
     ("callout", "matters", "The practical setting", "For anything parsed by code — tool calls, structured output, classification, routing — use temperature 0 or very close. You want repeatability, not creativity. Save higher temperatures for prose where variation is the point. A surprising share of 'the agent is flaky' bugs are just an unnecessarily high temperature on a structured task."),
+
+    ("h3", "What the repetition penalties actually reach"),
+    ("p", "These are worth knowing about and worth being sceptical of, because they operate at the level of the token and the failures people reach for them to fix usually are not at that level. A model that has locked into repeating a long block of reasoning is repeating a structure, and a per-token penalty sees only that individual tokens have occurred before — which is a weak signal when the repeated unit is three hundred characters long and internally varied."),
+
+    ("know",
+     "A token-level penalty is a poor instrument against a block-level loop.",
+     "It is the natural thing to reach for when a model starts repeating itself, and it addresses a different problem than the one usually observed. Presence and frequency penalties discourage reusing individual tokens; they do not detect that the model has entered a cycle and is re-emitting a whole passage. Turning them up far enough to interrupt such a cycle tends to damage everything else first, because the model is now also penalised for reusing the words a coherent answer needs.",
+     "Structured output is where that damage shows first. Code, JSON and technical prose legitimately reuse the same identifiers and keywords constantly, and a penalty that does not know the difference will start substituting synonyms into places that require an exact string."),
+
+    ("callout", "matters", "The knobs are being removed, not added",
+     "<p>Worth noticing as a direction. Anthropic's interface never exposed presence or frequency penalties, and on the current generation of models the sampling controls above are rejected outright — sending temperature, top-p or top-k to Opus 5 or Sonnet 5 returns an error rather than being honoured. The bet being made is that a model good enough does not need the caller tuning its decoding, and whether or not that bet is right, it means a technique built on these parameters may simply have nowhere to attach in a year.</p>"),
 
     ("h2", "Determinism, honestly"),
     ("p", "Temperature 0 makes sampling deterministic but does not guarantee identical outputs across runs. Batching, hardware differences, and floating-point non-associativity introduce variation, especially with hosted providers. Design evaluations to tolerate small differences rather than assuming byte-identical replies."),
@@ -1779,6 +1796,9 @@ LESSONS = [
      "A detector that reports and does not interrupt is telemetry, not a control.",
      "This is the same distinction the security material draws about mitigations: a control the failure can slip past is a preference. Detection tells you afterwards what happened, which is valuable and is not the same as bounding the damage. Any repetition detector, cost ceiling or turn cap should be checked by asking what it actually does when it fires, and under exactly what conditions it declines to.",
      "The precondition is where these fail. A stop that requires zero tool calls, a ceiling that only applies to completed turns, a cost cap checked between iterations but not within one — each is correct in its own terms and each has a shape of failure that walks straight through it."),
+
+    ("callout", "insight", "The sampling knobs are the wrong layer for this",
+     "<p>The instinct on seeing repeated output is to reach for a repetition penalty, and it is worth understanding why that is a weak fix here. Those penalties act per token; the failure above was a three-hundred-character block re-emitted intact twenty-eight times. Discouraging individual token reuse does not detect a cycle, and turning it up far enough to break one degrades ordinary output first. The layer that can actually stop this is the harness — a detector that interrupts rather than reports, which is the point of the case.</p>"),
 
     ("callout", "pitfall", "Reproducibility is what turned this from an anomaly into a finding",
      "<p>The first occurrence looks like bad luck. The second, hitting the same ceiling within two minutes of the same wall-clock time, is a property of the system. That is the whole argument for repeats from the measurement material, arriving in a place nobody plans for it: a single strange run is a story, and two matching strange runs are a bug with a reproduction.</p>"),
