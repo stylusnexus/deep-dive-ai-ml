@@ -57,6 +57,9 @@ If either half is untrue, stop. Everything below produces noise.
 - [ ] Compared against baseline spread, not against zero
 - [ ] Sample size big enough for the difference to mean anything
 - [ ] Guardrail checked before declaring a win
+- [ ] For a metric you have been optimising against for a while: re-derived, not assumed.
+      Does it still correlate with the outcome it was chosen for? A measure under pressure
+      drifts from the thing it stood for, and it looks best just before it stops working
 
 ## 4b · Turn the number into a decision
 - [ ] ☠ Threshold chosen from the **costs of each error type**, not left at the 0.5 default

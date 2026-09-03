@@ -465,13 +465,15 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="measurement-30"><input type="checkbox" data-id="measurement-30"><span class="tick"></span><span class="body">Compared against baseline spread, not against zero</span></label>
 <label class="item" id="measurement-31"><input type="checkbox" data-id="measurement-31"><span class="tick"></span><span class="body">Sample size big enough for the difference to mean anything</span></label>
 <label class="item" id="measurement-32"><input type="checkbox" data-id="measurement-32"><span class="tick"></span><span class="body">Guardrail checked before declaring a win</span></label>
+<label class="item" id="measurement-33"><input type="checkbox" data-id="measurement-33"><span class="tick"></span><span class="body">For a metric you have been optimising against for a while: re-derived, not assumed.</span></label>
+<p>Does it still correlate with the outcome it was chosen for? A measure under pressure drifts from the thing it stood for, and it looks best just before it stops working</p>
 <h2>4b · Turn the number into a decision</h2>
-<label class="item killer" id="measurement-33"><input type="checkbox" data-id="measurement-33"><span class="tick"></span><span class="body"><b class=skull>☠</b> Threshold chosen from the <strong>costs of each error type</strong>, not left at the 0.5 default</span></label>
-<label class="item" id="measurement-34"><input type="checkbox" data-id="measurement-34"><span class="tick"></span><span class="body">Decision table produced: at each threshold, what is caught, what is missed, what it costs</span></label>
-<label class="item" id="measurement-35"><input type="checkbox" data-id="measurement-35"><span class="tick"></span><span class="body">Error reported in units someone can act on — &quot;out by about four days&quot; beats &quot;RMSE 0.34&quot;</span></label>
-<label class="item" id="measurement-36"><input type="checkbox" data-id="measurement-36"><span class="tick"></span><span class="body">Stated what would make you distrust this result in six months</span></label>
+<label class="item killer" id="measurement-34"><input type="checkbox" data-id="measurement-34"><span class="tick"></span><span class="body"><b class=skull>☠</b> Threshold chosen from the <strong>costs of each error type</strong>, not left at the 0.5 default</span></label>
+<label class="item" id="measurement-35"><input type="checkbox" data-id="measurement-35"><span class="tick"></span><span class="body">Decision table produced: at each threshold, what is caught, what is missed, what it costs</span></label>
+<label class="item" id="measurement-36"><input type="checkbox" data-id="measurement-36"><span class="tick"></span><span class="body">Error reported in units someone can act on — &quot;out by about four days&quot; beats &quot;RMSE 0.34&quot;</span></label>
+<label class="item" id="measurement-37"><input type="checkbox" data-id="measurement-37"><span class="tick"></span><span class="body">Stated what would make you distrust this result in six months</span></label>
 <h2>5 · Revert the fix ☠</h2>
-<label class="item killer" id="measurement-37"><input type="checkbox" data-id="measurement-37"><span class="tick"></span><span class="body"><b class=skull>☠</b> Change removed and re-run — did the number go back?</span></label>
+<label class="item killer" id="measurement-38"><input type="checkbox" data-id="measurement-38"><span class="tick"></span><span class="body"><b class=skull>☠</b> Change removed and re-run — did the number go back?</span></label>
 <p>If it didn&#x27;t, the improvement came from somewhere else and you&#x27;ve learned the wrong lesson. This is the step everyone skips.</p>
 <h2>Smells</h2>
 <p class="bullet">A surprisingly good result → suspect the instrument before celebrating; check step 0 again</p>

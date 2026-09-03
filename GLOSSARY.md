@@ -912,6 +912,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **RLHF (reinforcement learning from human feedback)** — Humans rank outputs, a reward model learns to predict those rankings, and the policy is optimised against it. The original recipe for turning a base model into an assistant.
 
+**Goodhart's law** — When a measure becomes a target, it ceases to be a good measure. Effort moves towards the number and the number stops standing for the thing it was chosen to stand for. Reward hacking, benchmark gaming and a judge that prefers long answers are all instances of it.
+
 **Reward hacking** — A policy optimising the measure rather than the goal: passing the tests by detecting the fixture, producing length when length was a proxy for thoroughness. The default behaviour of an optimiser, not an edge case — and it is invisible in the reward curve by construction.
 
 **Fine-tuning** — Changing a model's weights so it responds differently: tone, structure, schema adherence, a domain's conventions. Good at installing behaviour and poor at installing facts, which is the distinction that decides whether it is the right tool or whether you needed retrieval.

@@ -14,6 +14,13 @@ def nb(cells, kernel="python3"):
         cid = hashlib.sha1(f"{i}{src}".encode()).hexdigest()[:8]
         lines = src.strip("\n").split("\n")
         lines = [l + "\n" for l in lines[:-1]] + [lines[-1]]
+        if kind == "code":
+            # A cell that does not parse costs a full execution run to discover,
+            # and nbconvert exits 0 having written nothing.
+            try:
+                compile(src, f"cell{i}", "exec")
+            except SyntaxError as e:
+                raise AssertionError(f"cell {i} does not compile: {e}") from None
         if kind == "md":
             out.append({"cell_type": "markdown", "id": cid, "metadata": {}, "source": lines})
         else:
