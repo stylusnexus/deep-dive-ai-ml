@@ -140,8 +140,10 @@ padding, so this block is a door plus the two genuine gaps.
 - Judging a conversation — scoring the trajectory, since the failure is rarely
   in the turn you graded ✅
 
-6 lessons in `lessons/block5-evaluation/`. No notebook yet — the natural one runs a
-battery across providers, which needs API keys this repository does not assume.
+6 lessons in `lessons/block5-evaluation/` and 1 notebook in
+`notebooks/05-evaluation/`. The statistics notebook needs no model, network or API
+key — every figure the lesson quotes is produced by running it. A battery across
+several providers still needs keys this repository does not assume.
 
 **Exit:** Your own eval set, run across ≥6 models, with a defensible ranking — and a
 non-completion column, without which the ranking is not defensible.

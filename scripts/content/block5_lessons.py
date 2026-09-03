@@ -368,10 +368,10 @@ LESSONS = [
 
     ("p", "The distinction decides which test to run, and the cost of getting it wrong is larger than it sounds. Question difficulty varies enormously — some questions are hard for everything and some are easy for everything — and in a paired comparison that difficulty affects both members of each pair equally, so subtracting one from the other removes it. An unpaired test cannot subtract it and leaves it in the noise, where it usually dwarfs the effect you are looking for."),
 
-    ("code", """20 questions, a real effect of +0.30, question difficulty varying by ~1.0
+    ("code", """20 questions, a real effect of +0.30, difficulty varying by ~1.0
 
-  unpaired test detects it:   0.3% of the time
-  paired   test detects it:  96.5% of the time"""),
+  unpaired test detects it :   0.6% of the time
+  paired   test detects it :  95.9% of the time"""),
 
     ("know",
      "The unpaired test is not wrong. It is answering a question nobody asked.",
@@ -417,11 +417,12 @@ LESSONS = [
 
     ("code", """true variance is 1.000 by construction
 
-     n     divide by n    divide by n-1
-     5      0.799 (-20%)   0.999 ( -0%)
-    10      0.898 (-10%)   0.998 ( -0%)
-    30      0.966 ( -3%)   1.000 ( -0%)
-  1000      0.999 ( -0%)   1.000 ( -0%)"""),
+      n           divide by n         divide by n-1
+      5        0.796 (-20.4%)        0.995 ( -0.5%)
+     10        0.897 (-10.3%)        0.997 ( -0.3%)
+     30        0.968 ( -3.2%)        1.002 ( +0.2%)
+    100        0.989 ( -1.1%)        0.999 ( -0.1%)
+   1000        0.999 ( -0.1%)        1.000 ( +0.0%)"""),
 
     ("callout", "warning", "The same ceiling fails in both directions, and both are silent",
      "<p>The evaluation material here treats a low output ceiling as the hazard: a reasoning model spends the budget thinking, returns an empty string, and scores as wrong. The mirror is just as real. Set the ceiling high and a turn that degenerates into repeating itself will consume the entire budget before stopping — in one observed case, 31,999 tokens of a 32,000 limit and forty-five minutes of wall clock, producing nothing, twice in a row.</p><p>So &ldquo;raise it&rdquo; is not the safe default and neither is &ldquo;lower it&rdquo;. The ceiling bounds the damage from a loop that has already gone wrong; it does not prevent the loop, and choosing it well means knowing which of the two failures you are currently exposed to.</p>"),
@@ -446,8 +447,10 @@ LESSONS = [
     ("code", """both arms drawn from the SAME distribution — every 'significant'
 result below is a false positive by construction
 
-  tested once at the end                : 5.2%
-  peeked 10 times, stopped when p < 0.05: 19.5%"""),
+  tested once, at the planned sample size : 5.3%
+  peeked 10 times, stopped when p<0.05    : 20.1%"""),
+
+    ("p", "Every figure in this lesson comes from <code>notebooks/05-evaluation/01-is-the-difference-real.ipynb</code>, which runs these simulations with a fixed seed and no model, network or API key. If a number here looks convenient, run it."),
 
     ("know",
      "Peeking turned a five percent error rate into nearly twenty, on data with no effect in it at all.",
