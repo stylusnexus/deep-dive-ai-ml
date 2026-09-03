@@ -367,3 +367,12 @@ Technical debt, properly
 The delay
 The maintenance horizon
 Undecided behaviour
+An anchor example per level
+Blind the calibration set too
+Blind the condition
+Blind the source
+Dimensions that fail independently
+How do I score something with no right answer?
+Observable criteria, not adjectives
+Randomise the order
+Three or four levels, not seven

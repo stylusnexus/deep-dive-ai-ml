@@ -30,6 +30,12 @@
       "title": "One Set, Many Models",
       "file": "lsn-1787800000002-one-set-many-models.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787800000003",
+      "title": "Rubrics and Blind Reads",
+      "file": "lsn-1787800000003-rubrics-and-blind-reads.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -44,6 +50,11 @@
       "starred": false
     },
     "lsn-1787800000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787800000003": {
       "viewed": false,
       "completed": false,
       "starred": false

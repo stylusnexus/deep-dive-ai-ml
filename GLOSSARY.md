@@ -636,6 +636,16 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Semantic caching** — Answering from a store of previous responses when an incoming question embeds close enough to an earlier one, without calling the model at all. Unrelated to the other three caches despite the name: it reuses answers rather than arithmetic, so a near-miss returns a confident answer to a question nobody asked.
 
+**Rubric** — A set of scoring dimensions, each with observable criteria per level and an anchor example, replacing a single score. The test of one is that two careful readers apply it to the same output and agree; if they do not, it describes nothing.
+
+**Anchor example** — A real output kept alongside a rubric to show what each level looks like. What makes a standard transferable to a second reader, a second model, or yourself in three months.
+
+**Blind read** — Judging output without knowing its provenance: which model produced it, and whether it is the treatment or the control. Expectation is a measurable bias pointing toward whatever you hoped for, and it applies to people at least as strongly as to models.
+
+**Blinding the calibration set** — Hand-labelling ground truth without knowing which system produced each answer. Skipped often, and skipping it makes the reported agreement rate a measure of how well the judge reproduces your expectations rather than your judgement.
+
+**Agreement rate** — How often a judge matches a blind human label on a calibration set. A judge score published without one is an opinion with a decimal point.
+
 **Similarity threshold** — The cut-off a semantic cache uses to decide two questions are the same one. Measured on this course's own encoder, a negation that reverses the answer scores 0.984 while a genuine paraphrase scores 0.940, so no cut-off separates them — see <code>scripts/measure_semantic_threshold.py</code>.
 
 **Cache hit rate** — The fraction of calls that actually reused a cached prefix. Nothing errors on a miss, so a cache that quietly stopped working looks exactly like never having had one, except on the bill.

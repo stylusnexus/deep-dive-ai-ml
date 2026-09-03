@@ -28,6 +28,9 @@ LESSONS = [
       ("How do serious people do it?",
        "SWE-bench, and How to Actually Run It",
        "A real harness, in detail: what a task actually is, the four variants and which number gets quoted, and what the score does not mean. Read it for the harness design, not the leaderboard."),
+      ("How do I score something with no right answer?",
+       "Models Judging Models, then Rubrics and Blind Reads in this block",
+       "The first covers what a judge buys and the four biases it ships with. The second is the two mechanics that make one usable — a rubric careful readers can agree on, and blinding so the score is about the output rather than about what you hoped for."),
       ("Why did this number move?",
        "Confounds You Cannot See, and Localising a Failure",
        "The difference between a result and an explanation. A number that moved without a located cause is a number that will move back."),
@@ -246,6 +249,90 @@ LESSONS = [
        ["The number of repeats per item",
         "The output budget and the timeout — a value tuned to the cheapest model handicaps the others rather than controlling for them",
         "The scoring rubric"], 1),
+    ]),
+  ],
+},
+{
+  "slug": "rubrics-and-blind-reads",
+  "title": "Rubrics and Blind Reads",
+  "subtitle": "A rubric makes a judgement checkable. Blinding makes it honest. Neither works without the other.",
+  "body": [
+    ("p", "The engineering-practice block covers what a judge buys you and the four biases it ships with. This lesson is the two mechanics that turn those principles into something you can run: how to write a rubric a judge can actually apply, and how to blind a read so the score is about the output rather than about what you were hoping for."),
+
+    ("h2", "Why one number is the wrong output"),
+    ("p", "Asking for a score out of ten produces a number nobody can act on. It clusters — almost everything lands on seven or eight — and when it moves you cannot tell which property changed. A rubric replaces it with several judgements, each of which names something specific enough that a disagreement is resolvable."),
+
+    ("terms", [
+      ("Dimensions that fail independently", "The test for whether you have the right ones",
+       "Groundedness, completeness and tone can each be wrong while the others are right, so scoring them separately tells you what to fix. If two dimensions always move together you have one dimension written twice."),
+      ("Observable criteria, not adjectives", "The difference between a rubric and a vibe",
+       "&ldquo;Complete&rdquo; is an adjective and two readers will disagree. &ldquo;Answers all three parts of the question&rdquo; is observable and they will not. Every level of every dimension needs a criterion you could check by pointing at the text."),
+      ("Three or four levels, not seven", "Because the judge cannot tell them apart",
+       "A grader that cannot reliably distinguish a six from a seven produces noise in the low bits and a false sense of precision. Fewer levels, each clearly separated, beats a fine scale nobody can apply consistently."),
+      ("An anchor example per level", "What makes it transferable",
+       "One real output that sits at each level, kept with the rubric. This is what lets a second person — or a second model, or you in three months — apply the same standard rather than a similar-sounding one."),
+    ]),
+
+    ("know",
+     "If two people cannot apply your rubric to the same output and agree, it is not a rubric.",
+     "The purpose of writing it down is to move a judgement from taste to procedure, and the only test of whether that worked is agreement. A rubric that produces disagreement between careful readers has not failed to describe quality — it has failed to describe anything, and running a model against it will produce confident, reproducible, meaningless numbers.",
+     "Check it before you automate anything. Take ten outputs, have two people score them independently against the rubric, and look at where they diverged. Every disagreement is a dimension that needs a sharper criterion or an anchor example, and finding those with ten items is far cheaper than discovering them after a thousand."),
+
+    ("h2", "Blind reads, and what they are actually for"),
+    ("p", "A blind read is a judgement made without knowing where the output came from — which model, which variant, whether it is the change you spent a week on or the baseline you expect it to beat. The point is not fairness in the abstract. It is that expectation is a measurable bias, it applies to people at least as strongly as to models, and it points in the direction of whatever you were hoping for."),
+
+    ("terms", [
+      ("Blind the source", "Which model or variant produced it",
+       "The one everybody thinks of. A judge from the same family as the system under test recognises its own output; a human who knows which one is the new version finds reasons to like it."),
+      ("Blind the condition", "Treatment or control",
+       "The one people skip. If the reviewer knows this is the run that is supposed to be better, they are no longer measuring — and this matters most exactly when the change is yours."),
+      ("Randomise the order", "And run both",
+       "Position bias is already covered in the judging lesson; blinding does not remove it. Presenting the same pair in both orders and requiring agreement is what removes it."),
+      ("Blind the calibration set too", "The step that gets missed",
+       "When you hand-label thirty items to check the judge against, label them blind. A calibration set scored while knowing the answers measures how well the judge agrees with your expectations rather than with your judgement."),
+    ]),
+
+    ("figure", "The two do different jobs and neither substitutes for the other. A rubric without blinding gives you consistent bias; blinding without a rubric gives you honest noise.", '''<svg viewBox="0 0 640 210" role="img" aria-label="Rubric and blinding as two independent axes"><line x1="60" y1="176" x2="606" y2="176" class="d-arrow-accent"/>
+<line x1="60" y1="176" x2="60" y2="24" class="d-arrow-accent"/>
+<text x="240" y="200" class="d-label-sm">blinded →</text>
+<text x="10" y="96" class="d-label-sm">rubric</text><text x="16" y="112" class="d-label-sm">↑</text>
+<rect x="80" y="96" width="228" height="66" rx="6" class="d-box"/><text x="92" y="120" class="d-label-b">consistent bias</text><text x="92" y="140" class="d-label-sm">repeatable, and tilted</text><text x="92" y="156" class="d-label-sm">toward what you hoped</text>
+<rect x="330" y="96" width="256" height="66" rx="6" class="d-box-accent"/><text x="342" y="120" class="d-label-b">what you want</text><text x="342" y="140" class="d-label-sm">checkable and honest</text><text x="342" y="156" class="d-label-sm">disagreements are resolvable</text>
+<rect x="80" y="32" width="228" height="56" rx="6" class="d-box"/><text x="92" y="54" class="d-label-b">taste, with a decimal point</text><text x="92" y="74" class="d-label-sm">neither checkable nor honest</text>
+<rect x="330" y="32" width="256" height="56" rx="6" class="d-box"/><text x="342" y="54" class="d-label-b">honest noise</text><text x="342" y="74" class="d-label-sm">unbiased, and unrepeatable</text>
+</svg>'''),
+
+    ("h2", "The loop that produces a judge worth running"),
+    ("ul", [
+      "<strong>Write the rubric first</strong>, with dimensions that fail independently and a criterion you could point at for each level.",
+      "<strong>Score ten items with two people</strong>, independently, and sharpen wherever they disagreed. Cheap, and it finds the ambiguity while fixing it is still free.",
+      "<strong>Hand-label thirty to fifty, blind</strong>, as the calibration set. This is the ground truth the judge is measured against, and it is worthless if it was labelled knowing the answers.",
+      "<strong>Run the judge against that set</strong> and report the agreement rate. A judge score published without a known agreement rate is an opinion with a decimal point.",
+      "<strong>Re-check agreement when anything changes</strong> — the judge model, the rubric wording, the prompt. All three are treatments, and a judge that drifted is worse than no judge because it is trusted.",
+    ]),
+
+    ("callout", "pitfall", "Some things cannot be blinded, and pretending otherwise is worse",
+     "<p>Outputs carry style tells. One model formats lists differently, another opens with a summary, a fine-tuned variant has the house voice. A reader who knows the systems will often infer which is which despite the labels being stripped, and a judge from the same family may recognise its own output regardless. Blinding reduces the effect rather than removing it, so record that it was blinded <em>and</em> whether the reader could plausibly have guessed — an unblindable comparison needs a different design, usually a judge from an unrelated family.</p>"),
+
+    ("callout", "matters", "Blind the calibration set, or the whole exercise is circular",
+     "<p>This is the failure that quietly voids a result. You label the ground truth knowing which system produced each answer, the judge is then tuned until it agrees with those labels, and the reported agreement rate measures how well the judge reproduces your expectations. Everything downstream inherits it, and nothing in the numbers looks wrong.</p>"),
+
+    ("quiz", [
+      ("What is the test of whether a rubric is a rubric?",
+       ["That it covers every dimension of quality that matters",
+        "That two people can apply it to the same output and agree — disagreement means it has failed to describe anything",
+        "That it produces scores which correlate with user satisfaction"],
+       1),
+      ("Which part of blinding is most often skipped?",
+       ["Blinding which model produced each output",
+        "Blinding whether a run is the treatment or the control, and blinding the hand-labelled calibration set",
+        "Randomising the order in which outputs are presented"],
+       1),
+      ("Why does a rubric without blinding still fail?",
+       ["Rubrics are only reliable when applied by more than one reader",
+        "It gives you consistent bias — repeatable scores tilted toward whatever you were hoping for, which is worse than noise because it looks trustworthy",
+        "Rubric dimensions drift over time without a control group"],
+       1),
     ]),
   ],
 },

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rubrics and Blind Reads</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 4 of 4</span>
+  <h1>Rubrics and Blind Reads</h1>
+  <p class="subtitle">A rubric makes a judgement checkable. Blinding makes it honest. Neither works without the other.</p>
+
+  <p>The engineering-practice block covers what a judge buys you and the four biases it ships with. This lesson is the two mechanics that turn those principles into something you can run: how to write a rubric a judge can actually apply, and how to blind a read so the score is about the output rather than about what you were hoping for.</p>
+  <h2>Why one number is the wrong output</h2>
+  <p>Asking for a score out of ten produces a number nobody can act on. It clusters — almost everything lands on seven or eight — and when it moves you cannot tell which property changed. A rubric replaces it with several judgements, each of which names something specific enough that a disagreement is resolvable.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Dimensions that fail independently</div><div><div class="roadmap-title">The test for whether you have the right ones</div><div class="roadmap-desc">Groundedness, completeness and tone can each be wrong while the others are right, so scoring them separately tells you what to fix. If two dimensions always move together you have one dimension written twice.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Observable criteria, not adjectives</div><div><div class="roadmap-title">The difference between a rubric and a vibe</div><div class="roadmap-desc">&ldquo;Complete&rdquo; is an adjective and two readers will disagree. &ldquo;Answers all three parts of the question&rdquo; is observable and they will not. Every level of every dimension needs a criterion you could check by pointing at the text.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Three or four levels, not seven</div><div><div class="roadmap-title">Because the judge cannot tell them apart</div><div class="roadmap-desc">A grader that cannot reliably distinguish a six from a seven produces noise in the low bits and a false sense of precision. Fewer levels, each clearly separated, beats a fine scale nobody can apply consistently.</div></div></div><div class="roadmap-item"><div class="roadmap-num">An anchor example per level</div><div><div class="roadmap-title">What makes it transferable</div><div class="roadmap-desc">One real output that sits at each level, kept with the rubric. This is what lets a second person — or a second model, or you in three months — apply the same standard rather than a similar-sounding one.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">If two people cannot apply your rubric to the same output and agree, it is not a rubric.</p><p class="know-why">The purpose of writing it down is to move a judgement from taste to procedure, and the only test of whether that worked is agreement. A rubric that produces disagreement between careful readers has not failed to describe quality — it has failed to describe anything, and running a model against it will produce confident, reproducible, meaningless numbers.</p><p class="know-eg"><span class="know-eg-label">For example</span>Check it before you automate anything. Take ten outputs, have two people score them independently against the rubric, and look at where they diverged. Every disagreement is a dimension that needs a sharper criterion or an anchor example, and finding those with ten items is far cheaper than discovering them after a thousand.</p></blockquote>
+  <h2>Blind reads, and what they are actually for</h2>
+  <p>A blind read is a judgement made without knowing where the output came from — which model, which variant, whether it is the change you spent a week on or the baseline you expect it to beat. The point is not fairness in the abstract. It is that expectation is a measurable bias, it applies to people at least as strongly as to models, and it points in the direction of whatever you were hoping for.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Blind the source</div><div><div class="roadmap-title">Which model or variant produced it</div><div class="roadmap-desc">The one everybody thinks of. A judge from the same family as the system under test recognises its own output; a human who knows which one is the new version finds reasons to like it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Blind the condition</div><div><div class="roadmap-title">Treatment or control</div><div class="roadmap-desc">The one people skip. If the reviewer knows this is the run that is supposed to be better, they are no longer measuring — and this matters most exactly when the change is yours.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Randomise the order</div><div><div class="roadmap-title">And run both</div><div class="roadmap-desc">Position bias is already covered in the judging lesson; blinding does not remove it. Presenting the same pair in both orders and requiring agreement is what removes it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Blind the calibration set too</div><div><div class="roadmap-title">The step that gets missed</div><div class="roadmap-desc">When you hand-label thirty items to check the judge against, label them blind. A calibration set scored while knowing the answers measures how well the judge agrees with your expectations rather than with your judgement.</div></div></div></div>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Rubric and blinding as two independent axes"><line x1="60" y1="176" x2="606" y2="176" class="d-arrow-accent"/>
+<line x1="60" y1="176" x2="60" y2="24" class="d-arrow-accent"/>
+<text x="240" y="200" class="d-label-sm">blinded →</text>
+<text x="10" y="96" class="d-label-sm">rubric</text><text x="16" y="112" class="d-label-sm">↑</text>
+<rect x="80" y="96" width="228" height="66" rx="6" class="d-box"/><text x="92" y="120" class="d-label-b">consistent bias</text><text x="92" y="140" class="d-label-sm">repeatable, and tilted</text><text x="92" y="156" class="d-label-sm">toward what you hoped</text>
+<rect x="330" y="96" width="256" height="66" rx="6" class="d-box-accent"/><text x="342" y="120" class="d-label-b">what you want</text><text x="342" y="140" class="d-label-sm">checkable and honest</text><text x="342" y="156" class="d-label-sm">disagreements are resolvable</text>
+<rect x="80" y="32" width="228" height="56" rx="6" class="d-box"/><text x="92" y="54" class="d-label-b">taste, with a decimal point</text><text x="92" y="74" class="d-label-sm">neither checkable nor honest</text>
+<rect x="330" y="32" width="256" height="56" rx="6" class="d-box"/><text x="342" y="54" class="d-label-b">honest noise</text><text x="342" y="74" class="d-label-sm">unbiased, and unrepeatable</text>
+</svg><figcaption>The two do different jobs and neither substitutes for the other. A rubric without blinding gives you consistent bias; blinding without a rubric gives you honest noise.</figcaption></figure>
+  <h2>The loop that produces a judge worth running</h2>
+  <ul><li><strong>Write the rubric first</strong>, with dimensions that fail independently and a criterion you could point at for each level.</li><li><strong>Score ten items with two people</strong>, independently, and sharpen wherever they disagreed. Cheap, and it finds the ambiguity while fixing it is still free.</li><li><strong>Hand-label thirty to fifty, blind</strong>, as the calibration set. This is the ground truth the judge is measured against, and it is worthless if it was labelled knowing the answers.</li><li><strong>Run the judge against that set</strong> and report the agreement rate. A judge score published without a known agreement rate is an opinion with a decimal point.</li><li><strong>Re-check agreement when anything changes</strong> — the judge model, the rubric wording, the prompt. All three are treatments, and a judge that drifted is worse than no judge because it is trusted.</li></ul>
+  <div class="callout pitfall"><span class="label">Some things cannot be blinded, and pretending otherwise is worse</span><p>Outputs carry style tells. One model formats lists differently, another opens with a summary, a fine-tuned variant has the house voice. A reader who knows the systems will often infer which is which despite the labels being stripped, and a judge from the same family may recognise its own output regardless. Blinding reduces the effect rather than removing it, so record that it was blinded <em>and</em> whether the reader could plausibly have guessed — an unblindable comparison needs a different design, usually a judge from an unrelated family.</p></div>
+  <div class="callout matters"><span class="label">Blind the calibration set, or the whole exercise is circular</span><p>This is the failure that quietly voids a result. You label the ground truth knowing which system produced each answer, the judge is then tuned until it agrees with those labels, and the reported agreement rate measures how well the judge reproduces your expectations. Everything downstream inherits it, and nothing in the numbers looks wrong.</p></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. What is the test of whether a rubric is a rubric?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">That it covers every dimension of quality that matters</div>
+      <div class="quiz-opt">That two people can apply it to the same output and agree — disagreement means it has failed to describe anything</div>
+      <div class="quiz-opt">That it produces scores which correlate with user satisfaction</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Which part of blinding is most often skipped?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Blinding which model produced each output</div>
+      <div class="quiz-opt">Blinding whether a run is the treatment or the control, and blinding the hand-labelled calibration set</div>
+      <div class="quiz-opt">Randomising the order in which outputs are presented</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why does a rubric without blinding still fail?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Rubrics are only reliable when applied by more than one reader</div>
+      <div class="quiz-opt">It gives you consistent bias — repeatable scores tilted toward whatever you were hoping for, which is worse than noise because it looks trustworthy</div>
+      <div class="quiz-opt">Rubric dimensions drift over time without a control group</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>
