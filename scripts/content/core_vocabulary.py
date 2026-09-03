@@ -2886,6 +2886,30 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
 
     ("p", "Markdown is doing real work here rather than being an arbitrary choice. It is read natively by both the model and the person, so there is no format that one of them has to be taught. It diffs in version control, which means changes to an agent&#39;s instructions get reviewed like any other change rather than accumulating unexamined. It needs no parser and therefore cannot fail to parse. And it degrades gracefully: a tool that ignores the frontmatter, the headings or the cross-references still reads the prose underneath and gets most of the value."),
 
+    ("h2", "The part nobody specifies: what earns a write"),
+    ("p", "Reading a memory store is easy and writing to one is easy. Deciding what goes in is the whole problem, and it is usually left to whatever the agent feels like recording. That decision compounds: every entry is a claim that this will matter later, made by something that cannot see later, and it is paid for by every future session that has to store, search or read past it."),
+
+    ("terms", [
+      ("The model decides", "Cheap, and it drifts",
+       "The agent writes whatever strikes it as significant. Requires no design and produces a store full of true, unremarkable facts, because salience in the moment is a poor predictor of usefulness later."),
+      ("A rule decides", "Predictable, and it misses",
+       "Only certain categories get written &mdash; decisions made, constraints stated, things that were surprising. Reviewable and boring, which is what you want, and it will miss the thing nobody anticipated a category for."),
+      ("A person confirms", "Accurate, and it does not scale",
+       "Nothing persists without a human agreeing to it. The right answer for a small store of high-value facts, and unworkable for anything that accumulates during long autonomous work."),
+      ("Consolidation", "The pass that keeps it usable",
+       "Periodically re-read the store: merge duplicates, resolve contradictions, delete what has died. Without it a store only grows, and growth alone degrades it."),
+    ]),
+
+    ("know",
+     "The hard problem in a memory system is not writing or reading. It is deciding what deserves to be written.",
+     "Storage is cheap and search mostly works, so neither is where these systems fail. They fail by accumulating true but useless facts until the few that matter cannot be found among them &mdash; which is the retrieval problem from Block 3, arriving through a door you built yourself. A store of thirty considered entries outperforms one of three thousand recorded reflexively, and it is not close.",
+     "An agent that writes a note after every task accumulates hundreds of entries reading &ldquo;fixed a failing test in the billing module&rdquo;. All true, none useful, and the one genuinely load-bearing note &mdash; that the billing tests need a fixture the CI environment does not provide &mdash; is now one line in several hundred with no better claim on attention than the rest."),
+
+    ("callout", "pitfall", "Two notes that disagree, and nothing to break the tie",
+     "<p>A store that has been written to for months will contain contradictions, because the world moved and both entries were true when written. Nothing in a directory of markdown files knows which is current: files have no inherent notion of recency or authority, and an agent reading both has no principled way to choose &mdash; so it picks one, usually whichever the search ranked first, and tells you nothing about the other.</p><p>Date every entry and prefer the newer, while knowing that this is a heuristic rather than a rule; the newer note is sometimes just the more recently mistaken one. The real fix is the consolidation pass, where a contradiction is resolved once and deliberately instead of silently and differently on every read.</p>"),
+
+    ("p", "You will also meet a borrowed vocabulary for this &mdash; <strong>episodic</strong> memory for what happened, <strong>semantic</strong> memory for facts that are true in general, <strong>procedural</strong> memory for how to do things &mdash; imported from cognitive science and common in writing about agents. It is worth recognising, and it is worth knowing that the split used earlier in this lesson is more useful to build from, because conversation history, compaction, external notes and retrieved memory are distinguished by mechanism and cost rather than by analogy. Analogies to human memory describe what a system resembles; the mechanism tells you what it will cost and how it will fail."),
+
     ("h2", "Context length is a ceiling, not a target"),
     ("p", "A larger window is frequently sold as a solution to everything above. It is not, for three separate reasons that compound."),
     ("ul", [

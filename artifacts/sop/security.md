@@ -28,6 +28,18 @@ typed at it by the person using it.
 - [ ] What the agent *read* is logged, not only what it did — otherwise an incident
       cannot be reconstructed
 
+## Persistent memory, if the agent has any
+- [ ] ☠ A memory write treated as an action with a gate, not as bookkeeping — it changes
+      what every future session believes
+- [ ] Every stored memory carries its source, so a fact learned from a fetched document is
+      distinguishable from one the user stated
+- [ ] Directives not persisted as directives — record that a document made a claim, never
+      that a standing instruction is now in force
+- [ ] ☠ The store scoped to the user or project it was written for; memory from one user's
+      session never loads into another's
+- [ ] Understood that restarting does not clear a poisoned store, and that the trace of the
+      harmful session will not contain the read that caused it
+
 ## Before believing it is safe
 - [ ] ☠ Tested against the whole system with real tools and real rendering, not a
       component in isolation

@@ -318,6 +318,14 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Task or state file** — The plan and statuses for the current piece of work. Distinct from accumulated memory in being disposable: it belongs to this run and is meant to be discarded after.
 
+**Memory write policy** — The rule deciding what gets persisted: the model's own judgement (cheap, drifts), a fixed category rule (predictable, misses things), or human confirmation (accurate, does not scale). The hard problem in a memory system, and usually the unspecified one.
+
+**Consolidation** — A periodic pass over a memory store to merge duplicates, resolve contradictions and delete what has died. Without it a store only grows, and growth alone degrades it.
+
+**Memory poisoning** — Indirect prompt injection that reaches persistent memory, so it is reloaded into later sessions that never saw the original content. It defeats restarting, because the restart reloads the store, and it defeats trace review, because the harmful action happens in a different session from the read that caused it.
+
+**Memory scoping** — Confining a memory store to the user or project it was written for. Memory written serving one user loading into a session serving another is a leak in the ordinary case and a delivery mechanism in the adversarial one.
+
 **Memory staleness** — A written memory records what was true when written. Once wrong it is worse than absent, because absence prompts a look while a stale note prompts confident action on something that no longer exists. Date entries; verify anything naming a file or flag before acting.
 
 **Retrieved memory** — Facts stored and fetched when relevant, by semantic search over past interactions. Powerful, and it means you now have a retrieval quality problem as well.

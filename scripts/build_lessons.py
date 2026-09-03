@@ -7,6 +7,7 @@ statistics-for-ai and aigp-exam-prep.
 """
 import importlib.util
 import re
+import xml.dom.minidom
 import html
 import json
 import pathlib
@@ -93,6 +94,15 @@ def render_block(b):
         return f'  <div class="{cls}">{rows}</div>'
     if kind == "figure":
         _, caption, svg = b
+        # SVG is XML: it defines only &amp; &lt; &gt; &quot; &apos;. HTML named
+        # entities such as &mdash; parse in prose and blow up inside a diagram.
+        stray = set(re.findall(r"&([a-zA-Z][a-zA-Z0-9]*);", svg)) - {
+            "amp", "lt", "gt", "quot", "apos"}
+        if stray:
+            raise AssertionError(
+                f"HTML entities in SVG ({', '.join(sorted(stray))}) — "
+                f"use the character itself or a numeric entity like &#8212;")
+        xml.dom.minidom.parseString(svg)
         return (f'  <figure class="diagram">{svg}'
                 f"<figcaption>{caption}</figcaption></figure>")
     if kind == "know":

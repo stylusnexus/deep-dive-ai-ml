@@ -498,14 +498,25 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="security-11"><input type="checkbox" data-id="security-11"><span class="tick"></span><span class="body">Runs as a non-root user</span></label>
 <label class="item" id="security-12"><input type="checkbox" data-id="security-12"><span class="tick"></span><span class="body">What the agent <em>read</em> is logged, not only what it did — otherwise an incident</span></label>
 <p>cannot be reconstructed</p>
+<h2>Persistent memory, if the agent has any</h2>
+<label class="item killer" id="security-13"><input type="checkbox" data-id="security-13"><span class="tick"></span><span class="body"><b class=skull>☠</b> A memory write treated as an action with a gate, not as bookkeeping — it changes</span></label>
+<p>what every future session believes</p>
+<label class="item" id="security-14"><input type="checkbox" data-id="security-14"><span class="tick"></span><span class="body">Every stored memory carries its source, so a fact learned from a fetched document is</span></label>
+<p>distinguishable from one the user stated</p>
+<label class="item" id="security-15"><input type="checkbox" data-id="security-15"><span class="tick"></span><span class="body">Directives not persisted as directives — record that a document made a claim, never</span></label>
+<p>that a standing instruction is now in force</p>
+<label class="item killer" id="security-16"><input type="checkbox" data-id="security-16"><span class="tick"></span><span class="body"><b class=skull>☠</b> The store scoped to the user or project it was written for; memory from one user&#x27;s</span></label>
+<p>session never loads into another&#x27;s</p>
+<label class="item" id="security-17"><input type="checkbox" data-id="security-17"><span class="tick"></span><span class="body">Understood that restarting does not clear a poisoned store, and that the trace of the</span></label>
+<p>harmful session will not contain the read that caused it</p>
 <h2>Before believing it is safe</h2>
-<label class="item killer" id="security-13"><input type="checkbox" data-id="security-13"><span class="tick"></span><span class="body"><b class=skull>☠</b> Tested against the whole system with real tools and real rendering, not a</span></label>
+<label class="item killer" id="security-18"><input type="checkbox" data-id="security-18"><span class="tick"></span><span class="body"><b class=skull>☠</b> Tested against the whole system with real tools and real rendering, not a</span></label>
 <p>component in isolation</p>
-<label class="item" id="security-14"><input type="checkbox" data-id="security-14"><span class="tick"></span><span class="body">Attack battery is fixed, private, and kept — with a decided criterion per case</span></label>
-<label class="item" id="security-15"><input type="checkbox" data-id="security-15"><span class="tick"></span><span class="body">Baseline recorded before any mitigation, so a fix can be shown to have worked</span></label>
-<label class="item" id="security-16"><input type="checkbox" data-id="security-16"><span class="tick"></span><span class="body">Re-run after every prompt, model or tool change — a tool added later reopens</span></label>
+<label class="item" id="security-19"><input type="checkbox" data-id="security-19"><span class="tick"></span><span class="body">Attack battery is fixed, private, and kept — with a decided criterion per case</span></label>
+<label class="item" id="security-20"><input type="checkbox" data-id="security-20"><span class="tick"></span><span class="body">Baseline recorded before any mitigation, so a fix can be shown to have worked</span></label>
+<label class="item" id="security-21"><input type="checkbox" data-id="security-21"><span class="tick"></span><span class="body">Re-run after every prompt, model or tool change — a tool added later reopens</span></label>
 <p>a hole closed earlier</p>
-<label class="item killer" id="security-17"><input type="checkbox" data-id="security-17"><span class="tick"></span><span class="body"><b class=skull>☠</b> Written down what the fix does <em>not</em> cover</span></label>
+<label class="item killer" id="security-22"><input type="checkbox" data-id="security-22"><span class="tick"></span><span class="body"><b class=skull>☠</b> Written down what the fix does <em>not</em> cover</span></label>
 <blockquote>Ask of every control: if the model were fully persuaded and cooperating with the attacker, would this still hold? A system prompt would not. A missing credential would.</blockquote>
 </section><section class="sop" id="sop-mcp" hidden>
 <div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>MCP servers — connecting and building</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div></div>

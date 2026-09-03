@@ -409,3 +409,6 @@ The compositional claim — well supported
 The frontier asymmetry — well supported
 The mechanism — plausible, not demonstrated
 The mechanism — formally modelled
+The model decides
+A rule decides
+A person confirms
