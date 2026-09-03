@@ -832,3 +832,15 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Spend attribution** — Recording input, output and cached tokens per request at the time it happens, since an invoice gives a total and cannot be decomposed afterwards.
 
+---
+
+## Closing · The Future of Work
+
+**Compositional effect** — A change in who holds jobs without a change in how many there are. The 2026 labour evidence shows no aggregate employment effect alongside a sharp decline in junior hiring, which is a structurally different situation from a shrinking market.
+
+**Capability frontier** — The boundary of what a model does reliably. Inside it, measured gains are largest for the least experienced; outside it, people using AI were about 19 percentage points less accurate than people without it — so knowing which side you are on is the skill the tool does not supply.
+
+**The apprenticeship problem** — That junior work is simultaneously output and the mechanism by which judgement is built, so automating it removes the second function as an unintended consequence of removing the first. An argument in this course's closing chapter, not a finding.
+
+**Complementary assets** — The skilled staff, organisational processes and data infrastructure that decide whether AI adoption produces a gain. Their importance is why adoption concentrates among firms that were already productive.
+

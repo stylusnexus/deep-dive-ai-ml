@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Apprenticeship Problem</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 2 of 2</span>
+  <h1>The Apprenticeship Problem</h1>
+  <p class="subtitle">An argument, not a finding: the scarce thing becomes knowing where the boundary is, and we are automating the work that used to teach it.</p>
+
+  <p>Everything below is argument. It is consistent with the evidence in the previous lesson and it is not established by it, and where I think it is weak I have said so at the end rather than left it out. Read it as a position to disagree with, which is what a closing chapter should be.</p>
+  <h2>The starting point: a video, and an executive who changed her mind</h2>
+  <p>This chapter began with a talk by Clara Shih, formerly of Salesforce and Meta, on how AI could radically change white-collar work. Her account of the turn is specific: she watched AI agents match and in places beat her strongest people across a set of tasks, and describes feeling radicalised in the moment of seeing it work. She left to build a nonprofit aimed at helping young people find work before entry-level roles disappear, on the reasoning that the only way for people to keep pace with AI is to give them AI.</p>
+  <p>I think the observation is right and the remedy is incomplete, and the gap between those two is where this chapter lives.</p>
+  <h2>The shape of the change</h2>
+  <p>Put the two strongest findings from the previous lesson next to each other. Within the model's competence, the largest gains go to the <em>least</em> experienced — up to 36% in field experiments, minimal for the most experienced. Outside its competence, people using it were about 19 percentage points less accurate than people without it.</p>
+  <p>Read together those say something sharper than either alone. The technology compresses the skill distribution inside its frontier and steepens the penalty outside it. If that holds, the capability that becomes scarce is not the ability to produce the work — that is what got compressed — but the ability to tell which side of the boundary you are standing on.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">The scarce skill is knowing where the model stops being reliable, and it is the hardest thing to teach without experience.</p><p class="know-why">Recognising that an answer is confidently wrong requires knowing what a right answer looks like in that domain, and that recognition is built by having been wrong and corrected, repeatedly, on work that mattered enough for someone to check. It is not transferable by instruction. This entire course is an attempt to transfer some of it and the honest assessment is that lessons can only get a reader to the point where their own mistakes start teaching them faster.</p><p class="know-eg"><span class="know-eg-label">For example</span>It is also exactly the judgement the evidence says is not being compressed — the experienced gained least from the tool, because what they were bringing was not production.</p></blockquote>
+  <h2>Why the junior end is not just the cheap end</h2>
+  <p>Junior work has always been two things at once, and organisations bought it for the first and got the second thrown in. It is output, produced more slowly and less well than a senior would. It is also the apprenticeship — the mechanism by which someone acquires the judgement that makes them senior, through doing work slightly beyond them and having it corrected.</p>
+  <p>Automating that work removes the first function and, incidentally, the second. Nobody decides to stop training people; the training was a by-product of an economic arrangement, and the arrangement changed. Meanwhile the demand for senior judgement rises, because somebody has to review output that arrives faster than before and carries no reasoning with it — which is the problem the engineering-practice block calls code nobody decided.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 220" role="img" aria-label="The apprenticeship loop, before and after"><defs><marker id="ap" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<text x="14" y="20" class="d-label-b">how judgement was made</text>
+<rect x="14" y="30" width="122" height="38" rx="6" class="d-box"/><text x="26" y="54" class="d-label-sm">junior does it</text>
+<path d="M136 49 L166 49" class="d-arrow-accent" marker-end="url(#ap)"/>
+<rect x="166" y="30" width="122" height="38" rx="6" class="d-box"/><text x="178" y="54" class="d-label-sm">senior corrects</text>
+<path d="M227 68 L227 96" class="d-arrow-accent" marker-end="url(#ap)"/>
+<rect x="120" y="96" width="168" height="38" rx="6" class="d-box-accent"/><text x="132" y="120" class="d-label-sm">junior becomes senior</text>
+<path d="M120 115 L60 115 L60 72" class="d-arrow-accent" marker-end="url(#ap)"/>
+<text x="346" y="20" class="d-label-b">how it is made now</text>
+<rect x="346" y="30" width="122" height="38" rx="6" class="d-box"/><text x="358" y="54" class="d-label-sm">model does it</text>
+<path d="M468 49 L498 49" class="d-arrow-accent" marker-end="url(#ap)"/>
+<rect x="498" y="30" width="128" height="38" rx="6" class="d-box"/><text x="510" y="54" class="d-label-sm">senior reviews</text>
+<rect x="452" y="96" width="174" height="38" rx="6" class="d-box"/><text x="464" y="120" class="d-label-sm">no junior in the loop</text>
+<text x="346" y="164" class="d-label-sm">demand for senior review rises;</text>
+<text x="346" y="182" class="d-label-sm">the supply of new seniors does not.</text>
+<text x="14" y="164" class="d-label-sm">The apprenticeship was never</text>
+<text x="14" y="182" class="d-label-sm">a policy. It was a by-product.</text>
+</svg><figcaption>The loop on the left is how judgement was produced. The one on the right removes the step in the middle. Both ends still need seniors, and only one of them makes any.</figcaption></figure>
+  <h2>Why giving people the tools is necessary and not sufficient</h2>
+  <p>Shih's remedy — put AI in the hands of the people being displaced — is clearly right as far as it goes, and the evidence supports it: the largest measured gains went to the least experienced. Someone entering work without these tools is at a straightforward disadvantage.</p>
+  <p>But what the junior loses is not access. It is the corrected-mistake loop. A person handed a capable tool and no one to tell them when its output is wrong learns to produce faster, not to judge better — and the 19-point accuracy penalty says that is precisely the failure mode past the frontier. Tools raise the floor of output. They do not by themselves build the thing that was being built accidentally, and I have not seen a convincing account of what replaces it.</p>
+  <div class="callout insight"><span class="label">The most valuable thing an organisation can do is probably unfashionable</span><p>If this argument holds, the highest-leverage move available to an employer is to keep hiring juniors and deliberately spend senior time correcting them, while accepting that the same output could be produced faster another way. That is a cost with no visible return in the quarter it is paid, which is precisely why it will not happen by default and why the shortfall shows up years later as an absence nobody can attribute.</p></div>
+  <h2>The case against everything I have just said</h2>
+  <p>This argument has been made before, repeatedly, and it was wrong. Compilers were going to end programming and produced more programmers. Spreadsheets were going to end accounting; the accounting profession grew. Computer-aided design did not empty drawing offices. In each case the apprenticeship did not vanish, it reformed around the new tool, and the people predicting otherwise were reasoning exactly as I have — from the tasks being automated to the skills that would no longer be learned.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The historical prior is against me</div><div><div class="roadmap-title">And it is a strong prior</div><div class="roadmap-desc">Every previous automation of a professional task produced a new layer of work above it, and the entry point moved rather than closing. There is no reason to be confident this is the exception, and considerable reason for humility about it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The evidence is thin and early</div><div><div class="roadmap-title">Single studies, unstable target</div><div class="roadmap-desc">A 9% relative decline in one dataset and 16% in another are a direction, not a law, measured during a period of rapid change. This course's own statistics lesson says what to do with a handful of studies at small effect sizes, and it does not say build a worldview on them.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The mechanism may be right and the magnitude wrong</div><div><div class="roadmap-title">The most likely outcome</div><div class="roadmap-desc">It is entirely possible that the apprenticeship is genuinely disrupted, reforms within a decade around reviewing and directing rather than producing, and the disruption is a rough transition rather than a structural break. That would make this chapter partly right in a way that is not very useful.</div></div></div></div>
+  <h2>What follows for someone who has read this far</h2>
+  <p>This course has an implicit answer to the question and it is worth making explicit, because it shaped what was taught. Almost nothing here was about producing output faster. It was about knowing what to measure, noticing when a measurement is lying, telling a real difference from a wobble, checking whether the model was needed at all, and recognising the failures that arrive looking like successes.</p>
+  <p>That was a bet: that the durable skill is judgement about systems rather than fluency at producing them, and that judgement is built by being wrong on purpose in cheap places. Every fixture that failed before the work, every baseline written down before the run, every measurement that turned out to be measuring the instrument — those were rehearsals for being wrong somewhere expensive. If the argument in this chapter is right, that is the correct bet. If the historical prior is right, it is still not a bad one.</p>
+  <div class="callout matters"><span class="label">Be wrong on purpose, in cheap places, on a schedule</span><p>If the corrected-mistake loop is no longer supplied by the job, it has to be arranged deliberately. Build the thing before reading how. Predict the number before running the eval. Write down what you expect and check. This course is full of moments where a check disagreed with a confident expectation, and every one of those was worth more than a lesson that went smoothly — which is the whole argument in miniature.</p></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. What does the chapter argue becomes the scarce capability?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The ability to produce work quickly with AI assistance</div>
+      <div class="quiz-opt">Knowing where the model stops being reliable — since capability is compressed inside its frontier and penalised outside it</div>
+      <div class="quiz-opt">Familiarity with the widest range of available tools</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why is junior work described as two things at once?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It is both technical and administrative</div>
+      <div class="quiz-opt">It is output, and it is also the apprenticeship — the mechanism by which judgement is built, which organisations got as a by-product rather than bought deliberately</div>
+      <div class="quiz-opt">It serves both the individual&#x27;s career and the team&#x27;s capacity</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What is the strongest argument against this chapter&#x27;s thesis?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Productivity gains from AI are smaller than reported</div>
+      <div class="quiz-opt">Every previous automation of professional work produced this same prediction, and each time the apprenticeship reformed around the tool rather than disappearing</div>
+      <div class="quiz-opt">Junior employment declines are concentrated in a few sectors</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

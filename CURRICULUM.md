@@ -23,7 +23,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 94 lessons built, 94 diagrams, 13 executed notebooks.**
+**Status: 96 lessons built, 96 diagrams, 13 executed notebooks.**
 
 ---
 
@@ -249,3 +249,27 @@ the three yet; the lessons exist and the notebooks do not.
 | 4 | Deployed energy intelligence assistant | 8 | Original's deployed RAG project |
 
 Each starts with the intake sheet and ends as a published HF Space.
+
+---
+
+## Closing · The Future of Work
+
+*Not in the original, and different in kind from everything else here.*
+
+The only chapter that argues rather than instructs, and it says so in its first
+paragraph. One lesson separates what the 2026 labour evidence actually measures — no
+aggregate employment effect, a 9-16% relative decline in junior hiring with senior
+roles unaffected, productivity gains largest for the least experienced and negative
+past the model's frontier. The second makes an argument from it: that junior work was
+simultaneously output and apprenticeship, and automating the first removes the second
+by accident.
+
+The counter-argument is in the lesson rather than omitted from it. Every previous
+automation of professional work produced this same prediction and each time the
+apprenticeship reformed around the tool. The historical prior is against the thesis
+and the chapter says so.
+
+- What the evidence actually shows ✅
+- The apprenticeship problem ✅
+
+**Exit:** none. It is an essay, and the reader is meant to disagree with it.

@@ -1,0 +1,41 @@
+{
+  "title": "Closing \u00b7 The Future of Work",
+  "topic": "closing-future-of-work",
+  "icon": "\ud83d\udd2d",
+  "description": "The only chapter here that argues rather than instructs. What the labour evidence actually shows in 2026, and a thesis about which capability becomes scarce \u2014 offered as an argument, with its counter-argument attached.",
+  "tags": [
+    "ai",
+    "work",
+    "essay"
+  ],
+  "colorScheme": "slate",
+  "starred": false,
+  "archived": false,
+  "createdAt": "2026-09-02",
+  "lessons": [
+    {
+      "id": "lsn-1788300000000",
+      "title": "What the Evidence Actually Shows",
+      "file": "lsn-1788300000000-what-the-evidence-shows.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788300000001",
+      "title": "The Apprenticeship Problem",
+      "file": "lsn-1788300000001-the-apprenticeship-problem.html",
+      "source": "skill"
+    }
+  ],
+  "completion": {
+    "lsn-1788300000000": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788300000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    }
+  }
+}

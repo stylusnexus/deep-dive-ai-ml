@@ -110,6 +110,8 @@ SECTIONS = [
      "Calling an interface you do not control, serving one other people do not control, and what changes the moment either has a caller who is not you."),
     ("block9-electives", "Block 9 · Electives",
      "Three directions the spine does not cover: input that is not text, asking the database properly, and where the money actually goes."),
+    ("closing-future-of-work", "Closing · The Future of Work",
+     "The only chapter that argues rather than instructs — what the 2026 labour evidence shows, and a thesis about which capability becomes scarce, with its counter-argument attached."),
     ("engineering-practice", "Block 0 · Engineering Practice",
      "The three artifacts an LLM project accumulates — harness, recipes, decision records — how each one turns harmful, and the measurement procedure that corrects them."),
 ]
