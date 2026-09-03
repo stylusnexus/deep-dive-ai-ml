@@ -17,6 +17,9 @@ If the first three aren't all yes, stop. Most fine-tuning projects should end he
 - [ ] Deduplicated — near-duplicates inflate your eval
 
 ## Method
+- [ ] ☠ Objective chosen for what you can actually supply: demonstrations you can write →
+      supervised; something you can only *check* → reinforcement against a verifier. Reaching for
+      the second without a grader is the commonest way this becomes an expensive nothing
 - [ ] LoRA / QLoRA before full fine-tune; rank chosen deliberately
 - [ ] Base model licence permits your use
 - [ ] Chat template matches the base model exactly
@@ -29,6 +32,9 @@ If the first three aren't all yes, stop. Most fine-tuning projects should end he
 
 ## After
 - [ ] ☠ Evaluated against the **base model** on the same held-out set — not just "it looks better"
+- [ ] If a reward or verifier was used: checked against an evaluation the reward never saw. A
+      rising reward curve is evidence the reward went up, which equals improvement only where the
+      reward captures the goal — and it never quite does
 - [ ] Checked for capability loss outside the fine-tuned task
 - [ ] Overfitting checked — does it parrot training examples verbatim?
 - [ ] ☠ Adapter versioned and stored somewhere real, not a local folder — and carrying its

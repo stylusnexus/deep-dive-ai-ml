@@ -170,6 +170,15 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="training-25"><input type="checkbox" data-id="training-25"><span class="tick"></span><span class="body">Cross-validated with the whole pipeline inside the folds</span></label>
 <label class="item" id="training-26"><input type="checkbox" data-id="training-26"><span class="tick"></span><span class="body">Test set touched <strong>once</strong>, at the end, and never again</span></label>
 <label class="item" id="training-27"><input type="checkbox" data-id="training-27"><span class="tick"></span><span class="body">Result recorded with config, data version, date, per-item outcomes</span></label>
+<h2>If this is a retrain rather than a first run</h2>
+<label class="item killer" id="training-28"><input type="checkbox" data-id="training-28"><span class="tick"></span><span class="body"><b class=skull>☠</b> Treated as a deployment, not a refresh — it is a new model that can be worse, so it earns</span></label>
+<p>the same shadow, canary and slice checks as any other change</p>
+<label class="item" id="training-29"><input type="checkbox" data-id="training-29"><span class="tick"></span><span class="body">The trigger named: schedule, drift threshold, measured performance drop, or accumulated data</span></label>
+<label class="item" id="training-30"><input type="checkbox" data-id="training-30"><span class="tick"></span><span class="body">Ruled out the cases where retraining is the wrong answer — drift detected but the metric</span></label>
+<p>holding, a seasonal shift about to reverse, labels not in yet, or an upstream data bug that retraining would teach the model to accommodate</p>
+<label class="item" id="training-31"><input type="checkbox" data-id="training-31"><span class="tick"></span><span class="body">The model it replaces still exists and is still servable</span></label>
+<label class="item" id="training-32"><input type="checkbox" data-id="training-32"><span class="tick"></span><span class="body">Budget covers the evaluation cycle, not only the compute — if you cannot afford to evaluate</span></label>
+<p>it, you cannot afford to retrain it</p>
 <h2>Smells</h2>
 <p class="bullet">Score suspiciously high on a hard problem → suspect leakage before celebrating</p>
 <p class="bullet">One model far worse than the rest at a fixed threshold → probably a threshold artefact, not a model problem; re-check threshold-free</p>
@@ -226,23 +235,27 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="fine-tuning-9"><input type="checkbox" data-id="fine-tuning-9"><span class="tick"></span><span class="body">Licensing checked if the data came from another model&#x27;s outputs</span></label>
 <label class="item" id="fine-tuning-10"><input type="checkbox" data-id="fine-tuning-10"><span class="tick"></span><span class="body">Deduplicated — near-duplicates inflate your eval</span></label>
 <h2>Method</h2>
-<label class="item" id="fine-tuning-11"><input type="checkbox" data-id="fine-tuning-11"><span class="tick"></span><span class="body">LoRA / QLoRA before full fine-tune; rank chosen deliberately</span></label>
-<label class="item" id="fine-tuning-12"><input type="checkbox" data-id="fine-tuning-12"><span class="tick"></span><span class="body">Base model licence permits your use</span></label>
-<label class="item" id="fine-tuning-13"><input type="checkbox" data-id="fine-tuning-13"><span class="tick"></span><span class="body">Chat template matches the base model exactly</span></label>
-<label class="item" id="fine-tuning-14"><input type="checkbox" data-id="fine-tuning-14"><span class="tick"></span><span class="body">Hardware plan real (M4 Max, 128GB: LoRA on 7B–13B is comfortable locally)</span></label>
-<label class="item" id="fine-tuning-15"><input type="checkbox" data-id="fine-tuning-15"><span class="tick"></span><span class="body">If it does not fit: mixed precision, then gradient accumulation, then gradient</span></label>
+<label class="item killer" id="fine-tuning-11"><input type="checkbox" data-id="fine-tuning-11"><span class="tick"></span><span class="body"><b class=skull>☠</b> Objective chosen for what you can actually supply: demonstrations you can write →</span></label>
+<p>supervised; something you can only <em>check</em> → reinforcement against a verifier. Reaching for the second without a grader is the commonest way this becomes an expensive nothing</p>
+<label class="item" id="fine-tuning-12"><input type="checkbox" data-id="fine-tuning-12"><span class="tick"></span><span class="body">LoRA / QLoRA before full fine-tune; rank chosen deliberately</span></label>
+<label class="item" id="fine-tuning-13"><input type="checkbox" data-id="fine-tuning-13"><span class="tick"></span><span class="body">Base model licence permits your use</span></label>
+<label class="item" id="fine-tuning-14"><input type="checkbox" data-id="fine-tuning-14"><span class="tick"></span><span class="body">Chat template matches the base model exactly</span></label>
+<label class="item" id="fine-tuning-15"><input type="checkbox" data-id="fine-tuning-15"><span class="tick"></span><span class="body">Hardware plan real (M4 Max, 128GB: LoRA on 7B–13B is comfortable locally)</span></label>
+<label class="item" id="fine-tuning-16"><input type="checkbox" data-id="fine-tuning-16"><span class="tick"></span><span class="body">If it does not fit: mixed precision, then gradient accumulation, then gradient</span></label>
 <p>checkpointing — in that order — <em>before</em> reaching for a smaller model. The first two cost no accuracy at all and the third costs only time; a smaller model costs capability</p>
-<label class="item" id="fine-tuning-16"><input type="checkbox" data-id="fine-tuning-16"><span class="tick"></span><span class="body">Loss flat immediately after enabling mixed precision treated as a numerics problem</span></label>
+<label class="item" id="fine-tuning-17"><input type="checkbox" data-id="fine-tuning-17"><span class="tick"></span><span class="body">Loss flat immediately after enabling mixed precision treated as a numerics problem</span></label>
 <p>(gradient underflow, loss scaling) rather than a learning-rate one</p>
 <h2>After</h2>
-<label class="item killer" id="fine-tuning-17"><input type="checkbox" data-id="fine-tuning-17"><span class="tick"></span><span class="body"><b class=skull>☠</b> Evaluated against the <strong>base model</strong> on the same held-out set — not just &quot;it looks better&quot;</span></label>
-<label class="item" id="fine-tuning-18"><input type="checkbox" data-id="fine-tuning-18"><span class="tick"></span><span class="body">Checked for capability loss outside the fine-tuned task</span></label>
-<label class="item" id="fine-tuning-19"><input type="checkbox" data-id="fine-tuning-19"><span class="tick"></span><span class="body">Overfitting checked — does it parrot training examples verbatim?</span></label>
-<label class="item killer" id="fine-tuning-20"><input type="checkbox" data-id="fine-tuning-20"><span class="tick"></span><span class="body"><b class=skull>☠</b> Adapter versioned and stored somewhere real, not a local folder — and carrying its</span></label>
+<label class="item killer" id="fine-tuning-18"><input type="checkbox" data-id="fine-tuning-18"><span class="tick"></span><span class="body"><b class=skull>☠</b> Evaluated against the <strong>base model</strong> on the same held-out set — not just &quot;it looks better&quot;</span></label>
+<label class="item" id="fine-tuning-19"><input type="checkbox" data-id="fine-tuning-19"><span class="tick"></span><span class="body">If a reward or verifier was used: checked against an evaluation the reward never saw. A</span></label>
+<p>rising reward curve is evidence the reward went up, which equals improvement only where the reward captures the goal — and it never quite does</p>
+<label class="item" id="fine-tuning-20"><input type="checkbox" data-id="fine-tuning-20"><span class="tick"></span><span class="body">Checked for capability loss outside the fine-tuned task</span></label>
+<label class="item" id="fine-tuning-21"><input type="checkbox" data-id="fine-tuning-21"><span class="tick"></span><span class="body">Overfitting checked — does it parrot training examples verbatim?</span></label>
+<label class="item killer" id="fine-tuning-22"><input type="checkbox" data-id="fine-tuning-22"><span class="tick"></span><span class="body"><b class=skull>☠</b> Adapter versioned and stored somewhere real, not a local folder — and carrying its</span></label>
 <p>provenance: which base and version, which dataset version, which tracked run, and the evaluation that justified shipping it</p>
-<label class="item" id="fine-tuning-21"><input type="checkbox" data-id="fine-tuning-21"><span class="tick"></span><span class="body">The model it replaces still exists and is still servable — a rollback you cannot perform</span></label>
+<label class="item" id="fine-tuning-23"><input type="checkbox" data-id="fine-tuning-23"><span class="tick"></span><span class="body">The model it replaces still exists and is still servable — a rollback you cannot perform</span></label>
 <p>turns an incident into an unplanned training run</p>
-<label class="item" id="fine-tuning-22"><input type="checkbox" data-id="fine-tuning-22"><span class="tick"></span><span class="body">Quantized for serving if it&#x27;s going local; re-evaluated after quantizing</span></label>
+<label class="item" id="fine-tuning-24"><input type="checkbox" data-id="fine-tuning-24"><span class="tick"></span><span class="body">Quantized for serving if it&#x27;s going local; re-evaluated after quantizing</span></label>
 <h2>Smells</h2>
 <p class="bullet">Brilliant on training examples, worse everywhere else → trained too long on too little</p>
 <p class="bullet">No improvement at all → the gap was knowledge, not format; go back to retrieval</p>
@@ -344,8 +357,10 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="llm-engineering-37"><input type="checkbox" data-id="llm-engineering-37"><span class="tick"></span><span class="body">Full action log — you cannot investigate what you didn&#x27;t record</span></label>
 <label class="item" id="llm-engineering-38"><input type="checkbox" data-id="llm-engineering-38"><span class="tick"></span><span class="body">Model versions pinned, not floating on an alias</span></label>
 <label class="item" id="llm-engineering-39"><input type="checkbox" data-id="llm-engineering-39"><span class="tick"></span><span class="body">Eval set re-run on a schedule, not only when something looks wrong</span></label>
-<label class="item" id="llm-engineering-40"><input type="checkbox" data-id="llm-engineering-40"><span class="tick"></span><span class="body">Rate limits on every paid endpoint</span></label>
-<label class="item" id="llm-engineering-41"><input type="checkbox" data-id="llm-engineering-41"><span class="tick"></span><span class="body">Unattended runs: narrow job, scoped access, safe stopping points, someone reachable</span></label>
+<label class="item" id="llm-engineering-40"><input type="checkbox" data-id="llm-engineering-40"><span class="tick"></span><span class="body">Drift watched on inputs <em>and</em> outputs, with a threshold set from a period you know was</span></label>
+<p>healthy. For the joint case a domain classifier — old data vs recent — catches what per-feature checks cannot, because features can move together while each looks unchanged</p>
+<label class="item" id="llm-engineering-41"><input type="checkbox" data-id="llm-engineering-41"><span class="tick"></span><span class="body">Rate limits on every paid endpoint</span></label>
+<label class="item" id="llm-engineering-42"><input type="checkbox" data-id="llm-engineering-42"><span class="tick"></span><span class="body">Unattended runs: narrow job, scoped access, safe stopping points, someone reachable</span></label>
 <h2>Smells</h2>
 <p class="bullet">Agent loops without progress → no external verifier; nothing tells it that it failed</p>
 <p class="bullet">Wrong tool chosen repeatedly → rewrite descriptions before upgrading the model</p>

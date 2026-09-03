@@ -39,6 +39,17 @@ Run after the data checklist. ☠ = miss it and the result is wrong, not just wo
 - [ ] Test set touched **once**, at the end, and never again
 - [ ] Result recorded with config, data version, date, per-item outcomes
 
+## If this is a retrain rather than a first run
+- [ ] ☠ Treated as a deployment, not a refresh — it is a new model that can be worse, so it earns
+      the same shadow, canary and slice checks as any other change
+- [ ] The trigger named: schedule, drift threshold, measured performance drop, or accumulated data
+- [ ] Ruled out the cases where retraining is the wrong answer — drift detected but the metric
+      holding, a seasonal shift about to reverse, labels not in yet, or an upstream data bug that
+      retraining would teach the model to accommodate
+- [ ] The model it replaces still exists and is still servable
+- [ ] Budget covers the evaluation cycle, not only the compute — if you cannot afford to evaluate
+      it, you cannot afford to retrain it
+
 ## Smells
 - Score suspiciously high on a hard problem → suspect leakage before celebrating
 - One model far worse than the rest at a fixed threshold → probably a threshold artefact, not a model problem; re-check threshold-free

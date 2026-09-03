@@ -61,6 +61,9 @@
 - [ ] Full action log — you cannot investigate what you didn't record
 - [ ] Model versions pinned, not floating on an alias
 - [ ] Eval set re-run on a schedule, not only when something looks wrong
+- [ ] Drift watched on inputs *and* outputs, with a threshold set from a period you know was
+      healthy. For the joint case a domain classifier — old data vs recent — catches what
+      per-feature checks cannot, because features can move together while each looks unchanged
 - [ ] Rate limits on every paid endpoint
 - [ ] Unattended runs: narrow job, scoped access, safe stopping points, someone reachable
 
