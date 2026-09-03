@@ -825,6 +825,44 @@ LESSONS = [
       "<strong>Cross-validation.</strong> Rotate which slice is held out, so your estimate doesn't hinge on one lucky split.",
     ]),
 
+    ("h2", "Will more data help? The curve that answers it"),
+    ("p", "&ldquo;Get more data&rdquo; is the standard advice and it is expensive advice, so it is worth knowing that the question has a mechanical answer rather than a judgement one. Train the same model on increasing fractions of what you already have &mdash; ten per cent, twenty, forty, and so on &mdash; and plot training and validation score against the amount used. The shape tells you what to do next."),
+
+    ("terms", [
+      ("Both curves low, close together", "Underfitting: more data will not help",
+       "The model cannot represent the pattern, so feeding it more of the same changes nothing. Add capacity or better features."),
+      ("Gap between them, validation still rising", "More data will help",
+       "The model is learning and has not saturated. The validation curve has not flattened, so the next tranche of data buys real improvement."),
+      ("Gap between them, validation flat", "More data will not help much",
+       "You are overfitting and the curve has plateaued. Regularisation, better features or a different model &mdash; not volume."),
+    ]),
+
+    ("know",
+     "A learning curve turns &ldquo;we need more data&rdquo; from an assumption into a measurement, and it costs an afternoon.",
+     "Collecting or labelling data is usually the most expensive thing a project can decide to do, and it is routinely decided on intuition. Training on fractions you already hold answers the question before the money is spent: if the validation curve has gone flat, more of the same data is the one intervention you can be confident will not help.",
+     "A team is quoted six weeks of labelling to double a training set. The learning curve, run in an afternoon on the existing data, is flat from sixty per cent onwards. The six weeks would have bought nothing, and the gap between train and validation says the problem was regularisation."),
+
+    ("h2", "Double descent, and why the tidy story is incomplete"),
+    ("p", "Everything above describes a U: too simple underfits, too complex overfits, and somewhere between them sits the sweet spot. That picture is correct for the classical models it was drawn from and it is not the whole picture, which matters because the models this course spends most of its time on live in the part it does not describe."),
+    ("p", "Push capacity past the point where the model can fit the training data exactly, and test error does something the U-curve forbids: it falls again. The error rises to a peak around the threshold where the model is just barely able to memorise the data, and then descends a second time as capacity keeps growing &mdash; hence the name. Very large models are operating well to the right of that peak, which is why they can have far more parameters than data points and still generalise, in apparent defiance of everything the classical account predicts."),
+
+    ("figure", "The classical U-curve is the left half. Past the point where the model can exactly fit the training data, test error peaks and then descends again.", '''<svg viewBox="0 0 520 168" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Test error falls, rises to a peak at the interpolation threshold, then falls again as capacity grows.">
+<path d="M40 132 L488 132" class="d-arrow"/>
+<path d="M40 132 L40 20" class="d-arrow"/>
+<text x="250" y="152" class="d-label-sm" text-anchor="middle">model capacity</text>
+<text x="16" y="72" class="d-label-sm" transform="rotate(-90 16 72)" text-anchor="middle">test error</text>
+<path d="M52 44 C90 96, 120 108, 150 104 C182 100, 208 60, 228 34" fill="none" stroke="currentColor" stroke-width="2" class="d-fill-accent"/>
+<path d="M228 34 C250 66, 268 96, 300 108 C350 122, 420 120, 480 118" fill="none" stroke="currentColor" stroke-width="2" class="d-fill-accent"/>
+<path d="M228 24 L228 132" stroke-dasharray="4 3" stroke="currentColor" stroke-width="1" opacity="0.55"/>
+<text x="228" y="18" class="d-label-sm" text-anchor="middle">can fit the data exactly</text>
+<text x="110" y="124" class="d-label-sm" text-anchor="middle">classical U</text>
+<text x="380" y="106" class="d-label-sm" text-anchor="middle">second descent</text>
+<text x="380" y="92" class="d-label-sm" text-anchor="middle">where large models sit</text>
+</svg>'''),
+
+    ("callout", "insight", "What this does and does not license",
+     "<p>It does not license ignoring overfitting. Everything earlier in this lesson holds for the regime most projects are in &mdash; a model of modest capacity on a modest dataset is on the left half of that curve, and a validation gap there means what it has always meant.</p><p>What it does explain is why the intuition transfers badly to large models. A practitioner carrying only the U-curve concludes that a model with vastly more parameters than training examples must be memorising and therefore useless, and that conclusion is wrong in a way that the classical account cannot repair. Know which regime you are in before you apply the rule from the other.</p>"),
+
     ("h2", "Where this shows up outside classical ML"),
     ("p", "The same failure follows you through the whole program under different names:"),
     ("ul", [
@@ -1516,6 +1554,8 @@ LESSONS = [
       ("Class weights", "Penalise minority errors more", "One parameter in most libraries. Try this first — it's nearly free."),
       ("Oversampling / synthetic minority over-sampling technique (SMOTE)", "Duplicate or synthesise minority rows", "Fit only on the training split. Doing it before the split is textbook leakage."),
       ("Undersampling", "Discard majority rows", "Fast, throws away real data. Reasonable when the majority class is enormous."),
+      ("Focal loss", "The neural-network answer",
+       "Reshapes the loss so that easy, already-correct examples contribute progressively less, concentrating training on the hard minority cases. Where class weights say some rows matter more, this says some rows matter less once the model has them right."),
       ("Threshold tuning", "Change nothing, move the cut-off", "Frequently the most effective option, and the most often skipped."),
     ]),
     ("callout", "pitfall", "The leakage trap here", "Oversample before splitting and copies of the same minority row land in both train and test. Your model has effectively seen the test data, the score is inflated, and the usual overfitting gap won't show it. This is one of the most common leakage mistakes in practice — resample inside the pipeline, after the split, every time."),
@@ -1582,6 +1622,28 @@ LESSONS = [
 <path d="M280 62 L280 30" stroke="var(--yellow)" stroke-width="1.4"/>
 <text x="188" y="24" class="d-fill-yellow" font-size="11" font-weight="600">input distribution shifts here</text>
 </svg>'''),
+
+    ("h2", "How you actually detect it"),
+    ("p", "The awkward part of drift is that the thing you want to watch &mdash; whether predictions are still correct &mdash; needs labels, and labels arrive late or never. So detection works on what you do have, which is the inputs and the outputs, and the methods form a ladder from cheap to thorough."),
+
+    ("terms", [
+      ("Summary statistics per feature", "Cheapest, and catches the obvious",
+       "Mean, spread, missing rate and category frequencies, compared against the training distribution. Finds the breakages that matter most often: a unit change, a new category, a feed that started sending nulls."),
+      ("Distribution tests and distances", "One feature at a time, more sensitive",
+       "A two-sample test or a distance measure between the training and recent distributions of each feature. More sensitive than summary statistics, and it will find differences too small to matter, so it needs a threshold you chose deliberately."),
+      ("A domain classifier", "The trick worth knowing",
+       "Label training data 0 and recent data 1, and train a classifier to tell them apart. If it cannot, the distributions match. If it can, its accuracy measures how much they differ and its feature importances tell you <em>which</em> features moved."),
+      ("Output monitoring", "What to watch when inputs look fine",
+       "The distribution of the model&#39;s own predictions. A classifier that used to predict the rare class two per cent of the time and now predicts it nine per cent is telling you something before any label arrives."),
+    ]),
+
+    ("know",
+     "The domain classifier is the one to reach for, because it answers the multivariate question the per-feature checks cannot.",
+     "Features can drift jointly while every one of them looks unchanged on its own. Height and weight can each keep their exact distribution while the relationship between them inverts, and no per-feature test will see it because no single feature moved. A classifier trained to separate old data from new is looking at all the features together, which is why it catches the joint case &mdash; and it costs you a model you already know how to build.",
+     "Every feature in a fraud model passes its individual distribution test. A domain classifier separates last month&#39;s traffic from the training set with 89 per cent accuracy, and its top features are transaction amount and time of day &mdash; neither of which shifted alone, but whose combination did. The fraud pattern had changed shape without changing any margin."),
+
+    ("callout", "matters", "Detection is not the hard part; deciding the threshold is",
+     "<p>These methods will all report some drift all the time, because distributions are never identical between two windows. A detector with no threshold produces an alert stream nobody reads, which is the failure mode the telemetry lesson describes: a signal that fires constantly conveys nothing. Set the threshold against a period you know was healthy, and pair the alert with the action it should trigger &mdash; retrain, investigate, or record and move on. An alert with no attached decision is a notification, not monitoring.</p>"),
 
     ("h2", "The monitoring problem"),
     ("p", "You usually can't measure accuracy in production, because ground truth arrives late or never. Whether a loan defaults takes months. Whether a maintenance prediction was right takes until the part fails or doesn't. So you monitor proxies that are available immediately:"),

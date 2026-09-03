@@ -39,8 +39,14 @@
     },
     {
       "id": "lsn-1788000000004",
+      "title": "When the Training Run Does Not Fit",
+      "file": "lsn-1788000000004-when-the-training-run-does-not-fit.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788000000005",
       "title": "The Four Ways to Shrink a Model",
-      "file": "lsn-1788000000004-the-four-ways-to-shrink-a-model.html",
+      "file": "lsn-1788000000005-the-four-ways-to-shrink-a-model.html",
       "source": "skill"
     }
   ],
@@ -66,6 +72,11 @@
       "starred": false
     },
     "lsn-1788000000004": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788000000005": {
       "viewed": false,
       "completed": false,
       "starred": false

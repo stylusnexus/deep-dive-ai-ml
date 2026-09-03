@@ -46,6 +46,8 @@
 - [ ] Tool results truncated or summarised before they enter context
 - [ ] History managed — window, compaction or structured memory
 - [ ] Long-session degradation understood; fresh context preferred to fighting a poisoned one
+- [ ] ☠ Shadowed against real traffic before any user sees it — and the shadow path has write
+      access *removed*, not merely unused, or it is running in production regardless
 - [ ] Anything written into an always-loaded instruction file (`AGENTS.md`, `CLAUDE.md`) earns its
       place on *every* task, not just the one that prompted it — it is spent from every session's
       budget. Facts needed occasionally belong in a searchable note instead

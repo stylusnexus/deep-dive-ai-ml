@@ -322,6 +322,71 @@ LESSONS = [
   ],
 },
 {
+  "slug": "when-the-training-run-does-not-fit",
+  "title": "When the Training Run Does Not Fit",
+  "subtitle": "Three techniques that trade time or precision for memory — and the order to reach for them.",
+  "body": [
+    ("p", "The commonest failure of a first training run is not a bad result. It is an out-of-memory error thirty seconds in, and the instinct it produces &mdash; use a smaller model &mdash; is usually the wrong response, because the memory is going somewhere you can control."),
+
+    ("h2", "Where the memory actually goes"),
+    ("p", "Four things are resident during training and only the first is the model. The weights themselves; the gradients, which are the same size again; the optimiser state, which for the common choice of optimiser is roughly twice the weights once more; and the activations, which are the intermediate values from the forward pass that the backward pass needs in order to compute anything at all."),
+    ("p", "The proportions surprise people. For a large model with a short sequence, the first three dominate and the arithmetic is fixed. With a long sequence or a large batch, activations grow until they are the largest single item &mdash; and unlike the other three, activations scale with what you feed the model rather than with how big it is."),
+
+    ("figure", "Four claims on memory during training. Only one of them is the model, and the one that grows with your batch and sequence length is the one you can trade against.", '''<svg viewBox="0 0 540 152" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Training memory divided between weights, gradients, optimiser state and activations.">
+<rect x="12" y="28" width="80" height="42" rx="5" class="d-box"/><text x="52" y="46" class="d-label-sm" text-anchor="middle">weights</text><text x="52" y="62" class="d-label-sm" text-anchor="middle">1&#215;</text>
+<rect x="96" y="28" width="80" height="42" rx="5" class="d-box"/><text x="136" y="46" class="d-label-sm" text-anchor="middle">gradients</text><text x="136" y="62" class="d-label-sm" text-anchor="middle">1&#215;</text>
+<rect x="180" y="28" width="118" height="42" rx="5" class="d-box"/><text x="239" y="46" class="d-label-sm" text-anchor="middle">optimiser state</text><text x="239" y="62" class="d-label-sm" text-anchor="middle">about 2&#215;</text>
+<rect x="302" y="28" width="222" height="42" rx="5" class="d-box-accent"/><text x="413" y="46" class="d-label-b" text-anchor="middle">activations</text><text x="413" y="62" class="d-label-sm" text-anchor="middle">grows with batch and sequence length</text>
+<text x="12" y="18" class="d-label-sm">fixed by the model and the optimiser</text>
+<text x="302" y="18" class="d-label-sm">the part you control</text>
+<text x="12" y="96" class="d-label-sm">precision &#8212; halve the weights, gradients and activations at once</text>
+<text x="12" y="114" class="d-label-sm">accumulation &#8212; shrink the batch in memory, keep it in the maths</text>
+<text x="12" y="132" class="d-label-sm">checkpointing &#8212; discard activations, recompute them in the backward pass</text>
+</svg>'''),
+
+    ("h2", "The three levers"),
+    ("terms", [
+      ("Mixed precision", "Store in half, accumulate in full",
+       "Hold weights and activations in a sixteen-bit format while keeping a full-precision copy of the weights for the update. Roughly halves memory and is usually faster as well, because moving fewer bytes is the thing that helps on memory-bound hardware."),
+      ("Gradient accumulation", "A large batch, taken in instalments",
+       "Run several small batches, add up their gradients, and update once. The maths is the large batch; the memory is the small one. It costs no accuracy and it costs wall-clock time, since you have done the same forward passes without the parallelism."),
+      ("Gradient checkpointing", "Throw activations away and recompute them",
+       "Keep only a few activations from the forward pass and recompute the rest during the backward pass. A large reduction in activation memory in exchange for running part of the forward pass twice &mdash; typically some tens of per cent more time."),
+      ("The order to try them", "Cheapest concession first",
+       "Mixed precision, then accumulation, then checkpointing. The first often costs nothing at all, the second costs time, the third costs more time. Reach for a smaller model only after all three."),
+    ]),
+
+    ("know",
+     "Two of these three cost time and none of them cost accuracy. That is why reaching for a smaller model first is usually the wrong move.",
+     "Accumulation is arithmetically identical to the large batch it imitates, and checkpointing recomputes exactly the values it discarded, so neither changes the result of the run &mdash; only how long it takes. Mixed precision is the one that touches numerics, and the full-precision master copy of the weights exists precisely so that the update does not lose the small increments that matter. A smaller model, by contrast, changes what you are able to learn, which is the one concession that shows up in the evaluation.",
+     "A run fails at a batch size of 16 on a 13-billion-parameter model. Mixed precision alone brings it within reach; if it does not, four accumulation steps at a batch of 4 give the same gradient as the batch of 16 at a quarter of the activation memory, and the only cost is that the epoch takes longer. Neither of those changes a single number in the final evaluation."),
+
+    ("callout", "pitfall", "The failure that looks like the technique and is not",
+     "<p>Sixteen-bit formats have a much narrower range than thirty-two-bit ones, and gradients are small numbers. In the older half-precision format they can underflow to zero, at which point training quietly stops learning &mdash; the loss flattens and nothing errors. The standard remedy is loss scaling: multiply the loss before the backward pass to lift the gradients into representable range, then divide it out before the update. Modern frameworks do this for you, and the newer sixteen-bit format designed for machine learning trades precision for range specifically to avoid the problem.</p><p>The reason to know this anyway is diagnostic. A flat loss curve immediately after enabling mixed precision is a numerics problem, not a learning-rate problem, and it will absorb an afternoon if you attack it as the latter.</p>"),
+
+    ("h2", "What none of them fix"),
+    ("p", "These are memory techniques, and the hardware lesson&#39;s first rule still governs: capacity is a hard wall and library support is what actually blocks people. A sixteen-bit format that has no implementation on your accelerator will fall back to something slower or fail outright, and no amount of accumulation makes a model fit that was never going to. Check that it fits, then check that the operations you need exist, and only then start trading time for room."),
+
+    ("quiz", [
+      ("Which of the four claims on training memory grows with your batch size and sequence length rather than with the model?",
+       ["The optimiser state, since it tracks statistics per example",
+        "The activations — intermediate forward-pass values the backward pass needs, which is why they are the part you can trade against",
+        "The gradients, which are computed per example before being averaged"],
+       1),
+      ("What does gradient accumulation cost you?",
+       ["Some accuracy, since gradients from small batches are noisier",
+        "Wall-clock time only — the summed gradient is arithmetically the same as the large batch, so the result is unchanged",
+        "Memory, which is traded for a shorter run"],
+       1),
+      ("The loss goes flat immediately after you enable mixed precision. What should you suspect first?",
+       ["The learning rate is now too high for the reduced precision",
+        "Gradients underflowing to zero in the narrower sixteen-bit range — a numerics problem that loss scaling exists to solve",
+        "The model is too small for the task and has underfit"],
+       1),
+    ]),
+  ],
+},
+{
   "slug": "the-four-ways-to-shrink-a-model",
   "title": "The Four Ways to Shrink a Model",
   "subtitle": "Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.",

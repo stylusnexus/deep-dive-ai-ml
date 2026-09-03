@@ -378,6 +378,14 @@ LESSONS = [
      "It asks whether two unrelated piles of numbers have different means. The question you actually had was whether B beats A <em>question by question</em>, and the pairing is the information that turns one into the other. Throwing it away is not a conservative choice or a safe default — in the simulation above it took a real, large effect from almost always detected to almost never, on identical data.",
      "The rule is simple: if you can line the two sets up one-to-one and the pairing means something, use a paired test. Same questions through two models, same code before and after a change, same document scored by two judges."),
 
+    ("h2", "Two intervals that get confused, and only one is about your next case"),
+    ("p", "An interval around a result can answer two different questions and the notation does not distinguish them. A <strong>confidence interval</strong> is about the average: run the experiment many times and the true mean lies inside it as often as the confidence level says. A <strong>prediction interval</strong> is about a single new observation: where the next case is likely to land. The second is always wider, often much wider, because it carries both the uncertainty in the estimate and the ordinary spread of the data."),
+
+    ("know",
+     "A confidence interval on the mean tells you nothing about how wrong you can be on one case.",
+     "Anything making a decision per item &mdash; a per-request latency budget, a per-customer forecast, a per-document score threshold &mdash; is asking a prediction question, and a confidence interval answers a different one. The gap between them is not a technicality: as the sample grows, the confidence interval shrinks towards nothing while the prediction interval converges on the actual spread of the data and stays wide, because knowing the mean perfectly still does not tell you what the next draw will be.",
+     "A model&#39;s mean response time is 400ms with a 95 per cent confidence interval of 390 to 410. It would be easy to promise a 500ms budget on that basis. The prediction interval is 180 to 1,300, because individual requests vary enormously, and roughly one request in twenty will breach the promise. The confidence interval was never evidence about individual requests."),
+
     ("h2", "Report the distribution per arm, not just the mean"),
     ("p", "A mean is one number standing in for a shape, and two arms with identical means can behave completely differently. The one that catches people is bimodality: a change that helps half the population and hurts the other half moves the mean not at all, and the summary reports success by reporting nothing."),
 

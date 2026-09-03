@@ -421,3 +421,11 @@ The held-out split
 The reward or verifier
 Verifier-based RFT
 The adapter
+Both curves low, close together
+Gap between them, validation still rising
+Gap between them, validation flat
+The order to try them
+Summary statistics per feature
+Distribution tests and distances
+A domain classifier
+Output monitoring

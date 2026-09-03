@@ -27,6 +27,8 @@ If either half is untrue, stop. Everything below produces noise.
 - [ ] Control fixture included, and read first when a board looks uniform
 
 ## 2 · Baseline
+- [ ] Before concluding you need more data: learning curve run on fractions of what you already
+      hold. A flat validation curve means more of the same will not help, and it costs an afternoon
 - [ ] Whole set, not a spot check
 - [ ] Repeated, so you know the run-to-run spread
 - [ ] Recorded with model, config, versions, date, per-item outcomes
@@ -47,6 +49,9 @@ If either half is untrue, stop. Everything below produces noise.
 - [ ] For each passing test, what it does **not** establish, written down now
 
 ## 4 · Read it honestly
+- [ ] Any per-case promise (a latency budget, a per-customer forecast) stated from a
+      *prediction* interval, not a confidence interval — the second is about the mean and says
+      nothing about how wrong a single case can be
 - [ ] Compared against baseline spread, not against zero
 - [ ] Sample size big enough for the difference to mean anything
 - [ ] Guardrail checked before declaring a win

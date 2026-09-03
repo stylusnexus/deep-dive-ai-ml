@@ -235,6 +235,28 @@ LESSONS = [
 <text x="14" y="178" class="d-label-sm">A page for the left. A dashboard read weekly for the right. Confusing the two produces alarms nobody trusts.</text>
 </svg>'''),
 
+    ("h2", "Four ways to put a change in front of traffic"),
+    ("p", "Everything above assumes the new version is already serving. How it got there is a separate decision, and the options differ in what they risk and what they can measure. The evaluation block argued that a held-out set is not the same as production; these are the ways to get production evidence without betting production on it."),
+
+    ("terms", [
+      ("Shadow deployment", "Runs on real traffic, serves nothing",
+       "The new version receives a copy of every live request and its output is logged and discarded. Zero user risk, real inputs, and it is the only one of these that can be run for as long as you like before anyone is affected."),
+      ("Canary release", "A small slice of real users",
+       "Route a few per cent of traffic to the new version, watch the metrics, widen if they hold. Real risk, bounded by the slice, and the first option here that can measure anything about user behaviour."),
+      ("Interleaved comparison", "Both versions in one response",
+       "For ranked output, mix results from both models into a single list and see which side earns the clicks. Far more sensitive than splitting users, because each user acts as their own comparison &mdash; the pairing argument from the evaluation block, applied to deployment."),
+      ("Blue-green deployment", "Two full environments, one switch",
+       "Stand the new version up alongside the old, cut traffic across, and keep the old one warm to cut back to. This is a rollback strategy rather than an evaluation one: it makes reverting fast, and tells you nothing before the switch."),
+    ]),
+
+    ("know",
+     "Shadow deployment is the one people skip, and it is the only way to see how a change behaves on the inputs you never imagined.",
+     "A held-out set contains the cases you thought to collect. Production contains the malformed requests, the enormous documents, the encoding no one anticipated and the traffic pattern at three in the morning. Running the new version against all of it while serving none of it separates &ldquo;does it work&rdquo; from &ldquo;does it work here&rdquo;, at no risk, before a single user is exposed. What it cannot tell you is whether people <em>prefer</em> the output, which is what the canary and the interleaved comparison are for.",
+     "A retrieval change passes the eval set at 94 per cent. Shadowed against a week of live traffic it errors on 0.3 per cent of requests &mdash; all of them documents above a size the eval set never contained. Nobody saw an error, because nobody was served the shadow output, and the fix shipped before the canary started."),
+
+    ("callout", "pitfall", "A shadow that writes is not a shadow",
+     "<p>The guarantee only holds if the shadowed path has no effects. If the new version calls a tool that sends, charges, records or deletes, it is running in production regardless of whether anyone reads its answer &mdash; and the same is true of anything that mutates a shared cache or index. Run shadows with write access removed rather than with writes merely unused, which is the least-privilege argument from the security block arriving in a place people do not expect it.</p><p>Watch the cost too. A shadow doubles inference volume for as long as it runs, and on a paid model that is a real bill for output nobody reads.</p>"),
+
     ("h2", "What deserves waking someone"),
     ("p", "Alert on the things that are both urgent and actionable, and put everything else on a dashboard somebody reads on a schedule. A page that fires for a condition nobody can act on at three in the morning trains people to ignore pages, which costs more than the alert ever saved."),
 

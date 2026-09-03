@@ -21,6 +21,11 @@ If the first three aren't all yes, stop. Most fine-tuning projects should end he
 - [ ] Base model licence permits your use
 - [ ] Chat template matches the base model exactly
 - [ ] Hardware plan real (M4 Max, 128GB: LoRA on 7B–13B is comfortable locally)
+- [ ] If it does not fit: mixed precision, then gradient accumulation, then gradient
+      checkpointing — in that order — *before* reaching for a smaller model. The first two cost
+      no accuracy at all and the third costs only time; a smaller model costs capability
+- [ ] Loss flat immediately after enabling mixed precision treated as a numerics problem
+      (gradient underflow, loss scaling) rather than a learning-rate one
 
 ## After
 - [ ] ☠ Evaluated against the **base model** on the same held-out set — not just "it looks better"

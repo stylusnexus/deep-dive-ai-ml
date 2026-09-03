@@ -796,6 +796,14 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 ## Block 5 · Evaluation
 
+**Prediction interval** — The range a single new observation is likely to fall in. Always wider than a confidence interval, because it carries the spread of the data as well as the uncertainty in the estimate — and it is the one that answers a per-case question.
+
+**Confidence interval vs prediction interval** — The first is about the mean, the second about the next case. As the sample grows the confidence interval shrinks towards nothing while the prediction interval converges on the real spread and stays wide.
+
+**Learning curve** — Score plotted against the fraction of training data used. Turns "we need more data" from an assumption into a measurement: a flat validation curve means more of the same data will not help.
+
+**Double descent** — Past the capacity where a model can fit the training data exactly, test error peaks and then falls again. Why very large models generalise with far more parameters than data points, in apparent defiance of the classical U-curve.
+
 **Correct by construction** — A gold label you know is right because you planted the fact it depends on, rather than because you trust whoever annotated it. The only kind of label you can debug.
 
 **Derivable** — A label that follows from applying the written rules to the written case, not merely one you believe is right. If a label is not derivable, no amount of model capability will reach it, and scoring against it measures your opinions.
@@ -854,6 +862,18 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 ## Block 7 · Training and Fine-Tuning
 
+**Mixed precision** — Holding weights and activations in a sixteen-bit format while keeping a full-precision master copy for the update. Roughly halves memory and is usually faster too, since fewer bytes move.
+
+**Loss scaling** — Multiplying the loss before the backward pass so small gradients stay inside the narrow sixteen-bit range, then dividing it out before the update. Without it gradients underflow to zero and training silently stops learning.
+
+**Gradient accumulation** — Running several small batches, summing their gradients and updating once. Arithmetically identical to the large batch it imitates; costs wall-clock time and no accuracy.
+
+**Gradient checkpointing** — Discarding most forward-pass activations and recomputing them during the backward pass. Trades some tens of per cent more time for a large reduction in activation memory.
+
+**Activations (training memory)** — The intermediate forward-pass values the backward pass needs. Unlike weights, gradients and optimiser state, they scale with batch size and sequence length — which is why they are the part you can trade against.
+
+**Focal loss** — A loss reshaped so easy, already-correct examples contribute progressively less, concentrating training on hard minority cases. Where class weights say some rows matter more, this says some rows matter less once the model has them right.
+
 **LoRA (low-rank adaptation)** — Freezing every base weight and learning a small pair of matrices whose product stands in for the update. The saving is not mainly the parameter count: a frozen weight needs no gradient and no optimiser state, and those are what dominate training memory.
 
 **LoRA rank** — The shared narrow dimension of the two adapter matrices, and the capacity of the adaptation. 8–16 suits most format-and-tone work. It is capacity, not quality: raising it on a small dataset buys faster overfitting, not a better result.
@@ -897,6 +917,20 @@ to someone non-technical in two sentences, it hasn't landed yet.
 ---
 
 ## Block 8 · Deployment and APIs
+
+**Shadow deployment** — Sending the new version a copy of live traffic and discarding its output. Zero user risk on real inputs, and the only way to see behaviour on the cases a held-out set never contained. It stops being a shadow the moment the path can write.
+
+**Canary release** — Routing a small slice of real traffic to the new version and widening if the metrics hold. The first option that can measure user behaviour, with risk bounded by the slice.
+
+**Interleaved comparison** — Mixing results from both versions into one ranked response so each user acts as their own comparison. Far more sensitive than splitting users — the pairing argument applied to deployment.
+
+**Blue-green deployment** — Two full environments with traffic switched between them. A rollback strategy rather than an evaluation one: fast to revert, and it tells you nothing before the switch.
+
+**Domain classifier (drift detection)** — Labelling training data 0 and recent data 1 and training a classifier to separate them. If it cannot, the distributions match; if it can, its accuracy measures the drift and its feature importances name the cause. Catches joint drift that per-feature tests cannot see.
+
+**Out-of-bag (OOB) estimate** — Scoring each row using only the bagged trees that never saw it. A free held-out estimate, available during training, usually close enough to cross-validation to skip it.
+
+**Spearman correlation** — Correlation computed on ranks, so it detects any monotonic relationship rather than only a linear one, and is far less sensitive to outliers. Where it disagrees with Pearson, the disagreement is the finding.
 
 **Idempotency key** — A caller-generated identifier for a logical operation, sent with every attempt, so a server recognises a repeat and returns the original result instead of doing the work twice. The key belongs to the operation, not the attempt — a fresh key per retry defeats the mechanism.
 
