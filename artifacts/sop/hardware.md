@@ -18,6 +18,13 @@ Run top to bottom. Most people fail at step 3 and spend their time on step 2.
 
 ---
 
+## Mixture-of-experts models
+- [ ] ☠ Total parameters checked, not only the activated count — every expert stays
+      resident because the router may pick any of them next, so total decides whether
+      it fits and active only decides roughly how fast a token is
+- [ ] Understood that skipping experts removes arithmetic and not bytes, so it does not
+      help a decode that is already memory-bound
+
 ## 0 · Does it need to be local at all?
 - [ ] A real reason exists: privacy, cost at volume, or offline operation
 - [ ] Preference is not a reason — an API call is frequently cheaper than the electricity

@@ -31,10 +31,15 @@
 - [ ] Process count checked after any run that timed out on a spawned command
 
 ## Adversarial
-- [ ] ☠ Indirect prompt injection tested — hostile text in a document, issue, email or page
-- [ ] Everything retrieved treated as data, never as instructions
-- [ ] Exfiltration path considered: what could a compromised agent send, and where
-- [ ] Defences architectural, not exhortations in the system prompt
+- [ ] ☠ Full adversarial pass run → [`security.md`](security.md)
+
+## Calling something you do not control
+- [ ] Status code read before deciding to retry — 4xx never, 429 only when told, 5xx with backoff
+- [ ] ☠ Timeouts treated as unknown rather than failed: an idempotency key per *operation*,
+      reused across every attempt, or a retry may pay for the work twice
+- [ ] Backoff exponential **and** jittered, capped, and bounded in total attempts
+- [ ] Retry budget understood as a spending policy — three attempts at a large prompt is
+      three times the bill for one answer
 
 ## Context
 - [ ] Budget allocated deliberately across instructions, tools, history, retrieval, answer

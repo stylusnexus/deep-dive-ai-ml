@@ -301,22 +301,26 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item killer" id="llm-engineering-21"><input type="checkbox" data-id="llm-engineering-21"><span class="tick"></span><span class="body"><b class=skull>☠</b> Timeouts kill the <strong>process group</strong>, not just the direct child — an orphaned tree survives its own timeout and compounds every iteration</span></label>
 <label class="item" id="llm-engineering-22"><input type="checkbox" data-id="llm-engineering-22"><span class="tick"></span><span class="body">Process count checked after any run that timed out on a spawned command</span></label>
 <h2>Adversarial</h2>
-<label class="item killer" id="llm-engineering-23"><input type="checkbox" data-id="llm-engineering-23"><span class="tick"></span><span class="body"><b class=skull>☠</b> Indirect prompt injection tested — hostile text in a document, issue, email or page</span></label>
-<label class="item" id="llm-engineering-24"><input type="checkbox" data-id="llm-engineering-24"><span class="tick"></span><span class="body">Everything retrieved treated as data, never as instructions</span></label>
-<label class="item" id="llm-engineering-25"><input type="checkbox" data-id="llm-engineering-25"><span class="tick"></span><span class="body">Exfiltration path considered: what could a compromised agent send, and where</span></label>
-<label class="item" id="llm-engineering-26"><input type="checkbox" data-id="llm-engineering-26"><span class="tick"></span><span class="body">Defences architectural, not exhortations in the system prompt</span></label>
+<label class="item killer" id="llm-engineering-23"><input type="checkbox" data-id="llm-engineering-23"><span class="tick"></span><span class="body"><b class=skull>☠</b> Full adversarial pass run → <a class="jump" data-to="security"><code>security.md</code> &rarr;</a></span></label>
+<h2>Calling something you do not control</h2>
+<label class="item" id="llm-engineering-24"><input type="checkbox" data-id="llm-engineering-24"><span class="tick"></span><span class="body">Status code read before deciding to retry — 4xx never, 429 only when told, 5xx with backoff</span></label>
+<label class="item killer" id="llm-engineering-25"><input type="checkbox" data-id="llm-engineering-25"><span class="tick"></span><span class="body"><b class=skull>☠</b> Timeouts treated as unknown rather than failed: an idempotency key per <em>operation</em>,</span></label>
+<p>reused across every attempt, or a retry may pay for the work twice</p>
+<label class="item" id="llm-engineering-26"><input type="checkbox" data-id="llm-engineering-26"><span class="tick"></span><span class="body">Backoff exponential <strong>and</strong> jittered, capped, and bounded in total attempts</span></label>
+<label class="item" id="llm-engineering-27"><input type="checkbox" data-id="llm-engineering-27"><span class="tick"></span><span class="body">Retry budget understood as a spending policy — three attempts at a large prompt is</span></label>
+<p>three times the bill for one answer</p>
 <h2>Context</h2>
-<label class="item" id="llm-engineering-27"><input type="checkbox" data-id="llm-engineering-27"><span class="tick"></span><span class="body">Budget allocated deliberately across instructions, tools, history, retrieval, answer</span></label>
-<label class="item" id="llm-engineering-28"><input type="checkbox" data-id="llm-engineering-28"><span class="tick"></span><span class="body">Tool results truncated or summarised before they enter context</span></label>
-<label class="item" id="llm-engineering-29"><input type="checkbox" data-id="llm-engineering-29"><span class="tick"></span><span class="body">History managed — window, compaction or structured memory</span></label>
-<label class="item" id="llm-engineering-30"><input type="checkbox" data-id="llm-engineering-30"><span class="tick"></span><span class="body">Long-session degradation understood; fresh context preferred to fighting a poisoned one</span></label>
+<label class="item" id="llm-engineering-28"><input type="checkbox" data-id="llm-engineering-28"><span class="tick"></span><span class="body">Budget allocated deliberately across instructions, tools, history, retrieval, answer</span></label>
+<label class="item" id="llm-engineering-29"><input type="checkbox" data-id="llm-engineering-29"><span class="tick"></span><span class="body">Tool results truncated or summarised before they enter context</span></label>
+<label class="item" id="llm-engineering-30"><input type="checkbox" data-id="llm-engineering-30"><span class="tick"></span><span class="body">History managed — window, compaction or structured memory</span></label>
+<label class="item" id="llm-engineering-31"><input type="checkbox" data-id="llm-engineering-31"><span class="tick"></span><span class="body">Long-session degradation understood; fresh context preferred to fighting a poisoned one</span></label>
 <h2>Production</h2>
-<label class="item killer" id="llm-engineering-31"><input type="checkbox" data-id="llm-engineering-31"><span class="tick"></span><span class="body"><b class=skull>☠</b> Human approval before anything irreversible or outward-facing</span></label>
-<label class="item" id="llm-engineering-32"><input type="checkbox" data-id="llm-engineering-32"><span class="tick"></span><span class="body">Full action log — you cannot investigate what you didn&#x27;t record</span></label>
-<label class="item" id="llm-engineering-33"><input type="checkbox" data-id="llm-engineering-33"><span class="tick"></span><span class="body">Model versions pinned, not floating on an alias</span></label>
-<label class="item" id="llm-engineering-34"><input type="checkbox" data-id="llm-engineering-34"><span class="tick"></span><span class="body">Eval set re-run on a schedule, not only when something looks wrong</span></label>
-<label class="item" id="llm-engineering-35"><input type="checkbox" data-id="llm-engineering-35"><span class="tick"></span><span class="body">Rate limits on every paid endpoint</span></label>
-<label class="item" id="llm-engineering-36"><input type="checkbox" data-id="llm-engineering-36"><span class="tick"></span><span class="body">Unattended runs: narrow job, scoped access, safe stopping points, someone reachable</span></label>
+<label class="item killer" id="llm-engineering-32"><input type="checkbox" data-id="llm-engineering-32"><span class="tick"></span><span class="body"><b class=skull>☠</b> Human approval before anything irreversible or outward-facing</span></label>
+<label class="item" id="llm-engineering-33"><input type="checkbox" data-id="llm-engineering-33"><span class="tick"></span><span class="body">Full action log — you cannot investigate what you didn&#x27;t record</span></label>
+<label class="item" id="llm-engineering-34"><input type="checkbox" data-id="llm-engineering-34"><span class="tick"></span><span class="body">Model versions pinned, not floating on an alias</span></label>
+<label class="item" id="llm-engineering-35"><input type="checkbox" data-id="llm-engineering-35"><span class="tick"></span><span class="body">Eval set re-run on a schedule, not only when something looks wrong</span></label>
+<label class="item" id="llm-engineering-36"><input type="checkbox" data-id="llm-engineering-36"><span class="tick"></span><span class="body">Rate limits on every paid endpoint</span></label>
+<label class="item" id="llm-engineering-37"><input type="checkbox" data-id="llm-engineering-37"><span class="tick"></span><span class="body">Unattended runs: narrow job, scoped access, safe stopping points, someone reachable</span></label>
 <h2>Smells</h2>
 <p class="bullet">Agent loops without progress → no external verifier; nothing tells it that it failed</p>
 <p class="bullet">Wrong tool chosen repeatedly → rewrite descriptions before upgrading the model</p>
@@ -553,34 +557,39 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <blockquote><strong>Capacity is a hard wall; bandwidth is only a slope.</strong> A model that does not fit does not run at any speed. A model that fits but runs slowly still runs. Check that it fits before comparing tokens per second.</blockquote>
 <blockquote><strong>What blocks you is usually neither memory nor speed — it is library support.</strong> CUDA-only kernels do not run on Metal regardless of how much memory you have. Check the library before you check the chip.</blockquote>
 <blockquote><strong>A heavily quantised large model beats a precise small one.</strong> A 4-bit 70B almost always outperforms a 16-bit 13B of similar file size. Prefer the bigger model, more compressed.</blockquote>
+<h2>Mixture-of-experts models</h2>
+<label class="item killer" id="hardware-1"><input type="checkbox" data-id="hardware-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> Total parameters checked, not only the activated count — every expert stays</span></label>
+<p>resident because the router may pick any of them next, so total decides whether it fits and active only decides roughly how fast a token is</p>
+<label class="item" id="hardware-2"><input type="checkbox" data-id="hardware-2"><span class="tick"></span><span class="body">Understood that skipping experts removes arithmetic and not bytes, so it does not</span></label>
+<p>help a decode that is already memory-bound</p>
 <h2>0 · Does it need to be local at all?</h2>
-<label class="item" id="hardware-1"><input type="checkbox" data-id="hardware-1"><span class="tick"></span><span class="body">A real reason exists: privacy, cost at volume, or offline operation</span></label>
-<label class="item" id="hardware-2"><input type="checkbox" data-id="hardware-2"><span class="tick"></span><span class="body">Preference is not a reason — an API call is frequently cheaper than the electricity</span></label>
-<label class="item" id="hardware-3"><input type="checkbox" data-id="hardware-3"><span class="tick"></span><span class="body">Cost compared honestly at <em>your</em> volume, not at demo volume</span></label>
+<label class="item" id="hardware-3"><input type="checkbox" data-id="hardware-3"><span class="tick"></span><span class="body">A real reason exists: privacy, cost at volume, or offline operation</span></label>
+<label class="item" id="hardware-4"><input type="checkbox" data-id="hardware-4"><span class="tick"></span><span class="body">Preference is not a reason — an API call is frequently cheaper than the electricity</span></label>
+<label class="item" id="hardware-5"><input type="checkbox" data-id="hardware-5"><span class="tick"></span><span class="body">Cost compared honestly at <em>your</em> volume, not at demo volume</span></label>
 <h2>1 · Will it fit? ☠</h2>
-<label class="item killer" id="hardware-4"><input type="checkbox" data-id="hardware-4"><span class="tick"></span><span class="body"><b class=skull>☠</b> Weights computed: parameters × bits ÷ 8 (70B at 4-bit ≈ 35GB)</span></label>
-<label class="item killer" id="hardware-5"><input type="checkbox" data-id="hardware-5"><span class="tick"></span><span class="body"><b class=skull>☠</b> KV cache budgeted — grows with context and batch, and is what usually exhausts memory</span></label>
-<label class="item" id="hardware-6"><input type="checkbox" data-id="hardware-6"><span class="tick"></span><span class="body">Runtime and activation overhead added (a few GB)</span></label>
-<label class="item" id="hardware-7"><input type="checkbox" data-id="hardware-7"><span class="tick"></span><span class="body">Compared against <strong>addressable</strong> memory, not total system memory</span></label>
+<label class="item killer" id="hardware-6"><input type="checkbox" data-id="hardware-6"><span class="tick"></span><span class="body"><b class=skull>☠</b> Weights computed: parameters × bits ÷ 8 (70B at 4-bit ≈ 35GB)</span></label>
+<label class="item killer" id="hardware-7"><input type="checkbox" data-id="hardware-7"><span class="tick"></span><span class="body"><b class=skull>☠</b> KV cache budgeted — grows with context and batch, and is what usually exhausts memory</span></label>
+<label class="item" id="hardware-8"><input type="checkbox" data-id="hardware-8"><span class="tick"></span><span class="body">Runtime and activation overhead added (a few GB)</span></label>
+<label class="item" id="hardware-9"><input type="checkbox" data-id="hardware-9"><span class="tick"></span><span class="body">Compared against <strong>addressable</strong> memory, not total system memory</span></label>
 <p class="bullet">NVIDIA: VRAM only. Spilling to system RAM collapses throughput</p>
 <p class="bullet">Apple Silicon: the wired limit, ~75% of RAM by default and adjustable</p>
-<label class="item" id="hardware-8"><input type="checkbox" data-id="hardware-8"><span class="tick"></span><span class="body">If it does not fit: quantise further, or take a smaller model — in that order</span></label>
+<label class="item" id="hardware-10"><input type="checkbox" data-id="hardware-10"><span class="tick"></span><span class="body">If it does not fit: quantise further, or take a smaller model — in that order</span></label>
 <h2>2 · Is it supported? ☠</h2>
-<label class="item killer" id="hardware-9"><input type="checkbox" data-id="hardware-9"><span class="tick"></span><span class="body"><b class=skull>☠</b> The <em>library</em> checked, not the chip — this is the step that actually blocks people</span></label>
-<label class="item" id="hardware-10"><input type="checkbox" data-id="hardware-10"><span class="tick"></span><span class="body">No CUDA-only kernels in the path (several quantisation and attention implementations)</span></label>
-<label class="item" id="hardware-11"><input type="checkbox" data-id="hardware-11"><span class="tick"></span><span class="body">For PyTorch on Apple Silicon: fallback-to-error enabled during development, so an</span></label>
+<label class="item killer" id="hardware-11"><input type="checkbox" data-id="hardware-11"><span class="tick"></span><span class="body"><b class=skull>☠</b> The <em>library</em> checked, not the chip — this is the step that actually blocks people</span></label>
+<label class="item" id="hardware-12"><input type="checkbox" data-id="hardware-12"><span class="tick"></span><span class="body">No CUDA-only kernels in the path (several quantisation and attention implementations)</span></label>
+<label class="item" id="hardware-13"><input type="checkbox" data-id="hardware-13"><span class="tick"></span><span class="body">For PyTorch on Apple Silicon: fallback-to-error enabled during development, so an</span></label>
 <p>unimplemented operation announces itself instead of silently running on CPU</p>
-<label class="item" id="hardware-12"><input type="checkbox" data-id="hardware-12"><span class="tick"></span><span class="body">Containers understood to be CPU-only on macOS — reproducibility, not training</span></label>
+<label class="item" id="hardware-14"><input type="checkbox" data-id="hardware-14"><span class="tick"></span><span class="body">Containers understood to be CPU-only on macOS — reproducibility, not training</span></label>
 <h2>3 · Is it fast enough for the job?</h2>
-<label class="item" id="hardware-13"><input type="checkbox" data-id="hardware-13"><span class="tick"></span><span class="body">Decode speed measured, not quoted — vendor figures are usually decode-only</span></label>
-<label class="item" id="hardware-14"><input type="checkbox" data-id="hardware-14"><span class="tick"></span><span class="body">Time-to-first-token measured with a <em>realistic</em> prompt length, since prefill dominates it</span></label>
-<label class="item" id="hardware-15"><input type="checkbox" data-id="hardware-15"><span class="tick"></span><span class="body">Below ~10 tok/s interactive use is unpleasant; batch work tolerates much less</span></label>
-<label class="item" id="hardware-16"><input type="checkbox" data-id="hardware-16"><span class="tick"></span><span class="body">Prefix-KV reuse available if this is a multi-turn agent loop — usually the biggest lever</span></label>
+<label class="item" id="hardware-15"><input type="checkbox" data-id="hardware-15"><span class="tick"></span><span class="body">Decode speed measured, not quoted — vendor figures are usually decode-only</span></label>
+<label class="item" id="hardware-16"><input type="checkbox" data-id="hardware-16"><span class="tick"></span><span class="body">Time-to-first-token measured with a <em>realistic</em> prompt length, since prefill dominates it</span></label>
+<label class="item" id="hardware-17"><input type="checkbox" data-id="hardware-17"><span class="tick"></span><span class="body">Below ~10 tok/s interactive use is unpleasant; batch work tolerates much less</span></label>
+<label class="item" id="hardware-18"><input type="checkbox" data-id="hardware-18"><span class="tick"></span><span class="body">Prefix-KV reuse available if this is a multi-turn agent loop — usually the biggest lever</span></label>
 <h2>4 · Before concluding &quot;it cannot run here&quot;</h2>
-<label class="item" id="hardware-17"><input type="checkbox" data-id="hardware-17"><span class="tick"></span><span class="body">Which artifact did you actually test? A load failure in one build format is not a</span></label>
+<label class="item" id="hardware-19"><input type="checkbox" data-id="hardware-19"><span class="tick"></span><span class="body">Which artifact did you actually test? A load failure in one build format is not a</span></label>
 <p>fact about the model — another build of the same weights may load fine</p>
-<label class="item" id="hardware-18"><input type="checkbox" data-id="hardware-18"><span class="tick"></span><span class="body">Was anything truncated? A too-small output budget manufactures false conclusions</span></label>
-<label class="item" id="hardware-19"><input type="checkbox" data-id="hardware-19"><span class="tick"></span><span class="body">Was the documented control mechanism used, or the folklore one?</span></label>
+<label class="item" id="hardware-20"><input type="checkbox" data-id="hardware-20"><span class="tick"></span><span class="body">Was anything truncated? A too-small output budget manufactures false conclusions</span></label>
+<label class="item" id="hardware-21"><input type="checkbox" data-id="hardware-21"><span class="tick"></span><span class="body">Was the documented control mechanism used, or the folklore one?</span></label>
 <h2>Quick reference</h2>
 <table><thead><tr><th>Setup</th><th>Good for</th><th>Ceiling</th></tr></thead><tbody><tr><td>Apple Silicon, high memory</td><td>Large quantised models, inference, LoRA on 7B–13B</td><td>Bandwidth, and library gaps</td></tr><tr><td>Consumer NVIDIA 8–24GB</td><td>Small models, real training, full ecosystem</td><td>Capacity — a hard wall</td></tr><tr><td>Rented cloud GPU</td><td>Anything big and fast</td><td>Hourly cost</td></tr><tr><td>No GPU</td><td>Embeddings, classical ML, API work</td><td>Nothing — most of Block 2 runs on CPU</td></tr></tbody></table>
 <h2>Smells</h2>
