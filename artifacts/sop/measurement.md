@@ -30,6 +30,12 @@ If either half is untrue, stop. Everything below produces noise.
 - [ ] Whole set, not a spot check
 - [ ] Repeated, so you know the run-to-run spread
 - [ ] Recorded with model, config, versions, date, per-item outcomes
+- [ ] ☠ **Concurrent baseline** — the unchanged configuration re-run *alongside* the
+      treatment, in the same session, on the same machine. A stored number from last
+      month attributes every change since — a model updated under you, a grown corpus,
+      a busier machine — to your treatment
+- [ ] A previous run reused as the reference only when you can state what has not
+      changed since, and are willing to be wrong about it
 
 ## 3 · One treatment at a time
 - [ ] One change, or a bundled screen with the cost stated: you'll know *something* worked, not *what*
