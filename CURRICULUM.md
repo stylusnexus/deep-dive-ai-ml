@@ -184,8 +184,10 @@ battery until you have shown it can detect a change.
   repair) and which are alternatives; and that compression does not remove capability
   evenly, so it needs slice evaluation rather than an aggregate.
 
-6 lessons in `lessons/block7-training/`. The remaining bullets need a training run and
-a GPU budget, which is where this block gets expensive.
+6 lessons in `lessons/block7-training/` and 1 notebook in `notebooks/07-finetuning/`,
+which does the work that precedes a training run — dataset checks and the memory
+arithmetic — without needing a GPU. The remaining bullets do need a training run and a
+GPU budget, which is where this block gets expensive.
 - Evaluating before and after against a held-out set
 - Quantization for serving — lands directly on a production agent's GGUF and Q4_K_M
 
@@ -207,7 +209,8 @@ Spine: `LLMS_from_Scratch` ch05–07 (Apache 2.0) plus the installed HF training
 - After it ships — availability against correctness, and why drift needs a scheduled
   measurement rather than a dashboard ✅
 
-4 lessons in `lessons/block8-deployment/`. Deploying to Render or an HF Space remains
+4 lessons in `lessons/block8-deployment/` and 1 notebook in `notebooks/08-deploy-apis/`,
+which runs two clients against a server that fails on a scripted schedule. Deploying to Render or an HF Space remains
 a human action; `projects/p4-deployed-assistant/render.yaml` describes it.
 
 **Exit:** Project 4 — an authenticated, rate-limited, containerised endpoint, built and
@@ -234,8 +237,10 @@ Still open: **CNNs and computer vision**, **recommendation systems**. Both are g
 missing and both want a training notebook rather than a lesson alone, which is why they
 are not here yet.
 
-**Exit:** Each elective has lessons and at least one runnable notebook — met for none of
-the three yet; the lessons exist and the notebooks do not.
+3 lessons in `lessons/block9-electives/` and 1 notebook in `notebooks/09-electives/`.
+
+**Exit:** Each elective has lessons and at least one runnable notebook — met for
+`where-the-money-goes`; the other two electives still have lessons only.
 
 ---
 
