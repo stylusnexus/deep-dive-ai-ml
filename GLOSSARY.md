@@ -14,6 +14,10 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Agent loop** — The while-loop that runs a model repeatedly, executing any tool it asks for and feeding the result back, until the model answers without needing a tool.
 
+**Fixture** — One case with an answer: a starting state, inputs, and an assertion that is false before the work and true after. The smallest unit of evidence a harness can produce. A fixture that passes at the starting commit, or fails whatever you do, measures nothing — and both look like results.
+
+**Harness vs fixture** — Runner and case. One harness runs many fixtures: it supplies the starting state, executes, and collects what happened; each fixture carries the specific claim. Confusing them is how people conclude a model cannot do something when the rig could never see that it had.
+
 **Harness** — Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for *evaluation* harness — context disambiguates.)
 
 **Token** — The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these.
@@ -911,6 +915,12 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **Direct Preference Optimisation (DPO)** — Optimising directly on preferred/rejected response pairs without training a separate reward model. Simpler and cheaper than RLHF, and needs preference pairs rather than a verifier.
 
 **RLHF (reinforcement learning from human feedback)** — Humans rank outputs, a reward model learns to predict those rankings, and the policy is optimised against it. The original recipe for turning a base model into an assistant.
+
+**Amdahl's law** — The speedup available from improving one part of a system is capped by the fraction of total time that part occupies. Making a stage that is a fifth of your latency infinitely fast saves a fifth. It does not tell you what to fix; it tells you the ceiling on what fixing each thing could be worth.
+
+**Little's law** — In any queueing system at steady state, the average number of requests resident equals arrival rate times average time in the system. Ten requests per second at four seconds each means about forty concurrent generations, and forty KV caches in memory.
+
+**Hyrum's law** — With enough users, every observable behaviour of your system will be depended on, regardless of what you promised. Sharper for model-backed services, which emit far more observable behaviour than anyone specified — length, tone, refusal phrasing — all of which move together on a model upgrade.
 
 **Goodhart's law** — When a measure becomes a target, it ceases to be a good measure. Effort moves towards the number and the number stops standing for the thing it was chosen to stand for. Reward hacking, benchmark gaming and a judge that prefers long answers are all instances of it.
 

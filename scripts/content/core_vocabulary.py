@@ -2786,6 +2786,14 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
 
     ("p", "How well it works depends entirely on how often the draft agrees with the target, so predictable text speeds up more than genuinely surprising text. That also explains the cheapest variant: rather than running a second model, draft by copying from the prompt itself. For work with a lot of quoting — editing a document, summarising with quotations, rewriting code in place — the next tokens are frequently already sitting in the context, and this costs almost nothing to attempt. You will not find any of this as an API parameter; it is a property of the serving stack, configured by whoever runs the model."),
 
+    ("h3", "Amdahl's law, which is why you measure the split first"),
+    ("p", "The instruction above &mdash; find where the time goes before optimising &mdash; has a name and an arithmetic. <strong>Amdahl&#39;s law</strong> says the speedup available from improving one part of a system is bounded by the fraction of total time that part occupies. Make a stage that is a fifth of your latency infinitely fast and you have saved a fifth; the other four fifths are untouched and now dominate completely."),
+    ("p", "It is worth having as a number rather than a sentiment, because it kills whole projects cheaply. Retrieval taking 200ms of a 2-second request caps any retrieval optimisation at ten per cent, so a fortnight spent halving it buys five per cent &mdash; and the same fortnight spent on the decode that occupies most of the remainder buys considerably more. The law does not tell you what to fix. It tells you the ceiling on what fixing each thing could possibly be worth, which is enough to stop you starting."),
+
+    ("h3", "Little's law, for the capacity question"),
+    ("p", "<strong>Little&#39;s law</strong> relates three quantities in any queueing system at steady state: the average number of requests in the system equals the arrival rate multiplied by the average time each one spends there. It holds regardless of how the queue behaves internally, which is what makes it useful when you know nothing about the internals."),
+    ("p", "For serving a model it answers the sizing question directly. Ten requests per second at an average of four seconds each means about forty requests resident at any moment &mdash; forty concurrent generations, forty KV caches in memory. If your hardware holds twelve, you do not have a tuning problem, you have a capacity shortfall of more than threefold, and no amount of prompt work closes it. The same arithmetic run backwards tells you the latency you would need in order to fit, which is often the more useful direction."),
+
     ("h2", "Concurrency, which changes the shape of everything"),
     ("p", "Everything above describes one request in isolation. Under concurrent load the picture changes, and the change is not proportional."),
     ("terms", [

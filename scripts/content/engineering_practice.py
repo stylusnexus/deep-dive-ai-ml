@@ -23,6 +23,50 @@ LESSONS = [
     ]),
     ("p", "The test for which one you are writing is simple. If a machine executes it, it is harness. If a person follows it step by step, it is a recipe. If someone reads it to understand why they can't do the obvious thing, it is an ADR."),
 
+    ("h2", "The harness is also the instrument, and that is the problem"),
+    ("p", "The definition above says the harness is executed and therefore true by construction &mdash; whatever it says is what happens. That is right about the <em>system</em>, and it hides something. The harness is not only the thing that does the work; it is also the thing that reports on the work. Those are two jobs, they are usually built by the same person in the same afternoon, and only the first one fails loudly."),
+    ("p", "The consequence is uncomfortable and specific: when the harness is wrong, the evidence about the harness comes from the harness. A rig that cannot tell success from inaction will say so in no way whatsoever. It will produce numbers, they will move when you change things, and every one of them will be noise &mdash; and the next lesson opens with two cases from this project where exactly that happened for months."),
+
+    ("h3", "What a fixture is, and how it relates to the harness"),
+    ("terms", [
+      ("Fixture", "One case, with an answer",
+       "A single scenario plus the check that decides whether it passed: the starting state, the inputs, and an assertion that is true afterwards and false before. It is the smallest unit of evidence the harness can produce."),
+      ("The harness", "The rig that runs them",
+       "Everything around the model plus everything around the fixtures &mdash; setting up the starting state, running the case, collecting what happened, deciding pass or fail. One harness, many fixtures."),
+      ("The relation", "Runner and case",
+       "A harness is to a fixture roughly what a test runner is to a test. The harness is reusable and says nothing about your task; the fixture is specific and carries the claim. Confusing them is how people conclude a model cannot do something when the rig was never able to see that it had."),
+      ("What it must not be", "A check the work cannot fail",
+       "A fixture that passes at the starting commit is measuring nothing, and one that fails whatever you do is measuring nothing either. Both look like results."),
+    ]),
+
+    ("figure", "One harness, many fixtures. The harness supplies the starting state and collects what happened; each fixture carries the claim that a specific thing became true.", '''<svg viewBox="0 0 540 168" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A harness sets up state, runs three fixtures, and collects a trace and a verdict from each.">
+<rect x="10" y="14" width="120" height="128" rx="7" class="d-box-accent"/>
+<text x="70" y="60" class="d-label-b" text-anchor="middle">harness</text>
+<text x="70" y="78" class="d-label-sm" text-anchor="middle">sets up state,</text>
+<text x="70" y="92" class="d-label-sm" text-anchor="middle">runs, records</text>
+<path d="M130 44 L172 44" class="d-arrow"/>
+<path d="M130 78 L172 78" class="d-arrow"/>
+<path d="M130 112 L172 112" class="d-arrow"/>
+<rect x="176" y="28" width="152" height="32" rx="5" class="d-box"/><text x="252" y="48" class="d-label-sm" text-anchor="middle">fixture: refuses out of scope</text>
+<rect x="176" y="62" width="152" height="32" rx="5" class="d-box"/><text x="252" y="82" class="d-label-sm" text-anchor="middle">fixture: cites the source</text>
+<rect x="176" y="96" width="152" height="32" rx="5" class="d-box"/><text x="252" y="116" class="d-label-sm" text-anchor="middle">fixture: escalates the refund</text>
+<path d="M328 44 L370 44" class="d-arrow"/>
+<path d="M328 78 L370 78" class="d-arrow"/>
+<path d="M328 112 L370 112" class="d-arrow"/>
+<rect x="374" y="44" width="152" height="60" rx="6" class="d-box-good"/>
+<text x="450" y="68" class="d-label-b" text-anchor="middle">verdict + trace</text>
+<text x="450" y="86" class="d-label-sm" text-anchor="middle">pass/fail, and what it did</text>
+<text x="176" y="152" class="d-label-sm">each fixture must fail before the work and pass after it &#8212; or it is not evidence</text>
+</svg>'''),
+
+    ("know",
+     "A harness you cannot measure is one you can only change, not improve.",
+     "Every harness decision &mdash; a prompt line, a turn limit, a tool description, a retry &mdash; is a claim that behaviour will get better. Without fixtures the claim is untestable, so changes get made on plausibility and kept on attachment, and the rig accumulates modifications nobody can justify or safely remove. With fixtures the same changes become reversible: you can revert one and see the number move, which is the difference between engineering the harness and decorating it.",
+     "The worked example below is a harness change that was a <em>deletion</em>. It was defensible only because a fixture existed that the deletion moved &mdash; without that, removing a line from a system prompt is indistinguishable from superstition, and nobody would have dared."),
+
+    ("callout", "matters", "Build the fixture before the harness change, not after",
+     "<p>A fixture written after a change tends to encode the change. You already know what the new behaviour is, so the assertion gets shaped to fit it, and it will pass forever afterwards without ever having been at risk. Write it first, watch it fail for the reason you expect, and only then make the change &mdash; at which point passing means something.</p><p>The other half is that the harness has to record <em>what happened</em>, not only the verdict. A pass/fail bit cannot distinguish a model that never understood the task from one that understood it and declined, and those two need opposite fixes. That distinction is what the next lesson calls process honesty, and it is a property of the harness rather than of the fixture.</p>"),
+
     ("h2", "They form a cycle, not a hierarchy"),
     ("figure", "Each artifact produces the evidence the next one needs. Break any edge and the other two drift.", '''<svg viewBox="0 0 660 320" role="img" aria-label="Cycle diagram: harness produces evidence, recipes interpret it, ADRs constrain the harness"><defs><marker id="ep1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="250" y="20" width="170" height="66" rx="10" class="d-box-accent"/>

@@ -41,6 +41,15 @@ LESSONS = [
      "Every other error tells you something definite. A timeout tells you only that you stopped waiting, and the operation on the other side may have succeeded, failed, or still be running. Retrying is therefore a decision to possibly do the thing twice — which is free for a read, expensive for a paid generation, and unacceptable for anything that sends, charges or writes.",
      "A model call that times out at thirty seconds and is retried has plausibly been billed twice for one answer. The same pattern on an endpoint that emails a customer has sent two emails, and no amount of logging on your side will tell you which happened."),
 
+    ("h2", "Hyrum's law, and why your output format is now a contract"),
+    ("p", "<strong>Hyrum&#39;s law</strong>: with a sufficient number of users, every observable behaviour of your system will be depended on by somebody, regardless of what you promised. Not the documented interface &mdash; the <em>observable</em> one. Field ordering, whitespace, how long a list usually is, the fact that an optional field is always present in practice."),
+    ("p", "This is sharper for a model-backed service than for an ordinary API, because a model emits far more observable behaviour than you specified. Nobody documented that the summary is usually three sentences, or that the reason field starts with a capital, or that refusals begin with a particular phrase &mdash; and downstream someone is splitting on it. Change the model version and those unwritten behaviours all move at once, which is why a model upgrade breaks consumers that the schema said were safe."),
+
+    ("know",
+     "Version the model as part of the interface, because your users are consuming behaviour you never promised.",
+     "A pinned schema constrains the shape and says nothing about the distribution of what fills it. Two model versions can both satisfy the schema perfectly while differing in length, tone, refusal phrasing and how often an optional field appears &mdash; and each of those is something a consumer may have come to rely on. Treating the model version as an implementation detail is what makes an upgrade look like an outage nobody changed anything to cause.",
+     "A service returns a category and a free-text justification. The schema never changes. A model upgrade shortens the justification from around forty words to around twelve, and a downstream dashboard that truncated at thirty starts showing complete sentences where it used to show ellipses &mdash; which a customer had been using to spot cases needing review."),
+
     ("h2", "Idempotency is the answer to the timeout"),
     ("p", "An idempotent operation produces the same result whether it runs once or five times. Most interfaces are not naturally idempotent, so the mechanism is a key: the caller generates a unique identifier per logical operation and sends it with every attempt, and the server recognises a repeat and returns the original result rather than doing the work again. The important half is that the key belongs to the <em>operation</em>, not to the attempt — a new key per retry defeats the entire mechanism."),
 

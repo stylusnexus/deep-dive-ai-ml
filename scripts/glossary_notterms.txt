@@ -439,3 +439,5 @@ On a schedule
 On a drift threshold
 On a performance drop
 On accumulated data
+The relation
+What it must not be
