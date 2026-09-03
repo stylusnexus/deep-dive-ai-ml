@@ -852,6 +852,32 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 ## Block 7 · Training and Fine-Tuning
 
+**LoRA (low-rank adaptation)** — Freezing every base weight and learning a small pair of matrices whose product stands in for the update. The saving is not mainly the parameter count: a frozen weight needs no gradient and no optimiser state, and those are what dominate training memory.
+
+**LoRA rank** — The shared narrow dimension of the two adapter matrices, and the capacity of the adaptation. 8–16 suits most format-and-tone work. It is capacity, not quality: raising it on a small dataset buys faster overfitting, not a better result.
+
+**Alpha** — A scaling factor applied to the low-rank product before it is added to the frozen weight. Conventionally one or two times the rank; worth setting deliberately rather than by folklore.
+
+**Target modules** — Which weight matrices receive an adapter, attention projections by default. Often a bigger lever on quality than the rank.
+
+**Adapter** — The trained artefact of a low-rank run, measured in megabytes. Small enough to version, swap per request, and discard when a better base model arrives — which is why fine-tuning stopped being a commitment.
+
+**QLoRA** — Low-rank adaptation over a base quantised to four bits. Precision matters most for weights being updated and the base is frozen, so storing it coarsely brings larger models within reach of a single machine.
+
+**Catastrophic forgetting** — Capability outside the tuned task degrading as a result of tuning. Invisible in the metric you are watching, because that metric is the task that improved; caught only by evaluating slices against the base model.
+
+**Supervised fine-tuning (SFT)** — Training on input/output pairs so the model imitates the targets. Cheap and stable, and bounded above by the quality of the demonstrations you could write.
+
+**Reinforcement fine-tuning (RFT)** — Training by scoring the model's own attempts rather than showing it answers. Can exceed the demonstrations, because nothing is being copied; needs something that can grade.
+
+**Group Relative Policy Optimisation (GRPO)** — Sampling several answers per prompt, scoring them, and moving towards those beating the group average. Dropping the separate value model earlier methods required is much of why reinforcement tuning became affordable.
+
+**Direct Preference Optimisation (DPO)** — Optimising directly on preferred/rejected response pairs without training a separate reward model. Simpler and cheaper than RLHF, and needs preference pairs rather than a verifier.
+
+**RLHF (reinforcement learning from human feedback)** — Humans rank outputs, a reward model learns to predict those rankings, and the policy is optimised against it. The original recipe for turning a base model into an assistant.
+
+**Reward hacking** — A policy optimising the measure rather than the goal: passing the tests by detecting the fixture, producing length when length was a proxy for thoroughness. The default behaviour of an optimiser, not an edge case — and it is invisible in the reward curve by construction.
+
 **Fine-tuning** — Changing a model's weights so it responds differently: tone, structure, schema adherence, a domain's conventions. Good at installing behaviour and poor at installing facts, which is the distinction that decides whether it is the right tool or whether you needed retrieval.
 
 **Low-rank factorisation** — Approximating a large weight matrix as the product of two smaller ones. The fourth member of the compression family, and the one already familiar from LoRA, where the adapter is a low-rank pair standing in for a full-rank update.

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Four Ways to Shrink a Model</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 5 of 5</span>
+  <h1>The Four Ways to Shrink a Model</h1>
+  <p class="subtitle">Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.</p>
+
+  <p>Block 0 taught quantization and distillation separately, in the places they came up. They are two members of a family of four, and seeing the family is what tells you which to reach for, because they remove different things and only some of them combine.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Quantization</div><div><div class="roadmap-title">Fewer bits per number</div><div class="roadmap-desc">The same architecture, the same parameter count, stored less precisely. Cheapest by a wide margin, needs no training, and is reversible in the sense that the original weights still exist. Usually the first and often the only thing needed.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Pruning</div><div><div class="roadmap-title">Fewer parts</div><div class="roadmap-desc">Remove structure from the trained network. Depth pruning takes whole layers; width pruning takes neurons and attention heads within layers. Unlike quantization this changes the architecture, and the model is worse immediately afterwards.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Distillation</div><div><div class="roadmap-title">A smaller model taught to imitate</div><div class="roadmap-desc">Train a student to reproduce a teacher's behaviour. The one that produces a genuinely different model rather than a modified one, and the most expensive of the four.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Low-rank factorisation</div><div><div class="roadmap-title">The same layer, expressed with fewer numbers</div><div class="roadmap-desc">A large weight matrix approximated as the product of two smaller ones. Least used of the four at inference time and conceptually the most familiar, because it is what LoRA already does — an adapter is a low-rank pair standing in for a full-rank update.</div></div></div></div>
+  <h2>Pruning and distillation are the pair that compose</h2>
+  <p>The other three are alternatives; these two are a sequence. Pruning removes structure and the model loses capability with it — the cut is blunt, and what falls out is whatever those layers or heads were contributing. Distillation is then used to <em>repair</em>, training the pruned model against the original as teacher so it recovers behaviour it just lost. Cut, then heal. This is the one place in the family where two techniques are used together rather than chosen between, and it is why a pruning pipeline is more work than the word suggests.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 214" role="img" aria-label="The four compression techniques and how they relate"><defs><marker id="cmp" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<text x="14" y="20" class="d-label-b">removes precision</text>
+<rect x="14" y="28" width="180" height="40" rx="6" class="d-box"/><text x="26" y="53" class="d-label-sm">quantization — no training</text>
+<text x="14" y="94" class="d-label-b">removes structure</text>
+<rect x="14" y="102" width="180" height="40" rx="6" class="d-box-accent"/><text x="26" y="127" class="d-label-sm">pruning — depth or width</text>
+<path d="M194 122 L252 122" class="d-arrow-accent" marker-end="url(#cmp)"/>
+<rect x="252" y="102" width="200" height="40" rx="6" class="d-box-accent"/><text x="264" y="127" class="d-label-sm">distillation — as repair</text>
+<text x="252" y="164" class="d-label-sm">cut, then heal: the one pair that</text>
+<text x="252" y="180" class="d-label-sm">composes rather than competes</text>
+<text x="470" y="20" class="d-label-b">removes rank</text>
+<rect x="470" y="28" width="156" height="40" rx="6" class="d-box"/><text x="482" y="53" class="d-label-sm">factorisation — LoRA</text>
+<text x="14" y="200" class="d-label-sm">Reach for quantization first. It is the only one that costs no training and keeps the architecture.</text>
+</svg><figcaption>Three of the four are alternatives chosen by constraint. Pruning and distillation are a sequence — the second exists to repair what the first removed.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Compression does not remove capability evenly, and the loss is not visible in an average.</p><p class="know-why">A pruned or quantized model that scores within a point of the original on a general benchmark has not necessarily kept everything. Capability is not distributed uniformly across a network, so cutting parts of it removes some things and leaves others — and an aggregate score can absorb a large loss in a narrow area without moving. What disappears tends to be what was rare in the first place: less-represented languages, minority dialects, uncommon domains, the long tail generally.</p><p class="know-eg"><span class="know-eg-label">For example</span>This is why compression is a fairness question and not only an efficiency one. If the capability lost falls disproportionately on the users who were already least well served, an average that barely moved has hidden exactly the harm worth knowing about. Evaluate compressed models on slices, not on a single number.</p></blockquote>
+  <div class="callout matters"><span class="label">Slice the evaluation before and after</span><p>The measurement discipline from Block 5 applies directly and is usually skipped here. Record the baseline per slice — per language, per domain, per user population you can identify — and compare per slice afterwards. A single aggregate is precisely the instrument that cannot detect uneven loss, and reporting one is how a compressed model ships having quietly become worse for a subset of the people using it.</p></div>
+  <div class="callout pitfall"><span class="label">Quantization is the boring answer and usually the right one</span><p>It requires no training run, no dataset, no student model and no repair pass, and on most serving constraints it is sufficient on its own. Pruning and distillation pipelines are more interesting to build and considerably more work to maintain — a variant you now own, re-derived on every base-model upgrade. Reach for them when quantization has been tried and has not met the constraint, rather than because they are the more sophisticated option.</p></div>
+  <h2>Where each one bites</h2>
+  <p>Choose by the constraint you actually have. If the model will not fit in memory, quantization addresses it directly and cheaply. If it fits but generation is too slow, remember from Block 0 that generation is memory-bound — so fewer bytes helps and fewer operations does not, which favours quantization again over anything that only removes arithmetic. If you need a genuinely smaller model for a narrow task, distillation is the honest answer. Pruning sits between: real gains, real cost, and a repair pass attached.</p>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Which two of the four are used together rather than chosen between?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Quantization and pruning, since both reduce size</div>
+      <div class="quiz-opt">Pruning and distillation — the cut removes capability and the distillation pass trains it back against the original as teacher</div>
+      <div class="quiz-opt">Distillation and factorisation, since both produce a new model</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why can a compressed model score within a point of the original and still be materially worse?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Benchmarks are usually too small to be reliable</div>
+      <div class="quiz-opt">Capability is not distributed evenly across a network, so what is lost tends to be what was rare — and an aggregate score absorbs a large loss in a narrow slice without moving</div>
+      <div class="quiz-opt">Compression introduces variance that averages out over enough questions</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. You have a model that fits in memory but generates too slowly. Which technique is least likely to help?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Quantization, because it reduces the bytes that must be moved per token</div>
+      <div class="quiz-opt">One that only reduces arithmetic per token, since generation is memory-bound and the arithmetic was not the constraint</div>
+      <div class="quiz-opt">Distillation to a genuinely smaller student</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

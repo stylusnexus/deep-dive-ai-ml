@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoRA, QLoRA and the Full Fine-Tune</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 3 of 5</span>
+  <h1>LoRA, QLoRA and the Full Fine-Tune</h1>
+  <p class="subtitle">What low-rank adaptation actually changes, what rank buys you, and the one case where updating every weight is still right.</p>
+
+  <p>A full fine-tune updates every parameter in the model. That is expensive for a reason worth stating precisely, because it is the reason the alternative exists: training needs the weights, the gradients and the optimiser state all resident at once, which is several times the memory of the weights alone. It also produces a complete copy of the model per task, so ten tuned variants is ten models to store, serve and re-derive the next time the base improves.</p>
+  <p>Low-rank adaptation (LoRA) is the observation that the <em>update</em> does not need to be as expressive as the model. Freeze every original weight, and learn a small pair of matrices alongside them whose product stands in for the change you would have made. Train those instead.</p>
+  <figure class="diagram"><svg viewBox="0 0 540 168" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A frozen weight matrix with a small low-rank pair added alongside it.">
+<rect x="18" y="24" width="112" height="112" rx="6" class="d-box"/>
+<text x="74" y="76" class="d-label-b" text-anchor="middle">W</text>
+<text x="74" y="94" class="d-label-sm" text-anchor="middle">frozen</text>
+<text x="74" y="152" class="d-label-sm" text-anchor="middle">billions of values</text>
+<text x="144" y="84" class="d-label-b">+</text>
+<rect x="168" y="24" width="34" height="112" rx="5" class="d-box-accent"/>
+<text x="185" y="84" class="d-label-sm" text-anchor="middle">B</text>
+<text x="212" y="84" class="d-label-b">&#215;</text>
+<rect x="228" y="66" width="112" height="30" rx="5" class="d-box-accent"/>
+<text x="284" y="86" class="d-label-sm" text-anchor="middle">A</text>
+<text x="252" y="152" class="d-label-sm" text-anchor="middle">trained &#8212; megabytes</text>
+<path d="M352 80 L392 80" class="d-arrow"/>
+<rect x="398" y="52" width="126" height="56" rx="6" class="d-box-good"/>
+<text x="461" y="76" class="d-label-b" text-anchor="middle">W + BA</text>
+<text x="461" y="94" class="d-label-sm" text-anchor="middle">used at inference</text>
+<text x="18" y="14" class="d-label-sm">the narrow dimension shared by B and A is the rank</text>
+</svg><figcaption>The base weights are frozen. A small pair of matrices learns the update, and their product is added at inference.</figcaption></figure>
+  <p>The saving is not mainly in the parameter count, though that is dramatic. It is that a frozen weight has no gradient and no optimiser state, so the memory that dominated the full fine-tune simply is not allocated. Block 0 made this point from the other direction when it explained why training costs so much more than inference; this is that arithmetic run in reverse.</p>
+  <h2>Rank, and what it is a dial for</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">LoRA rank</div><div><div class="roadmap-title">How much the adaptation can express</div><div class="roadmap-desc">The shared narrow dimension of the two matrices. A rank of 8 or 16 is a common starting point and is enough for most format-and-tone work; 64 and above is a large adaptation. It is capacity, not quality.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Alpha</div><div><div class="roadmap-title">How loudly the adaptation speaks</div><div class="roadmap-desc">A scaling factor applied to the low-rank product before it is added. Conventionally set at one or two times the rank, and worth changing deliberately rather than by folklore.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Target modules</div><div><div class="roadmap-title">Where the adaptation is allowed to act</div><div class="roadmap-desc">Which weight matrices get an adapter &mdash; the attention projections by default, sometimes the feed-forward layers too. More targets means more capacity and more to train, and it is a bigger lever than rank on many tasks.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The adapter</div><div><div class="roadmap-title">A few megabytes, not a few gigabytes</div><div class="roadmap-desc">What you actually ship. Small enough to version in a repository, swap at serve time, and throw away when the base model improves.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Raising the rank does not make a small dataset train better. It makes it overfit faster.</p><p class="know-why">Rank is capacity, and capacity is only useful if there is signal to fill it. On a few hundred examples a high rank gives the model enough freedom to memorise them, which shows up as a training loss that keeps falling while held-out performance stops improving or reverses &mdash; the same overfitting curve from Block 2, with a different knob attached to it. The instinct that a poor result means turn the dial up is exactly backwards here.</p><p class="know-eg"><span class="know-eg-label">For example</span>A tuning run on six hundred examples at rank 8 reaches its best held-out score at epoch two. The same data at rank 64 reaches a far lower <em>training</em> loss by epoch two, and a held-out score two points worse, because the extra capacity went into reproducing the training set rather than learning the behaviour it exemplified.</p></blockquote>
+  <h2>QLoRA, and the idea behind it</h2>
+  <p>Quantized low-rank adaptation (QLoRA) adds one move to the above: quantise the frozen base to four bits and keep the trainable adapters at higher precision. The reasoning is clean &mdash; precision matters most for the weights you are updating, and the base is not being updated at all. What it buys is a size class: models that would not otherwise fit on one machine become trainable on it, which is the difference between renting a cluster and not.</p>
+  <div class="callout matters"><span class="label">What this makes possible on the hardware in front of you</span><p>On a high-memory Apple Silicon machine, adaptation of a seven- to thirteen-billion-parameter model is comfortable and the data never leaves the desk &mdash; which for regulated or confidential material is not a convenience but the entire reason the option exists. Quantising the base extends the reach further up the size ladder. The hardware checklist still applies before any of it: capacity is a hard wall and library support is what actually blocks people, and neither of those is changed by the training method being clever.</p></div>
+  <h2>Adapters compose, and that changes the economics</h2>
+  <p>Because an adapter is a small separate artefact rather than a modified model, one base model can serve many of them, selected per request. That turns per-customer or per-task tuning from an infrastructure problem into a file-loading problem, and it makes a tuned behaviour something you can withdraw by deleting a file rather than by retraining. It also means a base-model upgrade costs you a re-run of the adapters rather than a rebuild of everything downstream &mdash; still work, but bounded work.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">An adapter is a diff against a base you do not own, which makes it cheap to keep and cheap to abandon.</p><p class="know-why">This is the practical reason low-rank adaptation displaced full fine-tuning for most work. A full fine-tune is a commitment: a whole model, stored and served and re-derived from scratch on every base upgrade. An adapter is measured in megabytes, swaps at request time, versions in an ordinary repository, and is discarded without loss when a better base arrives. The technique is not merely cheaper to train &mdash; it is cheaper to <em>own</em>, which is where most of the cost of a tuned model actually sits.</p><p class="know-eg"><span class="know-eg-label">For example</span>Twelve customers each needing a slightly different output convention is twelve full models to store and serve under the old arrangement. Under this one it is one base model in memory and twelve files of a few megabytes each, selected by whichever customer is asking.</p></blockquote>
+  <h2>When the full fine-tune is still the right call</h2>
+  <p>It has not been made obsolete, only unusual. Reach for it when the shift is genuinely large &mdash; a domain, language or output modality the base handles poorly rather than differently &mdash; and when you have data in proportion to that ambition, which means many thousands of examples rather than several hundred. It is also the honest answer when a low-rank run has been tried properly, at more than one rank and more than one set of target modules, and has plateaued below what the task needs.</p>
+  <div class="callout pitfall"><span class="label">Both methods can lose capability you never measured</span><p>Training a model to be good at one narrow thing can make it worse at others, and adaptation reduces this without eliminating it because the frozen base is still being spoken over. The failure does not appear in the metric you are watching, since that metric is the task you tuned for and it improved. It appears the first time somebody asks the tuned model something ordinary and outside the tuning distribution.</p><p>The defence is the one the compression lesson already argues for: evaluate against the base model on slices, not on an aggregate. Keep a small set of general questions the tuning was never about, run it before and after, and treat a drop there as a cost of the change rather than as noise.</p></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why does freezing the base weights save so much more memory than the parameter count suggests?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Frozen weights can be stored in lower precision automatically</div>
+      <div class="quiz-opt">A frozen weight needs no gradient and no optimiser state, and those — not the weights — are what dominate training memory</div>
+      <div class="quiz-opt">The forward pass skips frozen layers entirely</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. A run on six hundred examples disappoints. Why is raising the rank a poor first response?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Higher ranks are unstable and often fail to converge</div>
+      <div class="quiz-opt">Rank is capacity; with little data the extra capacity is spent memorising the training set, so training loss falls while held-out performance does not</div>
+      <div class="quiz-opt">Rank must match the base model&#x27;s hidden dimension to work correctly</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What is the reasoning behind quantising the base model in QLoRA?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Four-bit arithmetic is faster, which shortens the training run</div>
+      <div class="quiz-opt">Precision matters most for weights being updated, and the base is frozen — so it can be stored coarsely, which brings larger models within reach of one machine</div>
+      <div class="quiz-opt">Quantisation acts as a regulariser and improves the adapter&#x27;s generalisation</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

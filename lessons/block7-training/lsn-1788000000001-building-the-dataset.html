@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Four Ways to Shrink a Model</title>
+<title>Building the Dataset, and How Little You Need</title>
 <style>
   :root {
     --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
@@ -213,53 +213,63 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 2 of 2</span>
-  <h1>The Four Ways to Shrink a Model</h1>
-  <p class="subtitle">Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.</p>
+  <span class="pill">Lesson 2 of 5</span>
+  <h1>Building the Dataset, and How Little You Need</h1>
+  <p class="subtitle">The part that decides whether the training run was worth doing — and it is smaller than people expect.</p>
 
-  <p>Block 0 taught quantization and distillation separately, in the places they came up. They are two members of a family of four, and seeing the family is what tells you which to reach for, because they remove different things and only some of them combine.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Quantization</div><div><div class="roadmap-title">Fewer bits per number</div><div class="roadmap-desc">The same architecture, the same parameter count, stored less precisely. Cheapest by a wide margin, needs no training, and is reversible in the sense that the original weights still exist. Usually the first and often the only thing needed.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Pruning</div><div><div class="roadmap-title">Fewer parts</div><div class="roadmap-desc">Remove structure from the trained network. Depth pruning takes whole layers; width pruning takes neurons and attention heads within layers. Unlike quantization this changes the architecture, and the model is worse immediately afterwards.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Distillation</div><div><div class="roadmap-title">A smaller model taught to imitate</div><div class="roadmap-desc">Train a student to reproduce a teacher's behaviour. The one that produces a genuinely different model rather than a modified one, and the most expensive of the four.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Low-rank factorisation</div><div><div class="roadmap-title">The same layer, expressed with fewer numbers</div><div class="roadmap-desc">A large weight matrix approximated as the product of two smaller ones. Least used of the four at inference time and conceptually the most familiar, because it is what LoRA already does — an adapter is a low-rank pair standing in for a full-rank update.</div></div></div></div>
-  <h2>Pruning and distillation are the pair that compose</h2>
-  <p>The other three are alternatives; these two are a sequence. Pruning removes structure and the model loses capability with it — the cut is blunt, and what falls out is whatever those layers or heads were contributing. Distillation is then used to <em>repair</em>, training the pruned model against the original as teacher so it recovers behaviour it just lost. Cut, then heal. This is the one place in the family where two techniques are used together rather than chosen between, and it is why a pruning pipeline is more work than the word suggests.</p>
-  <figure class="diagram"><svg viewBox="0 0 640 214" role="img" aria-label="The four compression techniques and how they relate"><defs><marker id="cmp" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
-<text x="14" y="20" class="d-label-b">removes precision</text>
-<rect x="14" y="28" width="180" height="40" rx="6" class="d-box"/><text x="26" y="53" class="d-label-sm">quantization — no training</text>
-<text x="14" y="94" class="d-label-b">removes structure</text>
-<rect x="14" y="102" width="180" height="40" rx="6" class="d-box-accent"/><text x="26" y="127" class="d-label-sm">pruning — depth or width</text>
-<path d="M194 122 L252 122" class="d-arrow-accent" marker-end="url(#cmp)"/>
-<rect x="252" y="102" width="200" height="40" rx="6" class="d-box-accent"/><text x="264" y="127" class="d-label-sm">distillation — as repair</text>
-<text x="252" y="164" class="d-label-sm">cut, then heal: the one pair that</text>
-<text x="252" y="180" class="d-label-sm">composes rather than competes</text>
-<text x="470" y="20" class="d-label-b">removes rank</text>
-<rect x="470" y="28" width="156" height="40" rx="6" class="d-box"/><text x="482" y="53" class="d-label-sm">factorisation — LoRA</text>
-<text x="14" y="200" class="d-label-sm">Reach for quantization first. It is the only one that costs no training and keeps the architecture.</text>
-</svg><figcaption>Three of the four are alternatives chosen by constraint. Pruning and distillation are a sequence — the second exists to repair what the first removed.</figcaption></figure>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Compression does not remove capability evenly, and the loss is not visible in an average.</p><p class="know-why">A pruned or quantized model that scores within a point of the original on a general benchmark has not necessarily kept everything. Capability is not distributed uniformly across a network, so cutting parts of it removes some things and leaves others — and an aggregate score can absorb a large loss in a narrow area without moving. What disappears tends to be what was rare in the first place: less-represented languages, minority dialects, uncommon domains, the long tail generally.</p><p class="know-eg"><span class="know-eg-label">For example</span>This is why compression is a fairness question and not only an efficiency one. If the capability lost falls disproportionately on the users who were already least well served, an average that barely moved has hidden exactly the harm worth knowing about. Evaluate compressed models on slices, not on a single number.</p></blockquote>
-  <div class="callout matters"><span class="label">Slice the evaluation before and after</span><p>The measurement discipline from Block 5 applies directly and is usually skipped here. Record the baseline per slice — per language, per domain, per user population you can identify — and compare per slice afterwards. A single aggregate is precisely the instrument that cannot detect uneven loss, and reporting one is how a compressed model ships having quietly become worse for a subset of the people using it.</p></div>
-  <div class="callout pitfall"><span class="label">Quantization is the boring answer and usually the right one</span><p>It requires no training run, no dataset, no student model and no repair pass, and on most serving constraints it is sufficient on its own. Pruning and distillation pipelines are more interesting to build and considerably more work to maintain — a variant you now own, re-derived on every base-model upgrade. Reach for them when quantization has been tried and has not met the constraint, rather than because they are the more sophisticated option.</p></div>
-  <h2>Where each one bites</h2>
-  <p>Choose by the constraint you actually have. If the model will not fit in memory, quantization addresses it directly and cheaply. If it fits but generation is too slow, remember from Block 0 that generation is memory-bound — so fewer bytes helps and fewer operations does not, which favours quantization again over anything that only removes arithmetic. If you need a genuinely smaller model for a narrow task, distillation is the honest answer. Pruning sits between: real gains, real cost, and a repair pass attached.</p>
+  <p>Assume the previous lesson went badly for you and fine-tuning really is the answer. The dataset is now the whole project. Everything downstream &mdash; the method, the rank, the hardware, the hours &mdash; is mechanical by comparison, and none of it recovers from examples that disagree with each other.</p>
+  <h2>The number is smaller than you think</h2>
+  <p>The intuition people bring from classical machine learning is that more rows are better, and it is wrong here. A base model already speaks the language, knows the domain vocabulary and can follow a format; you are not teaching it to write, you are showing it which of the things it can already do you want. Low-rank adaptation on a narrow, consistent task frequently works on several hundred examples, and a few thousand is a large dataset rather than a small one.</p>
+  <p>What replaces volume is consistency and coverage. Five hundred examples that all handle the same situation the same way will teach a behaviour. Fifty thousand that disagree with each other will teach the disagreement, and will do it very thoroughly.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Consistency</div><div><div class="roadmap-title">The property that actually matters</div><div class="roadmap-desc">Two examples handling the same case differently do not average out. They teach the model that both are acceptable, which is exactly what you were fine-tuning to stop.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Coverage</div><div><div class="roadmap-title">Span the cases, not the volume</div><div class="roadmap-desc">Better to have twenty examples across ten situations than two hundred across two. The model generalises from the shape of what it saw, and it cannot generalise to a case that has no representative.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Format fidelity</div><div><div class="roadmap-title">Train the way you will serve</div><div class="roadmap-desc">The chat template, the system prompt, the field names and the whitespace all have to match what production sends. A model tuned on a slightly different envelope is being asked to generalise across the one difference you controlled and got wrong.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The held-out split</div><div><div class="roadmap-title">Made first, opened last</div><div class="roadmap-desc">Split before you look at anything, and do not iterate against it. A split carved out after you have been reading the data has already been contaminated by your own judgement.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A dataset teaches the whole distribution it contains, including the parts you did not intend to teach.</p><p class="know-why">The model has no way to know which properties of your examples were the point. If ninety-five per cent of them are one category, you have taught a prior on that category. If every single one is a confident, complete answer, you have taught it that confident and complete is always available &mdash; and quietly removed its willingness to say the thing is not in the document, which is the behaviour the retrieval and structured-output lessons both spent their time protecting.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team fine-tunes a support classifier on eight hundred resolved tickets. Resolved tickets, by definition, are the ones that had an answer. The tuned model stops routing anything to a human, because in eight hundred examples it never once saw that outcome, and its accuracy on the eval set &mdash; also drawn from resolved tickets &mdash; looks excellent.</p></blockquote>
+  <figure class="diagram"><svg viewBox="0 0 560 176" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three dataset sources compared: production logs, hand-written examples, and model-generated data.">
+<rect x="10" y="16" width="164" height="52" rx="6" class="d-box-good"/>
+<text x="92" y="36" class="d-label-b" text-anchor="middle">production traffic</text>
+<text x="92" y="52" class="d-label-sm" text-anchor="middle">the real distribution</text>
+<text x="92" y="64" class="d-label-sm" text-anchor="middle">needs labelling</text>
+<rect x="188" y="16" width="164" height="52" rx="6" class="d-box"/>
+<text x="270" y="36" class="d-label-b" text-anchor="middle">hand-written</text>
+<text x="270" y="52" class="d-label-sm" text-anchor="middle">highest quality</text>
+<text x="270" y="64" class="d-label-sm" text-anchor="middle">slowest, does not scale</text>
+<rect x="366" y="16" width="184" height="52" rx="6" class="d-box-bad"/>
+<text x="458" y="36" class="d-label-b" text-anchor="middle">model-generated</text>
+<text x="458" y="52" class="d-label-sm" text-anchor="middle">cheap and plentiful</text>
+<text x="458" y="64" class="d-label-sm" text-anchor="middle">inherits the generator</text>
+<path d="M92 68 L92 104" class="d-arrow"/>
+<path d="M270 68 L270 104" class="d-arrow"/>
+<path d="M458 68 L458 104" class="d-arrow"/>
+<rect x="10" y="108" width="540" height="34" rx="6" class="d-box"/>
+<text x="280" y="129" class="d-label" text-anchor="middle">deduplicate, check consistency, split before you look</text>
+<text x="10" y="164" class="d-label-sm">a near-duplicate across the split inflates your evaluation and tells you the training worked</text>
+</svg><figcaption>Where examples come from, and what each source costs you. Production traffic is the only one that carries the real distribution.</figcaption></figure>
+  <h2>Where the examples come from</h2>
+  <p>Production traffic is the best source and the most work: it carries the distribution you will actually serve, including the awkward inputs nobody would think to invent, and it arrives unlabelled. Hand-written examples are the highest quality per row and do not scale past a few hundred, which is fine, because a few hundred is often the whole requirement. Generating examples with a larger model is cheap and is where the traps live.</p>
+  <div class="callout pitfall"><span class="label">Two traps in model-generated data, one legal and one technical</span><p>Check the licence on the model whose outputs you are training on. Several providers prohibit using their outputs to train competing models, and a dataset built in breach of that is a dataset you cannot ship, which you would rather learn before the training run than after.</p><p>The technical trap is subtler and is the point of the loops-in-training lesson: a generated dataset inherits the generator&#39;s distribution, including its errors and its blind spots, and it under-represents exactly the rare cases that were the reason you were fine-tuning. Generated data is reasonable for teaching <em>format</em>, which the generator gets right by construction. It is a poor way to teach <em>judgement</em>, which is the thing it may not have.</p></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Deduplicate across the split, or your evaluation will tell you the training worked.</p><p class="know-why">Near-duplicates are ordinary in real corpora &mdash; the same ticket refiled, the same document in two formats, boilerplate repeated across records. If one copy lands in training and another in the held-out set, the model has seen the answer, and the score you read afterwards is measuring memorisation. This is data leakage from Block 1, arriving in a form the usual split-before-you-fit discipline does not catch, because the split was done correctly and the duplication was already in the data.</p><p class="know-eg"><span class="know-eg-label">For example</span>A support dataset of twelve hundred tickets contains roughly ninety near-identical password-reset requests. Split at random, the held-out set gets about eighteen of them and the model has trained on the rest. Accuracy comes back four points higher than the model deserves, and every one of those points is a ticket it had already been shown.</p></blockquote>
+  <h2>What good looks like before you start</h2>
+  <ul><li>The evaluation set exists, was split first, and nothing has been tuned against it.</li><li>You can state what a wrong answer looks like, and there are examples of the model getting it right in that specific way.</li><li>The hard cases and the ones where the correct answer is a refusal are both represented, in something like the proportion you expect to serve.</li><li>Two people reading a sample of the data agree on what the label should have been. If they do not, the model will not either.</li><li>The format is byte-for-byte what production sends, chat template included.</li></ul>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
-    <p class="quiz-q">1. Which two of the four are used together rather than chosen between?</p>
+    <p class="quiz-q">1. Why can five hundred consistent examples outperform fifty thousand inconsistent ones?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Quantization and pruning, since both reduce size</div>
-      <div class="quiz-opt">Pruning and distillation — the cut removes capability and the distillation pass trains it back against the original as teacher</div>
-      <div class="quiz-opt">Distillation and factorisation, since both produce a new model</div>
+      <div class="quiz-opt">Smaller datasets overfit less, which improves generalisation</div>
+      <div class="quiz-opt">Contradictory examples teach that both behaviours are acceptable, which is the behaviour fine-tuning was meant to remove — consistency is the signal, volume is not</div>
+      <div class="quiz-opt">Large datasets require a higher rank, which costs more memory</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">2. Why can a compressed model score within a point of the original and still be materially worse?</p>
+    <p class="quiz-q">2. Every example in a support dataset is a ticket that was successfully resolved. What has the model been taught?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Benchmarks are usually too small to be reliable</div>
-      <div class="quiz-opt">Capability is not distributed evenly across a network, so what is lost tends to be what was rare — and an aggregate score absorbs a large loss in a narrow slice without moving</div>
-      <div class="quiz-opt">Compression introduces variance that averages out over enough questions</div>
+      <div class="quiz-opt">Nothing problematic — resolved tickets are the correct behaviour to imitate</div>
+      <div class="quiz-opt">That an answer is always available, because it never saw the outcome where the right move was to escalate — and the eval set, drawn from the same pool, cannot detect it</div>
+      <div class="quiz-opt">To prefer shorter answers, since resolutions tend to be brief</div>
     </div>
     <div class="quiz-feedback"></div>
-    <p class="quiz-q">3. You have a model that fits in memory but generates too slowly. Which technique is least likely to help?</p>
+    <p class="quiz-q">3. A near-duplicate record appears in both the training and held-out sets. What does the evaluation measure?</p>
     <div class="quiz-options" data-answer="1">
-      <div class="quiz-opt">Quantization, because it reduces the bytes that must be moved per token</div>
-      <div class="quiz-opt">One that only reduces arithmetic per token, since generation is memory-bound and the arithmetic was not the constraint</div>
-      <div class="quiz-opt">Distillation to a genuinely smaller student</div>
+      <div class="quiz-opt">Generalisation, since the records are not byte-identical</div>
+      <div class="quiz-opt">Partly memorisation — the model has effectively seen the held-out answer, so the score is inflated by an amount you cannot see</div>
+      <div class="quiz-opt">Nothing is affected as long as the split was random</div>
     </div>
     <div class="quiz-feedback"></div>
   </div>

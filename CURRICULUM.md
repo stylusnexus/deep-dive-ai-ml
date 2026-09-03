@@ -166,9 +166,9 @@ Project 3 rather than in isolation, which is the point of it.
 *Not in the original at all.*
 
 - When fine-tuning is the wrong answer (usually — prompt, then RAG, then this) ✅
-- Dataset construction, and how little data you actually need
-- LoRA / QLoRA vs full fine-tune, locally on the M4 Max
-- **Supervised versus reinforcement fine-tuning** — the objective decides what you get.
+- Dataset construction, and how little data you actually need ✅
+- LoRA / QLoRA vs full fine-tune, locally on the M4 Max ✅
+- **Supervised versus reinforcement fine-tuning** ✅ — the objective decides what you get.
   Supervised tuning imitates answers; reinforcement tuning (GRPO and relatives) optimises
   against a reward or a verifier, which is how reasoning behaviour is trained rather than
   copied. Block 0 teaches what a reasoning model is and this is where it gets made.
@@ -177,7 +177,7 @@ Project 3 rather than in isolation, which is the point of it.
   repair) and which are alternatives; and that compression does not remove capability
   evenly, so it needs slice evaluation rather than an aggregate.
 
-2 lessons in `lessons/block7-training/`. The remaining bullets need a training run and
+5 lessons in `lessons/block7-training/`. The remaining bullets need a training run and
 a GPU budget, which is where this block gets expensive.
 - Evaluating before and after against a held-out set
 - Quantization for serving — lands directly on a production agent's GGUF and Q4_K_M

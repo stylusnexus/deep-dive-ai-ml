@@ -416,3 +416,8 @@ Where it genuinely wins
 What it costs
 The failure that matters
 How it is usually deployed
+Format fidelity
+The held-out split
+The reward or verifier
+Verifier-based RFT
+The adapter

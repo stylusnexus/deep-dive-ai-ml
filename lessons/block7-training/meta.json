@@ -21,8 +21,26 @@
     },
     {
       "id": "lsn-1788000000001",
+      "title": "Building the Dataset, and How Little You Need",
+      "file": "lsn-1788000000001-building-the-dataset.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788000000002",
+      "title": "LoRA, QLoRA and the Full Fine-Tune",
+      "file": "lsn-1788000000002-lora-qlora-and-full-fine-tuning.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788000000003",
+      "title": "Supervised versus Reinforcement Fine-Tuning",
+      "file": "lsn-1788000000003-supervised-versus-reinforcement-tuning.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788000000004",
       "title": "The Four Ways to Shrink a Model",
-      "file": "lsn-1788000000001-the-four-ways-to-shrink-a-model.html",
+      "file": "lsn-1788000000004-the-four-ways-to-shrink-a-model.html",
       "source": "skill"
     }
   ],
@@ -33,6 +51,21 @@
       "starred": false
     },
     "lsn-1788000000001": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788000000002": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788000000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788000000004": {
       "viewed": false,
       "completed": false,
       "starred": false
