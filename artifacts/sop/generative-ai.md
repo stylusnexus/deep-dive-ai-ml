@@ -26,6 +26,8 @@
       put it back, and a constrained system with no way to abstain fabricates instead
 - [ ] Validated on values, not just parsed
 - [ ] One repair retry, then fail loudly
+- [ ] Any stop sequence checked against real content — it fires wherever it appears, and it is
+      normally not returned, so a parser expecting the closing character will fail
 - [ ] Truncation ruled out as a cause before blaming the model
 
 ## Evaluation
@@ -38,4 +40,5 @@
 - Answers confident and wrong → ungrounded; retrieval before prompt-tuning
 - RAG quality dropped with no prompt change → measure index recall first
 - Intermittent malformed JSON → check temperature, then max-tokens
+- Output consistently missing its final character → a stop sequence is firing and is not returned
 - Every record comes back with a confident category and none is ever `unknown` → the schema has no abstain path, so you are reading forced guesses, not findings

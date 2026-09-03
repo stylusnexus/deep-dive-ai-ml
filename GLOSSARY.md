@@ -52,6 +52,16 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **top-k / top-p** — Limit sampling to the k most likely tokens, or to the smallest set summing to probability p. top-p adapts to the distribution's shape and is usually preferred.
 
+**min-p** — Keep only tokens above a fraction of the top token's probability, so the cutoff moves with the model's confidence. A newer open-weights control, increasingly preferred over top-p in local serving; hosted APIs generally do not expose it.
+
+**Greedy decoding** — Always taking the highest-probability token. What temperature 0 does, under the name you will meet in papers.
+
+**Beam search** — Keeping several candidate continuations alive and scoring whole sequences. Right for machine translation, bland for open-ended generation, and rarely used with modern LLMs — worth recognising in older material.
+
+**Stop sequence** — A string that ends generation the moment it appears, normally without being returned. It truncates output; it does not prevent the model from generating it, and it fires inside legitimate content too.
+
+**Log probability (logprobs)** — The probability a model assigned to each token it chose, returned by some providers. A confidence signal that does not rely on the model's self-report, but it describes one token given its prefix, not the truth of the claim. The Anthropic Messages API does not expose them.
+
 **Eval battery** — A fixed set of tasks with machine-checkable outcomes. Its value comes from staying fixed. The battery is the *data*; an eval harness is the *machinery* that runs it. Distinct again from an agent harness, which is the scaffolding around one agent run.
 
 **Model-as-judge** — Using a model to grade another model's output. Flexible, biased, and circular if the judge is the model under test.

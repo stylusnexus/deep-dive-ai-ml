@@ -577,9 +577,11 @@ LESSONS = [
     ("h2", "Temperature and top-k: how the next word gets picked"),
     ("p", "At each step the model produces a probability across every token in its vocabulary. Sampling controls decide how that distribution gets turned into one choice."),
     ("terms", [
-      ("Temperature", "Flattens or sharpens the distribution", "0 means always take the most likely token — deterministic and repetitive. Around 0.7 is a conversational default. Above ~1.2, coherence degrades."),
+      ("Temperature", "Flattens or sharpens the distribution", "0 means always take the most likely token, which has its own name — <strong>greedy decoding</strong> — and is deterministic and repetitive. Around 0.7 is a conversational default. Above ~1.2, coherence degrades."),
       ("top-k", "Consider only the k most likely tokens", "Discards the long tail of nonsense before sampling."),
       ("top-p", "Consider the smallest set summing to probability p", "Adapts to the distribution's shape — more choices when the model is unsure, fewer when it's confident. Usually preferred over top-k."),
+      ("min-p", "Keep tokens above a fraction of the top token's probability",
+       "A newer open-weights control: the floor moves with the model's confidence, so a confident step keeps few candidates and an uncertain one keeps many. Increasingly the recommended default over top-p in local serving stacks; hosted APIs generally do not expose it."),
           ("Presence penalty", "A flat penalty on any token already used",
        "Applied once to a token that has appeared at all, regardless of how often. Pushes the model toward introducing something new rather than staying on what it has said. An OpenAI-family parameter."),
       ("Frequency penalty", "A penalty that grows with each reuse",
@@ -612,6 +614,24 @@ LESSONS = [
 
     ("callout", "matters", "The knobs are being removed, not added",
      "<p>Worth noticing as a direction. Anthropic's interface never exposed presence penalties, frequency penalties or logit bias, and on the current generation of models the sampling controls above are rejected outright — sending temperature, top-p or top-k to Opus 5 or Sonnet 5 returns an error rather than being honoured. The bet being made is that a model good enough does not need the caller tuning its decoding, and whether or not that bet is right, it means a technique built on these parameters may simply have nowhere to attach in a year.</p>"),
+
+    ("h3", "Stop sequences, and what they do not do"),
+    ("p", "A stop sequence is a string that ends generation the moment it appears. Useful when you know the shape of what you want and the model has a habit of continuing past it — closing a single JSON object, ending before a chatty sign-off, cutting a transcript at the next speaker label."),
+    ("p", "Two things surprise people. The stop sequence itself is normally not returned, so if you stop on a closing brace you get output missing its last character and a parse failure that looks like the model's fault. And a stop sequence fires wherever it appears, including inside legitimate content — stopping on a newline truncates the first multi-line answer that comes along."),
+
+    ("know",
+     "A stop sequence truncates; it does not prevent.",
+     "The model generated the text either way. Stopping is something your client does to the stream, after the tokens exist — so a stop sequence used to keep the model from saying something has hidden it, not stopped it. Anything you are billed for by output token, you have already paid for.",
+     "If the requirement is &ldquo;never emit this&rdquo;, that is a constrained-decoding or output-filtering problem, not a stop-sequence one. If the requirement is &ldquo;stop once the answer is complete&rdquo;, a stop sequence is exactly right."),
+
+    ("h3", "Log probabilities, where a provider offers them"),
+    ("p", "Some APIs will return the log probability the model assigned to each token it chose, and often the runners-up. That is a confidence signal you get for free, and unlike asking the model how sure it is, it does not depend on the model's self-report — which is the weakest evidence in the building. A routing layer can use it: low probability on the decisive tokens means escalate or ask a human, rather than answering confidently and being wrong."),
+
+    ("callout", "pitfall", "Token probability is not answer confidence",
+     "<p>The number describes one token given everything before it, not the truth of the claim the sentence makes. A model can be fluent and certain at every step and still be confidently wrong, and the log probabilities will look excellent throughout. Treat them as a signal to <em>calibrate against your own labelled set</em> — measure whether low-probability outputs really are the wrong ones on your task — rather than as a probability that the answer is correct.</p><p>Availability varies and is not universal: the Anthropic Messages API does not expose them, so anything you build on log probabilities is tied to the providers that do.</p>"),
+
+    ("h3", "Beam search, and why it is not here"),
+    ("p", "Older material on text generation is full of beam search: keep several candidate continuations alive at once, score whole sequences, return the best. It was the right answer for machine translation, where there is broadly one correct output. For open-ended generation it produces text that is measurably bland — optimising for total sequence likelihood favours safe, common phrasing — and it does not combine naturally with the sampling controls above. You will meet the term; you will almost never reach for it."),
 
     ("h2", "Determinism, honestly"),
     ("p", "Temperature 0 makes sampling deterministic but does not guarantee identical outputs across runs. Batching, hardware differences, and floating-point non-associativity introduce variation, especially with hosted providers. Design evaluations to tolerate small differences rather than assuming byte-identical replies."),
