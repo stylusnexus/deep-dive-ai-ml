@@ -21,6 +21,8 @@ If either half is untrue, stop. Everything below produces noise.
 - [ ] Effective values printed **after** all writers, not the values you requested
 - [ ] Nothing truncated mid-measurement (output budget, context, tool-result clipping)
 - [ ] ☠ On a reasoning model the output budget covers thinking **and** answer — too low a ceiling returns an *empty* string, not a short one, and an empty answer scores as a wrong one
+- [ ] Output ceiling checked in **both** directions — too low truncates silently, too high lets a degenerate turn burn the whole budget producing nothing. Raising it is not the safe default
+- [ ] Every detector asked what it *does* when it fires, and under what precondition it declines to — a detector that reports without interrupting is telemetry, not a control
 - [ ] Non-completions classified — infrastructure errors kept out of capability numbers
 - [ ] Control fixture included, and read first when a board looks uniform
 

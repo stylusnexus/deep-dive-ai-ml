@@ -1768,6 +1768,21 @@ LESSONS = [
     ]),
     ("callout", "matters", "The termination condition is the design", "Most loop bugs are termination bugs. \"Until the model says it's finished\" hands the stopping decision to the component least able to judge whether it succeeded — the same problem as letting a model report its own eval score. Terminate on an external check, a turn cap, or a spend cap. Preferably all three."),
 
+    ("h3", "Detection is not enforcement, and the gap is where the budget goes"),
+    ("p", "This course lists repetition detection among the mitigations for a runaway loop, in three separate places, and states it as though detecting the problem were the same as stopping it. A worked case is worth more than the assertion, so here is one — anonymised, and real."),
+
+    ("p", "An agent harness with a repetition detector already built in ran an overnight evaluation. On one iteration the model produced the same 325-character block of reasoning twenty-eight times. The detector fired and reported it accurately. The turn then continued to the full output ceiling — 31,999 tokens of a 32,000 limit — and ran for forty-five minutes, producing nothing. The run was repeated and behaved almost identically: the same ceiling, the same shape, forty-three minutes."),
+
+    ("p", "A stop for exactly this had already been shipped. It did not fire, because it was written to trigger only when the model made <em>no</em> tool calls in a turn, and a degenerate turn that emits even a fragment of a malformed tool call does not satisfy that condition. So the system detected the failure it was designed to catch, reported it correctly, and let it run to the ceiling anyway."),
+
+    ("know",
+     "A detector that reports and does not interrupt is telemetry, not a control.",
+     "This is the same distinction the security material draws about mitigations: a control the failure can slip past is a preference. Detection tells you afterwards what happened, which is valuable and is not the same as bounding the damage. Any repetition detector, cost ceiling or turn cap should be checked by asking what it actually does when it fires, and under exactly what conditions it declines to.",
+     "The precondition is where these fail. A stop that requires zero tool calls, a ceiling that only applies to completed turns, a cost cap checked between iterations but not within one — each is correct in its own terms and each has a shape of failure that walks straight through it."),
+
+    ("callout", "pitfall", "Reproducibility is what turned this from an anomaly into a finding",
+     "<p>The first occurrence looks like bad luck. The second, hitting the same ceiling within two minutes of the same wall-clock time, is a property of the system. That is the whole argument for repeats from the measurement material, arriving in a place nobody plans for it: a single strange run is a story, and two matching strange runs are a bug with a reproduction.</p>"),
+
     ("h2", "The name this family goes by now"),
     ("p", "Everything in this lesson is <strong>test-time compute</strong> — spending more computation at inference rather than more parameters at training. It is now one of the two main axes of capability improvement alongside scale, and it is the axis you control without training anything."),
     ("p", "It works for the reason the whole lesson works: extra passes reach answers a single pass cannot, provided something filters or aggregates across them. The scaling is real and not free — cost grows with the compute you spend, so the engineering question is where on that curve your task sits, not whether more is better."),

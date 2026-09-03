@@ -415,6 +415,9 @@ LESSONS = [
     30      0.966 ( -3%)   1.000 ( -0%)
   1000      0.999 ( -0%)   1.000 ( -0%)"""),
 
+    ("callout", "warning", "The same ceiling fails in both directions, and both are silent",
+     "<p>The evaluation material here treats a low output ceiling as the hazard: a reasoning model spends the budget thinking, returns an empty string, and scores as wrong. The mirror is just as real. Set the ceiling high and a turn that degenerates into repeating itself will consume the entire budget before stopping — in one observed case, 31,999 tokens of a 32,000 limit and forty-five minutes of wall clock, producing nothing, twice in a row.</p><p>So &ldquo;raise it&rdquo; is not the safe default and neither is &ldquo;lower it&rdquo;. The ceiling bounds the damage from a loop that has already gone wrong; it does not prevent the loop, and choosing it well means knowing which of the two failures you are currently exposed to.</p>"),
+
     ("callout", "matters", "It matters at eval sizes and nowhere else",
      "<p>At a thousand samples the correction is invisible and arguing about it is pedantry. At ten — which is the size of the eval sets in this course — dividing by n understates the variance by a tenth, and understating variance means overstating confidence in exactly the situation where you have least of it. The correction is free, so the habit is simply to use it and stop thinking about it.</p>"),
 
