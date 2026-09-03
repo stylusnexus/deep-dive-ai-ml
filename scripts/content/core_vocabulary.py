@@ -70,9 +70,12 @@ LESSONS = [
      'The distinction matters because it decides where you spend. Model problems are expensive and often out of your hands; harness problems are cheap and entirely yours. Most of the time it is the harness, which is good news.',
      'An agent reads the failing tests, derives the correct fix, names the insertion point — then asks to read one more file. Every run. Nine scaffolding changes moved nothing. The prompt said to inspect before editing, which has no exit criterion, so a compliant model complied forever. The fix was one sentence, not a bigger model.'),
     ("h2", "The word you'll see elsewhere"),
+    ("p", "The loop above has a name you will meet constantly in the literature and almost never in a codebase: <strong>ReAct</strong>, for reason and act. It describes interleaving a reasoning step with an action &mdash; think, call a tool, read the result, think again &mdash; rather than planning everything up front or acting without deliberating. It is worth naming because of how the vocabulary settled: when the paper appeared this was a technique you chose, and it has since become simply what an agent is. If you have followed this lesson you have built a ReAct agent, and the papers describing one are describing the while-loop you already understand."),
     ("p", "<strong>Harness</strong> is also used for an <em>evaluation</em> harness — the rig that runs a model against a test set. Most projects use it in both senses, which is a real ambiguity in the field rather than a misunderstanding on your part. Context disambiguates: an agent harness runs one task for a user, an eval harness runs many tasks for a score."),
 
     ("links", [
+      ('ReAct (Yao et al., 2022)', 'https://arxiv.org/abs/2210.03629',
+       'The paper that named reason-and-act interleaving, back when it was a technique you chose rather than the default.'),
       ('Building effective agents', 'https://www.anthropic.com/engineering/building-effective-agents',
        "Anthropic's engineering write-up on when a loop is warranted and when a fixed workflow is better."),
     ]),

@@ -10,6 +10,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 ## Block 0 · Vocabulary
 
+**ReAct (reason and act)** — Interleaving a reasoning step with an action: think, call a tool, read the result, think again. Named when it was a technique you chose; it is now simply what an agent loop is, which is why you meet the term in papers and not in code.
+
 **Agent loop** — The while-loop that runs a model repeatedly, executing any tool it asks for and feeding the result back, until the model answers without needing a tool.
 
 **Harness** — Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for *evaluation* harness — context disambiguates.)
