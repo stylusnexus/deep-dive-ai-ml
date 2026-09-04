@@ -184,16 +184,27 @@ battery until you have shown it can detect a change.
   repair) and which are alternatives; and that compression does not remove capability
   evenly, so it needs slice evaluation rather than an aggregate.
 
-6 lessons in `lessons/block7-training/` and 1 notebook in `notebooks/07-finetuning/`,
-which does the work that precedes a training run — dataset checks and the memory
-arithmetic — without needing a GPU. The remaining bullets do need a training run and a
-GPU budget, which is where this block gets expensive.
-- Evaluating before and after against a held-out set
+6 lessons in `lessons/block7-training/` and 2 notebooks in `notebooks/07-finetuning/`:
+the checks that precede a run, and the analysis of one that was actually performed.
+
+The run is done. A LoRA adapter was trained on Apple Silicon against
+`Qwen2.5-1.5B-Instruct-4bit` — 965 examples, 600 iterations, 4.16 GB peak, minutes on
+one laptop — and evaluated against the base model with and without policies, and
+against the lookup table. **It lost to the dictionary** (0.393 against 0.458) and
+scored zero on the judgement cases the base model got a quarter of, because it learned
+to reproduce the rule including the rule's blind spot. The dataset check in notebook 01
+predicted this before any compute was spent.
+
+Still open: quantization for serving, and publishing the adapter to the `stylusnexus`
+HF org, which is an outward-facing action and deliberately not automated.
+- Evaluating before and after against a held-out set ✅ — run and recorded in
+  `artifacts/finetune-results.json`, with the analysis in
+  `notebooks/07-finetuning/02-the-training-run.ipynb`
 - Quantization for serving — lands directly on a production agent's GGUF and Q4_K_M
 
 Spine: `LLMS_from_Scratch` ch05–07 (Apache 2.0) plus the installed HF training skills.
 
-**Exit:** A LoRA adapter you trained, evaluated against base, published to the `stylusnexus` HF org.
+**Exit:** A LoRA adapter you trained ✅, evaluated against base ✅, published to the `stylusnexus` HF org (not done — outward-facing).
 
 ---
 

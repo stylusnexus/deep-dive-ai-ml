@@ -1,0 +1,49 @@
+{
+ "rows": 295,
+ "lookup_overall": 0.4576271186440678,
+ "lookup_routine": 1.0,
+ "lookup_judgement": 0.0,
+ "results": [
+  {
+   "label": "base",
+   "accuracy": 0.28135593220338984,
+   "judgement": 0.25,
+   "routine": 0.31851851851851853,
+   "unparsed": 0,
+   "seconds": 31
+  },
+  {
+   "label": "base+policies",
+   "accuracy": 0.2271186440677966,
+   "judgement": 0.05,
+   "routine": 0.43703703703703706,
+   "unparsed": 17,
+   "seconds": 98
+  },
+  {
+   "label": "tuned",
+   "accuracy": 0.39322033898305087,
+   "judgement": 0.0,
+   "routine": 0.8592592592592593,
+   "unparsed": 0,
+   "seconds": 35
+  }
+ ],
+ "agreement_with_lookup_table": {
+  "overall": 0.8,
+  "on_judgement_cases": 0.75,
+  "note": "the tuned model reproduces the lookup table, including on the cases where the table is always wrong"
+ },
+ "run": {
+  "base_model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+  "method": "LoRA, 8 layers, batch 8, 600 iters, lr 1e-4, mask-prompt",
+  "train_rows": 965,
+  "valid_rows": 120,
+  "test_rows": 295,
+  "split": "grouped by scenario \u2014 8 judgement scenarios trained, 4 held out entirely",
+  "peak_memory_gb": 4.16,
+  "trained_tokens": 27460,
+  "final_train_loss": 0.0,
+  "final_val_loss": 0.0
+ }
+}
