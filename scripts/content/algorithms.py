@@ -579,7 +579,7 @@ LESSONS = [
       ("Sliding window", "Bounded context per layer", "Each token attends only to a nearby span, making cost linear rather than quadratic. Information still travels further by passing up through layers."),
       ("Causal masking", "Not a variant, a requirement", "During generation a token must not see the future, so the upper triangle of the attention matrix is masked out. This is what makes the model autoregressive."),
     ]),
-    ("callout", "insight", "GQA is why long context got affordable", "The KV cache scales with the number of key-value heads, not query heads. Sharing them across groups cuts cache memory by a large factor — often four to eight times — with quality differences small enough to be hard to measure. That single architectural change did more for practical long-context serving than any increase in window size, and it is invisible from the outside."),
+    ("callout", "insight", "GQA is why long context got affordable", "The KV cache scales with the number of key-value heads, not query heads. Sharing them across groups cuts cache memory by exactly the ratio of query heads to key-value heads, which you can read off a model's own configuration rather than take on trust — thirty-two query heads over eight key-value heads is a factor of four. Reported quality differences are small; the memory saving is arithmetic. That single architectural change did more for practical long-context serving than any increase in window size, and it is invisible from the outside."),
 
     ("h2", "FlashAttention, and why it is not on that list"),
     ("p", "Everything above changes <em>what</em> attention computes. FlashAttention changes only <em>how</em>, and it is the single most consequential attention result of recent years for anyone actually running a model."),
@@ -723,7 +723,7 @@ LESSONS = [
     ("p", "The previous lesson on k-NN described finding the nearest vectors. Doing that across ten million embeddings, in under fifty milliseconds, is a different problem — and the algorithm you choose has a failure mode most people never measure."),
 
     ("h2", "Exact search, and when it's fine"),
-    ("p", "Compare the query against every stored vector and keep the best matches. It's exhaustive, perfectly accurate, and linear in the number of vectors. For under roughly 100,000 vectors this is genuinely fine on modern hardware — often single-digit milliseconds."),
+    ("p", "Compare the query against every stored vector and keep the best matches. It's exhaustive, perfectly accurate, and linear in the number of vectors. On a small corpus that is genuinely fine, and where it stops being fine depends on your vector width, hardware and latency budget — so measure it on yours before reaching for an index. The point is that the linear option is real and frequently sufficient, not that a particular corpus size is the cut-off."),
     ("callout", "matters", "Don't optimise this early", "Most retrieval-augmented generation (RAG) corpora are far smaller than people assume. A few thousand documents chunked into tens of thousands of vectors is comfortably exact-search territory. Reach for approximate indexing when you've measured that you need it, not because the tutorial used it."),
 
     ("h2", "Approximate nearest neighbour"),

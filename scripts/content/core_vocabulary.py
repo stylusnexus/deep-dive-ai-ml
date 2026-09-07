@@ -153,7 +153,7 @@ LESSONS = [
       ("Grows with context", "Linearly", "Double the conversation and you double the cache."),
       ("Grows with batch", "Linearly again", "Serving four users concurrently means four caches resident at once."),
       ("Independent of the weights", "A separate budget", "A model that loads with room to spare can still die on a long prompt, and nothing about the weights explains why."),
-      ("Shrunk by grouped-query attention (GQA)", "Often 4-8x", "Sharing key-value projections across query-head groups is why long context became affordable."),
+      ("Shrunk by grouped-query attention (GQA)", "By the ratio of query heads to key-value heads", "Read it off the model config rather than assuming a factor: thirty-two query heads over eight key-value heads is four. Sharing these projections is why long context became affordable."),
     ]),
 
     ("know",
@@ -312,7 +312,7 @@ LESSONS = [
     ("p", "It's also why quantization speeds things up as well as shrinking them — fewer bits per weight means less memory traffic per token. A Q4 model isn't just smaller than Q8, it's meaningfully faster."),
 
     ("h2", "A worked correction: when the headline number is the wrong number"),
-    ("p", "A widely-repeated claim held that one serving runtime was roughly three times faster than another for the same model. The figure was real — and it was a <em>decode</em> throughput measurement, around 130 tokens per second against 43."),
+    ("p", "A widely-repeated claim held that one serving runtime was several times faster than another for the same model. Take the claim at face value for a moment: the figure it rests on is a <em>decode</em> throughput comparison — tokens emitted per second once generation is under way, measured on a short prompt."),
     ("p", "Measured on an actual agent loop, the end-to-end gain was nothing like 3×. A coding agent re-sends a growing context every turn, so per-iteration time is dominated by prefill, not decode. Real decode on that loop was 20–25 tok/s, and each iteration spent 40–130 seconds re-processing the prompt. The benchmark measured the half of the work that wasn't the bottleneck."),
     ("callout", "insight", "What actually moved it", "Not the runtime and not the quantization — <strong>prefix-KV reuse</strong>, so each turn only processes the tokens that are genuinely new. On the same fixture that took 7–17 minutes, a serving engine with true prefix matching brought it to about 1.3 minutes, roughly tenfold, with cache hit rate at 1.00 and no loss of quality. Same weights throughout. The lever was in the serving layer's caching, which no tokens-per-second figure would ever have surfaced."),
     ("callout", "pitfall", "The habit this should build", "When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck. Two premature speed claims were made on that project from partial data before the real one was confirmed by cache-hit telemetry. A number measured on the wrong phase is not a small error — it points your optimisation work at the wrong layer entirely."),
@@ -338,7 +338,7 @@ LESSONS = [
     ("know",
      'When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck.',
      'Inference has two phases with wildly different speeds — prefill processes your prompt in parallel and is fast; decode generates one token at a time and is slow. A benchmark measuring the phase that is not your constraint tells you nothing useful about your workload.',
-     'A serving runtime was widely reported as roughly three times faster than the alternative: 130 tokens per second against 43. Both figures were decode. Measured on a real agent loop — which re-sends a growing context every turn and is therefore prefill-bound — the end-to-end gain was nothing like 3x. The actual lever turned out to be prefix-KV caching, worth about tenfold, and no tokens-per-second figure would ever have surfaced it.'),
+     'A serving runtime was widely reported as several times faster than the alternative. The figure behind it was a decode-throughput comparison. Measured on a real agent loop — which re-sends a growing context every turn and is therefore prefill-bound — the end-to-end gain was nothing like the headline. The actual lever turned out to be prefix-KV caching, worth about tenfold on the fixture this course measures, and no tokens-per-second figure would ever have surfaced it.'),
     ("related", ["local-hardware-limits", "weights-gguf-quantization", "latency-and-caching", "the-image-is-the-unit"]),
     ("links", [
       ('Ollama', 'https://ollama.com',
@@ -1863,7 +1863,7 @@ LESSONS = [
 
     ("know",
      "Where the training starts decides where it ends, and the gap is not small.",
-     "The same work reports a trained cache initialised from random noise reaching 29.9% on a long-context benchmark, against 55.3% for one initialised from the model's real cache of the first stretch of the corpus. Identical size, identical recipe, identical data — only the starting point differed, and it nearly doubled the score. Initialisation is usually filed under implementation detail; here it is the difference between a working artefact and a broken one.",
+     "Work on trained caches — Eyuboglu and colleagues' <em>Cartridges</em> and its follow-ups — finds that initialising from random vectors trains poorly, while initialising from the model's real cache of an opening stretch of text starts inside the model's own latent space and converges far better. Identical size, identical recipe, identical data; only the starting point differed. Take the direction rather than a precise figure — reported gaps vary by benchmark and by which follow-up you read. Initialisation is usually filed under implementation detail; here it is the difference between a working artefact and a broken one.",
      "The practical form of this: when a training run underperforms and the recipe looks right, check what it started from before you change the recipe."),
 
     ("callout", "insight", "The training data can come from the corpus itself",
@@ -1880,6 +1880,8 @@ LESSONS = [
     ("links", [
       ("Distilling the Knowledge in a Neural Network (Hinton et al., 2015)", "https://arxiv.org/abs/1503.02531",
        "The original knowledge-distillation paper. It argues in terms of soft targets; the phrase 'dark knowledge' comes from the same authors' 2014 talk rather than from here."),
+      ("Cartridges: long context via self-study (Eyuboglu et al., 2025)", "https://arxiv.org/abs/2506.06266",
+       "Training a small KV cache offline per corpus. Matches in-context learning at 38.6x less memory and 26.4x higher throughput, and is where the initialisation finding above comes from."),
       ("Distilling step-by-step (Hsieh et al., 2023)", "https://arxiv.org/abs/2305.02301",
        "Rationale distillation — smaller students beating larger models by learning the reasoning, not just the answer."),
     ]),
@@ -2823,7 +2825,7 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
        "The agent lessons offer a ladder of compaction strategies. Caching rewards appending at the tail and summarising edits the beginning, so replacing history with a summary makes the next call pay full price on everything. Truncating a tool result <em>in place</em> keeps the prefix byte-identical and the cache alive; summarising the transcript does not. Choose knowing which one you are buying."),
       ("Retrieval reorders the middle",
        "Prefix caching gives a guarantee retrieval cannot use",
-       "A retrieval prompt is instructions, then retrieved chunks, then the question. The chunks change per request and — worse — change <em>order</em> between requests, because retrieval scores shift with small rewordings and rerankers reorder by design. Retrieve the same three documents in a different order and the very first block after the system prompt differs, so every block hash after it diverges and the hit rate is <em>zero</em>, not merely lower. Published work on this reports that as retrieved fragments grow, retrieval workloads asymptote toward a nil hit rate. The mechanism needs a shared prefix and retrieval produces a shared <em>set</em>; those are different things. Sorting retrieved chunks deterministically before rendering is the cheapest partial fix."),
+       "A retrieval prompt is instructions, then retrieved chunks, then the question. The chunks change per request and — worse — change <em>order</em> between requests, because retrieval scores shift with small rewordings and rerankers reorder by design. Retrieve the same three documents in a different order and the very first block after the system prompt differs, so every block hash after it diverges and the hit rate is <em>zero</em>, not merely lower. The direction is what matters and it follows from the mechanism rather than from a study: every additional retrieved fragment is another chance for the block sequence to differ, so hit rate falls as the retrieved portion grows and as its ordering varies. The mechanism needs a shared prefix and retrieval produces a shared <em>set</em>; those are different things. Sorting retrieved chunks deterministically before rendering is the cheapest partial fix."),
       ("Two sort keys, one ordering", "Caching orders by volatility; attention orders by importance",
        "Different keys applied to the same list, and you only sort once. Caching is not expressing a preference &mdash; the prefix must be literal, so stable content goes first and volatile last or there is no cache at all. Attention wants whatever matters at an end. Where the two keys agree the rules agree: the user&#39;s question is both the most volatile and among the most important, and belongs last under either. Where they disagree you are choosing, not optimising."),
       ("The tail belongs to volatile content", "So stable material competes for one good position",
@@ -3048,7 +3050,7 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
      "Two agents are given the same three-hour task. One holds its plan in conversation and, after compaction, rebuilds a slightly different plan from a summary. The other writes the plan to a file at the start and re-reads it after every reset. Only the second finishes the task it was actually given."),
 
     ("h2", "What \u201cwrite it down\u201d looks like in practice"),
-    ("p", "The advice above is sound and uselessly abstract, so here is the shape the industry has actually converged on. A markdown file at the root of the project, read by the agent when it starts. <code>AGENTS.md</code> is the cross-tool version of this &mdash; plain markdown, no required fields, no frontmatter, no schema &mdash; and it is used by more than 60,000 open-source projects across some thirty tools including Codex, Cursor, Aider, Zed and Jules, stewarded by the Agentic AI Foundation under the Linux Foundation. <code>CLAUDE.md</code> is the same idea under a tool-specific name. Neither is a clever format; the value is entirely in the convention that a predictable file exists."),
+    ("p", "The advice above is sound and uselessly abstract, so here is the shape the industry has actually converged on. A markdown file at the root of the project, read by the agent when it starts. <code>AGENTS.md</code> is the cross-tool version of this &mdash; plain markdown, no required fields, no frontmatter, no schema &mdash; and as of late 2026 its own site reports use by more than 60,000 open-source projects across some thirty tools including Codex, Cursor, Aider, Zed and Jules, and it is stewarded by the Agentic AI Foundation under the Linux Foundation. Adoption figures move; the linked site is the one to check. <code>CLAUDE.md</code> is the same idea under a tool-specific name. Neither is a clever format; the value is entirely in the convention that a predictable file exists."),
 
     ("p", "That file is not the only kind of written memory, and conflating the kinds is where most of the trouble starts:"),
 
@@ -3180,7 +3182,7 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
       ("Registers", "Per-thread, effectively instant", "Where a value lives while it is being worked on."),
       ("Shared memory and L1", "On-chip scratchpad, around 100KB per unit", "Programmable — you decide what sits here. This is the lever the clever kernels pull."),
       ("L2 cache", "Shared across the chip, tens of megabytes", "Hardware-managed; you influence it only through access patterns."),
-      ("High-bandwidth memory (HBM)", "Off-die, and roughly 300 times slower than a register", "Where the weights live. Every byte the arithmetic units consume has to cross this gap."),
+      ("High-bandwidth memory (HBM)", "Off-die, and orders of magnitude slower to reach than a register", "Where the weights live. Every byte the arithmetic units consume has to cross this gap."),
     ]),
 
     ("h2", "Arithmetic intensity, and the line it has to cross"),

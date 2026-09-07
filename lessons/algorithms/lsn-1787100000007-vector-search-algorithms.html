@@ -223,7 +223,7 @@
 
   <p>The previous lesson on k-NN described finding the nearest vectors. Doing that across ten million embeddings, in under fifty milliseconds, is a different problem — and the algorithm you choose has a failure mode most people never measure.</p>
   <h2>Exact search, and when it&#x27;s fine</h2>
-  <p>Compare the query against every stored vector and keep the best matches. It's exhaustive, perfectly accurate, and linear in the number of vectors. For under roughly 100,000 vectors this is genuinely fine on modern hardware — often single-digit milliseconds.</p>
+  <p>Compare the query against every stored vector and keep the best matches. It's exhaustive, perfectly accurate, and linear in the number of vectors. On a small corpus that is genuinely fine, and where it stops being fine depends on your vector width, hardware and latency budget — so measure it on yours before reaching for an index. The point is that the linear option is real and frequently sufficient, not that a particular corpus size is the cut-off.</p>
   <div class="callout matters"><span class="label">Don&#x27;t optimise this early</span>Most retrieval-augmented generation (RAG) corpora are far smaller than people assume. A few thousand documents chunked into tens of thousands of vectors is comfortably exact-search territory. Reach for approximate indexing when you've measured that you need it, not because the tutorial used it.</div>
   <h2>Approximate nearest neighbour</h2>
   <p>Above that scale, <strong>ANN</strong> algorithms trade a small amount of accuracy for a large amount of speed. They don't guarantee finding the true nearest neighbours — they find <em>most</em> of them, most of the time.</p>

@@ -112,6 +112,14 @@ make check                      # environment: python, torch/MPS, docker, HF aut
 python3 scripts/build_lessons.py <module> && python3 scripts/build_index.py
 ```
 
+`make numbers` gates numeric claims. Two fabricated figures reached this course
+before anyone checked them, both from search summaries rather than papers, and both
+looked reasonable — a number is the one thing a reader cannot sanity-check from
+context. The check cannot tell whether a figure is true; it fails when a *new* one
+appears, so the judgement happens once per claim rather than never. Record the
+verdict in `scripts/numbers_reviewed.txt` with a note saying whether it is cited,
+measured in this repo, arithmetic, or hypothetical.
+
 And the validation the repo has been held to throughout — SVG well-formedness,
 no literal unicode escapes, no stray backticks, every `know` block complete, and
 every link resolving. See the git history for the exact checks; they have caught

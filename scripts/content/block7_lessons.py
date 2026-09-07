@@ -351,7 +351,7 @@ LESSONS = [
       ("Gradient accumulation", "A large batch, taken in instalments",
        "Run several small batches, add up their gradients, and update once. The maths is the large batch; the memory is the small one. It costs no accuracy and it costs wall-clock time, since you have done the same forward passes without the parallelism."),
       ("Gradient checkpointing", "Throw activations away and recompute them",
-       "Keep only a few activations from the forward pass and recompute the rest during the backward pass. A large reduction in activation memory in exchange for running part of the forward pass twice &mdash; typically some tens of per cent more time."),
+       "Keep only a few activations from the forward pass and recompute the rest during the backward pass. A large reduction in activation memory in exchange for running part of the forward pass twice. The time cost is real and worth measuring on your own run rather than assuming, since it depends on how much gets recomputed and on how memory-bound the step already was."),
       ("The order to try them", "Cheapest concession first",
        "Mixed precision, then accumulation, then checkpointing. The first often costs nothing at all, the second costs time, the third costs more time. Reach for a smaller model only after all three."),
     ]),
