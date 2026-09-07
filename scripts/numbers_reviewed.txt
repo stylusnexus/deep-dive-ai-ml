@@ -1,0 +1,267 @@
+# Numeric claims present in the lessons, keyed by a hash of the sentence.
+#
+# WHAT THIS FILE IS: a change detector. Its job is to fail the build when a NEW
+# numeric claim appears, so somebody decides where that number came from before it
+# ships. See scripts/check_numbers.py.
+#
+# WHAT IT IS NOT: a certificate that every line below was individually traced to a
+# source. The 2026-09-07 audit read three groups of lessons closely and traced the
+# labour-market and vendor figures specifically; two claims that traced to nothing
+# were deleted and the closing chapter gained the citations it had never had. The
+# remainder was seeded as-is. A line marked 'seeded, not individually traced' means
+# exactly that, and is a reasonable place to start if you are looking for work.
+#
+# format: <lesson>|<hash>|<provenance>
+
+gradient-descent-and-backprop|da6e6b238f8e|seeded, not individually traced
+gradient-descent-and-backprop|701223de556a|seeded, not individually traced
+gradient-descent-and-backprop|451f3ad8dcce|seeded, not individually traced
+gradient-descent-and-backprop|0e1bcce9d819|seeded, not individually traced
+gradient-descent-and-backprop|fc2f6bf5014a|seeded, not individually traced
+gradient-descent-and-backprop|d0a5bbacce2a|seeded, not individually traced
+gradient-descent-and-backprop|89d2032d252b|seeded, not individually traced
+gradient-descent-and-backprop|f89ef6fd5ab8|seeded, not individually traced
+regression-algorithms|87474c7fed44|seeded, not individually traced
+regression-algorithms|7256b7e13618|seeded, not individually traced
+regression-algorithms|7bc6e9363843|seeded, not individually traced
+regression-algorithms|28c45ef52b4d|seeded, not individually traced
+regression-algorithms|65f2a75199b1|seeded, not individually traced
+decision-trees|57aeca98253b|seeded, not individually traced
+decision-trees|d11bf5b6bd05|seeded, not individually traced
+decision-trees|df0141dda14b|seeded, not individually traced
+decision-trees|9551bc57999f|seeded, not individually traced
+decision-trees|78bdba5d5bd3|seeded, not individually traced
+decision-trees|01b0898cc318|seeded, not individually traced
+decision-trees|8a0f639c392c|seeded, not individually traced
+decision-trees|1b1f33956a6b|seeded, not individually traced
+decision-trees|e82849758519|seeded, not individually traced
+ensembles|7db3bf7d7a0b|seeded, not individually traced
+ensembles|6784c1870140|seeded, not individually traced
+attention-and-transformers|6e1603f42893|audited 2026-09-07
+vector-search-algorithms|1591a7310a07|audited 2026-09-07
+vector-search-algorithms|5d1321a86dac|audited 2026-09-07
+ranking-and-hybrid-retrieval|115123229a57|seeded, not individually traced
+ranking-and-hybrid-retrieval|17ac7c74e09e|seeded, not individually traced
+ranking-and-hybrid-retrieval|bf2c6479bbc3|seeded, not individually traced
+ranking-and-hybrid-retrieval|75abaa113ff0|seeded, not individually traced
+ranking-and-hybrid-retrieval|08c97ea72b6f|seeded, not individually traced
+data-leakage|575984d540c0|seeded, not individually traced
+data-leakage|ee7492f085ab|seeded, not individually traced
+data-leakage|fce0beb373f4|seeded, not individually traced
+tabular-data-and-dtypes|ea4834e43adb|seeded, not individually traced
+tabular-data-and-dtypes|ec311108bee6|seeded, not individually traced
+tabular-data-and-dtypes|aba2f0b94e37|seeded, not individually traced
+tabular-data-and-dtypes|502f32bb7c5a|seeded, not individually traced
+tabular-data-and-dtypes|20d006c8a517|seeded, not individually traced
+first-fifteen-minutes|655f62150d0c|seeded, not individually traced
+first-fifteen-minutes|a0caa36318aa|seeded, not individually traced
+first-fifteen-minutes|51e8a8851a2d|seeded, not individually traced
+missing-data-mechanisms|09d97844853d|seeded, not individually traced
+missing-data-mechanisms|9c0b51f67e97|seeded, not individually traced
+missing-data-mechanisms|7a1313c58b91|seeded, not individually traced
+missing-data-mechanisms|a38338325cfe|seeded, not individually traced
+what-a-plot-is-for|39c0908c59b0|seeded, not individually traced
+ai-assisted-analysis|9a275647b96e|seeded, not individually traced
+labels-and-holdouts|ab96a48818ae|seeded, not individually traced
+labels-and-holdouts|84a32646690d|seeded, not individually traced
+labels-and-holdouts|1198d32e004d|seeded, not individually traced
+labels-and-holdouts|ebacf0c88b9d|seeded, not individually traced
+confusion-matrix-and-metrics|b97bfe461ccd|seeded, not individually traced
+confusion-matrix-and-metrics|55d6351ccc17|seeded, not individually traced
+confusion-matrix-and-metrics|193da4538efc|seeded, not individually traced
+confusion-matrix-and-metrics|59eae47e7639|seeded, not individually traced
+confusion-matrix-and-metrics|19f45ae62676|seeded, not individually traced
+confusion-matrix-and-metrics|850fa81f2e3d|seeded, not individually traced
+confusion-matrix-and-metrics|c5fb9d68efe5|seeded, not individually traced
+confusion-matrix-and-metrics|d45ff104b7c5|seeded, not individually traced
+confusion-matrix-and-metrics|a0dafe614eb8|seeded, not individually traced
+baseline-to-model|0c19935e670b|seeded, not individually traced
+baseline-to-model|293b656252ca|seeded, not individually traced
+baseline-to-model|3fb6dc4a4f89|seeded, not individually traced
+baseline-to-model|2a2a30a0ed19|hypothetical worked example
+baseline-to-model|96fddf30aa6c|seeded, not individually traced
+neural-networks-both-ways|1d3e86573a4e|seeded, not individually traced
+neural-networks-both-ways|64a6721ab6b7|seeded, not individually traced
+time-series|eb98eb2599a6|seeded, not individually traced
+building-a-rag-system|cfa928f513c2|seeded, not individually traced
+building-a-rag-system|0268ef5cd7b9|seeded, not individually traced
+building-a-rag-system|e2dd020127d0|seeded, not individually traced
+transforming-the-query|251e32cb65e9|measured in this repository
+measuring-retrieval|f47a027104c7|audited 2026-09-07
+measuring-retrieval|22daffd40c6e|audited 2026-09-07
+measuring-retrieval|3a07c500ed6d|audited 2026-09-07
+measuring-retrieval|d31c1a3710a4|measured in this repository
+measuring-retrieval|2d5da7f99af9|audited 2026-09-07
+measuring-retrieval|f775b4ce61af|audited 2026-09-07
+agentic-rag|388406bf2af0|seeded, not individually traced
+agentic-rag|369a2c989aaf|seeded, not individually traced
+the-loop-by-hand|087a4bb53e98|seeded, not individually traced
+the-loop-by-hand|5478b85391b9|seeded, not individually traced
+multi-agent-and-approval|eeffc97b8fb0|seeded, not individually traced
+telemetry-and-instrumentation|13d9cd66d77d|seeded, not individually traced
+loop-tradeoffs|3a7eda0c7451|audited 2026-09-07
+loop-tradeoffs|026ad0795f40|audited 2026-09-07
+loop-tradeoffs|6469a04cb85c|audited 2026-09-07
+is-the-difference-real|b8692d30695d|seeded, not individually traced
+is-the-difference-real|a17b3c530414|seeded, not individually traced
+is-the-difference-real|f4726974d716|seeded, not individually traced
+is-the-difference-real|478804b36e78|seeded, not individually traced
+is-the-difference-real|544eb22c99e1|seeded, not individually traced
+is-the-difference-real|872fd6099c50|seeded, not individually traced
+is-the-difference-real|ad2b2fb4eb6b|seeded, not individually traced
+is-the-difference-real|0d601837a088|seeded, not individually traced
+is-the-difference-real|756a7926f5ab|seeded, not individually traced
+calling-an-api-you-do-not-control|259df6491c29|seeded, not individually traced
+calling-an-api-you-do-not-control|6e2955145394|seeded, not individually traced
+calling-an-api-you-do-not-control|838496d24e8b|seeded, not individually traced
+calling-an-api-you-do-not-control|73cdfcdcafdb|seeded, not individually traced
+calling-an-api-you-do-not-control|0c3e4704b648|seeded, not individually traced
+serving-one-yourself|d39e063e51db|seeded, not individually traced
+serving-one-yourself|2c6240edd3fa|seeded, not individually traced
+after-it-ships|c00ed93661a4|seeded, not individually traced
+after-it-ships|84e1672de2df|seeded, not individually traced
+after-it-ships|715da341b24d|seeded, not individually traced
+convolutions-and-computer-vision|c0f9285d1bb8|seeded, not individually traced
+convolutions-and-computer-vision|9ac3a73ebebc|seeded, not individually traced
+recommendation-systems|bd9d2ad89f0e|seeded, not individually traced
+what-the-evidence-shows|54333d8b3657|audited 2026-09-07
+what-the-evidence-shows|486eb1fa6a4a|audited 2026-09-07
+what-the-evidence-shows|0133797c2158|audited 2026-09-07
+what-the-evidence-shows|73e4703e1b80|audited 2026-09-07
+what-the-evidence-shows|2834fe54ba8a|audited 2026-09-07
+what-the-evidence-shows|d446967df61c|audited 2026-09-07
+what-the-evidence-shows|6aa506709885|audited 2026-09-07
+what-the-evidence-shows|15eb95f324d2|audited 2026-09-07
+what-the-evidence-shows|10c913bf8472|audited 2026-09-07
+what-the-evidence-shows|1481028d6524|measured in this repository
+what-the-evidence-shows|13ecb2d0eac4|audited 2026-09-07
+what-the-evidence-shows|64e8f1922f9e|audited 2026-09-07
+what-the-evidence-shows|a62733375a54|audited 2026-09-07
+what-the-evidence-shows|68a02641c2b5|audited 2026-09-07
+the-apprenticeship-problem|4fb0982001b3|audited 2026-09-07
+the-apprenticeship-problem|5320ed3acf98|audited 2026-09-07
+the-apprenticeship-problem|40c95835c2ff|audited 2026-09-07
+the-apprenticeship-problem|dc357b8969d1|audited 2026-09-07
+the-apprenticeship-problem|1d760495cee1|audited 2026-09-07
+the-apprenticeship-problem|2c052eaa3d64|audited 2026-09-07
+the-apprenticeship-problem|dc5ab7c08ba2|audited 2026-09-07
+tokens-context-and-kv-cache|324b7e6ca570|audited 2026-09-07
+tokens-context-and-kv-cache|3cd8a86b0d5d|audited 2026-09-07
+weights-gguf-quantization|69bbfdb52621|audited 2026-09-07
+weights-gguf-quantization|8e7c78bf6c2b|audited 2026-09-07
+weights-gguf-quantization|b8d9805c8a66|audited 2026-09-07
+weights-gguf-quantization|706269cf9a76|audited 2026-09-07
+weights-gguf-quantization|58c886890b9c|audited 2026-09-07
+weights-gguf-quantization|03912f3f9c94|audited 2026-09-07
+weights-gguf-quantization|5c705af62733|audited 2026-09-07
+serving-locally|55f8f0948464|measured in this repository
+serving-locally|e50aa05be862|audited 2026-09-07
+serving-locally|5324e0795496|audited 2026-09-07
+embeddings-and-retrieval|6343582c6271|seeded, not individually traced
+tool-calls-and-mcp|f2a5d61d7a54|audited 2026-09-07
+tool-calls-and-mcp|a0548b649546|audited 2026-09-07
+tool-calls-and-mcp|20dab91dbb7f|audited 2026-09-07
+tool-calls-and-mcp|b3bf731ce858|audited 2026-09-07
+routing-and-escalation|d5c3f292b97e|seeded, not individually traced
+routing-and-escalation|dc96c50a2112|seeded, not individually traced
+routing-and-escalation|db4f80d78e96|seeded, not individually traced
+overfitting-and-underfitting|2c8968b4aa3c|seeded, not individually traced
+overfitting-and-underfitting|d0fb22aa8f6b|seeded, not individually traced
+overfitting-and-underfitting|8f8393d45906|seeded, not individually traced
+overfitting-and-underfitting|b3e607c099d9|seeded, not individually traced
+overfitting-and-underfitting|b0b6b1b5b7ec|seeded, not individually traced
+agents-autonomy-and-danger|6971acf85654|seeded, not individually traced
+agents-autonomy-and-danger|416e652d0dd2|seeded, not individually traced
+agents-autonomy-and-danger|55d5e4218e2f|seeded, not individually traced
+agents-autonomy-and-danger|7d1af565e5c5|seeded, not individually traced
+context-engineering|7d88cc027015|audited 2026-09-07
+context-engineering|3ac26c2d51f2|audited 2026-09-07
+context-engineering|a8aa453bac70|audited 2026-09-07
+context-engineering|184c7baf2821|audited 2026-09-07
+context-engineering|bafa8c6a24d5|audited 2026-09-07
+structured-output-json|37377308916a|seeded, not individually traced
+structured-output-json|2e0aecda22c9|seeded, not individually traced
+structured-output-json|48d697cc4956|seeded, not individually traced
+structured-output-json|5421b293a02e|seeded, not individually traced
+hallucination-and-grounding|522b2a581a27|seeded, not individually traced
+shots-and-in-context-learning|a81240f5a883|seeded, not individually traced
+shots-and-in-context-learning|007828968364|seeded, not individually traced
+class-imbalance-and-thresholds|e850dc1711dc|seeded, not individually traced
+class-imbalance-and-thresholds|2c5d5343bd08|seeded, not individually traced
+class-imbalance-and-thresholds|4c713fc8fc0a|seeded, not individually traced
+class-imbalance-and-thresholds|b35ee000b501|seeded, not individually traced
+class-imbalance-and-thresholds|4169d4f1d66b|measured in this repository
+class-imbalance-and-thresholds|9a09c88597f1|seeded, not individually traced
+class-imbalance-and-thresholds|5c2b768a94f7|seeded, not individually traced
+class-imbalance-and-thresholds|c650f55084bd|seeded, not individually traced
+class-imbalance-and-thresholds|da176b6205a0|seeded, not individually traced
+drift|fe13bcb38dfd|seeded, not individually traced
+drift|0054b7eb2cd4|seeded, not individually traced
+distillation|c4379029a4e0|audited 2026-09-07
+distillation|11b99f1d8988|audited 2026-09-07
+loops-at-inference|5370e3d19051|seeded, not individually traced
+loops-at-inference|92ecb86e9665|seeded, not individually traced
+loops-at-inference|4dfccaecb08d|seeded, not individually traced
+loops-at-inference|ba3bd3a4025d|seeded, not individually traced
+loops-in-training|94d1213c8e76|seeded, not individually traced
+skills|7a2aa448b8ea|seeded, not individually traced
+building-an-mcp-server|4ab70184bc8a|seeded, not individually traced
+building-an-mcp-server|d34d4d52cc73|seeded, not individually traced
+local-hardware-limits|4a6dc901f1c2|seeded, not individually traced
+local-hardware-limits|5e46da4f7d88|seeded, not individually traced
+local-hardware-limits|6d36a4f9fb06|seeded, not individually traced
+local-hardware-limits|b8b55e879afa|seeded, not individually traced
+local-hardware-limits|073d1cf84dbc|seeded, not individually traced
+local-hardware-limits|9cd7906696b1|seeded, not individually traced
+local-hardware-limits|0db4f54a99f9|seeded, not individually traced
+local-hardware-limits|d9d67cce0223|seeded, not individually traced
+local-hardware-limits|e3bc03f1a184|seeded, not individually traced
+latency-and-caching|4fc09eb5aa39|audited 2026-09-07
+latency-and-caching|7f6998136a29|audited 2026-09-07
+latency-and-caching|19b632332277|audited 2026-09-07
+latency-and-caching|4714b127d714|audited 2026-09-07
+latency-and-caching|32d62d9696df|audited 2026-09-07
+latency-and-caching|0af54db7949c|audited 2026-09-07
+latency-and-caching|9bd43f12b05d|audited 2026-09-07
+latency-and-caching|e6e626b3aeb1|audited 2026-09-07
+latency-and-caching|b30a3ded53d7|audited 2026-09-07
+latency-and-caching|3e729057dd35|audited 2026-09-07
+latency-and-caching|1bbcb2386262|audited 2026-09-07
+session-lifecycle|a63e18762cc3|audited 2026-09-07
+session-lifecycle|c45b7f5be9b9|audited 2026-09-07
+session-lifecycle|cfa2fdedc36b|audited 2026-09-07
+session-lifecycle|6d6e5471b7af|audited 2026-09-07
+session-lifecycle|e1b068f2dd2c|audited 2026-09-07
+why-the-gpu-is-waiting|9365649e1526|audited 2026-09-07
+why-the-gpu-is-waiting|61488beca949|audited 2026-09-07
+why-the-gpu-is-waiting|b051d5136ffd|audited 2026-09-07
+frontier-and-local|06bc308c1a90|seeded, not individually traced
+when-scaffolding-turns|a03ec6cb39bf|seeded, not individually traced
+when-scaffolding-turns|f1a2df9f2060|seeded, not individually traced
+when-scaffolding-turns|f8557a5a50d4|seeded, not individually traced
+when-scaffolding-turns|caca002b9237|seeded, not individually traced
+why-measurement-decides|67d548f557d7|seeded, not individually traced
+why-measurement-decides|c5fd8010da52|seeded, not individually traced
+how-to-measure|e2b88bb39dbe|seeded, not individually traced
+how-to-measure|f80b856b872e|seeded, not individually traced
+swe-bench-and-how-to-run-it|701151ab56db|seeded, not individually traced
+swe-bench-and-how-to-run-it|ddeb09b03030|seeded, not individually traced
+swe-bench-and-how-to-run-it|1d3a14e504c7|seeded, not individually traced
+swe-bench-and-how-to-run-it|fe307ebd3074|seeded, not individually traced
+confounds-you-cannot-see|34229d6c427c|seeded, not individually traced
+confounds-you-cannot-see|f910ebe53c05|seeded, not individually traced
+localising-a-failure|641cd83bae37|seeded, not individually traced
+models-judging-models|7566323a06c7|seeded, not individually traced
+deterministic-first|ff305dcb13e5|seeded, not individually traced
+spec-driven-development|5c0a5579568b|seeded, not individually traced
+spec-driven-development|516cd5d13afb|seeded, not individually traced
+version-control-basics|8c5714f716e2|seeded, not individually traced
+rungs-and-experiments|ae47b245aff9|seeded, not individually traced
+rungs-and-experiments|637db366b946|seeded, not individually traced
+tracking-runs-and-automating-evals|4ecf487645e5|seeded, not individually traced
+tracking-runs-and-automating-evals|fe04c1fc13d3|seeded, not individually traced
+tracking-runs-and-automating-evals|fc59bc3b1d5d|seeded, not individually traced
+the-map|78f641c08cba|seeded, not individually traced
+inside-an-llm|ba7dc76dae75|seeded, not individually traced
+inside-an-llm|0dbd96779ba6|seeded, not individually traced
+inside-an-llm|138188e61f46|seeded, not individually traced
