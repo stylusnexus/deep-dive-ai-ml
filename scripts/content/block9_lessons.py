@@ -254,7 +254,6 @@ LESSONS = [
 
     ("callout", "matters", "The deterministic-first argument applies here too",
      "<p>Before either option, ask whether the task needs learning at all. A great deal of practical image work &mdash; is this page blank, has the seal moved, is this barcode readable, are these two frames different &mdash; is answered by arithmetic on pixels with no model of any kind, faster and with a failure mode you can read. Classical computer vision did not stop working when deep learning arrived, and the ladder from Block 0 is the same ladder: rule, then classical method, then a small trained model, then a large general one.</p>"),
-
     ("related", ["when-the-input-is-not-text", "attention-and-transformers", "neural-networks-both-ways", "deterministic-first"]),
     ("quiz", [
       ("What does weight sharing in a convolution actually encode?",
@@ -347,7 +346,6 @@ LESSONS = [
       "<strong>Measure coverage as a first-class metric.</strong> What share of the catalogue was recommended to anyone this week? A number that falls steadily is the loop closing, visible before the engagement number turns.",
       "<strong>Test online.</strong> The offline number is for filtering obviously bad candidates. The decision belongs to an experiment with real traffic, and the deployment lesson&#39;s interleaved comparison is unusually well suited here, since each user acts as their own control.",
     ]),
-
     ("related", ["loops-in-training", "drift", "why-measurement-decides", "embeddings-and-retrieval"]),
     ("quiz", [
       ("Why is treating unobserved user-item pairs as negative examples problematic?",

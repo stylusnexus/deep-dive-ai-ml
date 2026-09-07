@@ -186,6 +186,18 @@
       "title": "Why the Graphics Processing Unit (GPU) Is Waiting",
       "file": "lsn-1787000000028-why-the-gpu-is-waiting.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000029",
+      "title": "Frontier and Local, and What Each Is Actually For",
+      "file": "lsn-1787000000029-frontier-and-local.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000030",
+      "title": "Techniques That Transfer, and the Ones That Change Value",
+      "file": "lsn-1787000000030-techniques-that-transfer.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -330,6 +342,16 @@
       "starred": false
     },
     "lsn-1787000000028": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000029": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000030": {
       "viewed": false,
       "completed": false,
       "starred": false

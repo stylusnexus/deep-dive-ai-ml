@@ -24,6 +24,10 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Context window** — The maximum tokens a model can consider at once, covering prompt, history, retrieved documents and the answer together. A capacity limit, not a promise of attention.
 
+**Frontier vs local** — Not a quality ladder but two constraint sets. Frontier buys reasoning trained against verifiers, long context that stays usable, and tool-call reliability under compounding. Local buys data that never leaves, fixed rather than marginal cost, a version nothing deprecates under you, and ownership of the sampler — including constrained decoding against a grammar, which major hosted APIs do not offer at any price.
+
+**Technique transfer** — Most of the distance between a good agent and a bad one is harness rather than model, and harness is portable. Several techniques are worth *more* locally than where they were invented: progressive disclosure, because local prefill is slower; speculative decoding, because a single-user machine has the spare compute a batched server has already sold; and grammars, because you own the sampler.
+
 **Progressive disclosure** — Keeping a pointer resident and loading the detail only when needed. One technique at three layers of the context budget: tool names with schemas fetched on demand, skill descriptions with bodies loaded on invocation, and sub-agents returning conclusions rather than the material they read.
 
 **Cost measurement vs benefit measurement** — Token or latency savings measure what a change cost you; whether quality held is a separate experiment. A cut that removes something load-bearing produces exactly the same encouraging token figure as one that removed waste, which is why the ablation is the experiment and the saving is not.

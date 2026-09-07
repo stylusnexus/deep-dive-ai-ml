@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Techniques That Transfer, and the Ones That Change Value</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 31 of 31</span>
+  <h1>Techniques That Transfer, and the Ones That Change Value</h1>
+  <p class="subtitle">Most of what makes a frontier harness good is not the model. It is portable — and several techniques are worth more locally than they are where they were invented.</p>
+
+  <p>The previous lesson separates the capability you cannot reproduce from the constraints you might prefer. This one is about the large space in between: the engineering around the model, which is where a great deal of the observed quality difference actually lives and which costs nothing to copy.</p>
+  <p>The useful move is not to ask whether a technique works locally. Nearly all of them do. It is to ask whether it is worth <em>more</em> or <em>less</em> locally than where you read about it, because the answer is frequently more, and for reasons that follow directly from the hardware lessons in this course.</p>
+  <h2>Worth more locally than hosted</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Progressive disclosure</div><div><div class="roadmap-title">Because your prefill is slower</div><div class="roadmap-desc">Deferring tool schemas and skill bodies saves tokens everywhere. On a hosted endpoint those tokens are a line on an invoice; locally they are seconds of wall clock, because prefill on one machine runs at a fraction of a datacentre&#39;s rate. The same reduction that trims a hosted bill can be the difference between a usable local loop and an unusable one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Prefix and KV reuse</div><div><div class="roadmap-title">Because you can see it and control it</div><div class="roadmap-desc">A hosted cache is a feature with a lifetime you do not set. A local engine with true prefix matching lets you keep a session warm on your terms &mdash; and the caching lesson&#39;s own measurement is a local one, where reuse turned a multi-minute turn into roughly a tenth of that.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Speculative decoding</div><div><div class="roadmap-title">Because you are batch size one</div><div class="roadmap-desc">It buys latency by spending spare compute, so it wins exactly where the machine is otherwise waiting on memory, which is the single-user local case. A busy hosted server has already sold that headroom to batching, which is why this is a much larger lever on your desk than in a datacentre.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Grammars and constrained decoding</div><div><div class="roadmap-title">Because you own the sampler</div><div class="roadmap-desc">The strongest rung of the structured-output ladder is available locally and largely not hosted. This is the one place where the local stack is not catching up but genuinely ahead, and a system that needs guaranteed-parseable output has a real reason to run its own.</div></div></div></div>
+  <h2>Transfers unchanged</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Sub-agent isolation</div><div><div class="roadmap-title">A process boundary, not a product</div><div class="roadmap-desc">Running the expensive search somewhere else and returning a conclusion needs no vendor feature at all. Locally it is a second process against the same weights, and the context saving is identical.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The evaluation discipline</div><div><div class="roadmap-title">Entirely portable</div><div class="roadmap-desc">Fixtures, baselines, held-out sets, paired comparison, guardrails. None of it depends on where the model runs, and it is what tells you whether any of the above helped.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Approval gates and least privilege</div><div><div class="roadmap-title">Security is not a hosted feature</div><div class="roadmap-desc">Everything in the security block is harness work. A local agent with a shell tool and no egress control is exactly as dangerous as a hosted one, and rather easier to give too much access to because it is already inside your network.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Structured note-taking and compaction</div><div><div class="roadmap-title">Same arithmetic, sharper stakes</div><div class="roadmap-desc">Context management transfers directly and matters more, because your window is usually smaller and your prefill slower. The techniques are unchanged; the pressure is higher.</div></div></div></div>
+  <h2>Worth less, or differently</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Very long contexts</div><div><div class="roadmap-title">The one to be sceptical about</div><div class="roadmap-desc">Filling a large window locally is expensive twice: the key-value cache is what usually exhausts your memory, and the prefill is slow. Retrieval and note-taking are not merely alternatives here, they are frequently the only workable option &mdash; which flips the usual hosted advice that a big window can substitute for good retrieval.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reasoning-heavy prompting</div><div><div class="roadmap-title">Bounded by what the model was trained to do</div><div class="roadmap-desc">Chain-of-thought and inference-time loops help a small local model far less than a frontier one, because the underlying reasoning was never trained in. Spending three times the tokens to get a slightly better wrong answer is a real outcome, and it is worth measuring before adopting a technique on reputation.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Elaborate self-critique</div><div><div class="roadmap-title">Weakest exactly where it is most tempting</div><div class="roadmap-desc">Unaided self-correction degrades correct answers even on strong models. On a small one the critic is the same weak model, so the loop mostly adds cost and variance. Verifier-guided retry &mdash; where something outside the model checks &mdash; still works and is the version to reach for.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Most of the gap between a good agent and a bad one is harness, and harness is portable. Copy that before concluding you need a bigger model.</p><p class="know-why">Prompt assembly, tool design, context management, retrieval quality, output validation, retry policy, approval gates &mdash; none of these are capabilities of the model and all of them are being done well by the systems people admire. It is the cheapest available improvement and the one most often skipped in favour of a model upgrade, because a model upgrade is a decision and harness work is a fortnight.</p><p class="know-eg"><span class="know-eg-label">For example</span>The agent lesson makes the same point from the other direction with a rule worth repeating here: if a bigger model would fix it, it is a model problem; if better tools, clearer instructions or a shorter context would fix it, it is a harness problem. Establish which one you have before spending money on the other.</p></blockquote>
+  <div class="callout matters"><span class="label">The order to work through it</span><p>Harness first, because it is free and portable and you will need it either way. Then measure against a frontier model on your own eval set, so the gap is a number rather than an impression. Then decide whether the remaining difference is worth what closing it costs &mdash; which may be a hybrid, may be a bigger local model, and may be accepting the gap because the constraint that put you on local hardware has not moved.</p><p>The one order that reliably wastes money is the reverse: upgrade the model, find the improvement disappointing, and only then discover the tool descriptions were ambiguous and half the context was distractors.</p></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000029-frontier-and-local.html">Frontier and Local, and What Each Is Actually For</a><span class="link-note">Not a ladder with one at the top. Two different sets of constraints, and the choice is which set you would rather have.</span></li><li><a href="lsn-1787000000000-agent-loop-and-harness.html">The Agent Loop and the Harness</a><span class="link-note">The two words that appear most often in your own docs — and the difference between them.</span></li><li><a href="lsn-1787000000011-context-engineering.html">Context Engineering: What Goes In Decides What Comes Out</a><span class="link-note">For a model you've already chosen, context is the largest lever you still control.</span></li><li><a href="lsn-1787000000019-loops-at-inference.html">Loops at Inference: Control Flow, Limits and Dangers</a><span class="link-note">Running the model more than once — when that buys accuracy, and when it just buys tokens.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why is speculative decoding a larger lever locally than on a busy hosted server?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Local models are smaller, so the draft model is more accurate</div>
+      <div class="quiz-opt">It spends spare compute to buy latency, and a single-user local machine is waiting on memory — a batched server has already sold that headroom</div>
+      <div class="quiz-opt">Hosted providers do not implement it</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. A small local model is given an elaborate self-critique loop and gets worse. What is the most likely explanation?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The critique prompt needs more examples</div>
+      <div class="quiz-opt">The critic is the same weak model, and unaided self-correction degrades correct answers — a verifier outside the model is the version that works</div>
+      <div class="quiz-opt">The loop is running out of context</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Which of these is NOT portable from a frontier harness to a local one?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Sub-agent isolation, which needs a vendor feature</div>
+      <div class="quiz-opt">Nothing listed here — prompt assembly, context management, gates and evaluation are all harness work, which is why copying them comes before upgrading the model</div>
+      <div class="quiz-opt">Approval gates, which require hosted policy enforcement</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

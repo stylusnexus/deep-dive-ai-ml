@@ -72,7 +72,7 @@ LESSONS = [
     ("h2", "The word you'll see elsewhere"),
     ("p", "The loop above has a name you will meet constantly in the literature and almost never in a codebase: <strong>ReAct</strong>, for reason and act. It describes interleaving a reasoning step with an action &mdash; think, call a tool, read the result, think again &mdash; rather than planning everything up front or acting without deliberating. It is worth naming because of how the vocabulary settled: when the paper appeared this was a technique you chose, and it has since become simply what an agent is. If you have followed this lesson you have built a ReAct agent, and the papers describing one are describing the while-loop you already understand."),
     ("p", "<strong>Harness</strong> is also used for an <em>evaluation</em> harness — the rig that runs a model against a test set. Most projects use it in both senses, which is a real ambiguity in the field rather than a misunderstanding on your part. Context disambiguates: an agent harness runs one task for a user, an eval harness runs many tasks for a score."),
-    ("related", ["the-loop-by-hand", "loops-at-inference", "agents-autonomy-and-danger", "tool-calls-and-mcp"]),
+    ("related", ["the-loop-by-hand", "techniques-that-transfer", "agents-autonomy-and-danger", "tool-calls-and-mcp"]),
     ("links", [
       ('ReAct (Yao et al., 2022)', 'https://arxiv.org/abs/2210.03629',
        'The paper that named reason-and-act interleaving, back when it was a technique you chose rather than the default.'),
@@ -2621,7 +2621,7 @@ LESSONS = [
       ("Build Applications with Local AI Models", "Manning MEAP",
        "Practical local serving — model selection for a memory budget, quantisation choices, and the runtime differences this lesson summarises."),
     ]),
-    ("related", ["why-the-gpu-is-waiting", "weights-gguf-quantization", "serving-locally", "when-the-training-run-does-not-fit"]),
+    ("related", ["frontier-and-local", "weights-gguf-quantization", "serving-locally", "when-the-training-run-does-not-fit"]),
     ("links", [
       ("PyTorch MPS backend", "https://docs.pytorch.org/docs/stable/notes/mps.html",
        "Apple GPU support in PyTorch, including the fallback environment variable worth setting during development."),
@@ -3218,6 +3218,157 @@ time per token = 140 GB / 3.35 TB/s           = 42 ms   -> about 24 tokens/secon
        ["Decode should always be batched more aggressively than prefill",
         "Time to first token and tokens per second must be measured separately, because a change that improves one can worsen the other",
         "Prefill should be skipped whenever the prompt is cached"],
+       1),
+    ]),
+  ],
+},
+{
+  "slug": "frontier-and-local",
+  "title": "Frontier and Local, and What Each Is Actually For",
+  "subtitle": "Not a ladder with one at the top. Two different sets of constraints, and the choice is which set you would rather have.",
+  "body": [
+    ("p", "This course has taught local serving in detail &mdash; what fits, what is fast, what quantisation costs &mdash; and it has taught hosted APIs in detail, including the ones that fail. What it has not done is put them side by side, which leaves the impression that local is the budget option and a frontier model is what you use when you can afford it. That framing is wrong often enough to be worth dismantling."),
+
+    ("h2", "What a frontier model has that you cannot reproduce"),
+    ("p", "Be honest about this half first, because the local case is stronger when it is not overstated. Frontier models are trained with compute and data budgets that are not available to you at any price you would pay, and several capabilities follow from that scale rather than from cleverness you could copy."),
+    ("terms", [
+      ("Reasoning trained against verifiers", "The expensive kind of training",
+       "Block 7&#39;s reinforcement fine-tuning, run at a scale that requires thousands of accelerators and a very large verified problem set. This is the capability gap that widened most in recent years, and it is the least reproducible."),
+      ("Long context that works", "Not just a large number",
+       "A large window is easy to advertise and hard to make usable. The position-bias lesson applies to every model; the difference is how far into the window a model still retrieves reliably, and that is bought with training rather than configuration."),
+      ("Tool-use reliability", "Under compounding",
+       "A model that emits a valid tool call 97 per cent of the time and one that manages 99.5 look similar in a demo and behave completely differently over a twenty-step agent loop, where the difference compounds into a large gap in completed tasks."),
+      ("Breadth you did not plan for", "The long tail of requests",
+       "A general model handles the question nobody anticipated. A small local model is frequently excellent on the task you tuned it for and poor one step outside it, which matters when real users arrive."),
+    ]),
+
+    ("h2", "What local has that no amount of money buys from a vendor"),
+    ("terms", [
+      ("The data never leaves", "The one that ends arguments",
+       "For regulated, confidential or personal material this is not a preference, it is the entire reason the option exists. No contract makes a third party as safe as not sending it, and this alone decides a great many architectures."),
+      ("Fixed cost, not marginal", "The economics invert at volume",
+       "Hardware is paid for once and then the tokens are free. A workload with high, steady volume and modest quality requirements can be dramatically cheaper locally; a spiky, low-volume workload is almost always cheaper hosted. The crossover is arithmetic, not ideology."),
+      ("Nothing is deprecated under you", "The version is yours",
+       "A hosted model can change beneath a system that was working, and the sampling controls this course documented are being removed rather than added. A local weights file behaves the same next year as it does today, which is worth something to anything that must be reproducible."),
+      ("You own the sampler", "Where local is genuinely ahead",
+       "Constrained decoding against a grammar, logit bias, arbitrary sampling parameters, deterministic seeds, log probabilities. Several of these are unavailable from major hosted APIs at any price, and the structured-output lesson&#39;s strongest rung is the one only a local stack can offer."),
+    ]),
+
+    ("figure", "The choice is which constraints you prefer, not which model is better. Both columns contain things the other cannot supply.", '''<svg viewBox="0 0 560 178" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two columns comparing what frontier models and local models each uniquely offer.">
+<rect x="10" y="16" width="258" height="146" rx="7" class="d-box"/>
+<text x="139" y="38" class="d-label-b" text-anchor="middle">frontier</text>
+<text x="26" y="62" class="d-label-sm">reasoning trained against verifiers</text>
+<text x="26" y="80" class="d-label-sm">long context that stays usable</text>
+<text x="26" y="98" class="d-label-sm">tool-call reliability under compounding</text>
+<text x="26" y="116" class="d-label-sm">breadth for the unplanned request</text>
+<text x="26" y="142" class="d-label-sm">per-token cost, and it can change</text>
+<rect x="292" y="16" width="258" height="146" rx="7" class="d-box-good"/>
+<text x="421" y="38" class="d-label-b" text-anchor="middle">local</text>
+<text x="308" y="62" class="d-label-sm">the data never leaves</text>
+<text x="308" y="80" class="d-label-sm">fixed cost, free tokens after</text>
+<text x="308" y="98" class="d-label-sm">nothing deprecated under you</text>
+<text x="308" y="116" class="d-label-sm">you own the sampler and the grammar</text>
+<text x="308" y="142" class="d-label-sm">capability ceiling is your hardware</text>
+</svg>'''),
+
+    ("know",
+     "The question is never which model is better. It is which constraint you are unwilling to accept.",
+     "Capability, privacy, cost shape, reproducibility and control are five axes and no option leads on all of them. A workload where confidentiality is non-negotiable has already chosen, whatever the benchmark says. A workload where the hard part is genuinely difficult reasoning has also already chosen, whatever the invoice says. Most real systems have one axis that dominates, and finding it is the actual design decision &mdash; the rest is implementation.",
+     "A team compares a local 8B and a frontier model on their eval set, finds a fourteen-point gap, and concludes local is not viable. The material they process cannot legally leave their premises. The comparison was never a decision; the only real question was whether the local option clears their quality bar, and against what fallback for the cases it does not."),
+
+    ("h2", "The arrangement most systems actually end up with"),
+    ("p", "Framing it as a choice at all is the last thing to give up. The routing lesson makes the argument in general terms and it lands here specifically: run the cheap local path first, detect when it is out of its depth, and escalate. What makes this work is that the detection is usually easier than the task &mdash; a schema that fails to validate, a refusal, a confidence signal, a verifier that says no."),
+    ("p", "The hybrid also inverts the privacy argument in a way worth noticing. If the local model handles the ordinary cases and only the hard ones escalate, then only the hard ones leave, and you have reduced the exposure surface rather than eliminated it. Whether that is acceptable is a question for someone other than the engineer, and it should be asked explicitly rather than discovered in an audit."),
+
+    ("callout", "pitfall", "Two comparisons that are not fair, and both are common",
+     "<p><strong>Comparing a quantised local model against a frontier model at full precision, and calling the gap the local penalty.</strong> Some of that gap is the quantisation and some is the model, and the compression lesson says the loss is uneven &mdash; so the aggregate difference tells you very little about where you will actually be hurt. Slice it.</p><p><strong>Comparing the local model you can run against the frontier model as it is today.</strong> Local capability at a given hardware budget has moved quickly, and a conclusion drawn eighteen months ago about what fits on one machine is unlikely to still hold. Re-run the comparison rather than inheriting it, which is cheap because you kept the eval set.</p>"),
+
+    ("related", ["local-hardware-limits", "routing-and-escalation", "serving-locally", "weights-gguf-quantization"]),
+    ("quiz", [
+      ("A team finds a fourteen-point quality gap between a local model and a frontier one. Their data cannot leave the premises. What does the comparison establish?",
+       ["That local is not viable for this workload",
+        "Only whether the local option clears their quality bar — the privacy constraint had already decided the architecture, so the gap is not a choice",
+        "That they should quantise less aggressively to close the gap"],
+       1),
+      ("Which capability listed here is genuinely unavailable from major hosted APIs?",
+       ["Long context windows",
+        "Constrained decoding against an arbitrary grammar, along with logit bias and seeds — you have to own the sampler",
+        "Reliable tool calling"],
+       1),
+      ("Why is comparing a quantised local model against a full-precision frontier model unfair?",
+       ["Quantised models are always worse, so the comparison is pointless",
+        "The gap mixes the quantisation penalty with the model difference, and compression loss is uneven — so the aggregate says little about where you will actually be hurt",
+        "Precision differences make latency incomparable"],
+       1),
+    ]),
+  ],
+},
+{
+  "slug": "techniques-that-transfer",
+  "title": "Techniques That Transfer, and the Ones That Change Value",
+  "subtitle": "Most of what makes a frontier harness good is not the model. It is portable — and several techniques are worth more locally than they are where they were invented.",
+  "body": [
+    ("p", "The previous lesson separates the capability you cannot reproduce from the constraints you might prefer. This one is about the large space in between: the engineering around the model, which is where a great deal of the observed quality difference actually lives and which costs nothing to copy."),
+    ("p", "The useful move is not to ask whether a technique works locally. Nearly all of them do. It is to ask whether it is worth <em>more</em> or <em>less</em> locally than where you read about it, because the answer is frequently more, and for reasons that follow directly from the hardware lessons in this course."),
+
+    ("h2", "Worth more locally than hosted"),
+    ("terms", [
+      ("Progressive disclosure", "Because your prefill is slower",
+       "Deferring tool schemas and skill bodies saves tokens everywhere. On a hosted endpoint those tokens are a line on an invoice; locally they are seconds of wall clock, because prefill on one machine runs at a fraction of a datacentre&#39;s rate. The same reduction that trims a hosted bill can be the difference between a usable local loop and an unusable one."),
+      ("Prefix and KV reuse", "Because you can see it and control it",
+       "A hosted cache is a feature with a lifetime you do not set. A local engine with true prefix matching lets you keep a session warm on your terms &mdash; and the caching lesson&#39;s own measurement is a local one, where reuse turned a multi-minute turn into roughly a tenth of that."),
+      ("Speculative decoding", "Because you are batch size one",
+       "It buys latency by spending spare compute, so it wins exactly where the machine is otherwise waiting on memory, which is the single-user local case. A busy hosted server has already sold that headroom to batching, which is why this is a much larger lever on your desk than in a datacentre."),
+      ("Grammars and constrained decoding", "Because you own the sampler",
+       "The strongest rung of the structured-output ladder is available locally and largely not hosted. This is the one place where the local stack is not catching up but genuinely ahead, and a system that needs guaranteed-parseable output has a real reason to run its own."),
+    ]),
+
+    ("h2", "Transfers unchanged"),
+    ("terms", [
+      ("Sub-agent isolation", "A process boundary, not a product",
+       "Running the expensive search somewhere else and returning a conclusion needs no vendor feature at all. Locally it is a second process against the same weights, and the context saving is identical."),
+      ("The evaluation discipline", "Entirely portable",
+       "Fixtures, baselines, held-out sets, paired comparison, guardrails. None of it depends on where the model runs, and it is what tells you whether any of the above helped."),
+      ("Approval gates and least privilege", "Security is not a hosted feature",
+       "Everything in the security block is harness work. A local agent with a shell tool and no egress control is exactly as dangerous as a hosted one, and rather easier to give too much access to because it is already inside your network."),
+      ("Structured note-taking and compaction", "Same arithmetic, sharper stakes",
+       "Context management transfers directly and matters more, because your window is usually smaller and your prefill slower. The techniques are unchanged; the pressure is higher."),
+    ]),
+
+    ("h2", "Worth less, or differently"),
+    ("terms", [
+      ("Very long contexts", "The one to be sceptical about",
+       "Filling a large window locally is expensive twice: the key-value cache is what usually exhausts your memory, and the prefill is slow. Retrieval and note-taking are not merely alternatives here, they are frequently the only workable option &mdash; which flips the usual hosted advice that a big window can substitute for good retrieval."),
+      ("Reasoning-heavy prompting", "Bounded by what the model was trained to do",
+       "Chain-of-thought and inference-time loops help a small local model far less than a frontier one, because the underlying reasoning was never trained in. Spending three times the tokens to get a slightly better wrong answer is a real outcome, and it is worth measuring before adopting a technique on reputation."),
+      ("Elaborate self-critique", "Weakest exactly where it is most tempting",
+       "Unaided self-correction degrades correct answers even on strong models. On a small one the critic is the same weak model, so the loop mostly adds cost and variance. Verifier-guided retry &mdash; where something outside the model checks &mdash; still works and is the version to reach for."),
+    ]),
+
+    ("know",
+     "Most of the gap between a good agent and a bad one is harness, and harness is portable. Copy that before concluding you need a bigger model.",
+     "Prompt assembly, tool design, context management, retrieval quality, output validation, retry policy, approval gates &mdash; none of these are capabilities of the model and all of them are being done well by the systems people admire. It is the cheapest available improvement and the one most often skipped in favour of a model upgrade, because a model upgrade is a decision and harness work is a fortnight.",
+     "The agent lesson makes the same point from the other direction with a rule worth repeating here: if a bigger model would fix it, it is a model problem; if better tools, clearer instructions or a shorter context would fix it, it is a harness problem. Establish which one you have before spending money on the other."),
+
+    ("callout", "matters", "The order to work through it",
+     "<p>Harness first, because it is free and portable and you will need it either way. Then measure against a frontier model on your own eval set, so the gap is a number rather than an impression. Then decide whether the remaining difference is worth what closing it costs &mdash; which may be a hybrid, may be a bigger local model, and may be accepting the gap because the constraint that put you on local hardware has not moved.</p><p>The one order that reliably wastes money is the reverse: upgrade the model, find the improvement disappointing, and only then discover the tool descriptions were ambiguous and half the context was distractors.</p>"),
+
+    ("related", ["frontier-and-local", "agent-loop-and-harness", "context-engineering", "loops-at-inference"]),
+    ("quiz", [
+      ("Why is speculative decoding a larger lever locally than on a busy hosted server?",
+       ["Local models are smaller, so the draft model is more accurate",
+        "It spends spare compute to buy latency, and a single-user local machine is waiting on memory — a batched server has already sold that headroom",
+        "Hosted providers do not implement it"],
+       1),
+      ("A small local model is given an elaborate self-critique loop and gets worse. What is the most likely explanation?",
+       ["The critique prompt needs more examples",
+        "The critic is the same weak model, and unaided self-correction degrades correct answers — a verifier outside the model is the version that works",
+        "The loop is running out of context"],
+       1),
+      ("Which of these is NOT portable from a frontier harness to a local one?",
+       ["Sub-agent isolation, which needs a vendor feature",
+        "Nothing listed here — prompt assembly, context management, gates and evaluation are all harness work, which is why copying them comes before upgrading the model",
+        "Approval gates, which require hosted policy enforcement"],
        1),
     ]),
   ],

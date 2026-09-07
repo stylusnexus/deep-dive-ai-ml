@@ -460,3 +460,20 @@ The tail belongs to volatile content
 Tool schemas
 Skill bodies
 Sub-agent output
+Reasoning trained against verifiers
+Long context that works
+Tool-use reliability
+Breadth you did not plan for
+The data never leaves
+Fixed cost, not marginal
+Nothing is deprecated under you
+You own the sampler
+Prefix and KV reuse
+Sub-agent isolation
+The evaluation discipline
+Approval gates and least privilege
+Structured note-taking and compaction
+Very long contexts
+Reasoning-heavy prompting
+Elaborate self-critique
+Grammars and constrained decoding

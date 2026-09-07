@@ -17,7 +17,7 @@ RELATED = {
                             "preloading-instead-of-retrieving", "session-lifecycle"],
     "tokens-context-and-kv-cache": ["attention-and-transformers", "latency-and-caching",
                                     "context-engineering", "local-hardware-limits"],
-    "local-hardware-limits": ["why-the-gpu-is-waiting", "weights-gguf-quantization",
+    "local-hardware-limits": ["frontier-and-local", "weights-gguf-quantization",
                               "serving-locally", "when-the-training-run-does-not-fit"],
     "serving-locally": ["local-hardware-limits", "weights-gguf-quantization",
                         "latency-and-caching", "the-image-is-the-unit"],
@@ -109,7 +109,7 @@ RELATED = {
                                     "measuring-retrieval", "models-judging-models"],
 
     # --- agents, context and memory
-    "agent-loop-and-harness": ["the-loop-by-hand", "loops-at-inference",
+    "agent-loop-and-harness": ["the-loop-by-hand", "techniques-that-transfer",
                                "agents-autonomy-and-danger", "tool-calls-and-mcp"],
     "the-loop-by-hand": ["agent-loop-and-harness", "what-a-graph-buys",
                          "tool-calls-and-mcp", "loop-tradeoffs"],
@@ -241,6 +241,10 @@ RELATED = {
                                          "neural-networks-both-ways", "deterministic-first"],
     "recommendation-systems": ["loops-in-training", "drift",
                                "why-measurement-decides", "embeddings-and-retrieval"],
+    "frontier-and-local": ["local-hardware-limits", "routing-and-escalation",
+                           "serving-locally", "weights-gguf-quantization"],
+    "techniques-that-transfer": ["frontier-and-local", "agent-loop-and-harness",
+                                 "context-engineering", "loops-at-inference"],
     "ai-assisted-analysis": ["what-ai-makes-worse", "deterministic-first",
                              "first-fifteen-minutes", "confounds-you-cannot-see"],
 }
