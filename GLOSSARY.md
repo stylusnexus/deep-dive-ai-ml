@@ -24,6 +24,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Context window** — The maximum tokens a model can consider at once, covering prompt, history, retrieved documents and the answer together. A capacity limit, not a promise of attention.
 
+**Lost in the middle** — Retrieval accuracy following a U-shape in position: material at the start and end of a long context is used reliably, material in the middle much less. Reproduced across model families, so a sound default — but a property of how current models were built and trained rather than a law. It has a known cause (causal masking pulling towards early positions, positional encodings towards nearby ones, and position bias in the training data) and a known remedy (calibrating the attention bias away, worth up to ten points on retrieval tasks). Measure it on your own model rather than inheriting the curve.
+
 **KV cache** — Stored key/value vectors for tokens already processed, so they aren't recomputed each step. Grows with context length, and is usually what exhausts memory locally. Prompt caching is this, sold as a feature.
 
 **Prefill / decode** — Processing the prompt (parallel, fast) versus generating the answer one token at a time (sequential, slower). Quoted tok/s almost always means decode.

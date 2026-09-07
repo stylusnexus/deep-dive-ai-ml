@@ -164,7 +164,11 @@ LESSONS = [
     ("links", [
       ('Lost in the Middle (Liu et al., 2023)', 'https://arxiv.org/abs/2307.03172',
        'The paper behind the U-shaped attention finding. Short and worth reading properly.'),
-      ('Prompt caching', 'https://docs.claude.com/en/docs/build-with-claude/prompt-caching',
+
+      ('Found in the Middle (Hsieh et al., 2024)', 'https://arxiv.org/abs/2406.16008',
+       'The same U-shaped bias, shown to be an attention bias that can be calibrated away — up to ten points recovered on retrieval tasks.'),
+      ('On the Emergence of Position Bias in Transformers (Wu et al., 2025)', 'https://arxiv.org/abs/2502.01951',
+       'Where the bias comes from: causal masking pulling towards early positions, positional encodings towards nearby ones, and training-data bias completing it.'),      ('Prompt caching', 'https://docs.claude.com/en/docs/build-with-claude/prompt-caching',
        'The KV cache sold as a feature — note the rules about what invalidates a cached prefix.'),
     ]),
     ("quiz", [
@@ -1144,7 +1148,7 @@ LESSONS = [
     ("p", "Lesson 2 covered the mechanics of the context window — tokens, limits, the KV cache. This lesson is about the discipline built on top of it, and it may be the highest-leverage skill in the whole program. Once you've picked a model, almost everything that separates a good result from a bad one is <strong>what you put in front of it</strong>."),
 
     ("h2", "The uncomfortable finding: more context is not better"),
-    ("p", "The intuition is that a bigger window means you should fill it. The evidence says otherwise. Model attention over long contexts is not uniform — material at the beginning and end is used reliably, and material in the middle is used considerably less. This is the well-documented \"lost in the middle\" effect, and it holds across model families."),
+    ("p", "The intuition is that a bigger window means you should fill it. The evidence says otherwise. Model attention over long contexts is not uniform — material at the beginning and end is used reliably, and material in the middle is used considerably less. This is the well-documented \"lost in the middle\" effect, and it has been reproduced across model families."),
 
     ("figure", "Attention over position is U-shaped. Burying the one paragraph that matters in the middle of a large context is a reliable way to make a model appear to have missed it.", '''<svg viewBox="0 0 640 200" role="img" aria-label="U-shaped attention curve over context position">
 <line x1="60" y1="160" x2="610" y2="160" class="d-arrow"/>
@@ -1167,6 +1171,18 @@ LESSONS = [
 
     ("h2", "Distractors cost more than empty space"),
     ("p", "Irrelevant-but-plausible context actively degrades answers. A retrieved passage about the 2023 policy, sitting next to the 2026 one, doesn't get politely ignored — it competes. Precision in retrieval beats volume, which is why Block 3 spends time on ranking and filtering rather than on cramming the window."),
+
+    ("h3", "Where the U-shape comes from, and why it is not a law"),
+    ("p", "It is tempting to file this as a fixed property of transformers and design around it forever. The follow-up work says something more useful and more precise. Two architectural forces pull in opposite directions: <strong>causal masking</strong> biases attention towards earlier positions, because a token early in the sequence has every later token attending back to it and so gets repeated opportunity to shape what follows; <strong>relative positional encodings</strong> pull the other way, towards whatever is nearby. The interaction of the two produces the position bias real models show."),
+    ("p", "The part worth knowing is what completes the explanation. Wu and colleagues find the U-shape emerging when the <em>training data</em> itself carries a bias towards first and last positions &mdash; and report that the phenomenon does not appear when the training data lacks that bias. So this is a property of how current models were built and trained, not something the architecture makes inevitable."),
+
+    ("know",
+     "Lost in the middle is a measured property of particular models, not a law of attention. Treat it as something to verify rather than assume.",
+     "It has been reproduced widely enough to be a sound default, and it has a known cause and an active fix: Hsieh and colleagues show the same models attend to the ends regardless of relevance, and that calibrating that bias away recovers up to ten percentage points on retrieval-augmented tasks. A finding with a mechanism and a remedy is one that newer models can be better at, which means the honest move is to measure position sensitivity on the model you are actually using rather than inheriting a curve from a 2023 paper.",
+     "The measurement is cheap. Take twenty questions whose answer sits in one known chunk, run each with that chunk placed first, in the middle, and last, and compare accuracy across the three positions. If your model is flat, ordering is not your problem and you can stop ranking for it. If it is U-shaped, you have your own curve rather than someone else&#39;s."),
+
+    ("callout", "matters", "None of this changes what you should do",
+     "<p>The practical advice survives every one of these refinements intact, because it was never really about the shape of the curve: send less, rank better, and put what matters at an end. That is right if attention is U-shaped, right if it is flat, and right if your model is one of the ones that has been calibrated &mdash; a short well-ordered context beats a long one for reasons of cost and distraction that have nothing to do with position bias at all.</p><p>What changes is the confidence with which you should state the cause, and whether you would notice if the effect went away.</p>"),
 
     ("h2", "The context budget"),
     ("p", "Every turn you are allocating a fixed budget across competing claims:"),
@@ -1211,7 +1227,11 @@ LESSONS = [
     ("links", [
       ('Lost in the Middle (Liu et al., 2023)', 'https://arxiv.org/abs/2307.03172',
        'The evidence for the U-shaped curve. Read it once; it changes how you order retrieved material.'),
-      ('Prompt caching', 'https://docs.claude.com/en/docs/build-with-claude/prompt-caching',
+
+      ('Found in the Middle (Hsieh et al., 2024)', 'https://arxiv.org/abs/2406.16008',
+       'The same U-shaped bias, shown to be an attention bias that can be calibrated away — up to ten points recovered on retrieval tasks.'),
+      ('On the Emergence of Position Bias in Transformers (Wu et al., 2025)', 'https://arxiv.org/abs/2502.01951',
+       'Where the bias comes from: causal masking pulling towards early positions, positional encodings towards nearby ones, and training-data bias completing it.'),      ('Prompt caching', 'https://docs.claude.com/en/docs/build-with-claude/prompt-caching',
        'The mechanical reason stable content goes at the front.'),
       ('Effective context engineering for AI agents — Anthropic', 'https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents',
        'Compaction, structured note-taking and sub-agent isolation, with the attention-budget framing used above.'),
@@ -3057,7 +3077,11 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
        ["A session store is being queried automatically",
         "The whole transcript, including that turn, is re-sent with every request",
         "The model has a small persistent memory between calls"], 1),
-      ("An agent proposes something that contradicts a constraint you gave it an hour ago. What most likely happened?",
+
+      ('Found in the Middle (Hsieh et al., 2024)', 'https://arxiv.org/abs/2406.16008',
+       'The same U-shaped bias, shown to be an attention bias that can be calibrated away — up to ten points recovered on retrieval tasks.'),
+      ('On the Emergence of Position Bias in Transformers (Wu et al., 2025)', 'https://arxiv.org/abs/2502.01951',
+       'Where the bias comes from: causal masking pulling towards early positions, positional encodings towards nearby ones, and training-data bias completing it.'),      ("An agent proposes something that contradicts a constraint you gave it an hour ago. What most likely happened?",
        ["The model is ignoring instructions",
         "The constraint was mentioned once, dropped by a compaction summary, and no longer exists in its context",
         "The context window was exceeded and the request failed silently"], 1),
