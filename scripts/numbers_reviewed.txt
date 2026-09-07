@@ -265,3 +265,5 @@ the-map|78f641c08cba|seeded, not individually traced
 inside-an-llm|ba7dc76dae75|seeded, not individually traced
 inside-an-llm|0dbd96779ba6|seeded, not individually traced
 inside-an-llm|138188e61f46|seeded, not individually traced
+embeddings-and-retrieval|08f92fb61a7e|illustrative value, no claim attached
+embeddings-and-retrieval|569a714c4a08|measured in this repository by scripts/measure_semantic_threshold.py

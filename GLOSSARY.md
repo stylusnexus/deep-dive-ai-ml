@@ -66,6 +66,16 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Embedding** — A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers.
 
+**Contrastive learning** — How embedding models are trained: pull pairs that should be close together, push pairs that should not apart. Nobody labels what a dimension means; the only instruction is about relative distances, which is why an embedding has no meaningful absolute scale and a similarity of 0.8 means nothing except relative to the same model's other scores.
+
+**Positive pairs** — What training says should end up close. Usually harvested rather than labelled — a title and its body, a question and the passage answering it — and the cheapness of collecting them is why the method scales.
+
+**Negative pairs** — What should end up apart, frequently just the other items in the same batch. True often enough to work and false often enough to matter.
+
+**Hard negatives** — Items genuinely similar but which should not match. Easy negatives are learned in the first few steps and teach nothing after; a model never shown hard negatives has no reason to separate things that look alike.
+
+**Cross-modal alignment** — Contrastive training where the two halves of a pair are different kinds of thing, most often an image and its caption. Produces one space holding both, which is what allows searching images with text. Only as good as the captions it learned from, so it is weak on what captions rarely mention: counting, spatial relations, text inside an image.
+
 **Cosine similarity** — The angle between two vectors, from 1 to -1. How "closeness of meaning" is actually measured.
 
 **Semantic routing** — Picking a lane by embedding the incoming turn and comparing it to embedded examples. Milliseconds and fractions of a cent, versus asking an LLM to classify.

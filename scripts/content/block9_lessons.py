@@ -49,7 +49,7 @@ LESSONS = [
 
     ("callout", "pitfall", "Extraction is often the better tool, and it is less interesting",
      "<p>Before sending a document to a multimodal model, ask whether the layout carries meaning. A form, a chart, a diagram or a signed page needs to be seen. A text report does not, and extracting its text costs a fraction of processing pictures of its pages. The multimodal route is more impressive and frequently the wrong answer, which is the same shape as the fine-tuning argument in Block 7.</p>"),
-    ("related", ["convolutions-and-computer-vision", "attention-and-transformers", "inside-an-llm", "building-a-rag-system"]),
+    ("related", ["convolutions-and-computer-vision", "embeddings-and-retrieval", "inside-an-llm", "building-a-rag-system"]),
     ("quiz", [
       ("Why does image resolution matter beyond visual quality?",
        ["Larger images take longer to upload",

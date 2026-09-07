@@ -492,3 +492,4 @@ A test whose premise is unreachable
 A sweep where nothing differs
 An aggregate over zero rows
 A check downstream of its own subject
+The loss

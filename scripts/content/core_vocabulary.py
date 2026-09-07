@@ -407,6 +407,33 @@ LESSONS = [
     ]),
     ("p", "The reason to route this way rather than asking an LLM \"which category is this?\" is cost and latency. An embedding call is milliseconds and fractions of a cent. It runs on every single turn, so that difference compounds."),
 
+    ("h2", "Where the numbers come from: contrastive training"),
+    ("p", "Everything above treats the embedding model as given &mdash; text goes in, a vector comes out, similar things land near each other. It is worth knowing how that arrangement is produced, because several of the practical oddities in this course fall out of it directly."),
+    ("p", "The recipe is <strong>contrastive learning</strong>, and the idea is simpler than the name. Take pairs that should be close &mdash; a question and its answer, a sentence and its paraphrase, a caption and its image &mdash; and pairs that should not be. Train the model to pull the first kind together and push the second kind apart. Nobody labels what any dimension means and no dimension has to mean anything; the only instruction is about relative distances, and geometry that satisfies enough of those constraints turns out to encode something usable as meaning."),
+
+    ("terms", [
+      ("Positive pairs", "What should end up close",
+       "Usually harvested rather than labelled: a title and its body, a question and the passage that answers it, consecutive sentences. The cheapness of collecting these is why the method scales."),
+      ("Negative pairs", "What should end up apart",
+       "Frequently just the other items in the same batch, on the assumption that a random other document is unrelated. Which is true often enough to work and false often enough to matter."),
+      ("Hard negatives", "The ones that do the teaching",
+       "Items that are genuinely similar but should not match. Easy negatives are learned in the first few steps and contribute nothing afterwards; a model that has never seen hard negatives has no reason to separate things that look alike."),
+      ("The loss", "Relative, never absolute",
+       "The objective compares distances rather than fixing them, so an embedding has no meaningful absolute scale. This is why a similarity of 0.8 means nothing on its own and everything relative to the same model&#39;s other scores."),
+    ]),
+
+    ("know",
+     "An embedding model learned the distinctions someone chose to train it on, and is indifferent to the ones they did not.",
+     "The geometry is a record of which pairs were called positive. If negation was never a distinction the training pairs turned on, the model has no reason to place a sentence far from its opposite &mdash; and it will not. This is the same fact the semantic-cache measurement in this course arrives at from the other end, where a genuine paraphrase scored 0.149 while a negation that reverses the answer scored higher. Nothing is malfunctioning there; the model is reporting a similarity it was never asked to make sensitive to meaning-reversal.",
+     "So the useful question about an embedding model is not how good it is but what it was trained to separate. A model trained on question-and-answer pairs is being asked something different from one trained on paraphrases, and asking it to do the other job is a mismatch rather than a shortcoming."),
+
+    ("callout", "insight", "Two practical oddities this explains",
+     "<p><strong>Why some models want a prefix on your query.</strong> Several are trained with the two sides of a pair marked differently &mdash; a question is not a passage &mdash; so they expect a short instruction such as a query prefix at inference. Omitting it silently degrades retrieval, because you are handing the model an input in the wrong costume.</p><p><strong>Why two builds of nominally the same model are not interchangeable.</strong> The training only fixed relative distances, so nothing pins the space to a canonical orientation. Two versions can agree closely on average similarity and still rank your candidates differently, which is enough to change what gets retrieved. Re-embed the whole corpus when you change the model, and re-run your retrieval evaluation even when the change looks like a rebuild.</p>"),
+
+    ("h2", "The same trick across two modalities"),
+    ("p", "The interesting consequence is that nothing in the recipe requires both halves of a pair to be the same kind of thing. Train on images with their captions &mdash; pulling each image towards its own caption and away from everyone else&#39;s &mdash; and you get one space holding both, where a photograph of a dog sits near the words &ldquo;a dog&rdquo;. This is <strong>cross-modal alignment</strong>, and it is what makes it possible to search images with text, or to classify an image against a list of written labels the model was never explicitly trained to recognise."),
+    ("p", "It also explains what a vision-language model is doing under the surface, and where it is weak. The alignment is only as good as the caption pairs it learned from, so these systems are strong on the sorts of description that appear in captions and much weaker on anything captions rarely mention &mdash; counting, spatial relations, text inside the image, or fine distinctions that nobody bothers writing down."),
+
     ("h2", "Where embeddings fail"),
     ("ul", [
       "<strong>Negation.</strong> \"I want a refund\" and \"I don't want a refund\" embed close together. Sign is meaning, and embeddings are weak at it.",
@@ -3323,7 +3350,6 @@ time per token = 140 GB / 3.35 TB/s           = 42 ms   -> about 24 tokens/secon
 
     ("callout", "pitfall", "Two comparisons that are not fair, and both are common",
      "<p><strong>Comparing a quantised local model against a frontier model at full precision, and calling the gap the local penalty.</strong> Some of that gap is the quantisation and some is the model, and the compression lesson says the loss is uneven &mdash; so the aggregate difference tells you very little about where you will actually be hurt. Slice it.</p><p><strong>Comparing the local model you can run against the frontier model as it is today.</strong> Local capability at a given hardware budget has moved quickly, and a conclusion drawn eighteen months ago about what fits on one machine is unlikely to still hold. Re-run the comparison rather than inheriting it, which is cheap because you kept the eval set.</p>"),
-
     ("related", ["local-hardware-limits", "routing-and-escalation", "serving-locally", "weights-gguf-quantization"]),
     ("quiz", [
       ("A team finds a fourteen-point quality gap between a local model and a frontier one. Their data cannot leave the premises. What does the comparison establish?",
@@ -3393,7 +3419,6 @@ time per token = 140 GB / 3.35 TB/s           = 42 ms   -> about 24 tokens/secon
 
     ("callout", "matters", "The order to work through it",
      "<p>Harness first, because it is free and portable and you will need it either way. Then measure against a frontier model on your own eval set, so the gap is a number rather than an impression. Then decide whether the remaining difference is worth what closing it costs &mdash; which may be a hybrid, may be a bigger local model, and may be accepting the gap because the constraint that put you on local hardware has not moved.</p><p>The one order that reliably wastes money is the reverse: upgrade the model, find the improvement disappointing, and only then discover the tool descriptions were ambiguous and half the context was distractors.</p>"),
-
     ("related", ["frontier-and-local", "agent-loop-and-harness", "context-engineering", "loops-at-inference"]),
     ("quiz", [
       ("Why is speculative decoding a larger lever locally than on a busy hosted server?",

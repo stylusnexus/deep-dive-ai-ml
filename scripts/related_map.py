@@ -218,7 +218,7 @@ RELATED = {
                 "why-measurement-decides", "agents-autonomy-and-danger"],
     "asking-the-database-properly": ["deterministic-first", "tabular-data-and-dtypes",
                                      "structured-output-json", "agentic-rag"],
-    "when-the-input-is-not-text": ["convolutions-and-computer-vision", "attention-and-transformers",
+    "when-the-input-is-not-text": ["convolutions-and-computer-vision", "embeddings-and-retrieval",
                                    "inside-an-llm", "building-a-rag-system"],
     "the-apprenticeship-problem": ["what-the-evidence-shows", "what-ai-makes-worse",
                                    "code-nobody-decided", "when-scaffolding-turns"],
