@@ -1213,6 +1213,28 @@ LESSONS = [
     ("callout", "insight", "Clearing tool results is the cheapest win", "Of all forms of compaction, dropping old tool results is the safest and lightest-touch — they are usually the largest thing in the window, and once acted on they are rarely needed verbatim. Do this before reaching for summarisation, which risks losing something."),
     ("p", "The framing that ties these together is an <strong>attention budget</strong>: not a storage limit but a finite capacity to attend, degrading as a gradient rather than a cliff. Good context engineering is finding the smallest set of high-signal tokens that gets the outcome — a different objective from filling the window."),
 
+    ("h2", "Progressive disclosure, at three layers rather than one"),
+    ("p", "The skills lesson describes progressive disclosure as that format&#39;s central design: a name and one line stay resident, the body loads when it is needed. It is worth seeing that this is not a property of skills. It is one technique, and a mature harness applies it at three separate layers of the budget above."),
+
+    ("terms", [
+      ("Tool schemas", "Names resident, schemas fetched",
+       "The full JSON schema for a tool is several times the size of its name and one-line description, and it is paid for on every turn whether or not the tool is called. Keeping only the names in context and fetching a schema when one is actually wanted moves that cost from always to sometimes."),
+      ("Skill bodies", "Pointers resident, procedure loaded",
+       "The same trade one level up. A long procedure costs nothing until the model decides it applies, which is what makes it reasonable to package something detailed."),
+      ("Sub-agent output", "Conclusions resident, evidence discarded",
+       "A search that reads thirty files and returns a finding has spent thirty files of context somewhere other than yours. The isolation is the point: what comes back is a paragraph, not a transcript."),
+    ]),
+
+    ("p", "The three compound, because they attack different lines of the budget: tools, instructions and tool results. A harness doing none of them can spend a large share of its window before the user has said anything &mdash; and that share is not idle, it is the distractor load the earlier sections of this lesson describe, arriving from your own configuration rather than from retrieval."),
+
+    ("know",
+     "A token reduction is a measurement of what the change cost you, not of what it bought. Those are different experiments and only one of them is easy.",
+     "Cutting a prompt in half and reporting the tokens saved and the prefill time is honest work, and it establishes nothing about quality. The answers may be better, worse, or identical, and the reduction figure cannot distinguish those &mdash; a change that removes what the model needed produces exactly the same encouraging token number. This is the guardrail-metric argument in a place people rarely apply it, because the primary metric here is so easy to move that it is tempting to stop there.",
+     "A prompt goes from about 17,500 tokens to about 7,300 &mdash; 58 per cent smaller, prefill roughly halved. Every number in that sentence is a cost. Whether the assistant still answers as well needs the same held-out set run against both arms, and until that has been done the correct claim is &ldquo;it is cheaper&rdquo; rather than &ldquo;it is better&rdquo;."),
+
+    ("callout", "matters", "The ablation is the whole experiment",
+     "<p>If you remove something and quality holds, you have found genuine waste and should keep the cut. If quality drops, you have located something that was load-bearing and learned what it was doing, which is worth nearly as much. If you never run the comparison, you have a faster system of unknown quality and no way back to knowing &mdash; and the tempting reading of a large token saving is that it was obviously right.</p><p>Run both arms on the same items. It is the paired comparison from the evaluation block, and the fact that the treatment is a deletion changes nothing about the arithmetic.</p>"),
+
     ("h2", "Context rot"),
     ("p", "Long agent sessions degrade in a characteristic way: early mistakes stay in the history, get re-read every turn, and are treated as established fact. A wrong assumption at turn 3 is still shaping behaviour at turn 30. Restarting with a clean context and a short accurate summary frequently outperforms continuing — the reason a fresh session sometimes solves what a long one couldn't."),
 

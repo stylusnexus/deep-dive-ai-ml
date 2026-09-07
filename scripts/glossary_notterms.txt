@@ -457,3 +457,6 @@ A control fixture
 A positive control
 Two sort keys, one ordering
 The tail belongs to volatile content
+Tool schemas
+Skill bodies
+Sub-agent output
