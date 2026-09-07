@@ -481,3 +481,10 @@ Your gate may already be an arm
 Gate, then interleave
 Aborting on a gate is not peeking
 A gate is not a weak battery
+Deferring is about context, not the request
+It is designed to preserve the cache
+The Model Context Protocol does not do this
+The tool-count threshold is guidance
+The context window you get is not the one advertised
+Concurrency is one by default
+Tool calling needs flags, not just a model

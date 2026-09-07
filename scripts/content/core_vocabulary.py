@@ -317,6 +317,21 @@ LESSONS = [
     ("callout", "insight", "What actually moved it", "Not the runtime and not the quantization — <strong>prefix-KV reuse</strong>, so each turn only processes the tokens that are genuinely new. On the same fixture that took 7–17 minutes, a serving engine with true prefix matching brought it to about 1.3 minutes, roughly tenfold, with cache hit rate at 1.00 and no loss of quality. Same weights throughout. The lever was in the serving layer's caching, which no tokens-per-second figure would ever have surfaced."),
     ("callout", "pitfall", "The habit this should build", "When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck. Two premature speed claims were made on that project from partial data before the real one was confirmed by cache-hit telemetry. A number measured on the wrong phase is not a small error — it points your optimisation work at the wrong layer entirely."),
 
+    ("h2", "Three defaults that quietly break a local agent"),
+    ("p", "The lessons above are about speed. These are about whether the thing works at all, and each is a default rather than a bug &mdash; which is why they are found late and by accident."),
+
+    ("terms", [
+      ("The context window you get is not the one advertised", "It is chosen from your memory",
+       "A convenience runtime will pick a context length based on available video memory, and the smallest tier is far below what an agent needs &mdash; a few thousand tokens where the model supports vastly more. Its own documentation tells agent users to raise it explicitly. A loop that mysteriously forgets its instructions on long tasks is usually this, not the model."),
+      ("Concurrency is one by default", "One request at a time",
+       "The parallel-request setting on the common local runtime defaults to a single request, and memory scales with parallelism times context length, so raising it is not free. An agent issuing concurrent tool calls against a local endpoint may be queueing them without anyone noticing, which shows up as latency rather than as an error."),
+      ("Tool calling needs flags, not just a model", "OpenAI-compatible is not drop-in",
+       "Local servers require explicit configuration before function calling works &mdash; a template flag in one engine, an auto-tool-choice flag plus a <em>model-specific</em> parser in another. The endpoints speak the same shape as a hosted API and one engine states plainly that it makes no strong claim of compatibility. Assume the differences are where your agent will break."),
+    ]),
+
+    ("callout", "pitfall", "And prompt caching locally is not guaranteed to be lossless",
+     "<p>Reusing a cached prefix is a large win locally and one engine documents a caveat worth carrying: because logits are not guaranteed bit-for-bit identical across different batch sizes, enabling prompt reuse <em>can produce nondeterministic results</em>. The hosted equivalent makes no such warning.</p><p>That matters for anything trying to be reproducible. The determinism lesson already says temperature zero does not guarantee identical output; this is a second, separate source of the same problem, and it is one you switched on deliberately to go faster.</p>"),
+
     ("h2", "The thing to keep straight"),
     ("p", "Ollama is a convenience layer, not a requirement. <code>llama.cpp</code> serves models directly; vLLM and Text Generation Inference (TGI) are production-grade alternatives with better batching for concurrent users. Ollama optimises for one developer on one machine, and is a poor fit for serving many users at once. Block 8 covers what changes when you need the latter."),
 
@@ -502,6 +517,18 @@ LESSONS = [
       ("Tool use examples", "Show, do not just schema", "Concrete example calls inside the tool definition. A schema says what is structurally valid; examples convey conventions a schema cannot — date formats, id shapes, when an optional parameter matters. Reported: 72% to 90% on complex parameter handling."),
     ]),
     ("callout", "matters", "Notice what the accuracy numbers mean", "Loading fewer tools made selection <em>more accurate</em>, not merely cheaper. Sixty definitions in context is not a neutral cost paid in tokens — similar tool names crowd each other and the model picks wrongly. This is the context-engineering finding in another guise: more material in the window is not more capability, and precision beats volume for tools exactly as it does for retrieved documents."),
+
+    ("h3", "Two things about deferral that are easy to get backwards"),
+    ("terms", [
+      ("Deferring is about context, not the request", "You still send every definition",
+       "Marking tools for deferred loading controls what enters the <em>context window</em>. The request still carries every tool&#39;s full definition on every call, because the service needs them to run the search and expand a reference. If you were expecting a smaller payload, you will not get one; what you get is a smaller prompt."),
+      ("It is designed to preserve the cache", "Which is why it goes at the front",
+       "Deferred tools are excluded from the system-prompt prefix rather than inserted into it, so the prefix stays byte-identical and prompt caching survives. That is not incidental &mdash; a disclosure mechanism that rewrote the front of the prompt would pay back its savings immediately, for the reasons the caching lesson gives."),
+      ("The Model Context Protocol does not do this", "It is a platform feature, not a protocol one",
+       "The protocol&#39;s tool listing returns the full input schema for every tool. It offers pagination and change notifications, and nothing that defers a definition. If you are aggregating servers and expecting the protocol to keep your context small, it will not &mdash; that has to come from the layer above it, or from something you build."),
+      ("The tool-count threshold is guidance", "Attribute it, do not launder it",
+       "The published advice is that selection accuracy degrades somewhere past roughly thirty to fifty available tools. It is a vendor&#39;s stated figure with no benchmark or methodology behind it, which does not make it wrong &mdash; it makes it a starting hypothesis for your own measurement rather than a constant to design against."),
+    ]),
 
     ("h2", "The trust question"),
     ("p", "An MCP server runs code and can read files. Adding one is closer to adding a dependency than installing a browser extension. Your own house rule — start read-only, widen only when a task needs it, narrow again afterwards, and connect production last — is the correct posture, and Block 6 tests it against real attacks."),

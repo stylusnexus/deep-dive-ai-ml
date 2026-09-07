@@ -48,6 +48,12 @@ Run top to bottom. Most people fail at step 3 and spend their time on step 2.
 - [ ] Decode speed measured, not quoted — vendor figures are usually decode-only
 - [ ] Time-to-first-token measured with a *realistic* prompt length, since prefill dominates it
 - [ ] Below ~10 tok/s interactive use is unpleasant; batch work tolerates much less
+- [ ] ☠ Context length set explicitly, not inherited — a convenience runtime picks it from available
+      memory and its smallest tier is far below what an agent needs
+- [ ] Parallel-request setting raised deliberately if the agent issues concurrent calls; it defaults
+      to one, and memory scales with parallelism times context length
+- [ ] Tool calling actually enabled — local servers need explicit flags and, in one engine, a
+      model-specific parser. OpenAI-compatible does not mean drop-in
 - [ ] Prefix-KV reuse available if this is a multi-turn agent loop — usually the biggest lever
 - [ ] Speculative decoding considered if one user is waiting rather than a thousand — it spends
       spare compute to cut latency, so it wins at low concurrency and does nothing for a server

@@ -653,14 +653,20 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="hardware-15"><input type="checkbox" data-id="hardware-15"><span class="tick"></span><span class="body">Decode speed measured, not quoted — vendor figures are usually decode-only</span></label>
 <label class="item" id="hardware-16"><input type="checkbox" data-id="hardware-16"><span class="tick"></span><span class="body">Time-to-first-token measured with a <em>realistic</em> prompt length, since prefill dominates it</span></label>
 <label class="item" id="hardware-17"><input type="checkbox" data-id="hardware-17"><span class="tick"></span><span class="body">Below ~10 tok/s interactive use is unpleasant; batch work tolerates much less</span></label>
-<label class="item" id="hardware-18"><input type="checkbox" data-id="hardware-18"><span class="tick"></span><span class="body">Prefix-KV reuse available if this is a multi-turn agent loop — usually the biggest lever</span></label>
-<label class="item" id="hardware-19"><input type="checkbox" data-id="hardware-19"><span class="tick"></span><span class="body">Speculative decoding considered if one user is waiting rather than a thousand — it spends</span></label>
+<label class="item killer" id="hardware-18"><input type="checkbox" data-id="hardware-18"><span class="tick"></span><span class="body"><b class=skull>☠</b> Context length set explicitly, not inherited — a convenience runtime picks it from available</span></label>
+<p>memory and its smallest tier is far below what an agent needs</p>
+<label class="item" id="hardware-19"><input type="checkbox" data-id="hardware-19"><span class="tick"></span><span class="body">Parallel-request setting raised deliberately if the agent issues concurrent calls; it defaults</span></label>
+<p>to one, and memory scales with parallelism times context length</p>
+<label class="item" id="hardware-20"><input type="checkbox" data-id="hardware-20"><span class="tick"></span><span class="body">Tool calling actually enabled — local servers need explicit flags and, in one engine, a</span></label>
+<p>model-specific parser. OpenAI-compatible does not mean drop-in</p>
+<label class="item" id="hardware-21"><input type="checkbox" data-id="hardware-21"><span class="tick"></span><span class="body">Prefix-KV reuse available if this is a multi-turn agent loop — usually the biggest lever</span></label>
+<label class="item" id="hardware-22"><input type="checkbox" data-id="hardware-22"><span class="tick"></span><span class="body">Speculative decoding considered if one user is waiting rather than a thousand — it spends</span></label>
 <p>spare compute to cut latency, so it wins at low concurrency and does nothing for a server already compute-saturated by batching. It costs no quality: the output distribution is unchanged</p>
 <h2>4 · Before concluding &quot;it cannot run here&quot;</h2>
-<label class="item" id="hardware-20"><input type="checkbox" data-id="hardware-20"><span class="tick"></span><span class="body">Which artifact did you actually test? A load failure in one build format is not a</span></label>
+<label class="item" id="hardware-23"><input type="checkbox" data-id="hardware-23"><span class="tick"></span><span class="body">Which artifact did you actually test? A load failure in one build format is not a</span></label>
 <p>fact about the model — another build of the same weights may load fine</p>
-<label class="item" id="hardware-21"><input type="checkbox" data-id="hardware-21"><span class="tick"></span><span class="body">Was anything truncated? A too-small output budget manufactures false conclusions</span></label>
-<label class="item" id="hardware-22"><input type="checkbox" data-id="hardware-22"><span class="tick"></span><span class="body">Was the documented control mechanism used, or the folklore one?</span></label>
+<label class="item" id="hardware-24"><input type="checkbox" data-id="hardware-24"><span class="tick"></span><span class="body">Was anything truncated? A too-small output budget manufactures false conclusions</span></label>
+<label class="item" id="hardware-25"><input type="checkbox" data-id="hardware-25"><span class="tick"></span><span class="body">Was the documented control mechanism used, or the folklore one?</span></label>
 <h2>Quick reference</h2>
 <table><thead><tr><th>Setup</th><th>Good for</th><th>Ceiling</th></tr></thead><tbody><tr><td>Apple Silicon, high memory</td><td>Large quantised models, inference, LoRA on 7B–13B</td><td>Bandwidth, and library gaps</td></tr><tr><td>Consumer NVIDIA 8–24GB</td><td>Small models, real training, full ecosystem</td><td>Capacity — a hard wall</td></tr><tr><td>Rented cloud GPU</td><td>Anything big and fast</td><td>Hourly cost</td></tr><tr><td>No GPU</td><td>Embeddings, classical ML, API work</td><td>Nothing — most of Block 2 runs on CPU</td></tr></tbody></table>
 <h2>Smells</h2>
