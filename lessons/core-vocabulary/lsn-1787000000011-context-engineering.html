@@ -224,7 +224,7 @@
   <p>Lesson 2 covered the mechanics of the context window — tokens, limits, the KV cache. This lesson is about the discipline built on top of it, and it may be the highest-leverage skill in the whole program. Once you've picked a model, almost everything that separates a good result from a bad one is <strong>what you put in front of it</strong>.</p>
   <h2>The uncomfortable finding: more context is not better</h2>
   <p>The intuition is that a bigger window means you should fill it. The evidence says otherwise. Liu and colleagues placed the passage containing the answer at different points in a long context and measured how often the model got the question right: accuracy is highest when it sits at the beginning or the end, and falls markedly in between. This is the "lost in the middle" effect, and it has been reproduced across model families. Note what was measured — task accuracy by position, not attention weights, which is a separate finding covered below.</p>
-  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="U-shaped attention curve over context position">
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="U-shaped accuracy curve over the position of the relevant passage">
 <line x1="60" y1="160" x2="610" y2="160" class="d-arrow"/>
 <line x1="60" y1="160" x2="60" y2="20" class="d-arrow"/>
 <text x="4" y="80" class="d-label-sm">use of</text>

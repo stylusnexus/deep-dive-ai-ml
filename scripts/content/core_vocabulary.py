@@ -1150,7 +1150,7 @@ LESSONS = [
     ("h2", "The uncomfortable finding: more context is not better"),
     ("p", "The intuition is that a bigger window means you should fill it. The evidence says otherwise. Liu and colleagues placed the passage containing the answer at different points in a long context and measured how often the model got the question right: accuracy is highest when it sits at the beginning or the end, and falls markedly in between. This is the \"lost in the middle\" effect, and it has been reproduced across model families. Note what was measured — task accuracy by position, not attention weights, which is a separate finding covered below."),
 
-    ("figure", "Accuracy is U-shaped in the position of the relevant passage. Burying the one paragraph that matters in the middle of a large context is a reliable way to make a model appear to have missed it.", '''<svg viewBox="0 0 640 200" role="img" aria-label="U-shaped attention curve over context position">
+    ("figure", "Accuracy is U-shaped in the position of the relevant passage. Burying the one paragraph that matters in the middle of a large context is a reliable way to make a model appear to have missed it.", '''<svg viewBox="0 0 640 200" role="img" aria-label="U-shaped accuracy curve over the position of the relevant passage">
 <line x1="60" y1="160" x2="610" y2="160" class="d-arrow"/>
 <line x1="60" y1="160" x2="60" y2="20" class="d-arrow"/>
 <text x="4" y="80" class="d-label-sm">use of</text>
