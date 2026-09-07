@@ -21,4 +21,6 @@ projects/p3-delivery-agents/pending/
 projects/p4-deployed-assistant/corpus/
 .venv-train/
 data/finetune/
-adapters/
+adapters/**
+!adapters/*/
+!adapters/*/README.md

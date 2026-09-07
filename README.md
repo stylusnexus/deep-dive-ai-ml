@@ -33,8 +33,17 @@ checklist for when something is already broken.
 
 ## Start here
 
-1. Read [`CURRICULUM.md`](CURRICULUM.md) — the week-by-week map
-2. Run `make up` (or see [`docker/README.md`](docker/README.md)) to bring up the environments
+1. **[`HOW-TO-USE.md`](HOW-TO-USE.md)** — how the lessons, notebooks and projects fit
+   together, and what a block looks like start to finish
+2. [`CURRICULUM.md`](CURRICULUM.md) — the week-by-week map and the exit criteria
+3. `open index.html` to read, `make up` to run
+
+Then, depending on what you're doing:
+
+- Running the labs → [`notebooks/README.md`](notebooks/README.md)
+- Environments → [`docker/README.md`](docker/README.md)
+- The fine-tuned adapter → [`adapters/exception-triage/README.md`](adapters/exception-triage/README.md)
+- Changing content → [`CLAUDE.md`](CLAUDE.md)
 
 ## Layout
 
