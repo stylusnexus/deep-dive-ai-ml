@@ -166,7 +166,7 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Skill** — A folder packaging procedural knowledge: a SKILL.md with a name and a when-to-use description, plus optional reference files and executable scripts. A tool is a verb, an MCP server is a place, a skill is a method.
 
-**Progressive disclosure** — Name and description always in context; the body loads on trigger; bundled files load only when reached. Lets a skill be arbitrarily detailed without that detail costing anything until used.
+**Progressive disclosure (in a skill)** — The same technique as above, applied to one format: name and description always in context, the body loading on trigger, bundled files only when reached. Lets a skill be arbitrarily detailed without that detail costing anything until used.
 
 **Trajectory log** — Every turn, every tool call, and a named termination reason. The only artefact that survives an agent run, since runs cannot be reproduced.
 
