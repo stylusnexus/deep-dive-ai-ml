@@ -248,7 +248,7 @@ th {{ color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spac
 <nav><span class="brand">MASTER SOP</span>{nav}</nav>
 <main>{"".join(render(d) for d in docs)}</main>
 <script>
-const KEY = "pgp-sop-v1";
+const KEY = "pgp-sop-v1";  // deliberately unchanged: it is a browser storage key, and renaming it would silently discard every tick anyone has saved
 const load = () => {{ try {{ return JSON.parse(localStorage.getItem(KEY)) || {{}}; }} catch {{ return {{}}; }} }};
 const save = s => {{ try {{ localStorage.setItem(KEY, JSON.stringify(s)); }} catch {{}} }};
 let state = load();

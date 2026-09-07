@@ -1,4 +1,4 @@
-name: pgp-aiml
+name: aiml-course
 
 services:
   torch:

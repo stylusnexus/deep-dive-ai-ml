@@ -1,8 +1,8 @@
-# CLAUDE.md — `pgp-aiml`
+# CLAUDE.md — Building and Measuring LLM Systems
 
-A self-built recreation of the UT Austin / McCombs PGP in AI & Machine Learning,
-rebuilt as ~13 weeks of lessons, runnable notebooks and portfolio projects — with
-the security, evaluation, cost and fine-tuning material the original omits.
+A self-built curriculum in applied AI and machine learning: ~13 weeks of lessons,
+runnable notebooks and portfolio projects, including the security, evaluation, cost
+and fine-tuning material that short courses usually leave out.
 
 **Read [`CURRICULUM.md`](CURRICULUM.md) first.** It is the map and the status board.
 

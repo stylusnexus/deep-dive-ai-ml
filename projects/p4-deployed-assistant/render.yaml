@@ -3,7 +3,7 @@
 # the reproducible description and the deploy stays a human action.
 services:
   - type: web
-    name: pgp-aiml-assistant
+    name: aiml-course-assistant
     runtime: docker
     dockerfilePath: ./Dockerfile
     dockerContext: .

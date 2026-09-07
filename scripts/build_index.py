@@ -133,14 +133,14 @@ doc = f"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PGP AI/ML — Program Home</title>
+<title>Building and Measuring LLM Systems</title>
 {STYLE}
 </head>
 <body>
 
-<p class="eyebrow">🎯 Self-built program</p>
-<h1>Post Graduate Program in AI &amp; Machine Learning</h1>
-<p class="lede">A rebuild of the UT Austin / McCombs PGP AI&amp;ML curriculum as ~13 weeks of lessons, runnable notebooks and four portfolio projects — with the security, evaluation, cost and fine-tuning material the original leaves out.</p>
+<p class="eyebrow">🎯 Self-built curriculum</p>
+<h1>Building and Measuring LLM Systems</h1>
+<p class="lede">Applied AI and machine learning as ~13 weeks of lessons, runnable notebooks and four portfolio projects — with the security, evaluation, cost and fine-tuning material the original leaves out.</p>
 
 <div class="meta">
   <span class="chip">{total} lessons built</span>

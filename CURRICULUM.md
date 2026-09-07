@@ -31,7 +31,6 @@ and the Project 4 deployment, which is deliberately a human action.
 ---
 
 ## Block 1 · Python, Data & EDA — 1 week
-*Original: Pre-work + Module 01*
 
 - pandas and the shape of tabular data — dtypes as a diagnostic, sentinels, units ✅
 - Exploratory data analysis as a discipline, not a ritual ✅
@@ -48,12 +47,11 @@ alarms; at 0.7 you catch 44% with 77. Choosing a row is a business decision.
 ---
 
 ## Block 2 · Classical ML — 2 weeks
-*Original: Module 02, plus time series which they omit*
 
 - The confusion matrix, precision and recall, ROC and AUC, and when AUC misleads ✅
 - The model ladder: baseline → one rule → logistic → forest → boosting, compared honestly ✅
 - Neural networks in **Keras 3** and raw PyTorch, with an honest account of when they are wrong ✅
-- Time series — because three of the original's own case studies are time-series problems ✅
+- Time series — because so many real business problems are time-series problems ✅
 
 4 lessons in `lessons/block2-classical-ml/` and 2 notebooks in
 `notebooks/02-classical-ml/`, both verified executing end to end.
@@ -68,7 +66,6 @@ demonstrably better, and a threshold chosen from costs.
 ---
 
 ## Block 3 · Retrieval and Agentic RAG — 1.5 weeks
-*Original: Module 03, extended — the original stops at single-shot retrieval*
 
 - LLMs and prompt engineering ✅
 - Embeddings, chunking, vector search against real pgvector — not an in-memory list ✅
@@ -96,9 +93,8 @@ system cannot handle.
 ---
 
 ## Block 4 · Agentic AI — 1.5 weeks
-*Original: Module 04*
 
-The original is built in **LangGraph / LangChain / LangSmith**. This rebuild uses
+Comparable courses build on **LangGraph / LangChain / LangSmith**. This one uses
 **LangGraph** only, and writes traces as local JSON rather than to LangSmith — a
 hosted tracer needs an account and an API key, and the telemetry lesson's claim is
 that the trace is the only evidence, not that it lives in a particular product. The
@@ -121,11 +117,11 @@ delivery note contradicts their event code — 98% correct against an 82% baseli
 ---
 
 ## Block 5 · Evaluation — 0.5 week
-*Not in the original as a module. It should be.*
+*Not usually taught as its own module. It should be.*
 
 Most of this course's evaluation material was already written, scattered by design:
 the vocabulary in Block 0, the procedure in engineering practice, the checklist in
-`artifacts/sop/measurement.md`. Two of this block's original four topics — why public
+`artifacts/sop/measurement.md`. Two of the four topics here — why public
 benchmarks mislead, and building a private eval set — are taught in
 `core-vocabulary/eval-battery`, and LLM-as-judge is taught in
 `engineering-practice/models-judging-models`. Restating them here would have been
@@ -151,7 +147,7 @@ non-completion column, without which the ranking is not defensible.
 ---
 
 ## Block 6 · Security — 1 week
-*Not in the original at all.*
+*Rarely taught at all.*
 
 - Prompt injection, direct and indirect — and why the indirect form is the one this
   course's own architecture invites ✅
@@ -170,7 +166,7 @@ battery until you have shown it can detect a change.
 ---
 
 ## Block 7 · Training & Fine-Tuning — 1.5 weeks
-*Not in the original at all.*
+*Rarely taught at all.*
 
 - When fine-tuning is the wrong answer (usually — prompt, then RAG, then this) ✅
 - Dataset construction, and how little data you actually need ✅
@@ -209,7 +205,6 @@ Spine: `LLMS_from_Scratch` ch05–07 (Apache 2.0) plus the installed HF training
 ---
 
 ## Block 8 · Deployment & APIs — 2 weeks
-*Original: Module 05, expanded — they teach portability in Colab, which cannot demonstrate it*
 
 - Calling an API you do not control — status-code semantics, idempotency for the
   timeout you cannot interpret, jittered backoff ✅
@@ -231,9 +226,8 @@ and a public URL has a bill and an audience attached.
 ---
 
 ## Block 9 · Electives — 2 weeks
-*Original: the self-paced modules*
 
-Originally six electives. Two are already taught: **Claude workflows and MCP** has four
+Six electives were planned. Two are already taught: **Claude workflows and MCP** has four
 lessons in Block 0 (`tool-calls-and-mcp`, `building-an-mcp-server`, `mcp-dangers`,
 `skills`), and **routing** is covered by `routing-and-escalation`. Building either as an
 elective would have duplicated them.

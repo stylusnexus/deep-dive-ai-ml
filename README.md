@@ -1,24 +1,22 @@
-# pgp-aiml
+# Building and Measuring LLM Systems
 
-A self-built recreation of the UT Austin / McCombs **Post Graduate Program in AI & Machine Learning: Business Applications**, rebuilt as ~13 weeks of lessons, runnable notebooks, and four portfolio projects.
+A self-built curriculum in applied AI and machine learning: ~13 weeks of lessons, runnable notebooks, and four portfolio projects.
 
 ## Why this exists
 
-The original is 23 weeks and sells four things: content, live mentorship, a credential, and graded assessment. Only the content is reproducible — and it's standard material. This repo reproduces the content, adds the parts the original leaves out, and drops the scheduling padding.
+Most applied AI curricula cover the same standard material and stop short of the parts that decide whether a system survives contact with production. This one covers the standard material and then keeps going, and every checkable claim in it has been checked.
 
-## What's different from the original
-
-The syllabus we're copying has real gaps. This version fixes them:
+## What this covers that short courses usually skip
 
 | Added | Why |
 |---|---|
-| **Security** | The original teaches "Responsible AI" (ethics/governance) but never prompt injection, tool abuse, or agent sandboxing — in a program that builds multi-agent systems that take actions |
-| **Evaluation** as a module | Two bullet points in the original. It's the discipline that separates a demo from production |
+| **Security** | Curricula routinely teach "Responsible AI" as ethics and governance but never prompt injection, tool abuse, or agent sandboxing — in a program that builds multi-agent systems that take actions |
+| **Evaluation** as a module | Usually a bullet point or two. It's the discipline that separates a demo from production |
 | **Cost & routing** | Absent entirely. Token cost, caching, model routing, when a small local model is enough |
-| **APIs** | The original consumes APIs constantly and never teaches designing or serving one, despite "deployment" being a module |
-| **Training & fine-tuning** | Zero coverage in the original |
-| **Time series** | Omitted by the original, despite three of its own case studies being time-series problems |
-| **Retention** | The original has no mechanism to make week 3 survive to week 23. This one wires into engram spaced repetition from day one |
+| **APIs** | Courses consume APIs constantly and rarely teach designing or serving one, despite "deployment" being a module |
+| **Training & fine-tuning** | Rarely covered at all |
+| **Time series** | Frequently omitted, despite how many real business problems are time-series problems |
+| **Retention** | Most courses have no mechanism to make week 3 survive to week 13. This one wires into engram spaced repetition from day one |
 
 ## The three outcomes
 

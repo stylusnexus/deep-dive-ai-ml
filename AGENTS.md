@@ -1,4 +1,4 @@
-# AGENTS.md — `pgp-aiml`
+# AGENTS.md — Building and Measuring LLM Systems
 
 Instructions for any coding agent working in this repository. Written to be read
 cold, without the conversation that produced the repo.
@@ -8,7 +8,7 @@ version plus the things agents specifically get wrong here.
 
 ## What you are working on
 
-A recreation of a postgraduate AI/ML curriculum: 63 lessons, 8 notebooks, 2
+A self-built applied AI/ML curriculum: 63 lessons, 8 notebooks, 2
 projects, 10 SOP checklists. The reader is one person learning this material
 properly, not a class. Tone is direct and evidence-first.
 
