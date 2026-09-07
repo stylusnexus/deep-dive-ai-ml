@@ -274,7 +274,7 @@ Each starts with the intake sheet and ends as a published HF Space.
 
 ## Closing · The Future of Work
 
-*Not in the original, and different in kind from everything else here.*
+*Different in kind from everything else here.*
 
 The only chapter that argues rather than instructs, and it says so in its first
 paragraph. One lesson separates what the 2026 labour evidence actually measures — no

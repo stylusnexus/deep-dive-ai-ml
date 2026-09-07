@@ -1,6 +1,6 @@
 # Project 2 · Grounded Document Assistant
 
-**Block 3 exit criterion.** Mirrors the original syllabus's finance project.
+**Block 3 exit criterion.** The finance project.
 
 > Help analysts extract key information from lengthy documents by leveraging
 > retrieval-augmented generation, improving efficiency in decision-making.

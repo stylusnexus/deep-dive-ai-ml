@@ -1,6 +1,6 @@
 # Project 1 · Wind Turbine Failure Prediction
 
-**Block 2 exit criterion.** Mirrors the original syllabus's energy project.
+**Block 2 exit criterion.** The energy project.
 
 > Analyse equipment data from a wind energy provider, build models to identify
 > potential failures, and enable timely repairs before equipment breaks down.

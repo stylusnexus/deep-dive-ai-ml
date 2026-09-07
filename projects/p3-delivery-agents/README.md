@@ -1,6 +1,6 @@
 # Project 3 · Multi-Agent Exception Handling
 
-**Block 4 exit criterion.** Mirrors the original syllabus's operations project.
+**Block 4 exit criterion.** The operations project.
 
 > Improve last-mile logistics by implementing a multi-agent system that detects
 > delivery exceptions from operational logs, applies policy-based reasoning to

@@ -1,7 +1,7 @@
 # Portfolio projects
 
-Four projects mirroring the original program's, each ending as a published
-Hugging Face Space with a live URL.
+Four projects across four domains, each ending as a published Hugging Face
+Space with a live URL.
 
 | # | Project | Block | Exit |
 |---|---|---|---|

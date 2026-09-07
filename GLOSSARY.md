@@ -1,7 +1,7 @@
 # Glossary
 
 Accumulates block by block. Every term defined here is fed into engram spaced
-repetition — the mechanism the original program has no equivalent for.
+repetition, so a term learned in week 3 is still there in week 13.
 
 Terms are written to be *said out loud*, not recited. If you can't explain one
 to someone non-technical in two sentences, it hasn't landed yet.

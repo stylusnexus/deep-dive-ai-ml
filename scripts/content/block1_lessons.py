@@ -13,7 +13,7 @@ LESSONS = [
   "title": "Tabular Data and the Lies dtypes Tell",
   "subtitle": "Rows, columns, types — and why the type a column loaded as is your first diagnostic.",
   "body": [
-    ("p", "Most business machine learning is tabular: rows are things, columns are facts about them. It's the least glamorous data in AI and it remains where most real value sits — which is why the original syllabus opens here too."),
+    ("p", "Most business machine learning is tabular: rows are things, columns are facts about them. It's the least glamorous data in AI and it remains where most real value sits — which is why this block opens here."),
 
     ("h2", "The dtype is a diagnostic, not a detail"),
     ("p", "When pandas loads a CSV it infers a type per column. That inference is a free test result and most people skim past it. A column you expect to be numeric arriving as <code>object</code> means pandas found something it couldn't parse and fell back to text."),
@@ -316,7 +316,7 @@ LESSONS = [
 {
   "slug": "ai-assisted-analysis",
   "title": "AI-Assisted Analysis, and Where It Lies to You",
-  "subtitle": "The original syllabus promises 'Python with generative AI'. Here's the honest version.",
+  "subtitle": "Courses promise 'Python with generative AI'. Here's the honest version.",
   "body": [
     ("p", "Using a model to help with data work is genuinely productive, and it fails in specific, predictable ways. Knowing which is which is the difference between a real speed-up and confidently wrong analysis."),
 

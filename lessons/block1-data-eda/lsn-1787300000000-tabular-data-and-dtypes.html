@@ -221,7 +221,7 @@
   <h1>Tabular Data and the Lies dtypes Tell</h1>
   <p class="subtitle">Rows, columns, types — and why the type a column loaded as is your first diagnostic.</p>
 
-  <p>Most business machine learning is tabular: rows are things, columns are facts about them. It's the least glamorous data in AI and it remains where most real value sits — which is why the original syllabus opens here too.</p>
+  <p>Most business machine learning is tabular: rows are things, columns are facts about them. It's the least glamorous data in AI and it remains where most real value sits — which is why this block opens here.</p>
   <h2>The dtype is a diagnostic, not a detail</h2>
   <p>When pandas loads a CSV it infers a type per column. That inference is a free test result and most people skim past it. A column you expect to be numeric arriving as <code>object</code> means pandas found something it couldn't parse and fell back to text.</p>
   <p>In the Block 1 dataset, <code>operating_hours</code> loads as <code>object</code>. The cause turns out to be thousands separators plus a stray <code>hrs</code> suffix on some rows — two different formatting problems in one column, which is exactly what happens when data is assembled from more than one system.</p>

@@ -254,7 +254,7 @@ LESSONS = [
   "title": "Neural Networks, in Keras and in PyTorch",
   "subtitle": "The same network written twice — and an honest account of when it is the wrong tool.",
   "body": [
-    ("p", "The original syllabus specifies TensorFlow and Keras. Most current research and tooling is PyTorch. You do not have to choose, because Keras 3 runs on either — and seeing the same network expressed both ways is the fastest route to understanding what the framework is actually doing."),
+    ("p", "Courses in this area usually specify TensorFlow and Keras. Most current research and tooling is PyTorch. You do not have to choose, because Keras 3 runs on either — and seeing the same network expressed both ways is the fastest route to understanding what the framework is actually doing."),
 
     ("h2", "Keras 3 is multi-backend, and that is not marketing"),
     ("p", "One environment variable selects the engine underneath. The model code does not change:"),
@@ -317,7 +317,7 @@ for epoch in range(3):
     ]),
 
     ("h2", "The honest part: neural networks and tabular data"),
-    ("p", "The syllabus builds toward a neural network on the turbine data, so this needs saying plainly. <strong>On tabular problems, gradient-boosted trees usually win.</strong> Not occasionally — consistently, across published comparisons and in practice."),
+    ("p", "This block builds toward a neural network on the turbine data, so this needs saying plainly. <strong>On tabular problems, gradient-boosted trees usually win.</strong> Not occasionally — consistently, across published comparisons and in practice."),
     ("ul", [
       "<strong>Trees handle mixed types natively.</strong> Categorical and numeric together, no scaling, no encoding decisions.",
       "<strong>Trees are robust to irrelevant features.</strong> A network has to learn to ignore them, which costs data.",
@@ -378,9 +378,9 @@ for epoch in range(3):
 {
   "slug": "time-series",
   "title": "Time Series, and Why Random Splits Lie",
-  "subtitle": "The original syllabus omits this while three of its own case studies are time-series problems.",
+  "subtitle": "Routinely skipped, in courses whose own case studies are time-series problems.",
   "body": [
-    ("p", "Predictive maintenance, demand forecasting, ride-share volume — the syllabus uses all three as examples and never teaches the thing they have in common. Every one is ordered in time, and ordered data breaks the standard workflow in a way that produces excellent scores and worthless models."),
+    ("p", "Predictive maintenance, demand forecasting, ride-share volume — courses use all three as examples and rarely teach the thing they have in common. Every one is ordered in time, and ordered data breaks the standard workflow in a way that produces excellent scores and worthless models."),
 
     ("h2", "Why the random split fails"),
     ("p", "A random split scatters rows from every period into both halves. The model trains on Tuesday and Thursday and is tested on Wednesday — surrounded, on both sides, by data it has already seen."),
