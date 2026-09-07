@@ -201,7 +201,7 @@ LESSONS = [
 </svg>'''),
 
     ("know",
-     "Two models whose confidence intervals overlap are not distinguishable, however different their means look.",
+     "Overlapping confidence intervals mean you cannot claim a difference from the intervals alone. They do not mean there is no difference.",
      "Cross-validation folds vary. A three-point difference with four points of spread on each side is consistent with the models being equally good, and reporting it as an improvement is a claim the evidence does not support.",
      "A team ships a boosted model over logistic regression on a 2.8-point gain, then spends a quarter maintaining a serving stack for it. Re-run with different fold seeds, the gap is 0.4 points. The original difference was fold assignment, not modelling."),
 

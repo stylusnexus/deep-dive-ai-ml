@@ -194,7 +194,7 @@ LESSONS = [
     ("p", "<strong>GGUF</strong> and <strong>Q4_K_M</strong> describe how a model is stored on disk. That choice affects the day-to-day experience of local inference more than almost anything else, and the notation looks impenetrable until you realise it is four separate facts stuck together."),
 
     ("h2", "Weights, briefly"),
-    ("p", "A trained model is a large pile of numbers — the <strong>weights</strong> or <em>parameters</em>. \"7B\" means seven billion of them. Stored at full precision (16 bits each), seven billion numbers is about 14GB. A 70B model is about 140GB, which is why it won't fit on most machines at full precision."),
+    ("p", "A trained model is a large pile of numbers — the <strong>weights</strong> or <em>parameters</em>. \"7B\" means seven billion of them. Stored unquantised at 16 bits each &mdash; half precision, which is what most weights ship as &mdash; seven billion numbers is about 14GB. A 70B model is about 140GB, which is why it won't fit on most machines at full precision."),
 
     ("h2", "Quantization is lossy compression for weights"),
     ("p", "<strong>Quantization</strong> stores each weight in fewer bits — 8, 5, 4, sometimes 2 — instead of 16. Four-bit quantization cuts the file roughly to a quarter: that 70B model drops from ~140GB to ~40GB and becomes something your 128GB machine runs comfortably."),
@@ -203,7 +203,7 @@ LESSONS = [
 
     ("h2", "Reading Q4_K_M"),
     ("terms", [
-      ("Q", "Quantized", "As opposed to full-precision F16 or F32."),
+      ("Q", "Quantized", "As opposed to an unquantised release at F16 (half precision) or F32 (full precision)."),
       ("4", "Four bits per weight", "The main lever. Lower means smaller and faster, but less precise."),
       ("K", "K-quant method", "A smarter scheme that varies precision across parts of the model instead of applying one rate everywhere."),
       ("M", "Medium", "Within K-quants: S (small), M (medium), L (large). Larger keeps more precision in the layers that matter most."),
@@ -356,7 +356,7 @@ LESSONS = [
     ("h2", "An embedding is a list of numbers standing in for meaning"),
     ("p", "An embedding model takes text and returns a fixed-length list of numbers — a <strong>vector</strong>, typically a few hundred to a couple of thousand values. The useful property is that texts with similar meanings produce vectors that point in similar directions, even when they share no words at all."),
     ("p", "\"How do I reset my password?\" and \"I'm locked out of my account\" have almost no vocabulary in common. Their embeddings sit close together. That is the whole trick, and everything else is bookkeeping."),
-    ("callout", "insight", "Similarity is a measurable angle", "Closeness is usually cosine similarity — the angle between two vectors, from 1 (same direction) to -1 (opposite). It's a cheap arithmetic operation, which is why searching millions of vectors is fast."),
+    ("callout", "insight", "Similarity is a measurable angle", "Closeness is usually cosine similarity — the cosine <em>of</em> the angle between two vectors, which runs from 1 (same direction) through 0 (perpendicular) to -1 (opposite). The angle itself would run 0 to 180 degrees; it is the cosine that gives the convenient range. It's a cheap arithmetic operation, which is why searching millions of vectors is fast."),
 
     ("figure", "Meaning becomes geometry. Phrases sharing no words land close together; the negation pair lands close too, which is exactly the failure mode to watch for.", '''<svg viewBox="0 0 640 260" role="img" aria-label="Embedding space with clusters">
 <rect x="12" y="12" width="616" height="236" rx="8" class="d-box"/>
@@ -1560,6 +1560,53 @@ LESSONS = [
     ]),
     ("callout", "pitfall", "The leakage trap here", "Oversample before splitting and copies of the same minority row land in both train and test. Your model has effectively seen the test data, the score is inflated, and the usual overfitting gap won't show it. This is one of the most common leakage mistakes in practice — resample inside the pipeline, after the split, every time."),
 
+    ("h2", "Thresholds in practice, across this course"),
+    ("p", "The idea generalises well past a classifier&#39;s probability, and it is worth seeing the same decision in several costumes, because the arithmetic is identical every time and only the units change."),
+
+    ("terms", [
+      ("A spam filter", "Score 0.73 — junk or inbox?",
+       "The cut goes low, because missing a phishing message costs more than misfiling a newsletter. Screening tests cut low for the same reason: a false alarm costs a second test, a miss costs a life."),
+      ("A semantic cache", "How alike is &ldquo;the same question&rdquo;?",
+       "Measured on this course&#39;s own encoder rather than assumed: a genuine paraphrase scored 0.149, and a negation that reverses the answer scored higher. A cut that looks safe on the number serves a wrong cached answer."),
+      ("An approval gate", "A threshold on consequence, not on a score",
+       "Project 3 halts refund actions for a human. Nothing is being scored — the cut is on what the action would do, which is the same decision with the units changed from probability to severity."),
+      ("A ship-or-not bar", "Set before you look",
+       "The fine-tuned model in Block 7 scored 0.393. Whether that ships is not a property of the model: the lookup table at 0.458 was the bar, and it was known beforehand."),
+    ]),
+
+    ("h2", "And the thing that feeds a threshold"),
+    ("p", "A threshold needs a signal to cut, and something has to produce one. The general name for a thing whose job is to separate two possibilities is a <strong>discriminator</strong> &mdash; and it is worth being careful with the word, because in most machine-learning writing it means one specific thing: the adversary in a generative adversarial network (GAN), a classifier trained to tell real examples from generated ones. This course does not teach GANs, so the word appears here only to be recognised rather than borrowed."),
+
+    ("figure", "A discriminator produces a signal that separates two possibilities. A threshold decides what to do about it. Neither is much use alone.", '''<svg viewBox="0 0 540 128" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A discriminator produces a separation score, a threshold cuts it, and an action follows.">
+<rect x="10" y="34" width="140" height="46" rx="6" class="d-box-accent"/>
+<text x="80" y="54" class="d-label-b" text-anchor="middle">discriminator</text>
+<text x="80" y="70" class="d-label-sm" text-anchor="middle">separates A from B</text>
+<path d="M150 57 L196 57" class="d-arrow"/>
+<text x="173" y="48" class="d-label-sm" text-anchor="middle">signal</text>
+<rect x="200" y="34" width="128" height="46" rx="6" class="d-box"/>
+<text x="264" y="54" class="d-label-b" text-anchor="middle">threshold</text>
+<text x="264" y="70" class="d-label-sm" text-anchor="middle">where to cut</text>
+<path d="M328 57 L374 57" class="d-arrow"/>
+<rect x="378" y="34" width="150" height="46" rx="6" class="d-box-good"/>
+<text x="453" y="60" class="d-label-b" text-anchor="middle">an action</text>
+<text x="10" y="20" class="d-label-sm">a signal with no cut decides nothing; a cut with no signal is arbitrary</text>
+<text x="10" y="112" class="d-label-sm">the cost of being wrong in each direction is what sets the cut &#8212; never the default</text>
+</svg>'''),
+
+    ("terms", [
+      ("A domain classifier", "Has the data moved?",
+       "Label the training data 0 and recent data 1 and train something to tell them apart. If it cannot, the distributions match. If it can, its accuracy is the size of the drift and its feature importances name the cause &mdash; and it catches joint drift that per-feature tests cannot, because features can move together while each looks unchanged."),
+      ("A control fixture", "Is it the model or the harness?",
+       "One task you are confident is easy, same model, same harness, same domain. Easy passes and hard fails means the model is the wall; both failing means the harness is. Neither reading is available without the control."),
+      ("A positive control", "Can the test detect anything at all?",
+       "Block 6&#39;s attack battery found nothing, which has two explanations &mdash; a robust system, or a blind battery. A payload that <em>should</em> change the decision separates them, and on the first run it moved one case in six, which said the instrument was blind rather than the system sound."),
+    ]),
+
+    ("know",
+     "A discriminator produces the signal; a threshold decides what to do with it. Most arguments about one are really about the other.",
+     "They fail in opposite directions and the fix differs accordingly. A weak discriminator cannot be rescued by moving the cut &mdash; if the signal does not separate the two cases, no threshold on it will either, and tuning one is how teams spend weeks on a decision that was never available. A good discriminator with a badly chosen cut is the easy case, and it is frequently the most effective single change available, which is why threshold tuning appears in the list above.",
+     "Drift detection needs both. The domain classifier says the distributions differ and by how much; the threshold decides whether that is enough to retrain. Without the classifier the cut has nothing to cut; without the cut the classifier reports a number nobody acts on &mdash; which is why the checklist asks for a threshold set from a period you know was healthy."),
+
     ("h2", "Where this reappears"),
     ("p", "Every rare-event problem in the program: fraud, equipment failure, safety incidents, and the retrieval evaluations in Block 5 where the relevant documents are a tiny fraction of the corpus. The reflex worth building is to check the class balance before reading any metric at all."),
 
@@ -2272,7 +2319,7 @@ LESSONS = [
     ("figure", "The server offers three things to the client. The client offers three back. Most servers use only the top-left box, which leaves the more interesting half of the protocol unused.", '''<svg viewBox="0 0 640 240" role="img" aria-label="MCP server and client capabilities"><defs><marker id="ma1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <text x="12" y="18" class="d-accent">SERVER OFFERS →</text>
 <rect x="12" y="28" width="290" height="34" rx="5" class="d-box-accent"/>
-<text x="26" y="50" class="d-label-sm"><tspan class="d-label-b">Tools</tspan> — functions the model executes</text>
+<text x="26" y="50" class="d-label-sm"><tspan class="d-label-b">Tools</tspan> — functions the model requests, the host runs</text>
 <rect x="12" y="66" width="290" height="34" rx="5" class="d-box"/>
 <text x="26" y="88" class="d-label-sm"><tspan class="d-label-b">Resources</tspan> — data addressed by URI</text>
 <rect x="12" y="104" width="290" height="34" rx="5" class="d-box"/>

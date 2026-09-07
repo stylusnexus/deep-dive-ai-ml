@@ -187,7 +187,7 @@ LESSONS = [
 
     ("callout", "matters", "What this licenses you to say", "A sixteen-point spread on identical model weights. If you swapped models and saw a gain that size you would call it a generational leap — here it is entirely scaffolding. Note also AutoCodeRover v2.0 to v2.1: the same team, the same model, 231 tasks to 258, from harness work alone. When something underperforms, the harness is the higher-yield place to look, and this is the evidence for it rather than the intuition."),
 
-    ("callout", "pitfall", "Read it carefully, though", "These submissions differ in more than scaffold — different prompts, retrieval, retry budgets and token spend. The spread is an upper bound on what harness work can buy, not a controlled experiment. It tells you the harness matters enormously; it does not tell you which harness change is responsible. That distinction is the whole of the next two lessons."),
+    ("callout", "pitfall", "Read it carefully, though", "These submissions differ in many parts of the scaffold at once — prompts, retrieval, retry budgets and token spend all vary together. The spread is an upper bound on what harness work can buy, not a controlled experiment. It tells you the harness matters enormously; it does not tell you which harness change is responsible. That distinction is the whole of the next two lessons."),
     ("related", ["what-ai-makes-worse", "code-nobody-decided", "the-apprenticeship-problem", "deterministic-first"]),
     ("links", [
       ('SWE-bench', 'https://www.swebench.com/',

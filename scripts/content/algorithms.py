@@ -18,7 +18,7 @@ LESSONS = [
     ("h2", "Gradient descent: walking downhill in fog"),
     ("p", "You have a loss — a number saying how wrong the model currently is — and millions of parameters you could adjust. The <strong>gradient</strong> is the slope of the loss with respect to each parameter: for every knob, which direction makes things worse, and how steeply. Move each parameter a small step the other way. Recompute. Repeat."),
 
-    ("figure", "Learning rate is the step size. Too small and training crawls; too large and you overshoot the minimum repeatedly and never settle. Most training instability is this parameter.", '''<svg viewBox="0 0 640 200" role="img" aria-label="Effect of learning rate on gradient descent">
+    ("figure", "Learning rate is the step size. Too small and training crawls; too large and you overshoot the minimum repeatedly and never settle. Most training instability is this one hyperparameter — set by you, unlike the parameters the training is adjusting.", '''<svg viewBox="0 0 640 200" role="img" aria-label="Effect of learning rate on gradient descent">
 <g>
 <text x="40" y="18" class="d-fill-red" font-size="12" font-weight="600">too small</text>
 <path d="M20 40 Q100 170 180 40" stroke="var(--border)" stroke-width="2" fill="none"/>
@@ -64,7 +64,7 @@ LESSONS = [
     ]),
 
     ("h2", "The numbers that make it concrete"),
-    ("p", "Abstractly this is downhill walking. Concretely, here is what a training run costs. A 7-billion-parameter model at 16-bit precision is about 14GB of weights. Training it needs roughly four times that again: gradients (one per parameter), plus the optimiser's own state — Adam keeps two running averages per parameter, which is where most of the surprise comes from."),
+    ("p", "Abstractly this is downhill walking. Concretely, here is what a training run costs. A 7-billion-parameter model at 16-bit precision is about 14GB of weights. Training it needs roughly three times that again: gradients (one per parameter), plus the optimiser's own state — Adam keeps two running averages per parameter, which is where most of the surprise comes from. Weights included, that is about four times the weights in total."),
     ("terms", [
       ("Weights", "~14 GB", "The model itself, at 16-bit."),
       ("Gradients", "~14 GB", "One per parameter, alive during the backward pass."),
@@ -677,7 +677,7 @@ LESSONS = [
       ("The rich get richer", "One expert wins early and keeps winning",
        "At the start every expert is equally poor, so the first choice is effectively random. The chosen expert improves, which makes it more likely to be chosen, which improves it further. Left alone, a handful of experts absorb the training and the rest stay undertrained."),
       ("Noise and masking", "The fix for it",
-       "Noise is added to the router's scores so other experts occasionally win, and everything outside the top K is set to negative infinity before the softmax so it contributes nothing. Together they keep the field open long enough for the others to learn."),
+       "Noise is added to the router's scores so other experts occasionally win, which keeps the field open long enough for the rest to learn; production systems add an auxiliary loss that penalises unbalanced routing. Separately &mdash; and not as a remedy for this &mdash; everything outside the top K is set to negative infinity before the softmax, which is simply how the sparsity is implemented and applies whether or not the router has collapsed."),
       ("Load imbalance", "Some experts see far more tokens than others",
        "A different problem with the same symptom. The fix is a capacity limit: an expert that has taken its quota of tokens refuses more, and the overflow goes to the next best choice."),
     ]),

@@ -359,7 +359,7 @@ class AgentState(TypedDict):
       ("Span", "One unit of work inside it", "A model call, a retrieval, a tool execution. Spans nest — a tool span sits inside the turn span that requested it."),
       ("Attributes", "Structured facts on a span", "Model name, token counts, latency, the tool's arguments. Queryable, unlike a log line."),
       ("Events", "Timestamped things within a span", "A retry, a cache miss, a guard firing."),
-      ("Baggage", "Context carried across boundaries", "The trace id following a request into a sub-agent, so the whole tree stays connected."),
+      ("Trace context", "What actually crosses the boundary", "The trace and span ids travelling with a request into a sub-agent, so the whole tree stays connected. Carried in a header, and distinct from <em>baggage</em> &mdash; a separate key-value store propagated alongside it for values of your own."),
     ]),
     ("p", "This is OpenTelemetry's model, and it is worth adopting even if you never export to a vendor, because it forces the question <em>what is a unit of work here?</em> — which is the question that makes a trace readable."),
 
@@ -499,7 +499,7 @@ class AgentState(TypedDict):
     ("terms", [
       ("What it buys", "Prefill, mostly gone", "On a long system prompt plus a tool set plus a growing transcript, this is the single largest latency and cost lever available in an agent loop."),
       ("What it costs — ordering", "The prompt becomes rigid", "Stable content must come first and stay byte-identical. Adding a timestamp, reordering tools, or interpolating a session id near the front sets your hit rate to zero."),
-      ("What it costs — pricing", "Writes cost more than reads save, once", "Caching a prefix used twice is roughly break-even. Used fifty times it is a large win. Below a few reuses it is a small loss."),
+      ("What it costs — pricing", "Writes cost more than reads save, once", "The write premium is about a quarter of an uncached read, and each cached read saves about nine tenths of one — so break-even arrives at roughly the second use, and by the second use it is already about a third cheaper. Used fifty times it is a large win. The only losing case is a prefix written and never read again."),
       ("What it costs — silence", "Nothing errors on a miss", "Hit rate is a metric you have to look at. A cache that stopped working looks exactly like a system that never had one, except on the bill."),
     ]),
     ("callout", "matters", "Instrument the hit rate or you do not have caching", "The failure mode is not a broken cache, it is a cache that quietly stopped matching after someone added a line to the system prompt. Record cached-token counts per call and alert on the ratio. Without that number you are hoping, and hoping is expensive at three times the cost per turn."),

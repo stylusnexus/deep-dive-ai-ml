@@ -705,7 +705,7 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Events** — Timestamped occurrences within a span, such as a retry, a cache miss, or a guard firing.
 
-**Baggage** — Context carried across process boundaries, most often the trace id following a request into a sub-agent so the whole tree stays connected.
+**Trace context** — The trace and span ids carried with a request across a process or agent boundary, in a header, so the spans on the far side join the same tree. Distinct from **baggage**, which is a separate key-value store propagated alongside it for application values — baggage does not keep the trace connected, and conflating the two is common.
 
 **Logs** — What happened, in prose. Good for the unexpected, terrible at answering "how often" or "how slow".
 
@@ -717,7 +717,7 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Sub-agent as a tool** — A child agent the parent calls like any other tool: it runs, returns, and disappears. The simplest useful form of multi-agent, and the one to reach for first.
 
-**Prompt caching** — Prefix caching exposed as a billable feature: you mark where the stable part of the prompt ends, entries expire, and writes and reads are priced differently. Reads cost about a tenth of normal input; writes cost 1.25× at the five-minute lifetime and 2× at the one-hour one, so a prefix reused twice roughly breaks even and one reused fifty times is a large win.
+**Prompt caching** — Prefix caching exposed as a billable feature: you mark where the stable part of the prompt ends, entries expire, and writes and reads are priced differently. Reads cost about a tenth of normal input; writes cost 1.25× at the five-minute lifetime and 2× at the one-hour one, so break-even arrives at roughly the second use: a prefix read twice already costs about a third less than not caching, and one reused fifty times is a large win. The losing case is a prefix written and never read.
 
 **Exact-match response cache** — Returning a stored answer when a request is byte-identical to an earlier one. It saves output tokens as a semantic cache does, and carries none of the false-positive risk because it does no similarity matching — worth measuring your byte-identical repeat rate before reaching for embeddings.
 

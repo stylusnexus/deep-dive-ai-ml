@@ -41,7 +41,7 @@ LESSONS = [
       ("int64 / float64", "Numbers", "Note that a column with any missing value becomes float, because NaN is a float. An integer column that arrives as float often just means 'has gaps'."),
       ("object", "Usually strings", "The catch-all. Also what a mixed-type column becomes, which is why it's worth investigating."),
       ("category", "Repeated labels", "Far less memory than object for low-cardinality columns, and it makes the intended set of values explicit."),
-      ("datetime64", "Real dates", "Only if you asked for it. Dates loaded as strings sort alphabetically, which puts 2026-01 before 2025-12 — a silent and nasty bug."),
+      ("datetime64", "Real dates", "Only if you asked for it. Dates left as strings sort alphabetically, which is harmless for ISO-8601 (<code>2025-12</code> really does sort before <code>2026-01</code>) and silently wrong for anything else — <code>12/2025</code> sorts before <code>01/2026</code>, putting December ahead of the following January."),
       ("bool", "True/False", "Becomes object the moment a missing value appears."),
     ]),
 
@@ -167,7 +167,7 @@ LESSONS = [
       ("MAR", "Missing at random, given other columns", "Missingness is explained by data you *do* have. One site's sensors fail more often. Fill using those other columns and you can do well."),
       ("MNAR", "Missing not at random", "Missingness depends on the missing value itself. High-vibration sensors drop out *because* of the vibration. Filling actively introduces bias."),
     ]),
-    ("callout", "insight", "You cannot test for MNAR directly", "By definition you don't have the values that would prove it. What you can do is compare rows where a value is missing against rows where it's present, on every *other* column. If those groups differ systematically, treat MNAR as likely — and involve someone who knows how the data is collected."),
+    ("callout", "insight", "You cannot test for MNAR directly", "By definition you don't have the values that would prove it. What you can do is compare rows where a value is missing against rows where it's present, on every *other* column. Be careful reading the result: if those groups differ systematically you have ruled out MCAR, and nothing more. A difference explained by columns you hold is MAR; MNAR is when the missingness depends on the absent value itself, and no observed column can show you that. Which of the two it is comes from knowing how the data was collected, not from the table — so this test tells you when to go and ask, rather than what the answer is."),
 
     ("figure", "Same 7% missing, three different worlds. Only the third biases your model — and it is the one where the median fill feels most obviously correct.", '''<svg viewBox="0 0 640 200" role="img" aria-label="MCAR MAR and MNAR compared">
 <g><text x="30" y="18" class="d-fill-green" font-size="12" font-weight="600">MCAR</text>

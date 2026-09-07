@@ -448,3 +448,10 @@ The matrix
 You are ranking, not predicting
 The held-out data came from the old policy
 Position and presentation dominate
+A spam filter
+A semantic cache
+An approval gate
+A ship-or-not bar
+A domain classifier
+A control fixture
+A positive control

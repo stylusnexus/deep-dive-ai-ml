@@ -341,7 +341,7 @@ LESSONS = [
   "title": "Is the Difference Real?",
   "subtitle": "Pairing, spread, Bessel's correction and the peeking problem — the arithmetic that decides whether a number moved or wobbled.",
   "body": [
-    ("p", "Block 2 says two models whose confidence intervals overlap are not distinguishable however different their means look. Nothing carried that into this block, so every score here has been read as though it were exact. This lesson is the repair, and its numbers come from simulations in <code>scripts/measure_eval_statistics.py</code> rather than from assertion."),
+    ("p", "Block 2 says that when two models&#39; confidence intervals overlap you cannot claim a difference from those intervals alone. Nothing carried that into this block, so every score here has been read as though it were exact. This lesson is the repair, and its numbers come from simulations in <code>scripts/measure_eval_statistics.py</code> rather than from assertion."),
 
     ("h2", "What each of these costs you when you do not know it"),
     ("p", "This is the only lesson in the course that looks like statistics, so it is worth being blunt about why it earns its place. Each item below has a failure attached, and every one of them is a failure that looks like success at the time."),
@@ -384,7 +384,7 @@ LESSONS = [
 
     ("know",
      "Report the size alongside the significance, because significance alone cannot tell a discovery from a rounding error.",
-     "A p-value answers &ldquo;is this probably not noise?&rdquo; and nothing else. It says nothing about magnitude, and it gets easier to satisfy as the sample grows &mdash; so a team that reports only significance will, given enough data, keep finding real and worthless results. The two failure modes are symmetrical and both are common: acting on a difference that was noise, and acting on a difference that was real and negligible.",
+     "A p-value answers one narrow question: if there were no real effect, how often would a difference at least this large turn up anyway? It is not the probability that your result is noise &mdash; that inversion is the same mistake as reading a 95 per cent interval as a 95 per cent chance the true value sits inside it. It says nothing about magnitude, and it gets easier to satisfy as the sample grows &mdash; so a team that reports only significance will, given enough data, keep finding real and worthless results. The two failure modes are symmetrical and both are common: acting on a difference that was noise, and acting on a difference that was real and negligible.",
      "Two prompt variants are compared over 4,000 items. B beats A by 0.3 percentage points, comfortably significant at that sample size. It is also 0.3 percentage points, against a change that doubles the prompt length and therefore the cost of every call forever. The result is real and the decision is still no."),
 
     ("h2", "Two intervals that get confused, and only one is about your next case"),
@@ -400,7 +400,7 @@ LESSONS = [
 
     ("terms", [
       ("Per-arm spread", "The minimum honest report",
-       "Mean and standard deviation for each arm separately, not a single difference. Two arms whose distributions overlap heavily are not distinguishable however far apart the means sit."),
+       "Mean and standard deviation for each arm separately, not a single difference. Note what the spread does <em>not</em> tell you: heavily overlapping distributions can still have clearly distinguishable means, because distinguishability depends on the standard error and therefore on how many items you ran. The pairing figure above is exactly that case — the two piles overlap completely and B still beats A on every question."),
       ("The shape, not only the width", "Where bimodality hides",
        "Look at the distribution. A change that improved most cases slightly and broke a few badly has a mean that moved up and a tail that should stop the release."),
       ("Slices as arms", "The connection to Block 7",

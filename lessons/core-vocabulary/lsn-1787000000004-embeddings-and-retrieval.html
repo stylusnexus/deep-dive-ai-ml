@@ -225,7 +225,7 @@
   <h2>An embedding is a list of numbers standing in for meaning</h2>
   <p>An embedding model takes text and returns a fixed-length list of numbers — a <strong>vector</strong>, typically a few hundred to a couple of thousand values. The useful property is that texts with similar meanings produce vectors that point in similar directions, even when they share no words at all.</p>
   <p>"How do I reset my password?" and "I'm locked out of my account" have almost no vocabulary in common. Their embeddings sit close together. That is the whole trick, and everything else is bookkeeping.</p>
-  <div class="callout insight"><span class="label">Similarity is a measurable angle</span>Closeness is usually cosine similarity — the angle between two vectors, from 1 (same direction) to -1 (opposite). It's a cheap arithmetic operation, which is why searching millions of vectors is fast.</div>
+  <div class="callout insight"><span class="label">Similarity is a measurable angle</span>Closeness is usually cosine similarity — the cosine <em>of</em> the angle between two vectors, which runs from 1 (same direction) through 0 (perpendicular) to -1 (opposite). The angle itself would run 0 to 180 degrees; it is the cosine that gives the convenient range. It's a cheap arithmetic operation, which is why searching millions of vectors is fast.</div>
   <figure class="diagram"><svg viewBox="0 0 640 260" role="img" aria-label="Embedding space with clusters">
 <rect x="12" y="12" width="616" height="236" rx="8" class="d-box"/>
 <circle cx="140" cy="80" r="6" class="d-fill-accent"/>
