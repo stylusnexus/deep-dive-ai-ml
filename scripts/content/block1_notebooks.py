@@ -12,7 +12,7 @@ DATA = Path.cwd()
 while not (DATA / "data" / "turbine_readings.csv").exists() and DATA != DATA.parent:
     DATA = DATA.parent
 CSV = DATA / "data" / "turbine_readings.csv"
-print("reading", CSV)"""
+print("reading", CSV.relative_to(DATA))"""
 
 NOTEBOOKS = [
 ("01-first-contact.ipynb", [
