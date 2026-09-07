@@ -163,10 +163,10 @@ LESSONS = [
     ("related", ["attention-and-transformers", "latency-and-caching", "context-engineering", "local-hardware-limits"]),
     ("links", [
       ('Lost in the Middle (Liu et al., 2023)', 'https://arxiv.org/abs/2307.03172',
-       'The paper behind the U-shaped attention finding. Short and worth reading properly.'),
+       'Where the U-shape comes from. Note what it measures: task accuracy by the position of the relevant passage, not attention weights.'),
 
       ('Found in the Middle (Hsieh et al., 2024)', 'https://arxiv.org/abs/2406.16008',
-       'The same U-shaped bias, shown to be an attention bias that can be calibrated away — up to ten points recovered on retrieval tasks.'),
+       'The attention measurement Liu et al. did not make: the ends draw more attention regardless of relevance. Calibrating that bias away recovers up to fifteen percentage points on retrieval tasks.'),
       ('On the Emergence of Position Bias in Transformers (Wu et al., 2025)', 'https://arxiv.org/abs/2502.01951',
        'Where the bias comes from: causal masking pulling towards early positions, positional encodings towards nearby ones, and training-data bias completing it.'),      ('Prompt caching', 'https://docs.claude.com/en/docs/build-with-claude/prompt-caching',
        'The KV cache sold as a feature — note the rules about what invalidates a cached prefix.'),
@@ -1148,9 +1148,9 @@ LESSONS = [
     ("p", "Lesson 2 covered the mechanics of the context window — tokens, limits, the KV cache. This lesson is about the discipline built on top of it, and it may be the highest-leverage skill in the whole program. Once you've picked a model, almost everything that separates a good result from a bad one is <strong>what you put in front of it</strong>."),
 
     ("h2", "The uncomfortable finding: more context is not better"),
-    ("p", "The intuition is that a bigger window means you should fill it. The evidence says otherwise. Model attention over long contexts is not uniform — material at the beginning and end is used reliably, and material in the middle is used considerably less. This is the well-documented \"lost in the middle\" effect, and it has been reproduced across model families."),
+    ("p", "The intuition is that a bigger window means you should fill it. The evidence says otherwise. Liu and colleagues placed the passage containing the answer at different points in a long context and measured how often the model got the question right: accuracy is highest when it sits at the beginning or the end, and falls markedly in between. This is the \"lost in the middle\" effect, and it has been reproduced across model families. Note what was measured — task accuracy by position, not attention weights, which is a separate finding covered below."),
 
-    ("figure", "Attention over position is U-shaped. Burying the one paragraph that matters in the middle of a large context is a reliable way to make a model appear to have missed it.", '''<svg viewBox="0 0 640 200" role="img" aria-label="U-shaped attention curve over context position">
+    ("figure", "Accuracy is U-shaped in the position of the relevant passage. Burying the one paragraph that matters in the middle of a large context is a reliable way to make a model appear to have missed it.", '''<svg viewBox="0 0 640 200" role="img" aria-label="U-shaped attention curve over context position">
 <line x1="60" y1="160" x2="610" y2="160" class="d-arrow"/>
 <line x1="60" y1="160" x2="60" y2="20" class="d-arrow"/>
 <text x="4" y="80" class="d-label-sm">use of</text>
@@ -1178,7 +1178,7 @@ LESSONS = [
 
     ("know",
      "Lost in the middle is a measured property of particular models, not a law of attention. Treat it as something to verify rather than assume.",
-     "It has been reproduced widely enough to be a sound default, and it has a known cause and an active fix: Hsieh and colleagues show the same models attend to the ends regardless of relevance, and that calibrating that bias away recovers up to ten percentage points on retrieval-augmented tasks. A finding with a mechanism and a remedy is one that newer models can be better at, which means the honest move is to measure position sensitivity on the model you are actually using rather than inheriting a curve from a 2023 paper.",
+     "It has been reproduced widely enough to be a sound default, and it has a known cause and an active fix: Hsieh and colleagues show the same models attend to the ends regardless of relevance, and that calibrating that bias away recovers up to fifteen percentage points on retrieval-augmented tasks. A finding with a mechanism and a remedy is one that newer models can be better at, which means the honest move is to measure position sensitivity on the model you are actually using rather than inheriting a curve from a 2023 paper.",
      "The measurement is cheap. Take twenty questions whose answer sits in one known chunk, run each with that chunk placed first, in the middle, and last, and compare accuracy across the three positions. If your model is flat, ordering is not your problem and you can stop ranking for it. If it is U-shaped, you have your own curve rather than someone else&#39;s."),
 
     ("callout", "matters", "None of this changes what you should do",
@@ -1229,7 +1229,7 @@ LESSONS = [
        'The evidence for the U-shaped curve. Read it once; it changes how you order retrieved material.'),
 
       ('Found in the Middle (Hsieh et al., 2024)', 'https://arxiv.org/abs/2406.16008',
-       'The same U-shaped bias, shown to be an attention bias that can be calibrated away — up to ten points recovered on retrieval tasks.'),
+       'The attention measurement Liu et al. did not make: the ends draw more attention regardless of relevance. Calibrating that bias away recovers up to fifteen percentage points on retrieval tasks.'),
       ('On the Emergence of Position Bias in Transformers (Wu et al., 2025)', 'https://arxiv.org/abs/2502.01951',
        'Where the bias comes from: causal masking pulling towards early positions, positional encodings towards nearby ones, and training-data bias completing it.'),      ('Prompt caching', 'https://docs.claude.com/en/docs/build-with-claude/prompt-caching',
        'The mechanical reason stable content goes at the front.'),
@@ -1433,7 +1433,7 @@ LESSONS = [
     ("p", "A grounded system can still fail: retrieval returns nothing and the model answers from memory anyway; it returns the wrong passage and the model faithfully summarises the wrong thing; or the model blends retrieved content with parametric knowledge and produces something that half-matches its source. This is why Block 5 measures groundedness — whether the answer is actually supported by what was retrieved — separately from whether the answer is correct."),
     ("related", ["building-a-rag-system", "structured-output-json", "measuring-retrieval", "models-judging-models"]),
     ("links", [
-      ("Survey of hallucination in LLMs (Huang et al., 2023)", "https://arxiv.org/abs/2311.05232",
+      ("Survey of hallucination in LLMs (Lei Huang et al., 2023)", "https://arxiv.org/abs/2311.05232",
        "The taxonomy of hallucination types and the mitigation landscape, with the evidence for each."),
       ("Retrieval-augmented generation (Lewis et al., 2020)", "https://arxiv.org/abs/2005.11401",
        "The original RAG paper — grounding as an architecture rather than a prompt."),
@@ -1638,7 +1638,7 @@ LESSONS = [
     ("links", [
       ("Precision-recall (scikit-learn)", "https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html",
        "Worked curves, plus why PR curves beat receiver operating characteristic (ROC) on heavily imbalanced data."),
-      ("imbalanced-learn", "https://imbalanced-learn.org/stable/",
+      ("imbalanced-learn", "https://github.com/scikit-learn-contrib/imbalanced-learn",
        "SMOTE and the resampling family, with pipeline integration that avoids the leakage trap."),
     ]),
 
@@ -1761,7 +1761,7 @@ LESSONS = [
 
     ("h2", "Why it works better than just training a small model"),
     ("p", "Train a small model on hard labels and each example teaches it one thing: this is a cat. Train it on the teacher's full output distribution and the same example teaches it far more — this is a cat, it's somewhat dog-like, it's nothing like a car. Those relative probabilities carry information about how the teacher organises the problem, and that's a richer signal than the label alone."),
-    ("callout", "insight", "The name for that extra signal", "It's often called dark knowledge — the information in the probabilities the teacher assigns to wrong answers. A small model trained on it reliably outperforms the same architecture trained on labels alone. You are transferring how the teacher thinks, not just what it concludes."),
+    ("callout", "insight", "The name for that extra signal", "It's often called dark knowledge — a coinage from a 2014 talk by the same authors rather than from the paper itself, which speaks of soft targets. The information in the probabilities the teacher assigns to wrong answers. A small model trained on it reliably outperforms the same architecture trained on labels alone. You are transferring how the teacher thinks, not just what it concludes."),
 
     ("figure", "The teacher's full distribution carries more information than the label. That difference is why the student ends up better than the same model trained on labels alone.", '''<svg viewBox="0 0 640 190" role="img" aria-label="Hard labels versus teacher distribution in distillation">
 <text x="12" y="18" class="d-label-b">Hard label</text>
@@ -1818,7 +1818,7 @@ LESSONS = [
     ("related", ["the-four-ways-to-shrink-a-model", "loops-in-training", "building-the-dataset", "supervised-versus-reinforcement-tuning"]),
     ("links", [
       ("Distilling the Knowledge in a Neural Network (Hinton et al., 2015)", "https://arxiv.org/abs/1503.02531",
-       "The original paper, and where 'dark knowledge' comes from."),
+       "The original knowledge-distillation paper. It argues in terms of soft targets; the phrase 'dark knowledge' comes from the same authors' 2014 talk rather than from here."),
       ("Distilling step-by-step (Hsieh et al., 2023)", "https://arxiv.org/abs/2305.02301",
        "Rationale distillation — smaller students beating larger models by learning the reasoning, not just the answer."),
     ]),
@@ -2763,10 +2763,19 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
       ("Retrieval reorders the middle",
        "Prefix caching gives a guarantee retrieval cannot use",
        "A retrieval prompt is instructions, then retrieved chunks, then the question. The chunks change per request and — worse — change <em>order</em> between requests, because retrieval scores shift with small rewordings and rerankers reorder by design. Retrieve the same three documents in a different order and the very first block after the system prompt differs, so every block hash after it diverges and the hit rate is <em>zero</em>, not merely lower. Published work on this reports that as retrieved fragments grow, retrieval workloads asymptote toward a nil hit rate. The mechanism needs a shared prefix and retrieval produces a shared <em>set</em>; those are different things. Sorting retrieved chunks deterministically before rendering is the cheapest partial fix."),
+      ("Two sort keys, one ordering", "Caching orders by volatility; attention orders by importance",
+       "Different keys applied to the same list, and you only sort once. Caching is not expressing a preference &mdash; the prefix must be literal, so stable content goes first and volatile last or there is no cache at all. Attention wants whatever matters at an end. Where the two keys agree the rules agree: the user&#39;s question is both the most volatile and among the most important, and belongs last under either. Where they disagree you are choosing, not optimising."),
+      ("The tail belongs to volatile content", "So stable material competes for one good position",
+       "Because the end is reserved for whatever changes per request, important <em>stable</em> content can only ever take the early slot, never the late one. A long stable prefix &mdash; system prompt, tools, examples, fixed documents &mdash; pushes most of itself into the middle, which is the position the evidence says is used least. Cache economics reward lengthening that prefix; attention penalises what lands in the middle of it. Both pressures act at once and nothing resolves them for you."),
       ("A high hit rate can cost more memory",
        "Hit rate and memory efficiency are separate measurements",
        "Because a block's identity includes everything before it, the same chunk appearing at position two and at position five is two cache entries holding two full copies of its keys and values. Across a corpus where popular chunks appear in many positions, a system can report an excellent hit rate while consuming more memory than one reporting a worse figure. Report the two numbers separately or the good one hides the bad one."),
     ]),
+
+    ("know",
+     "Repeating a critical instruction at the very end is nearly free, because appending to the tail does not invalidate a prefix.",
+     "This is the way out of the bind above, and it rests on an asymmetry worth holding onto: editing the front of a prompt destroys the cache while adding to the back does not. A constraint that must land can therefore be paid for once inside the cached prefix, where it is effectively free after the first call, and again in the final few tokens, where attention is strongest and the only cost is those tokens. You buy the late position without giving up the cache, which the two rules taken separately imply you cannot do.",
+     "A two-thousand-token system prompt holds the policies, cached and near-free after the first call. The one constraint that must not be missed &mdash; never send a customer message without approval &mdash; is thirty tokens repeated immediately before the user&#39;s turn. The cache still hits on the two thousand; the thirty are recomputed every call and sit exactly where the model reads most reliably."),
 
     ("callout", "warning", "A cache that stopped working raises no error",
      "<p>Every failure on this page fails open. The request still succeeds, the answer is still correct, and the only symptom is the bill — which is why these are typically found a month late. A timestamp near the front, a reordered tool list, a model switch mid-session, or a compaction pass will each take the hit rate to zero silently. Read <code>cache_read_input_tokens</code> on real traffic rather than trusting that it is working.</p>"),
@@ -3079,7 +3088,7 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
         "The model has a small persistent memory between calls"], 1),
 
       ('Found in the Middle (Hsieh et al., 2024)', 'https://arxiv.org/abs/2406.16008',
-       'The same U-shaped bias, shown to be an attention bias that can be calibrated away — up to ten points recovered on retrieval tasks.'),
+       'The attention measurement Liu et al. did not make: the ends draw more attention regardless of relevance. Calibrating that bias away recovers up to fifteen percentage points on retrieval tasks.'),
       ('On the Emergence of Position Bias in Transformers (Wu et al., 2025)', 'https://arxiv.org/abs/2502.01951',
        'Where the bias comes from: causal masking pulling towards early positions, positional encodings towards nearby ones, and training-data bias completing it.'),      ("An agent proposes something that contradicts a constraint you gave it an hour ago. What most likely happened?",
        ["The model is ignoring instructions",

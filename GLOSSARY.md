@@ -24,7 +24,7 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Context window** — The maximum tokens a model can consider at once, covering prompt, history, retrieved documents and the answer together. A capacity limit, not a promise of attention.
 
-**Lost in the middle** — Retrieval accuracy following a U-shape in position: material at the start and end of a long context is used reliably, material in the middle much less. Reproduced across model families, so a sound default — but a property of how current models were built and trained rather than a law. It has a known cause (causal masking pulling towards early positions, positional encodings towards nearby ones, and position bias in the training data) and a known remedy (calibrating the attention bias away, worth up to ten points on retrieval tasks). Measure it on your own model rather than inheriting the curve.
+**Lost in the middle** — Retrieval accuracy following a U-shape in position: material at the start and end of a long context is used reliably, material in the middle much less. Reproduced across model families, so a sound default — but a property of how current models were built and trained rather than a law. It has a known cause (causal masking pulling towards early positions, positional encodings towards nearby ones, and position bias in the training data) and a known remedy (calibrating the attention bias away, worth up to fifteen points on retrieval tasks). Measure it on your own model rather than inheriting the curve.
 
 **KV cache** — Stored key/value vectors for tokens already processed, so they aren't recomputed each step. Grows with context length, and is usually what exhausts memory locally. Prompt caching is this, sold as a feature.
 
@@ -720,6 +720,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **Sub-agent as a tool** — A child agent the parent calls like any other tool: it runs, returns, and disappears. The simplest useful form of multi-agent, and the one to reach for first.
 
 **Prompt caching** — Prefix caching exposed as a billable feature: you mark where the stable part of the prompt ends, entries expire, and writes and reads are priced differently. Reads cost about a tenth of normal input; writes cost 1.25× at the five-minute lifetime and 2× at the one-hour one, so break-even arrives at roughly the second use: a prefix read twice already costs about a third less than not caching, and one reused fifty times is a large win. The losing case is a prefix written and never read.
+
+**Tail-append asymmetry** — Editing the front of a prompt destroys the cache; adding to the back does not. This is what makes it cheap to repeat a critical instruction in the last few tokens, buying the strong late attention position without giving up the cached prefix — the one way out of the bind that caching orders by volatility while attention orders by importance.
 
 **Exact-match response cache** — Returning a stored answer when a request is byte-identical to an earlier one. It saves output tokens as a semantic cache does, and carries none of the false-positive risk because it does no similarity matching — worth measuring your byte-identical repeat rate before reaching for embeddings.
 
