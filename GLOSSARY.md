@@ -390,6 +390,11 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Predictive vs generative** — Predictive models answer closed questions with checkable answers. Generative models produce open-ended content, which is why evaluating them is a research problem rather than a formula.
 
+**Discriminator** — In the wider literature this names the adversary in a generative adversarial network (GAN): a classifier trained to tell real examples from generated ones, whose job is to get harder to fool as the generator improves. Related is a *discriminative* model, which learns the boundary between classes rather than how the data was produced. This course teaches neither GANs nor discriminative modelling directly — the entry is here because the word is common enough that meeting it undefined is worse than meeting it.
+
+**Effect size** — How large a difference is, as distinct from whether it is real. Significance says a difference is probably not noise; effect size says whether it is big enough to care about, and a large sample can make a trivial difference significant. Report both, because a result that is significant and tiny is a result you should not act on.
+
+
 ---
 
 ## Block 0 · Algorithms

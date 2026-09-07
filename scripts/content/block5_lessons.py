@@ -378,6 +378,15 @@ LESSONS = [
      "It asks whether two unrelated piles of numbers have different means. The question you actually had was whether B beats A <em>question by question</em>, and the pairing is the information that turns one into the other. Throwing it away is not a conservative choice or a safe default — in the simulation above it took a real, large effect from almost always detected to almost never, on identical data.",
      "The rule is simple: if you can line the two sets up one-to-one and the pairing means something, use a paired test. Same questions through two models, same code before and after a change, same document scored by two judges."),
 
+    ("h2", "Real is not the same as large"),
+    ("p", "Everything above establishes whether a difference is <em>real</em> &mdash; whether it is more than noise. That is a different question from whether it is <strong>big enough to act on</strong>, and the two get run together constantly because significance is the number people report."),
+    ("p", "The distinction has a direction that matters: a large enough sample makes almost any difference significant, including differences far too small to change a decision. Run enough items and a 0.2 percentage point improvement becomes unambiguously real, and it is still 0.2 percentage points. The size of the difference is its <strong>effect size</strong>, and it is the half that tells you whether to ship."),
+
+    ("know",
+     "Report the size alongside the significance, because significance alone cannot tell a discovery from a rounding error.",
+     "A p-value answers &ldquo;is this probably not noise?&rdquo; and nothing else. It says nothing about magnitude, and it gets easier to satisfy as the sample grows &mdash; so a team that reports only significance will, given enough data, keep finding real and worthless results. The two failure modes are symmetrical and both are common: acting on a difference that was noise, and acting on a difference that was real and negligible.",
+     "Two prompt variants are compared over 4,000 items. B beats A by 0.3 percentage points, comfortably significant at that sample size. It is also 0.3 percentage points, against a change that doubles the prompt length and therefore the cost of every call forever. The result is real and the decision is still no."),
+
     ("h2", "Two intervals that get confused, and only one is about your next case"),
     ("p", "An interval around a result can answer two different questions and the notation does not distinguish them. A <strong>confidence interval</strong> is about the average: run the experiment many times and the true mean lies inside it as often as the confidence level says. A <strong>prediction interval</strong> is about a single new observation: where the next case is likely to land. The second is always wider, often much wider, because it carries both the uncertainty in the estimate and the ordinary spread of the data."),
 

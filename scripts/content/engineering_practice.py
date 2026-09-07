@@ -560,7 +560,7 @@ swebench report my-run-01 -d verified"""),
     ("p", "Classify every non-completion before you aggregate. A run that failed because the model couldn't do the task and a run that failed because a socket closed do not belong in the same number."),
 
     ("h2", "One prompt is not an experiment"),
-    ("p", "A first smoke run on a single fixture showed a discriminator between two conditions of <strong>+1.00</strong> — an apparently decisive result. The full seven-fixture run showed <strong>+0.00</strong>. The single fixture wasn't representative, and nothing about the n=1 result signalled that."),
+    ("p", "A first smoke run on a single fixture showed a difference between two conditions of <strong>+1.00</strong> — one passed, one failed, an apparently decisive result. The full seven-fixture run showed <strong>+0.00</strong>. The single fixture wasn't representative, and nothing about the n=1 result signalled that."),
     ("p", "This is the sample-size point from your statistics course arriving in agent evaluation, where it bites harder because runs are slow and expensive and the temptation to conclude from one is correspondingly larger. Whole set, repeated, mean and spread, against a baseline — or you have an anecdote."),
 
     ("h2", "The checklist this produces"),
@@ -612,7 +612,7 @@ swebench report my-run-01 -d verified"""),
     ("h2", "1 · A control fixture"),
     ("p", "Add one task you are confident is easy, in the same domain, exercised by the same harness. Then read the pair:"),
 
-    ("figure", "The control is the discriminator. Same model, same harness, same domain — only difficulty differs, so the pattern of pass and fail tells you which component is the wall.", '''<svg viewBox="0 0 640 190" role="img" aria-label="Reading a control fixture against a hard fixture">
+    ("figure", "The control is what separates the explanations. Same model, same harness, same domain — only difficulty differs, so the pattern of pass and fail tells you which component is the wall.", '''<svg viewBox="0 0 640 190" role="img" aria-label="Reading a control fixture against a hard fixture">
 <rect x="12" y="34" width="180" height="26" rx="4" class="d-box"/><text x="24" y="52" class="d-label-sm">control (easy)</text>
 <rect x="12" y="66" width="180" height="26" rx="4" class="d-box"/><text x="24" y="84" class="d-label-sm">target (hard)</text>
 <text x="228" y="26" class="d-label-sm">control ✓ / target ✗</text>
@@ -1307,7 +1307,7 @@ git switch main && git pull            # back to the main line, now updated"""),
     ("know",
      "One run per cell produces a board of coin flips formatted as a table.",
      "Agent runs vary between attempts for reasons that have nothing to do with your treatment — sampling, retrieval order, timing. Without repeats you cannot distinguish a real transition between rungs from noise, and the tidy grid makes the result look more solid than it is.",
-     "A smoke run on one fixture showed a discriminator of +1.00 between two conditions — apparently decisive. The full seven-fixture run showed +0.00. Nothing about the single-run result signalled that it was unrepresentative, and it had already been written up."),
+     "A smoke run on one fixture showed a difference of +1.00 between two conditions — one passed and one failed, which on a single fixture is the largest gap arithmetically available and looks decisive. The full seven-fixture run showed +0.00. Nothing about the single-run result signalled that it was unrepresentative, and it had already been written up."),
 
     ("h2", "When to stop climbing"),
     ("p", "The ladder is a diagnostic, not a product. Once you know which rung fixes the task you have your answer, and the engineering question becomes whether that rung is affordable in production. Guards-off is a diagnosis, not a configuration you ship. Decomposition that works in a benchmark may be too slow for an interactive path."),
