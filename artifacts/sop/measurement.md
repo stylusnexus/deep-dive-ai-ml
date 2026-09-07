@@ -6,6 +6,12 @@ In dependency order. Every step is worthless before the one above it.
 - [ ] ☠ Fixture **fails** at the starting state, before the work
 - [ ] ☠ Fixture **passes** with a known-good fix applied
 - [ ] "Did nothing" and "solved it" cannot score the same
+- [ ] ☠ Every gate this run depends on mutation-verified once: name the mistake it catches,
+      introduce it, watch it go red. A check nobody has seen fail is not evidence
+- [ ] The eval calls production's function rather than a copy of the logic — a re-implementation
+      drifts silently and keeps printing plausible numbers about a decision you never ship
+- [ ] Scored on the outcome, not on resemblance to a reference solution. Shape is a diagnostic
+      worth reporting and a gate that marks better answers wrong
 - [ ] ☠ For a battery: the detection gate ran **first**, on two or three runs, and passed. Forty
       runs after an unproven instrument return no information — and a null from a blind rig reads
       exactly like a null from a real one, which is the direction that gets believed

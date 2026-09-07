@@ -355,12 +355,16 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <h2>Production</h2>
 <label class="item killer" id="llm-engineering-36"><input type="checkbox" data-id="llm-engineering-36"><span class="tick"></span><span class="body"><b class=skull>☠</b> Human approval before anything irreversible or outward-facing</span></label>
 <label class="item" id="llm-engineering-37"><input type="checkbox" data-id="llm-engineering-37"><span class="tick"></span><span class="body">Full action log — you cannot investigate what you didn&#x27;t record</span></label>
-<label class="item" id="llm-engineering-38"><input type="checkbox" data-id="llm-engineering-38"><span class="tick"></span><span class="body">Model versions pinned, not floating on an alias</span></label>
-<label class="item" id="llm-engineering-39"><input type="checkbox" data-id="llm-engineering-39"><span class="tick"></span><span class="body">Eval set re-run on a schedule, not only when something looks wrong</span></label>
-<label class="item" id="llm-engineering-40"><input type="checkbox" data-id="llm-engineering-40"><span class="tick"></span><span class="body">Drift watched on inputs <em>and</em> outputs, with a threshold set from a period you know was</span></label>
+<label class="item" id="llm-engineering-38"><input type="checkbox" data-id="llm-engineering-38"><span class="tick"></span><span class="body">Any counter that both reports and triggers a control split in two — the control resets on</span></label>
+<p>progress, the metric never does. Merged, the stop punishes runs that complied</p>
+<label class="item" id="llm-engineering-39"><input type="checkbox" data-id="llm-engineering-39"><span class="tick"></span><span class="body">Verification reports three states, not two. &quot;Unverified&quot; never renders as a pass, and a</span></label>
+<p>checker that ran but did not complete escalates rather than passing</p>
+<label class="item" id="llm-engineering-40"><input type="checkbox" data-id="llm-engineering-40"><span class="tick"></span><span class="body">Model versions pinned, not floating on an alias</span></label>
+<label class="item" id="llm-engineering-41"><input type="checkbox" data-id="llm-engineering-41"><span class="tick"></span><span class="body">Eval set re-run on a schedule, not only when something looks wrong</span></label>
+<label class="item" id="llm-engineering-42"><input type="checkbox" data-id="llm-engineering-42"><span class="tick"></span><span class="body">Drift watched on inputs <em>and</em> outputs, with a threshold set from a period you know was</span></label>
 <p>healthy. For the joint case a domain classifier — old data vs recent — catches what per-feature checks cannot, because features can move together while each looks unchanged</p>
-<label class="item" id="llm-engineering-41"><input type="checkbox" data-id="llm-engineering-41"><span class="tick"></span><span class="body">Rate limits on every paid endpoint</span></label>
-<label class="item" id="llm-engineering-42"><input type="checkbox" data-id="llm-engineering-42"><span class="tick"></span><span class="body">Unattended runs: narrow job, scoped access, safe stopping points, someone reachable</span></label>
+<label class="item" id="llm-engineering-43"><input type="checkbox" data-id="llm-engineering-43"><span class="tick"></span><span class="body">Rate limits on every paid endpoint</span></label>
+<label class="item" id="llm-engineering-44"><input type="checkbox" data-id="llm-engineering-44"><span class="tick"></span><span class="body">Unattended runs: narrow job, scoped access, safe stopping points, someone reachable</span></label>
 <h2>Smells</h2>
 <p class="bullet">Agent loops without progress → no external verifier; nothing tells it that it failed</p>
 <p class="bullet">Wrong tool chosen repeatedly → rewrite descriptions before upgrading the model</p>
@@ -424,64 +428,70 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item killer" id="measurement-1"><input type="checkbox" data-id="measurement-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> Fixture <strong>fails</strong> at the starting state, before the work</span></label>
 <label class="item killer" id="measurement-2"><input type="checkbox" data-id="measurement-2"><span class="tick"></span><span class="body"><b class=skull>☠</b> Fixture <strong>passes</strong> with a known-good fix applied</span></label>
 <label class="item" id="measurement-3"><input type="checkbox" data-id="measurement-3"><span class="tick"></span><span class="body">&quot;Did nothing&quot; and &quot;solved it&quot; cannot score the same</span></label>
-<label class="item killer" id="measurement-4"><input type="checkbox" data-id="measurement-4"><span class="tick"></span><span class="body"><b class=skull>☠</b> For a battery: the detection gate ran <strong>first</strong>, on two or three runs, and passed. Forty</span></label>
+<label class="item killer" id="measurement-4"><input type="checkbox" data-id="measurement-4"><span class="tick"></span><span class="body"><b class=skull>☠</b> Every gate this run depends on mutation-verified once: name the mistake it catches,</span></label>
+<p>introduce it, watch it go red. A check nobody has seen fail is not evidence</p>
+<label class="item" id="measurement-5"><input type="checkbox" data-id="measurement-5"><span class="tick"></span><span class="body">The eval calls production&#x27;s function rather than a copy of the logic — a re-implementation</span></label>
+<p>drifts silently and keeps printing plausible numbers about a decision you never ship</p>
+<label class="item" id="measurement-6"><input type="checkbox" data-id="measurement-6"><span class="tick"></span><span class="body">Scored on the outcome, not on resemblance to a reference solution. Shape is a diagnostic</span></label>
+<p>worth reporting and a gate that marks better answers wrong</p>
+<label class="item killer" id="measurement-7"><input type="checkbox" data-id="measurement-7"><span class="tick"></span><span class="body"><b class=skull>☠</b> For a battery: the detection gate ran <strong>first</strong>, on two or three runs, and passed. Forty</span></label>
 <p>runs after an unproven instrument return no information — and a null from a blind rig reads exactly like a null from a real one, which is the direction that gets believed</p>
-<label class="item" id="measurement-5"><input type="checkbox" data-id="measurement-5"><span class="tick"></span><span class="body">Gate blocked, battery interleaved — running all of one arm then all of the next exposes the</span></label>
+<label class="item" id="measurement-8"><input type="checkbox" data-id="measurement-8"><span class="tick"></span><span class="body">Gate blocked, battery interleaved — running all of one arm then all of the next exposes the</span></label>
 <p>comparison to drift the round-robin would have spread</p>
-<label class="item" id="measurement-6"><input type="checkbox" data-id="measurement-6"><span class="tick"></span><span class="body">Process recorded, not just outcome — you can tell <em>never attempted</em> from <em>attempted and failed</em></span></label>
+<label class="item" id="measurement-9"><input type="checkbox" data-id="measurement-9"><span class="tick"></span><span class="body">Process recorded, not just outcome — you can tell <em>never attempted</em> from <em>attempted and failed</em></span></label>
 <p>If either half is untrue, stop. Everything below produces noise.</p>
 <h2>1 · Write the number down before you run</h2>
-<label class="item" id="measurement-7"><input type="checkbox" data-id="measurement-7"><span class="tick"></span><span class="body">Target metric named</span></label>
-<label class="item" id="measurement-8"><input type="checkbox" data-id="measurement-8"><span class="tick"></span><span class="body">Threshold that would count as success, fixed in advance</span></label>
-<label class="item" id="measurement-9"><input type="checkbox" data-id="measurement-9"><span class="tick"></span><span class="body">Guardrail metric chosen — what must not get worse</span></label>
+<label class="item" id="measurement-10"><input type="checkbox" data-id="measurement-10"><span class="tick"></span><span class="body">Target metric named</span></label>
+<label class="item" id="measurement-11"><input type="checkbox" data-id="measurement-11"><span class="tick"></span><span class="body">Threshold that would count as success, fixed in advance</span></label>
+<label class="item" id="measurement-12"><input type="checkbox" data-id="measurement-12"><span class="tick"></span><span class="body">Guardrail metric chosen — what must not get worse</span></label>
 <h2>1b · Rule out the invisible</h2>
-<label class="item killer" id="measurement-10"><input type="checkbox" data-id="measurement-10"><span class="tick"></span><span class="body"><b class=skull>☠</b> Run manifest emitted: model, endpoint, every budget, verification state, config version</span></label>
-<label class="item" id="measurement-11"><input type="checkbox" data-id="measurement-11"><span class="tick"></span><span class="body">Every terminator names itself when it fires — a wall clock must not look like a model stopping</span></label>
-<label class="item" id="measurement-12"><input type="checkbox" data-id="measurement-12"><span class="tick"></span><span class="body">Effective values printed <strong>after</strong> all writers, not the values you requested</span></label>
-<label class="item" id="measurement-13"><input type="checkbox" data-id="measurement-13"><span class="tick"></span><span class="body">Nothing truncated mid-measurement (output budget, context, tool-result clipping)</span></label>
-<label class="item killer" id="measurement-14"><input type="checkbox" data-id="measurement-14"><span class="tick"></span><span class="body"><b class=skull>☠</b> On a reasoning model the output budget covers thinking <strong>and</strong> answer — too low a ceiling returns an <em>empty</em> string, not a short one, and an empty answer scores as a wrong one</span></label>
-<label class="item" id="measurement-15"><input type="checkbox" data-id="measurement-15"><span class="tick"></span><span class="body">Output ceiling checked in <strong>both</strong> directions — too low truncates silently, too high lets a degenerate turn burn the whole budget producing nothing. Raising it is not the safe default</span></label>
-<label class="item" id="measurement-16"><input type="checkbox" data-id="measurement-16"><span class="tick"></span><span class="body">Every detector asked what it <em>does</em> when it fires, and under what precondition it declines to — a detector that reports without interrupting is telemetry, not a control</span></label>
-<label class="item" id="measurement-17"><input type="checkbox" data-id="measurement-17"><span class="tick"></span><span class="body">Non-completions classified — infrastructure errors kept out of capability numbers</span></label>
-<label class="item" id="measurement-18"><input type="checkbox" data-id="measurement-18"><span class="tick"></span><span class="body">Control fixture included, and read first when a board looks uniform</span></label>
+<label class="item killer" id="measurement-13"><input type="checkbox" data-id="measurement-13"><span class="tick"></span><span class="body"><b class=skull>☠</b> Run manifest emitted: model, endpoint, every budget, verification state, config version</span></label>
+<label class="item" id="measurement-14"><input type="checkbox" data-id="measurement-14"><span class="tick"></span><span class="body">Every terminator names itself when it fires — a wall clock must not look like a model stopping</span></label>
+<label class="item" id="measurement-15"><input type="checkbox" data-id="measurement-15"><span class="tick"></span><span class="body">Effective values printed <strong>after</strong> all writers, not the values you requested</span></label>
+<label class="item" id="measurement-16"><input type="checkbox" data-id="measurement-16"><span class="tick"></span><span class="body">Nothing truncated mid-measurement (output budget, context, tool-result clipping)</span></label>
+<label class="item killer" id="measurement-17"><input type="checkbox" data-id="measurement-17"><span class="tick"></span><span class="body"><b class=skull>☠</b> On a reasoning model the output budget covers thinking <strong>and</strong> answer — too low a ceiling returns an <em>empty</em> string, not a short one, and an empty answer scores as a wrong one</span></label>
+<label class="item" id="measurement-18"><input type="checkbox" data-id="measurement-18"><span class="tick"></span><span class="body">Output ceiling checked in <strong>both</strong> directions — too low truncates silently, too high lets a degenerate turn burn the whole budget producing nothing. Raising it is not the safe default</span></label>
+<label class="item" id="measurement-19"><input type="checkbox" data-id="measurement-19"><span class="tick"></span><span class="body">Every detector asked what it <em>does</em> when it fires, and under what precondition it declines to — a detector that reports without interrupting is telemetry, not a control</span></label>
+<label class="item" id="measurement-20"><input type="checkbox" data-id="measurement-20"><span class="tick"></span><span class="body">Non-completions classified — infrastructure errors kept out of capability numbers</span></label>
+<label class="item" id="measurement-21"><input type="checkbox" data-id="measurement-21"><span class="tick"></span><span class="body">Control fixture included, and read first when a board looks uniform</span></label>
 <h2>2 · Baseline</h2>
-<label class="item killer" id="measurement-19"><input type="checkbox" data-id="measurement-19"><span class="tick"></span><span class="body"><b class=skull>☠</b> Every row in the set could actually reach the code being measured — production&#x27;s gates</span></label>
+<label class="item killer" id="measurement-22"><input type="checkbox" data-id="measurement-22"><span class="tick"></span><span class="body"><b class=skull>☠</b> Every row in the set could actually reach the code being measured — production&#x27;s gates</span></label>
 <p>applied to the eval, not bypassed by calling the function directly</p>
-<label class="item" id="measurement-20"><input type="checkbox" data-id="measurement-20"><span class="tick"></span><span class="body">Ground truth taken from an artefact somebody else wrote where one exists, and the direction</span></label>
+<label class="item" id="measurement-23"><input type="checkbox" data-id="measurement-23"><span class="tick"></span><span class="body">Ground truth taken from an artefact somebody else wrote where one exists, and the direction</span></label>
 <p>of its bias stated. Labels drawn from the same text the mechanism was built on make the result an upper bound, not an estimate</p>
-<label class="item" id="measurement-21"><input type="checkbox" data-id="measurement-21"><span class="tick"></span><span class="body">Before concluding you need more data: learning curve run on fractions of what you already</span></label>
+<label class="item" id="measurement-24"><input type="checkbox" data-id="measurement-24"><span class="tick"></span><span class="body">Before concluding you need more data: learning curve run on fractions of what you already</span></label>
 <p>hold. A flat validation curve means more of the same will not help, and it costs an afternoon</p>
-<label class="item" id="measurement-22"><input type="checkbox" data-id="measurement-22"><span class="tick"></span><span class="body">Whole set, not a spot check</span></label>
-<label class="item" id="measurement-23"><input type="checkbox" data-id="measurement-23"><span class="tick"></span><span class="body">Repeated, so you know the run-to-run spread</span></label>
-<label class="item" id="measurement-24"><input type="checkbox" data-id="measurement-24"><span class="tick"></span><span class="body">Recorded with model, config, versions, date, per-item outcomes</span></label>
-<label class="item killer" id="measurement-25"><input type="checkbox" data-id="measurement-25"><span class="tick"></span><span class="body"><b class=skull>☠</b> <strong>Concurrent baseline</strong> — the unchanged configuration re-run <em>alongside</em> the</span></label>
+<label class="item" id="measurement-25"><input type="checkbox" data-id="measurement-25"><span class="tick"></span><span class="body">Whole set, not a spot check</span></label>
+<label class="item" id="measurement-26"><input type="checkbox" data-id="measurement-26"><span class="tick"></span><span class="body">Repeated, so you know the run-to-run spread</span></label>
+<label class="item" id="measurement-27"><input type="checkbox" data-id="measurement-27"><span class="tick"></span><span class="body">Recorded with model, config, versions, date, per-item outcomes</span></label>
+<label class="item killer" id="measurement-28"><input type="checkbox" data-id="measurement-28"><span class="tick"></span><span class="body"><b class=skull>☠</b> <strong>Concurrent baseline</strong> — the unchanged configuration re-run <em>alongside</em> the</span></label>
 <p>treatment, in the same session, on the same machine. A stored number from last month attributes every change since — a model updated under you, a grown corpus, a busier machine — to your treatment</p>
-<label class="item" id="measurement-26"><input type="checkbox" data-id="measurement-26"><span class="tick"></span><span class="body">A previous run reused as the reference only when you can state what has not</span></label>
+<label class="item" id="measurement-29"><input type="checkbox" data-id="measurement-29"><span class="tick"></span><span class="body">A previous run reused as the reference only when you can state what has not</span></label>
 <p>changed since, and are willing to be wrong about it</p>
 <h2>3 · One treatment at a time</h2>
-<label class="item" id="measurement-27"><input type="checkbox" data-id="measurement-27"><span class="tick"></span><span class="body">One change, or a bundled screen with the cost stated: you&#x27;ll know <em>something</em> worked, not <em>what</em></span></label>
-<label class="item" id="measurement-28"><input type="checkbox" data-id="measurement-28"><span class="tick"></span><span class="body">Everything else held fixed</span></label>
+<label class="item" id="measurement-30"><input type="checkbox" data-id="measurement-30"><span class="tick"></span><span class="body">One change, or a bundled screen with the cost stated: you&#x27;ll know <em>something</em> worked, not <em>what</em></span></label>
+<label class="item" id="measurement-31"><input type="checkbox" data-id="measurement-31"><span class="tick"></span><span class="body">Everything else held fixed</span></label>
 <h2>3b · Make the result locatable</h2>
-<label class="item" id="measurement-29"><input type="checkbox" data-id="measurement-29"><span class="tick"></span><span class="body">Logged to the tracker, not only to a notebook cell — including the commit hash, without</span></label>
+<label class="item" id="measurement-32"><input type="checkbox" data-id="measurement-32"><span class="tick"></span><span class="body">Logged to the tracker, not only to a notebook cell — including the commit hash, without</span></label>
 <p>which the parameters describe a run you can no longer reconstruct</p>
-<label class="item" id="measurement-30"><input type="checkbox" data-id="measurement-30"><span class="tick"></span><span class="body">Engagement reported separately from correctness — a metric that merges them hides what to fix</span></label>
-<label class="item" id="measurement-31"><input type="checkbox" data-id="measurement-31"><span class="tick"></span><span class="body">Every model failing identically? Suspect the harness before the models</span></label>
-<label class="item" id="measurement-32"><input type="checkbox" data-id="measurement-32"><span class="tick"></span><span class="body">For each passing test, what it does <strong>not</strong> establish, written down now</span></label>
+<label class="item" id="measurement-33"><input type="checkbox" data-id="measurement-33"><span class="tick"></span><span class="body">Engagement reported separately from correctness — a metric that merges them hides what to fix</span></label>
+<label class="item" id="measurement-34"><input type="checkbox" data-id="measurement-34"><span class="tick"></span><span class="body">Every model failing identically? Suspect the harness before the models</span></label>
+<label class="item" id="measurement-35"><input type="checkbox" data-id="measurement-35"><span class="tick"></span><span class="body">For each passing test, what it does <strong>not</strong> establish, written down now</span></label>
 <h2>4 · Read it honestly</h2>
-<label class="item" id="measurement-33"><input type="checkbox" data-id="measurement-33"><span class="tick"></span><span class="body">Any per-case promise (a latency budget, a per-customer forecast) stated from a</span></label>
+<label class="item" id="measurement-36"><input type="checkbox" data-id="measurement-36"><span class="tick"></span><span class="body">Any per-case promise (a latency budget, a per-customer forecast) stated from a</span></label>
 <p><em>prediction</em> interval, not a confidence interval — the second is about the mean and says nothing about how wrong a single case can be</p>
-<label class="item" id="measurement-34"><input type="checkbox" data-id="measurement-34"><span class="tick"></span><span class="body">Compared against baseline spread, not against zero</span></label>
-<label class="item" id="measurement-35"><input type="checkbox" data-id="measurement-35"><span class="tick"></span><span class="body">Sample size big enough for the difference to mean anything</span></label>
-<label class="item" id="measurement-36"><input type="checkbox" data-id="measurement-36"><span class="tick"></span><span class="body">Guardrail checked before declaring a win</span></label>
-<label class="item" id="measurement-37"><input type="checkbox" data-id="measurement-37"><span class="tick"></span><span class="body">For a metric you have been optimising against for a while: re-derived, not assumed.</span></label>
+<label class="item" id="measurement-37"><input type="checkbox" data-id="measurement-37"><span class="tick"></span><span class="body">Compared against baseline spread, not against zero</span></label>
+<label class="item" id="measurement-38"><input type="checkbox" data-id="measurement-38"><span class="tick"></span><span class="body">Sample size big enough for the difference to mean anything</span></label>
+<label class="item" id="measurement-39"><input type="checkbox" data-id="measurement-39"><span class="tick"></span><span class="body">Guardrail checked before declaring a win</span></label>
+<label class="item" id="measurement-40"><input type="checkbox" data-id="measurement-40"><span class="tick"></span><span class="body">For a metric you have been optimising against for a while: re-derived, not assumed.</span></label>
 <p>Does it still correlate with the outcome it was chosen for? A measure under pressure drifts from the thing it stood for, and it looks best just before it stops working</p>
 <h2>4b · Turn the number into a decision</h2>
-<label class="item killer" id="measurement-38"><input type="checkbox" data-id="measurement-38"><span class="tick"></span><span class="body"><b class=skull>☠</b> Threshold chosen from the <strong>costs of each error type</strong>, not left at the 0.5 default</span></label>
-<label class="item" id="measurement-39"><input type="checkbox" data-id="measurement-39"><span class="tick"></span><span class="body">Decision table produced: at each threshold, what is caught, what is missed, what it costs</span></label>
-<label class="item" id="measurement-40"><input type="checkbox" data-id="measurement-40"><span class="tick"></span><span class="body">Error reported in units someone can act on — &quot;out by about four days&quot; beats &quot;RMSE 0.34&quot;</span></label>
-<label class="item" id="measurement-41"><input type="checkbox" data-id="measurement-41"><span class="tick"></span><span class="body">Stated what would make you distrust this result in six months</span></label>
+<label class="item killer" id="measurement-41"><input type="checkbox" data-id="measurement-41"><span class="tick"></span><span class="body"><b class=skull>☠</b> Threshold chosen from the <strong>costs of each error type</strong>, not left at the 0.5 default</span></label>
+<label class="item" id="measurement-42"><input type="checkbox" data-id="measurement-42"><span class="tick"></span><span class="body">Decision table produced: at each threshold, what is caught, what is missed, what it costs</span></label>
+<label class="item" id="measurement-43"><input type="checkbox" data-id="measurement-43"><span class="tick"></span><span class="body">Error reported in units someone can act on — &quot;out by about four days&quot; beats &quot;RMSE 0.34&quot;</span></label>
+<label class="item" id="measurement-44"><input type="checkbox" data-id="measurement-44"><span class="tick"></span><span class="body">Stated what would make you distrust this result in six months</span></label>
 <h2>5 · Revert the fix ☠</h2>
-<label class="item killer" id="measurement-42"><input type="checkbox" data-id="measurement-42"><span class="tick"></span><span class="body"><b class=skull>☠</b> Change removed and re-run — did the number go back?</span></label>
+<label class="item killer" id="measurement-45"><input type="checkbox" data-id="measurement-45"><span class="tick"></span><span class="body"><b class=skull>☠</b> Change removed and re-run — did the number go back?</span></label>
 <p>If it didn&#x27;t, the improvement came from somewhere else and you&#x27;ve learned the wrong lesson. This is the step everyone skips.</p>
 <h2>Smells</h2>
 <p class="bullet">A surprisingly good result → suspect the instrument before celebrating; check step 0 again</p>

@@ -518,6 +518,22 @@ class AgentState(TypedDict):
      "Tool results are context, and context is re-sent whole on every turn. A file read at turn four is paid for again at turns five through twenty, at growing prefill cost, while crowding out the material the model actually needs now.",
      "An agent reads a 3,000-line file at turn four of a twenty-turn run. That one read is re-sent sixteen more times. It is not the read that costs, it is the sixteen re-sends — and truncating the result to the relevant 200 lines would have removed almost all of it."),
 
+    ("h3", "An instrument and a controller must not share a counter"),
+    ("p", "The detector-versus-enforcement distinction has a subtler cousin that bites once you act on a signal. When the same variable both reports on the system and triggers a control, the two jobs pull in opposite directions, and the resulting bug is invisible in exactly the runs you care most about."),
+    ("p", "A control counter has to reset when the situation improves, because that is what makes it a control &mdash; it measures how long the problem has persisted. A metric counter must never reset, because that is what makes it a measurement &mdash; it records how often the problem happened at all. Use one variable for both and you get a stop-trigger that never resets, so a run which responded correctly to every intervention still accumulates towards termination, and telemetry that reports your best-behaved runs as your worst."),
+
+    ("know",
+     "Count the same event twice, into two variables, and let them have different reset rules.",
+     "The duplication looks wasteful and is not. One counter answers &ldquo;is this still happening?&rdquo; and resets on real progress; the other answers &ldquo;how much did this happen?&rdquo; and only ever climbs. Merging them forces a single reset rule onto two questions that need different ones, and whichever question loses is the one that fails silently.",
+     "A loop that nudges a stalled agent and stops it after several stalls needs both. The stop reads a counter that clears whenever the agent makes progress, so compliance is rewarded. The report reads a counter that never clears, so a run that stalled four times and recovered four times is visible as such rather than as a clean run."),
+
+    ("h3", "Verification has three outcomes, and the third one is the point"),
+    ("p", "An automated check returns pass, fail, or <strong>unverified</strong>. The third is the one systems drop, because two states are easier to render and because the honest answer is unsatisfying. Collapsing unverified into pass means &ldquo;we could not tell&rdquo; gets reported as &ldquo;we checked&rdquo;, and it fails open every time."),
+    ("p", "The third state splits again, and the halves want opposite handling. <em>Benign unverified</em> is when no checker exists for this kind of artefact &mdash; nothing is wrong, and the honest move is to deliver the result while saying it is unchecked. <em>Inconclusive</em> is when a checker ran and did not complete: it crashed, timed out, or could not parse its input. That is a signal, and it should escalate rather than pass. Treating the two alike guarantees you handle one of them wrongly."),
+
+    ("callout", "pitfall", "And where a checker did run, ask about coverage",
+     "<p>A checker completing successfully is not the same as a checker having looked at what changed. The useful question is whether every modified artefact fell inside the set that checker actually analysed &mdash; a linter that skipped a file it could not parse, a type checker with an excluded directory, a test suite that never imported the changed module. Each of those returns a clean pass over a set that omits precisely the thing you wanted verified.</p><p>Report the coverage alongside the verdict. &ldquo;Passed, and it examined four of the five files you touched&rdquo; is a usable answer; &ldquo;passed&rdquo; on its own is not.</p>"),
+
     ("h2", "3 · Per-edit verification"),
     ("p", "Run the check after every change, rather than once at the end. The granularity question, and it has a sharper tradeoff than it first appears."),
     ("terms", [

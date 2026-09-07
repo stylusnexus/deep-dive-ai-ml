@@ -761,6 +761,16 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Detection gate** — A small run, before a battery, that proves the rig can detect an effect at all. Two or three runs, sized to answer a binary question rather than to establish anything. Cheap, and it either buys the battery or saves it: a forty-run battery after an unproven instrument can return no information at all.
 
+**Mutation verification** — Naming the specific mistake a check exists to catch, introducing it deliberately, and confirming the check goes red. The fail-before/pass-after rule for eval fixtures, applied to every test, threshold and gate. A check nobody has seen fail is a check nobody has evidence about.
+
+**Instrument versus controller** — The counter a system reports on and the counter a control acts on must be separate variables even when they count the same event. A control resets on real progress; a metric never resets. Merged, the stop-trigger punishes runs that responded correctly to every intervention.
+
+**Unverified (third state)** — Neither pass nor fail: either no checker exists for this artefact, which is benign and should be stated, or a checker ran and did not complete, which should escalate. Collapsing it into pass reports "we could not tell" as "we checked", and fails open every time.
+
+**Outcome gate versus shape metric** — Score on whether the required behaviour happened; report similarity to a reference solution as a diagnostic only. Any metric assuming one correct shape marks a better answer wrong, and does so selectively on the runs that found a novel route.
+
+**Eval-code parity** — The evaluation invokes the same function production invokes rather than a copy of the logic. A re-implementation drifts silently and keeps printing plausible numbers about a decision your system would never make.
+
 **Blocked vs interleaved runs** — Running all of one arm then all of the next is blocked and exposed to drift; round-robin across arms is interleaved and spreads drift evenly. The usual shape is a small blocked gate first, then an interleaved battery.
 
 **Trajectory evaluation** — Scoring an agent's whole sequence of turns rather than its final answer. A correct ending can follow a wasteful or lucky run, and a wrong one can follow sound reasoning that hit a broken tool; only the sequence distinguishes them.

@@ -59,6 +59,10 @@
 ## Production
 - [ ] ☠ Human approval before anything irreversible or outward-facing
 - [ ] Full action log — you cannot investigate what you didn't record
+- [ ] Any counter that both reports and triggers a control split in two — the control resets on
+      progress, the metric never does. Merged, the stop punishes runs that complied
+- [ ] Verification reports three states, not two. "Unverified" never renders as a pass, and a
+      checker that ran but did not complete escalates rather than passing
 - [ ] Model versions pinned, not floating on an alias
 - [ ] Eval set re-run on a schedule, not only when something looks wrong
 - [ ] Drift watched on inputs *and* outputs, with a threshold set from a period you know was

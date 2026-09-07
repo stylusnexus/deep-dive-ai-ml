@@ -243,6 +243,26 @@ LESSONS = [
      'An instrument that cannot tell success from inaction produces noise, not numbers.',
      'Before trusting any measurement, prove the fixture fails at the starting state and passes with a known-good fix applied. If either half is untrue, every number it produces afterwards is meaningless.',
      'A benchmark reported six of eight tasks passing before any work had been done. The verification step was checking that the test command exited zero, and the command was piped through head, which exits zero regardless of what failed upstream. Weeks of comparisons had been run against that fixture.'),
+    ("h2", "The same rule applies to every check, not just the fixture"),
+    ("p", "Step 0 asks a fixture to fail before the work and pass after it. That invariant is usually filed as a rule about evaluation fixtures, and it is a rule about <em>checks</em> &mdash; every test, threshold, gate and assertion in the system is subject to it, and most of them have never been asked."),
+    ("p", "The procedure is short. For each check, name the specific mistake it exists to catch. Then introduce that mistake deliberately and confirm the check goes red. A check that stays green has told you something more useful than a passing suite: it cannot fail, so it has never been protecting anything."),
+
+    ("terms", [
+      ("A test whose premise is unreachable", "Green because it never ran",
+       "The setup can no longer produce the state the assertion is about, so the body executes against a case that cannot occur. Nothing errors and the suite counts it as a pass."),
+      ("A sweep where nothing differs", "Green because the axis is flat",
+       "A threshold or parameter sweep in which the change being validated moves no case across any boundary. Every setting agrees, which reads as robustness and is actually a sweep with no signal in it."),
+      ("An aggregate over zero rows", "Green because the set is empty",
+       "A comparison that holds vacuously because the filter upstream matched nothing. The strongest-looking results in a report are sometimes these."),
+      ("A check downstream of its own subject", "Green because it inherits the bug",
+       "A validator that consumes output from the component it is validating. If that component is wrong, the check is wrong in the same direction and confirms it."),
+    ]),
+
+    ("know",
+     "A green suite full of checks that cannot fail is indistinguishable from a green suite that works &mdash; and it is what people trust when deciding to ship.",
+     "This is the same argument as the instrument invariant, applied one level out. The evaluation fixture gets scrutinised because everyone knows an eval can lie; the surrounding tests and gates get a pass because they are &ldquo;just tests&rdquo;. But a gate nobody has seen fail is a gate nobody has evidence about, and the failure is silent in the direction that feels like success.",
+     "Budget for it the way you budget for the fixture check: once per gate, when the gate is written. Break the thing the gate protects, watch it go red, put it back. If that is expensive enough to be worth skipping, the gate is probably too complicated to trust anyway."),
+
     ("h2", "Two kinds of honesty"),
     ("p", "The invariant above is <strong>outcome honesty</strong> — can the instrument tell success from inaction? There is a second one, checked far less often. <strong>Process honesty</strong>: did the instrument record what the system actually did and said, or only whether it succeeded?"),
     ("p", "Two completely different failures score identically under outcome metrics alone:"),
@@ -366,6 +386,15 @@ LESSONS = [
      "A null result from an unvalidated instrument is not a weak finding. It is not a finding.",
      "This is what makes the ordering non-negotiable rather than merely tidy. A positive result at least prompts the question of whether the rig was honest; a null invites the conclusion that the treatment does nothing, which is the same output a broken instrument produces and is far more comfortable to believe. The failure mode is therefore biased towards being accepted, and the only defence is having proved detection before the numbers existed to be interpreted.",
      "A red-team battery in this course ran thirty attacks against an agent and found nothing, which read as a robust system. A control added afterwards &mdash; a change that <em>should</em> have moved the decision &mdash; moved it in one case out of six, meaning the rig was mostly blind and the clean sweep meant nothing. Two full runs were spent before the ordering was corrected, and the corrected control then passed at four out of six."),
+
+    ("h2", "Gate on the outcome; report the shape as a diagnostic"),
+    ("p", "When a reference solution exists, it is tempting to score against its shape &mdash; which files were touched, which steps were taken, how closely the trace matches. Shape is cheap to compute and it feels like a stricter test. As a <em>gate</em> it is worse than useless, because it marks a better answer wrong."),
+    ("p", "Score on whether the required behaviour actually happened: the tests pass, the value is correct, the state changed as specified. Compute the shape metrics too and report them, because a large divergence between a passing outcome and an unexpected shape is genuinely interesting &mdash; it is how you find a solution nobody anticipated, and occasionally how you find one that passed for the wrong reason. Just do not let it decide."),
+
+    ("know",
+     "Any metric that assumes one correct shape will punish an improvement, and it will do so precisely on the runs worth reading.",
+     "The failures a shape gate produces are not random. They cluster on the cases where the system found a different route &mdash; which are the cases you built the evaluation to discover. So the metric is not merely noisy, it is selectively blind to the outcome you most wanted, and the more novel the solution the more likely it is scored as a failure.",
+     "A change is implemented correctly in an existing file rather than the new one the reference created. Behaviour is right and the tests are green; file-overlap against the reference is a third. Gated on shape, that is a failure and the run gets counted against the system. Gated on behaviour with shape reported alongside, it is a pass with an interesting note attached."),
 
     ("h2", "1 · Write the number down before you run"),
     ("p", "State the hypothesis as a prediction with a value: <em>“this should take edit-attempt rate from 0.25 to above 0.5.”</em> A hypothesis that predicts no particular number cannot be wrong, and one that cannot be wrong is not being tested. Written afterwards, any result confirms it."),

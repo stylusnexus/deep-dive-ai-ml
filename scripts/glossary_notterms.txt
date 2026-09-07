@@ -488,3 +488,7 @@ The tool-count threshold is guidance
 The context window you get is not the one advertised
 Concurrency is one by default
 Tool calling needs flags, not just a model
+A test whose premise is unreachable
+A sweep where nothing differs
+An aggregate over zero rows
+A check downstream of its own subject

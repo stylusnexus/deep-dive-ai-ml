@@ -161,6 +161,15 @@ LESSONS = [
     ("callout", "pitfall", "Two recording habits that stop a bad number outliving its correction",
      "<p><strong>Write down the invalidated result, not only the good one.</strong> A number measured on a configuration production never ran is void, and deleting it quietly means the next person finds it in a chat log and cites it as a baseline. Recording it alongside one paragraph on why it does not count costs almost nothing and stops that.</p><p><strong>State what a change does not fix.</strong> A fix that restores a broken path and leaves the ranking quality exactly where it was should say so, or it will be credited with a benefit it never delivered &mdash; and the next person to look will start from a belief that the area is already handled.</p>"),
 
+    ("h2", "The eval must call the code, not re-implement it"),
+    ("p", "The previous section is about rows: an evaluation set should only contain cases that could actually reach the thing being measured. There is a converse half, and it fails more quietly. The evaluation must invoke the same function production invokes, rather than a copy of the decision logic written inside the harness."),
+    ("p", "A re-implementation drifts. It is written from the same understanding, it agrees at the time, and then one side gains a branch &mdash; a guard, a fallback, an early return &mdash; and the other does not. Nothing announces this. The harness keeps printing plausible numbers that move when you change things, and they describe a decision your system would never make. Comments asserting that the two implementations match are worth nothing, because they were true when written."),
+
+    ("know",
+     "Route the decision through one function and make the evaluation call it. If that is awkward, the awkwardness is the finding.",
+     "Being unable to invoke your production decision path from a test usually means the logic is entangled with things that should not be part of it &mdash; a request object, a session, a global. That is worth fixing on its own merits, and until it is fixed you cannot measure the decision you actually ship. Where a re-implementation genuinely cannot be avoided, pin the two together with a test that feeds both the same inputs and asserts identical outputs, so the drift fails loudly rather than silently.",
+     "The tell is a harness that grew its own copy of a threshold, a scoring rule or a routing table. Search for the constant in two places; if it appears twice, one of them is already out of date or shortly will be."),
+
     ("h2", "What a disagreement is telling you"),
     ("ul", [
       "<strong>The label is wrong</strong> — a rule elsewhere forbids it. Fix the rules or fix the label, and record which you chose.",
