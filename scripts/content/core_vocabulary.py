@@ -1213,6 +1213,15 @@ LESSONS = [
     ("callout", "insight", "Clearing tool results is the cheapest win", "Of all forms of compaction, dropping old tool results is the safest and lightest-touch — they are usually the largest thing in the window, and once acted on they are rarely needed verbatim. Do this before reaching for summarisation, which risks losing something."),
     ("p", "The framing that ties these together is an <strong>attention budget</strong>: not a storage limit but a finite capacity to attend, degrading as a gradient rather than a cliff. Good context engineering is finding the smallest set of high-signal tokens that gets the outcome — a different objective from filling the window."),
 
+    ("h3", "Price the prompt, and measure position before assuming burial"),
+    ("p", "Everything above argues about where things sit. Almost nobody knows where things actually sit. Before reasoning about position or cost, produce the table: every block in your assembled prompt with its size, which needs no model call and is usually a surprise &mdash; a contributor guide or a tool list that nobody remembered including can be a third of the total."),
+    ("p", "Then locate the block you care about as a percentage of the whole, because the intuition is unreliable in a specific and expensive direction. A block assumed to be lost in the middle can turn out to sit at ninety-eight per cent of the prompt &mdash; in the privileged tail, exactly where you would have put it. An arm built to &ldquo;lift it out of the middle&rdquo; would in that case have moved it <em>to</em> the middle, at around seventy per cent, and made things worse while looking like a fix."),
+
+    ("know",
+     "Reordering inside a block is free. Moving blocks is not.",
+     "This is what makes the caching and attention rules livable rather than a deadlock. The cache keys on a literal prefix, so moving a whole block changes where every later block starts and costs you the reuse from that point on. Rearranging sentences <em>within</em> a block leaves every subsequent block&#39;s starting position untouched, so it costs nothing. The two goals agree on getting important material early, which is free, and conflict only over the tail, which caching has already reserved for whatever changes per request.",
+     "So the first move on a badly ordered prompt is not to reorder the blocks. It is to front-load within the block you already have, which is free, and only then to consider whether a block genuinely needs to move &mdash; a question you can now answer against a measured position rather than an assumed one."),
+
     ("h2", "Progressive disclosure, at three layers rather than one"),
     ("p", "The skills lesson describes progressive disclosure as that format&#39;s central design: a name and one line stay resident, the body loads when it is needed. It is worth seeing that this is not a property of skills. It is one technique, and a mature harness applies it at three separate layers of the budget above."),
 
@@ -1226,6 +1235,9 @@ LESSONS = [
     ]),
 
     ("p", "The three compound, because they attack different lines of the budget: tools, instructions and tool results. A harness doing none of them can spend a large share of its window before the user has said anything &mdash; and that share is not idle, it is the distractor load the earlier sections of this lesson describe, arriving from your own configuration rather than from retrieval."),
+
+    ("callout", "pitfall", "An index line has to say what the thing answers, not what it is about",
+     "<p>Progressive disclosure only works if the resident one-liner is enough for the model to decide it wants the body. That is a harder writing problem than it looks, because headings are habitually written for a reader who already knows the content. &ldquo;Verification architecture&rdquo; tells a model scanning for relevance nothing; &ldquo;re-snapshotting after a shell command does not detect changes&rdquo; tells it exactly when to look. Write the finding, not the topic.</p><p>A mechanical trap worth knowing if you generate these lines from existing documents: prose hard-wrapped at a fixed column means the first <em>physical</em> line routinely stops mid-claim. Unwrap the paragraph and take the first sentence, or your index will be full of half-sentences that answer nothing.</p>"),
 
     ("know",
      "A token reduction is a measurement of what the change cost you, not of what it bought. Those are different experiments and only one of them is easy.",

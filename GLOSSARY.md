@@ -765,6 +765,12 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Guardrail metric** — A measure that must not get worse, checked alongside the primary metric but not permitted to declare success. Latency, cost and refusal rate are the usual ones.
 
+**Free ground truth** — Labels lifted from an artefact somebody else already wrote — a specification, an author's stated contract, a config declaring intended behaviour — rather than hand-labelled by the person hoping the change worked. Cheap and unbiased by the experimenter, and rarely neutral in other ways, which is why the direction of its bias has to be stated.
+
+**Upper-bound measurement** — A result obtained under conditions that flatter the mechanism, most often because the labels came from the same text the mechanism was built on. Naming it as an upper bound changes what the number means: a mediocre-looking score becomes a mechanism barely working under ideal conditions.
+
+**Gate-consistent evaluation** — Applying production's filters to the eval set, so it contains only rows that could actually reach the code under test. A harness calling the ranking function directly steps around routers, confidence floors and permission checks, and loads the set with negatives the system would never have been asked about.
+
 **Agreement rate** — How often a judge matches a blind human label on a calibration set. A judge score published without one is an opinion with a decimal point.
 
 **Similarity threshold** — The cut-off a semantic cache uses to decide two questions are the same one. Measured on this course's own encoder, a negation that reverses the answer scores 0.984 while a genuine paraphrase scores 0.940, so no cut-off separates them — see <code>scripts/measure_semantic_threshold.py</code>.

@@ -146,6 +146,21 @@ LESSONS = [
     ("callout", "pitfall", "The general clause that eats the specific ones",
      "<p>Escalation rules are the usual offender. A clause like &ldquo;escalate anything ambiguous&rdquo; sounds cautious and quietly overrides every specific rule you wrote, because almost everything interesting is ambiguous. When a system escalates far more than you expected, read your own escalation clause before blaming the model.</p>"),
 
+    ("h2", "Ground truth you did not write yourself"),
+    ("p", "Hand-labelling is slow and it carries the labeller&#39;s opinion, which is a problem when the labeller is also the person hoping the change worked. Before starting, look for ground truth that already exists in written form &mdash; a specification, an author&#39;s own stated contract for when something should apply, a config that declares the intended behaviour. Labels lifted from an artefact somebody else wrote are free and they cannot be bent towards the result you want."),
+
+    ("know",
+     "Then say which way your ground truth is biased, because it changes what the number means rather than merely qualifying it.",
+     "Free labels are rarely neutral. If the phrases you are scoring against are the same phrases the mechanism was built from, then you are measuring under conditions chosen to flatter it, and the result is an <em>upper bound</em> rather than an estimate. Naming the direction converts a number people will argue about into one they can act on, and it usually converts it downwards.",
+     "A retrieval mechanism scores 44 out of 97 against labels taken from the descriptions its own index was built on. Reported bare, that reads as mediocre and fixable. Reported with the direction &mdash; those labels are literal substrings of the indexed text, so this is the most favourable measurement available &mdash; it reads as the mechanism barely working under ideal conditions, which is a different finding and a different decision."),
+
+    ("h2", "Rows that could never have reached the thing you are measuring"),
+    ("p", "An evaluation set can be perfectly labelled and still measure nothing, if production would have rejected half its rows before they arrived. Systems accumulate gates &mdash; a router that sends the request elsewhere, a confidence floor, a permission check, a lane filter &mdash; and a harness that calls the ranking function directly steps around all of them."),
+    ("p", "The failure is asymmetric and flattering in a specific way: the rows that never reach the mechanism are disproportionately the odd ones, so bypassing the gate loads your evaluation with negatives the system would never have been asked about. A precision figure computed that way is not pessimistic or optimistic in a way you can correct for, because you no longer know what population it describes. Before trusting a number, ask which rows can actually reach the code being measured, and apply production&#39;s gates to the set."),
+
+    ("callout", "pitfall", "Two recording habits that stop a bad number outliving its correction",
+     "<p><strong>Write down the invalidated result, not only the good one.</strong> A number measured on a configuration production never ran is void, and deleting it quietly means the next person finds it in a chat log and cites it as a baseline. Recording it alongside one paragraph on why it does not count costs almost nothing and stops that.</p><p><strong>State what a change does not fix.</strong> A fix that restores a broken path and leaves the ranking quality exactly where it was should say so, or it will be credited with a benefit it never delivered &mdash; and the next person to look will start from a belief that the area is already handled.</p>"),
+
     ("h2", "What a disagreement is telling you"),
     ("ul", [
       "<strong>The label is wrong</strong> — a rule elsewhere forbids it. Fix the rules or fix the label, and record which you chose.",

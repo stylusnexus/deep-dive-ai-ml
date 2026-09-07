@@ -32,6 +32,11 @@ If either half is untrue, stop. Everything below produces noise.
 - [ ] Control fixture included, and read first when a board looks uniform
 
 ## 2 · Baseline
+- [ ] ☠ Every row in the set could actually reach the code being measured — production's gates
+      applied to the eval, not bypassed by calling the function directly
+- [ ] Ground truth taken from an artefact somebody else wrote where one exists, and the direction
+      of its bias stated. Labels drawn from the same text the mechanism was built on make the
+      result an upper bound, not an estimate
 - [ ] Before concluding you need more data: learning curve run on fractions of what you already
       hold. A flat validation curve means more of the same will not help, and it costs an afternoon
 - [ ] Whole set, not a spot check
