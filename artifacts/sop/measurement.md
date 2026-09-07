@@ -6,6 +6,11 @@ In dependency order. Every step is worthless before the one above it.
 - [ ] ☠ Fixture **fails** at the starting state, before the work
 - [ ] ☠ Fixture **passes** with a known-good fix applied
 - [ ] "Did nothing" and "solved it" cannot score the same
+- [ ] ☠ For a battery: the detection gate ran **first**, on two or three runs, and passed. Forty
+      runs after an unproven instrument return no information — and a null from a blind rig reads
+      exactly like a null from a real one, which is the direction that gets believed
+- [ ] Gate blocked, battery interleaved — running all of one arm then all of the next exposes the
+      comparison to drift the round-robin would have spread
 - [ ] Process recorded, not just outcome — you can tell *never attempted* from *attempted and failed*
 
 If either half is untrue, stop. Everything below produces noise.

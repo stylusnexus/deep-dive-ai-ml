@@ -755,6 +755,10 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Peeking** — Repeatedly testing a running experiment and stopping when it crosses the threshold. Every look is another chance for noise to cross, which inflates the false-positive rate far past the nominal one.
 
+**Detection gate** — A small run, before a battery, that proves the rig can detect an effect at all. Two or three runs, sized to answer a binary question rather than to establish anything. Cheap, and it either buys the battery or saves it: a forty-run battery after an unproven instrument can return no information at all.
+
+**Blocked vs interleaved runs** — Running all of one arm then all of the next is blocked and exposed to drift; round-robin across arms is interleaved and spreads drift evenly. The usual shape is a small blocked gate first, then an interleaved battery.
+
 **Trajectory evaluation** — Scoring an agent's whole sequence of turns rather than its final answer. A correct ending can follow a wasteful or lucky run, and a wrong one can follow sound reasoning that hit a broken tool; only the sequence distinguishes them.
 
 **Recovery** — Whether an agent notices a failure and adapts. A run that failed a tool call, read the error and tried something sensible is better than one that succeeded by luck, and a final-answer score ranks them the other way round.

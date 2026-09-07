@@ -477,3 +477,7 @@ Very long contexts
 Reasoning-heavy prompting
 Elaborate self-critique
 Grammars and constrained decoding
+Your gate may already be an arm
+Gate, then interleave
+Aborting on a gate is not peeking
+A gate is not a weak battery
