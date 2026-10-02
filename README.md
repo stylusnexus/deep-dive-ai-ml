@@ -10,7 +10,7 @@ Most applied AI curricula cover the same standard material and stop short of the
 
 | Added | Why |
 |---|---|
-| **Security** | Curricula routinely teach "Responsible AI" as ethics and governance but never prompt injection, tool abuse, or agent sandboxing — in a program that builds multi-agent systems that take actions |
+| **Security** | Curricula routinely teach "Responsible AI" as ethics and governance but never prompt injection, tool abuse, or agent sandboxing - in a program that builds multi-agent systems that take actions |
 | **Evaluation** as a module | Usually a bullet point or two. It's the discipline that separates a demo from production |
 | **Cost & routing** | Absent entirely. Token cost, caching, model routing, when a small local model is enough |
 | **APIs** | Courses consume APIs constantly and rarely teach designing or serving one, despite "deployment" being a module |
@@ -20,22 +20,22 @@ Most applied AI curricula cover the same standard material and stop short of the
 
 ## The three outcomes
 
-Everything here is built to deliver three things that aren't modules — they're judgment, practised repeatedly:
+Everything here is built to deliver three things that aren't modules - they're judgment, practised repeatedly:
 
 1. **What to look for when building projects** → [`artifacts/project-intake.md`](artifacts/project-intake.md), filled in before every project and lab
 2. **How to evaluate platforms, tools and models** → [`artifacts/selection-scorecard.md`](artifacts/selection-scorecard.md), used for every model, vendor and framework decision
 3. **How to speak the language** → [`GLOSSARY.md`](GLOSSARY.md), built cumulatively and fed into spaced repetition
 
-And when you're actually building: [`artifacts/sop/`](artifacts/sop/) — checklists in the
+And when you're actually building: [`artifacts/sop/`](artifacts/sop/) - checklists in the
 aviation sense. A master run-through plus focused ones for training, deep learning,
 fine-tuning, generative AI, LLM engineering, measurement, and a separate non-normal
 checklist for when something is already broken.
 
 ## Start here
 
-1. **[`HOW-TO-USE.md`](HOW-TO-USE.md)** — how the lessons, notebooks and projects fit
+1. **[`HOW-TO-USE.md`](HOW-TO-USE.md)** - how the lessons, notebooks and projects fit
    together, and what a block looks like start to finish
-2. [`CURRICULUM.md`](CURRICULUM.md) — the week-by-week map and the exit criteria
+2. [`CURRICULUM.md`](CURRICULUM.md) - the week-by-week map and the exit criteria
 3. `open index.html` to read, `make up` to run
 
 Then, depending on what you're doing:
@@ -52,7 +52,7 @@ lessons/     Self-contained HTML lessons (engram format, open straight from disk
 notebooks/   Runnable labs, one folder per block
 projects/    Four portfolio projects
 artifacts/   The intake sheet, selection scorecard, and other recurring tools
-docker/      Reproducible environments — torch, keras, pgvector, mlflow
+docker/      Reproducible environments - torch, keras, pgvector, mlflow
 scripts/     Setup and helper scripts
 ```
 

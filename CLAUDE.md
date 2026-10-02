@@ -1,4 +1,4 @@
-# CLAUDE.md — Building and Measuring LLM Systems
+# CLAUDE.md - Building and Measuring LLM Systems
 
 A self-built curriculum in applied AI and machine learning: ~13 weeks of lessons,
 runnable notebooks and portfolio projects, including the security, evaluation, cost
@@ -35,12 +35,12 @@ lessons/          Self-contained HTML lessons, one directory per set
 notebooks/        Runnable labs, one directory per block
 projects/         Portfolio projects, each a script rather than a notebook
 artifacts/        The intake sheet, selection scorecard, and SOP checklists
-scripts/          Builders and data generators — content lives here, not in HTML
+scripts/          Builders and data generators - content lives here, not in HTML
 data/             Generated datasets and corpora (seeded, reproducible)
 docker/           Torch, Keras, pgvector and MLflow environments
 ```
 
-## How to change content — this matters
+## How to change content - this matters
 
 **Never edit a file in `lessons/`.** They are generated. Edit the content module
 in `scripts/content/` and rebuild:
@@ -114,13 +114,13 @@ python3 scripts/build_lessons.py <module> && python3 scripts/build_index.py
 
 `make numbers` gates numeric claims. Two fabricated figures reached this course
 before anyone checked them, both from search summaries rather than papers, and both
-looked reasonable — a number is the one thing a reader cannot sanity-check from
+looked reasonable - a number is the one thing a reader cannot sanity-check from
 context. The check cannot tell whether a figure is true; it fails when a *new* one
 appears, so the judgement happens once per claim rather than never. Record the
 verdict in `scripts/numbers_reviewed.txt` with a note saying whether it is cited,
 measured in this repo, arithmetic, or hypothetical.
 
-And the validation the repo has been held to throughout — SVG well-formedness,
+And the validation the repo has been held to throughout - SVG well-formedness,
 no literal unicode escapes, no stray backticks, every `know` block complete, and
 every link resolving. See the git history for the exact checks; they have caught
 real defects including three unstyled callouts and a backtick in quiz text.
@@ -146,7 +146,7 @@ make torch     # just the torch lab + mlflow
 ```
 
 Notebooks run on Python 3.12. TensorFlow has no 3.14 support, and the host runs
-3.14 — this is why the containers exist. Training runs on the host with MPS;
+3.14 - this is why the containers exist. Training runs on the host with MPS;
 containers are CPU-only on macOS and exist for reproducibility.
 
 ## Things that will bite you

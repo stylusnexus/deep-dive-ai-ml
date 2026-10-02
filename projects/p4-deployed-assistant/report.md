@@ -1,4 +1,4 @@
-# Deployed Grounded Assistant — Report
+# Deployed Grounded Assistant - Report
 
 ## What was built
 
@@ -37,6 +37,6 @@ being measured rather than the other way round.
 ## Not done
 
 The service is not deployed. `render.yaml` describes it and applying it is a human
-action — a public URL has a bill and an audience, and the keys belong in a
+action - a public URL has a bill and an audience, and the keys belong in a
 dashboard. The two unticked boxes in the README are that step and verifying the
 rate limit against the running instance.

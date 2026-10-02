@@ -1,7 +1,7 @@
 # Environments
 
 Two Jupyter stacks because TensorFlow and the newest Torch/pandas don't
-coexist cleanly — and because a container per block means these labs still
+coexist cleanly - and because a container per block means these labs still
 run in two years.
 
 | Service | What | URL |
@@ -27,7 +27,7 @@ allocation is leaving almost all of it unused.
 
 ## Note on GPU
 
-Containers on macOS get **CPU only** — Docker can't pass through Apple's GPU.
+Containers on macOS get **CPU only** - Docker can't pass through Apple's GPU.
 That's deliberate here: containers are for *reproducibility* (labs, vector
 store, tracking, serving practice). Actual training runs on the host with
 `torch` + MPS, where the M4 Max's 128GB unified memory does real work. Use

@@ -1,4 +1,4 @@
-# exception-triage — a LoRA adapter that lost
+# exception-triage - a LoRA adapter that lost
 
 A LoRA adapter for `Qwen2.5-1.5B-Instruct-4bit`, trained to pick the right action for
 a delivery exception. It works, and it is **worse than the nine-entry lookup table it
@@ -19,7 +19,7 @@ Scored on 295 held-out rows, single run, greedy decoding:
 | **Tuned (this adapter)** | 0.393 | 0.859 | **0.000** |
 
 Read the last column. The tuned model agrees with the lookup table 80% of the time
-overall and 75% on judgement cases — and the table is *always wrong* on judgement
+overall and 75% on judgement cases - and the table is *always wrong* on judgement
 cases, because those are exactly the ones a rule can't decide.
 
 So the adapter learned the rule, including its blind spot. It got much better at the
@@ -38,7 +38,7 @@ unparseable replies out of 295.
 | Method | LoRA, 8 layers, rank 8, scale 20, dropout 0 |
 | Training | 600 iterations, batch 8, lr 1e-4, prompt masked, seed 23 |
 | Data | 965 train / 120 validation / 295 test rows |
-| Split | **Grouped by scenario** — 8 judgement scenarios trained on, 4 held out entirely |
+| Split | **Grouped by scenario** - 8 judgement scenarios trained on, 4 held out entirely |
 | Peak memory | 4.16 GB |
 | Trained tokens | 27,460 |
 
@@ -82,7 +82,7 @@ on the thing that mattered.
 
 **Do not use it for anything real.** It scores 0.000 on the 160 cases needing
 judgement. For the 80 of those where the right answer was to escalate to a human, it
-never did — the failure mode you least want in an operations system.
+never did - the failure mode you least want in an operations system.
 
 ## Reproducing
 
@@ -99,7 +99,7 @@ Full numbers in [`artifacts/finetune-results.json`](../../artifacts/finetune-res
 
 Measure a fine-tune against **what you would have done instead**, not against
 nothing. Against the base model this adapter is a clear win: 0.281 to 0.393. Against
-the lookup table anyone would actually have shipped, it's a loss — and the comparison
+the lookup table anyone would actually have shipped, it's a loss - and the comparison
 that flatters it is the one most projects report.
 
 Weights are gitignored; this card is not.

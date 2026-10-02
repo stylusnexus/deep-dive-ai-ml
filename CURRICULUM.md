@@ -1,6 +1,6 @@
 # Curriculum
 
-~13 weeks. Each block has an exit criterion — a thing that runs, not a box ticked. Commit at every block boundary.
+~13 weeks. Each block has an exit criterion - a thing that runs, not a box ticked. Commit at every block boundary.
 
 Three artifacts thread through every block rather than adding time:
 the [intake sheet](artifacts/project-intake.md) before each build, the
@@ -9,15 +9,15 @@ and the [glossary](GLOSSARY.md) accumulating throughout.
 
 ---
 
-## Block 0 · Spine & Vocabulary — 0.5 week
+## Block 0 · Spine & Vocabulary - 0.5 week
 
 Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 - Docker environments for Torch and Keras, pgvector, MLflow ✅
-- `lessons/orientation/` — one map placing every term in the program ✅
-- `lessons/core-vocabulary/` — 31 lessons: the vocabulary an LLM system is built from, plus overfitting, agents and danger, RLHF and human-in-the-loop, context engineering, structured output, hallucination and grounding, in-context learning, class imbalance and thresholds, drift, distillation, chain-of-thought, and loops at inference and in training ✅
-- `lessons/engineering-practice/` — 16 lessons: harnesses, recipes and ADRs; the measurement discipline that corrects them; SWE-bench; invisible confounds; localising a failure; LLM-as-judge; deterministic-first; experiment tracking and continuous evaluation; and the trained artefact with its retraining triggers ✅
-- `lessons/algorithms/` — 10 lessons on the algorithms this domain runs on, from gradient descent to HNSW and data leakage ✅
+- `lessons/orientation/` - one map placing every term in the program ✅
+- `lessons/core-vocabulary/` - 31 lessons: the vocabulary an LLM system is built from, plus overfitting, agents and danger, RLHF and human-in-the-loop, context engineering, structured output, hallucination and grounding, in-context learning, class imbalance and thresholds, drift, distillation, chain-of-thought, and loops at inference and in training ✅
+- `lessons/engineering-practice/` - 16 lessons: harnesses, recipes and ADRs; the measurement discipline that corrects them; SWE-bench; invisible confounds; localising a failure; LLM-as-judge; deterministic-first; experiment tracking and continuous evaluation; and the trained artefact with its retraining triggers ✅
+- `lessons/algorithms/` - 10 lessons on the algorithms this domain runs on, from gradient descent to HNSW and data leakage ✅
 - Wire in the two finished courses (statistics, governance) ✅
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
@@ -30,9 +30,9 @@ and the Project 4 deployment, which is deliberately a human action.
 
 ---
 
-## Block 1 · Python, Data & EDA — 1 week
+## Block 1 · Python, Data & EDA - 1 week
 
-- pandas and the shape of tabular data — dtypes as a diagnostic, sentinels, units ✅
+- pandas and the shape of tabular data - dtypes as a diagnostic, sentinels, units ✅
 - Exploratory data analysis as a discipline, not a ritual ✅
 - Missing data: MCAR, MAR, MNAR, and why the mechanism decides the fix ✅
 - AI-assisted analysis, and where it lies to you ✅
@@ -46,32 +46,32 @@ alarms; at 0.7 you catch 44% with 77. Choosing a row is a business decision.
 
 ---
 
-## Block 2 · Classical ML — 2 weeks
+## Block 2 · Classical ML - 2 weeks
 
 - The confusion matrix, precision and recall, ROC and AUC, and when AUC misleads ✅
 - The model ladder: baseline → one rule → logistic → forest → boosting, compared honestly ✅
 - Neural networks in **Keras 3** and raw PyTorch, with an honest account of when they are wrong ✅
-- Time series — because so many real business problems are time-series problems ✅
+- Time series - because so many real business problems are time-series problems ✅
 
 4 lessons in `lessons/block2-classical-ml/` and 2 notebooks in
 `notebooks/02-classical-ml/`, both verified executing end to end.
 
 4 lessons, 4 notebooks and the project, all verified running end to end.
 
-**Exit:** Project 1 — wind turbine failure prediction — runs end to end. ✅
+**Exit:** Project 1 - wind turbine failure prediction - runs end to end. ✅
 `python src/train.py` produces a report naming the baseline, the leakage audit,
 a threshold-free model comparison with an honest verdict on whether the winner is
 demonstrably better, and a threshold chosen from costs.
 
 ---
 
-## Block 3 · Retrieval and Agentic RAG — 1.5 weeks
+## Block 3 · Retrieval and Agentic RAG - 1.5 weeks
 
 - LLMs and prompt engineering ✅
-- Embeddings, chunking, vector search against real pgvector — not an in-memory list ✅
+- Embeddings, chunking, vector search against real pgvector - not an in-memory list ✅
 - Hybrid retrieval: BM25 and vectors fused by rank; rerankers over the shortlist ✅
 - Retrieval quality: what actually makes RAG fail, and measuring index recall ✅
-- **Agentic RAG** — retrieval as a loop, its failure modes, and why it should be
+- **Agentic RAG** - retrieval as a loop, its failure modes, and why it should be
   routed to rather than made the default ✅
 - Structured outputs and tool calling ✅
 
@@ -83,19 +83,19 @@ the gold labels are genuinely correct and recall@k is measurable rather than
 estimated. It plants three multi-hop chains that single-shot retrieval provably
 cannot answer, and one question the corpus cannot answer at all.
 
-**Exit:** Project 2 — grounded document assistant — runs end to end. ✅
+**Exit:** Project 2 - grounded document assistant - runs end to end. ✅
 `python src/rag.py` reports four numbers separately (index recall, retrieval
 quality, groundedness, correctness) and states plainly which question types the
 system cannot handle.
 
-**Exit:** Project 2 — financial report assistant answers cited questions over a real 10-K.
+**Exit:** Project 2 - financial report assistant answers cited questions over a real 10-K.
 
 ---
 
-## Block 4 · Agentic AI — 1.5 weeks
+## Block 4 · Agentic AI - 1.5 weeks
 
 Comparable courses build on **LangGraph / LangChain / LangSmith**. This one uses
-**LangGraph** only, and writes traces as local JSON rather than to LangSmith — a
+**LangGraph** only, and writes traces as local JSON rather than to LangSmith - a
 hosted tracer needs an account and an API key, and the telemetry lesson's claim is
 that the trace is the only evidence, not that it lives in a particular product. The
 Microsoft agents course is Azure/AutoGen-based and lifts as reading only, not code.
@@ -103,55 +103,55 @@ Microsoft agents course is Azure/AutoGen-based and lifts as reading only, not co
 - Single-agent loops: the loop written by hand before any framework ✅
 - What a graph runtime buys, and what it costs ✅
 - Multi-agent systems, handoffs, and approval gates that actually halt ✅
-- Telemetry and instrumentation — the trace is the only evidence ✅
+- Telemetry and instrumentation - the trace is the only evidence ✅
 
 5 lessons in `lessons/block4-agentic/`, including the four loop levers and their tradeoffs.
-2 notebooks in `notebooks/04-agentic/` — the loop by hand, then the same loop as a
+2 notebooks in `notebooks/04-agentic/` - the loop by hand, then the same loop as a
 checkpointed graph, which measures what resuming a crashed run costs. Project 3 is built:
 `src/pipeline.py` applies the lookup table first, escalates by guard where policy
 forbids automating a decision, and calls a model only on the exceptions whose
-delivery note contradicts their event code — 98% correct against an 82% baseline.
+delivery note contradicts their event code - 98% correct against an 82% baseline.
 
-**Exit:** Project 3 — multi-agent delivery-exception handler runs with human approval, traced to local JSON.
+**Exit:** Project 3 - multi-agent delivery-exception handler runs with human approval, traced to local JSON.
 
 ---
 
-## Block 5 · Evaluation — 0.5 week
+## Block 5 · Evaluation - 0.5 week
 *Not usually taught as its own module. It should be.*
 
 Most of this course's evaluation material was already written, scattered by design:
 the vocabulary in Block 0, the procedure in engineering practice, the checklist in
-`artifacts/sop/measurement.md`. Two of the four topics here — why public
-benchmarks mislead, and building a private eval set — are taught in
+`artifacts/sop/measurement.md`. Two of the four topics here - why public
+benchmarks mislead, and building a private eval set - are taught in
 `core-vocabulary/eval-battery`, and LLM-as-judge is taught in
 `engineering-practice/models-judging-models`. Restating them here would have been
 padding, so this block is a door plus the two genuine gaps.
 
-- Where evaluation lives — the map, and the order that saves a week ✅
+- Where evaluation lives - the map, and the order that saves a week ✅
 - Eval data you can trust: labels that follow from the rules, not from your opinion ✅
 - One set, many models: the comparison, and the output budget that silently breaks it ✅
-- Rubrics and blind reads — the two mechanics that make a judge usable ✅
-- Is the difference real? — pairing, per-arm distribution, Bessel's correction,
+- Rubrics and blind reads - the two mechanics that make a judge usable ✅
+- Is the difference real? - pairing, per-arm distribution, Bessel's correction,
   A/B discipline and the peeking problem, with the numbers simulated ✅
-- Judging a conversation — scoring the trajectory, since the failure is rarely
+- Judging a conversation - scoring the trajectory, since the failure is rarely
   in the turn you graded ✅
 
 6 lessons in `lessons/block5-evaluation/` and 1 notebook in
 `notebooks/05-evaluation/`. The statistics notebook needs no model, network or API
-key — every figure the lesson quotes is produced by running it. A battery across
+key - every figure the lesson quotes is produced by running it. A battery across
 several providers still needs keys this repository does not assume.
 
-**Exit:** Your own eval set, run across ≥6 models, with a defensible ranking — and a
+**Exit:** Your own eval set, run across ≥6 models, with a defensible ranking - and a
 non-completion column, without which the ranking is not defensible.
 
 ---
 
-## Block 6 · Security — 1 week
+## Block 6 · Security - 1 week
 *Rarely taught at all.*
 
-- Prompt injection, direct and indirect — and why the indirect form is the one this
+- Prompt injection, direct and indirect - and why the indirect form is the one this
   course's own architecture invites ✅
-- Tool abuse and data exfiltration — every tool is a channel, and rendering is one too ✅
+- Tool abuse and data exfiltration - every tool is a channel, and rendering is one too ✅
 - Sandboxing and what actually works: the mitigations ranked by whether the model can
   talk its way past them ✅
 - Red-teaming your own Block 4 agent with `agent-armor` and SecLists corpora ✅
@@ -165,17 +165,17 @@ battery until you have shown it can detect a change.
 
 ---
 
-## Block 7 · Training & Fine-Tuning — 1.5 weeks
+## Block 7 · Training & Fine-Tuning - 1.5 weeks
 *Rarely taught at all.*
 
-- When fine-tuning is the wrong answer (usually — prompt, then RAG, then this) ✅
+- When fine-tuning is the wrong answer (usually - prompt, then RAG, then this) ✅
 - Dataset construction, and how little data you actually need ✅
 - LoRA / QLoRA vs full fine-tune, locally on the M4 Max ✅
-- **Supervised versus reinforcement fine-tuning** ✅ — the objective decides what you get.
+- **Supervised versus reinforcement fine-tuning** ✅ - the objective decides what you get.
   Supervised tuning imitates answers; reinforcement tuning (GRPO and relatives) optimises
   against a reward or a verifier, which is how reasoning behaviour is trained rather than
   copied. Block 0 teaches what a reasoning model is and this is where it gets made.
-- **The four ways to shrink a model** ✅ — quantization, pruning, distillation and
+- **The four ways to shrink a model** ✅ - quantization, pruning, distillation and
   low-rank factorisation as one family; which compose (pruning then distillation as
   repair) and which are alternatives; and that compression does not remove capability
   evenly, so it needs slice evaluation rather than an aggregate.
@@ -184,8 +184,8 @@ battery until you have shown it can detect a change.
 the checks that precede a run, and the analysis of one that was actually performed.
 
 The run is done. A LoRA adapter was trained on Apple Silicon against
-`Qwen2.5-1.5B-Instruct-4bit` — 965 examples, 600 iterations, 4.16 GB peak, minutes on
-one laptop — and evaluated against the base model with and without policies, and
+`Qwen2.5-1.5B-Instruct-4bit` - 965 examples, 600 iterations, 4.16 GB peak, minutes on
+one laptop - and evaluated against the base model with and without policies, and
 against the lookup table. **It lost to the dictionary** (0.393 against 0.458) and
 scored zero on the judgement cases the base model got a quarter of, because it learned
 to reproduce the rule including the rule's blind spot. The dataset check in notebook 01
@@ -193,28 +193,28 @@ predicted this before any compute was spent.
 
 Still open: quantization for serving, and publishing the adapter to the `stylusnexus`
 HF org, which is an outward-facing action and deliberately not automated.
-- Evaluating before and after against a held-out set ✅ — run and recorded in
+- Evaluating before and after against a held-out set ✅ - run and recorded in
   `artifacts/finetune-results.json`, with the analysis in
   `notebooks/07-finetuning/02-the-training-run.ipynb`
-- Quantization for serving — lands directly on a production agent's GGUF and Q4_K_M
+- Quantization for serving - lands directly on a production agent's GGUF and Q4_K_M
 
 Spine: `LLMS_from_Scratch` ch05–07 (Apache 2.0) plus the installed HF training skills.
 
-**Exit:** A LoRA adapter you trained ✅, evaluated against base ✅, published to the `stylusnexus` HF org (not done — outward-facing).
+**Exit:** A LoRA adapter you trained ✅, evaluated against base ✅, published to the `stylusnexus` HF org (not done - outward-facing).
 
 ---
 
-## Block 8 · Deployment & APIs — 2 weeks
+## Block 8 · Deployment & APIs - 2 weeks
 
-- Calling an API you do not control — status-code semantics, idempotency for the
+- Calling an API you do not control - status-code semantics, idempotency for the
   timeout you cannot interpret, jittered backoff ✅
-- Serving one yourself — auth, rate limiting, validation, versioning, a health check
+- Serving one yourself - auth, rate limiting, validation, versioning, a health check
   that reports readiness rather than liveness, worked against Project 4 ✅
-- The image is the unit — what goes inside, what stays configuration, and image size
+- The image is the unit - what goes inside, what stays configuration, and image size
   as a decision rather than an outcome ✅
-- After it ships — availability against correctness, and why drift needs a scheduled
+- After it ships - availability against correctness, and why drift needs a scheduled
   measurement rather than a dashboard ✅
-- The artefact is code, data and configuration — a model file is not a deployment;
+- The artefact is code, data and configuration - a model file is not a deployment;
   the manifest and hash that make a rollback real, and the three tests that ask
   different questions (training-system, validation, functionality) ✅
 
@@ -224,7 +224,7 @@ second measures the serving boundary (throughput, concurrency, tail latency) aga
 a local fixture service. Deploying to Render or an HF Space remains a human action;
 `projects/p4-deployed-assistant/render.yaml` describes it.
 
-**Exit:** Project 4 — an authenticated, rate-limited, containerised endpoint, built and
+**Exit:** Project 4 - an authenticated, rate-limited, containerised endpoint, built and
 verified end to end ✅, now with a corpus identity hash reported at `/version`
 (`scripts/build_corpus_artifact.py`) and a serving benchmark run against the real
 `/v1/ask` handler (`bench_serving.py`, sixteen tests total) ✅. The deploy itself is a
@@ -233,7 +233,7 @@ attached.
 
 ---
 
-## Block 9 · Electives — 2 weeks
+## Block 9 · Electives - 2 weeks
 
 Six electives were planned. Two are already taught: **Claude workflows and MCP** has four
 lessons in Block 0 (`tool-calls-and-mcp`, `building-an-mcp-server`, `mcp-dangers`,
@@ -241,16 +241,16 @@ lessons in Block 0 (`tool-calls-and-mcp`, `building-an-mcp-server`, `mcp-dangers
 elective would have duplicated them.
 
 Built:
-- When the input is not text — images as tokens, so every context-cost rule applies ✅
-- Asking the database properly — the SQL behind intake question one ✅
-- Where the money goes — spend attribution, and the four places cost hides. Complements
+- When the input is not text - images as tokens, so every context-cost rule applies ✅
+- Asking the database properly - the SQL behind intake question one ✅
+- Where the money goes - spend attribution, and the four places cost hides. Complements
   Block 0's routing (architecture) with the measurement ✅
 
-- Convolutions, and what a CNN assumes — the clearest inductive bias in the program ✅
-- Recommendation systems, and the loop they sit in — the one system whose training
+- Convolutions, and what a CNN assumes - the clearest inductive bias in the program ✅
+- Recommendation systems, and the loop they sit in - the one system whose training
   data is its own past output ✅
 
-A seventh, beyond the original six: **Agents that improve themselves** — the closed
+A seventh, beyond the original six: **Agents that improve themselves** - the closed
 act/signal/search/apply loop, and when hill-climbing, a population with a Pareto front
 (GEPA), or an archive that never discards (the Darwin Gödel Machine) each earn their
 cost. Surfaced by `/check-worth` against the *Self-Improving Agents* MEAP (Lanham,
@@ -261,9 +261,9 @@ Manning); scoped to the two ideas this course did not already teach, cross-linki
 The convolution notebook hand-rolls the sliding window rather than calling a library,
 the recommender notebook runs the feedback loop until the catalogue narrows, and the
 self-improvement notebook runs hill-climbing, population and archive search against
-the same synthetic deceptive landscape — no model calls, seeded and reproducible.
+the same synthetic deceptive landscape - no model calls, seeded and reproducible.
 
-**Exit:** Each elective has lessons and at least one runnable notebook — met for cost,
+**Exit:** Each elective has lessons and at least one runnable notebook - met for cost,
 convolutions, recommenders and self-improvement search; `when-the-input-is-not-text`
 and `asking-the-database-properly` still have lessons only.
 
@@ -299,7 +299,7 @@ technical note, upstream contribution or interview walkthrough.
 *Different in kind from everything else here.*
 
 The only chapter that argues rather than instructs, and it says so in its first
-paragraph. One lesson separates what the 2026 labour evidence actually measures — no
+paragraph. One lesson separates what the 2026 labour evidence actually measures - no
 aggregate employment effect, a 9-16% relative decline in junior hiring with senior
 roles unaffected, productivity gains largest for the least experienced and negative
 past the model's frontier. The second makes an argument from it: that junior work was

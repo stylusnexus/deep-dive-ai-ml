@@ -3,7 +3,7 @@
 For choosing a **model**, a **platform/vendor**, or a **framework**. Three
 different decisions with three different failure modes, so three sections.
 
-Score each line 1–5, but the score isn't the output — the **notes** are.
+Score each line 1–5, but the score isn't the output - the **notes** are.
 A decision you can defend out loud is the deliverable.
 
 Calibrate on decisions you've already made (Render, Neon + Prisma, local
@@ -22,7 +22,7 @@ answers, which is what makes them useful for testing the rubric.
 | Context window vs. what you actually need | | |
 | Open weights / can you run it yourself | | |
 | Provider stability and deprecation history | | |
-| Data handling — is your input training someone's model | | |
+| Data handling - is your input training someone's model | | |
 
 **Non-negotiable:** score capability against a **private eval set of ~20 items
 drawn from your real task**. Public benchmarks are contaminated, gamed, and
@@ -40,7 +40,7 @@ memory you can. Ask it every time:
 
 - Does this need frontier capability, or is it classification/extraction/routing that a 7B model does fine?
 - What's the privacy value of the data never leaving the machine?
-- What's the cost at your actual volume — is the API cheaper than your time?
+- What's the cost at your actual volume - is the API cheaper than your time?
 
 ---
 
@@ -48,8 +48,8 @@ memory you can. Ask it every time:
 
 | Criterion | Score | Notes |
 |---|---|---|
-| Lock-in surface — how much of your code assumes them | | |
-| Exit cost — how long to migrate off, honestly | | |
+| Lock-in surface - how much of your code assumes them | | |
+| Exit cost - how long to migrate off, honestly | | |
 | Pricing shape (per-token / per-seat / per-hour / per-GB) | | |
 | What breaks at 10x usage | | |
 | Rate limits and quotas **in practice**, not on the pricing page | | |
@@ -66,8 +66,8 @@ memory you can. Ask it every time:
 | Criterion | Score | Notes |
 |---|---|---|
 | Does the abstraction earn its weight, or is it a thin wrapper | | |
-| Maintenance burden — release cadence, breaking changes | | |
-| Dependency risk — what it drags in transitively | | |
+| Maintenance burden - release cadence, breaking changes | | |
+| Dependency risk - what it drags in transitively | | |
 | Can you read the source when it misbehaves | | |
 | Could you replace it with ~200 lines of your own | | |
 
@@ -81,7 +81,7 @@ saves twenty lines and adds a supply chain is a bad trade.
 
 ## Worked comparisons
 
-Complete these three first — you already know the answers, so they calibrate the rubric.
+Complete these three first - you already know the answers, so they calibrate the rubric.
 
 - [ ] Why Render over Vercel/Fly/AWS for the Stylus services
 - [ ] Why Neon + Prisma over Supabase for newer projects
@@ -89,5 +89,5 @@ Complete these three first — you already know the answers, so they calibrate t
 
 Then two live ones where you don't know the answer yet:
 
-- [ ] Vector store for Block 3 — pgvector vs. Qdrant vs. Chroma
-- [ ] Agent framework for Block 4 — LangGraph vs. raw SDK
+- [ ] Vector store for Block 3 - pgvector vs. Qdrant vs. Chroma
+- [ ] Agent framework for Block 4 - LangGraph vs. raw SDK

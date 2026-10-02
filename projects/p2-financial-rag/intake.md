@@ -2,7 +2,7 @@
 
 Fill this in **before** writing code. Every project, every substantial lab.
 
-The point isn't the document — it's that after four or five of these, the
+The point isn't the document - it's that after four or five of these, the
 questions start asking themselves. That's the whole mechanism. Judgment is
 a habit, not a lecture.
 

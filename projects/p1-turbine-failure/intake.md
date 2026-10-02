@@ -2,7 +2,7 @@
 
 Fill this in **before** writing code. Every project, every substantial lab.
 
-The point isn't the document — it's that after four or five of these, the
+The point isn't the document - it's that after four or five of these, the
 questions start asking themselves. That's the whole mechanism. Judgment is
 a habit, not a lecture.
 
@@ -15,8 +15,8 @@ happened. That comparison is where the learning is.
 **Date:** 
 **Block:** 2
 
-> Fill this in before running `src/train.py`. Questions 2 and 6 in particular —
-> the baseline and the cost of each error type — decide how you read every
+> Fill this in before running `src/train.py`. Questions 2 and 6 in particular -
+> the baseline and the cost of each error type - decide how you read every
 > number the script produces.
 
 ### 1. Is this even a machine learning problem?

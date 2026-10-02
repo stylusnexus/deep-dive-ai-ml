@@ -6,7 +6,7 @@
 > retrieval-augmented generation, improving efficiency in decision-making.
 
 The corpus here is the operations corpus from `data/corpus/` rather than a real
-annual report — because the evaluation labels are then genuinely correct, which
+annual report - because the evaluation labels are then genuinely correct, which
 is what makes the measurement worth anything. Swap in your own documents once the
 pipeline is proven; `src/rag.py --corpus` takes a directory.
 
@@ -15,11 +15,11 @@ pipeline is proven; `src/rag.py --corpus` takes a directory.
 Not "it answers questions". A system whose failures you can locate:
 
 - [ ] Intake sheet completed before building
-- [ ] Chunks inspected by eye — twenty printed and read
+- [ ] Chunks inspected by eye - twenty printed and read
 - [ ] Index recall measured against exact search, not assumed
 - [ ] Retrieval quality measured against gold labels at the k you actually send
 - [ ] Groundedness measured **separately** from correctness
-- [ ] The refusal case tested — a question the corpus cannot answer
+- [ ] The refusal case tested - a question the corpus cannot answer
 - [ ] Every answer carries citations a human can check in one step
 - [ ] A statement of which question types the system cannot handle
 
@@ -40,6 +40,6 @@ stand-in so the measurement still runs.
 
 The deliverable is not the assistant. It is the sentence *"this system answers
 single-hop policy questions with 0.9 groundedness and refuses correctly when the
-answer is absent — and it cannot answer questions requiring two documents."*
+answer is absent - and it cannot answer questions requiring two documents."*
 
 Knowing what it cannot do is what makes it safe to deploy.

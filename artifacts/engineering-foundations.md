@@ -10,7 +10,7 @@ notebook here.
 Skip this map by default if you are comfortable with production code, data
 representation, network failure and maintaining an existing codebase. Skim the
 four apply questions, then move on. Return only to the relevant section when a
-project exposes a blind spot — for example, timezone or Unicode handling, lost
+project exposes a blind spot - for example, timezone or Unicode handling, lost
 responses after a write, or a floating-point comparison that changes an eval.
 
 This is a bridge into ML/LLM systems, not remedial programming. It is included so

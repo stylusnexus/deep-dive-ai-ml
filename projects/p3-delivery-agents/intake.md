@@ -2,7 +2,7 @@
 
 Fill this in **before** writing code. Every project, every substantial lab.
 
-The point isn't the document — it's that after four or five of these, the
+The point isn't the document - it's that after four or five of these, the
 questions start asking themselves. That's the whole mechanism. Judgment is
 a habit, not a lecture.
 
@@ -17,7 +17,7 @@ happened. That comparison is where the learning is.
 
 > Question 1 is the one to take seriously here. Most delivery exceptions have a
 > deterministic answer. Measure what fraction genuinely needs judgement before
-> building three agents — if it is small, the honest system is rules plus one
+> building three agents - if it is small, the honest system is rules plus one
 > agent for the remainder, and that is a better result than a working demo.
 
 ### 1. Is this even a machine learning problem?
