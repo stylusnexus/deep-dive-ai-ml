@@ -14,6 +14,10 @@ chunker's 900-character split so each becomes one substantial chunk.
 Every planted fact lives in exactly one document. The assertion at the bottom
 enforces that, because gold labels are only correct by construction if the
 construction is actually checked.
+
+Project 4 serves this exact corpus and gitignores its own copy, so this script
+also syncs it into projects/p4-deployed-assistant/corpus/ — the only place that
+copy comes from.
 """
 import json, pathlib, re, textwrap
 
@@ -473,6 +477,18 @@ if problems:
 for d in DOCS:
     (OUT / f"{d['doc_id']}.md").write_text(d["text"] + "\n")
 (OUT / "manifest.json").write_text(json.dumps(DOCS, indent=2) + "\n")
+
+# Project 4 serves this exact corpus and gitignores its own copy of it — "regenerated
+# by scripts/make_corpus.py rather than edited here" — so that regeneration has to
+# actually happen here, or a fresh clone has nothing for the Dockerfile to COPY.
+P4_CORPUS = ROOT / "projects" / "p4-deployed-assistant" / "corpus"
+P4_CORPUS.mkdir(parents=True, exist_ok=True)
+for d in DOCS:
+    (P4_CORPUS / f"{d['doc_id']}.md").write_text(d["text"] + "\n")
+(P4_CORPUS / "manifest.json").write_text(json.dumps(DOCS, indent=2) + "\n")
+print(f"synced {len(DOCS)} documents to {P4_CORPUS.relative_to(ROOT)}")
+print("  run projects/p4-deployed-assistant/scripts/build_corpus_artifact.py "
+      "to refresh its data-identity hash")
 
 # --- evaluation set. gold_docs is exact because the facts were planted.
 EVAL = [
