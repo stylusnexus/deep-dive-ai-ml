@@ -45,19 +45,21 @@ pytest tests/
 
 The test boundary has three layers:
 
-- **Training-system tests** prove that the build loads the intended corpus and
-  writes a named artefact with its data identity.
+- **Training-system tests** (`tests/test_build_corpus_artifact.py`) prove that the
+  build loads the intended corpus and writes a named artefact with its data identity —
+  including a sensitivity check that the hash actually changes when the corpus does,
+  not just that it runs.
 - **Validation tests** belong to Project 2: the candidate is scored against the
   frozen held-out set and compared with the incumbent before promotion.
-- **Functionality tests** are the nine API tests below: authentication,
-  validation, rate limiting, health and a real corpus load through the service
-  entry point.
+- **Functionality tests** (`tests/test_app.py`) are the ten API tests below:
+  authentication, validation, rate limiting, health, corpus identity and a real
+  corpus load through the service entry point.
 
-Nine tests, none of which check answer quality — that is Project 2's job and it
-needs a model. These check the interface contract: that an unauthenticated caller
-cannot get in, that a wrong key is indistinguishable from a missing one, that the
-rate limit is per key and actually limits, that validation rejects what it should,
-and that the corpus genuinely loaded.
+Sixteen tests total, none of which check answer quality — that is Project 2's job
+and it needs a model. The functionality tests check the interface contract: that an
+unauthenticated caller cannot get in, that a wrong key is indistinguishable from a
+missing one, that the rate limit is per key and actually limits, that validation
+rejects what it should, and that the corpus genuinely loaded.
 
 That last one exists because of a real failure. An early version resolved the
 corpus path relative to the repository, which was wrong inside the container. The
@@ -65,14 +67,53 @@ service was therefore never ready, every request short-circuited to 503, and the
 whole suite passed **without ever calling the model**. Green tests that exercise
 nothing are worse than red ones, and the guard is there so it cannot recur.
 
+## Data identity
+
+```bash
+python3 scripts/build_corpus_artifact.py
+```
+
+Writes `corpus/corpus_id.json`: a sha256 hash of `manifest.json`, the document
+count and IDs, and a build timestamp. Regenerated alongside the corpus, the same
+way `manifest.json` already is — not committed, since `corpus/` is gitignored
+entirely (see "Noticed, not fixed" below), and not rebuilt inside the container,
+so it runs once per corpus generation rather than on every image build. The
+running service loads it at startup and reports it at `GET /version`, so a caller
+or an operator can answer "which exact corpus is this instance serving" without
+SSH access to the container.
+
+The build refuses to hash a manifest that disagrees with the `.md` files sitting
+next to it — a hash over content nobody is actually serving is a confident wrong
+answer, not a data identity.
+
+## Serving benchmark
+
+```bash
+python3 bench_serving.py
+```
+
+Starts the real `src.app:app` via uvicorn and measures the real `/v1/ask` handler —
+real auth, real rate limiting, real retrieval over the real corpus — under a
+concurrency sweep (1, 2, 4, 8), reporting throughput and p50/p95 latency. The one
+substitution: `GENERATION_ENDPOINTS` points at a local stub chat-completions server
+rather than a real model, because this runs with no paid API key and no deployed
+instance. The script names that substitution in its own output.
+
+This is a genuine measurement of the service's own overhead — FastAPI, the
+in-process rate limiter, the keyword-retrieval scoring — not a claim about model
+latency or deployed capacity. Re-run it against the Render instance with a real
+`GENERATION_ENDPOINTS` before treating the numbers as evidence for production.
+
 ## What "done" looks like
 
 - [ ] Intake sheet completed before building
 - [x] Auth, rate limiting, validation and health implemented and tested
 - [x] Container builds, runs as non-root, and answers correctly end to end
 - [x] Health check reports dependency state rather than "something is listening"
-- [ ] Dataset manifest/hash recorded with the model artefact
-- [ ] Serving benchmark run against the real entry point (`notebooks/08-deploy-apis/02-serving-measured.ipynb`)
+- [x] Dataset manifest/hash recorded with the model artefact (`scripts/build_corpus_artifact.py`
+      writes `corpus/corpus_id.json`; the running service reports it at `/version`)
+- [x] Serving benchmark run against the real entry point (`bench_serving.py`, not the
+      notebook's fixture — see below for what it does and does not prove)
 - [x] Deploy configuration committed (`render.yaml`), secrets not committed
 - [ ] Deployed to a public URL — a human action, see below
 - [ ] Rate limit verified against the deployed instance
@@ -93,3 +134,13 @@ the subject. The consequence is real: answers here are worse than Project 2's on
 questions where wording differs from the corpus, and this is the same system with
 a web interface only in the parts that are not retrieval. Deploying the embedding
 version is a defensible different choice, and it is a different image.
+
+## Noticed, not fixed
+
+`.gitignore` excludes `corpus/` entirely — "regenerated by `scripts/make_corpus.py`
+rather than edited here" — but the Dockerfile's own comment on `COPY corpus/
+./data/corpus/` says the corpus is "versioned with the code." Both cannot be true: a
+fresh clone has no `corpus/` directory, so `docker build` has nothing to copy. This
+predates the data-identity work above and is a repository-structure decision
+(commit the corpus, or add an explicit generation step before `docker build`), not
+a one-line fix made in passing here.

@@ -225,11 +225,11 @@ a local fixture service. Deploying to Render or an HF Space remains a human acti
 `projects/p4-deployed-assistant/render.yaml` describes it.
 
 **Exit:** Project 4 — an authenticated, rate-limited, containerised endpoint, built and
-verified end to end ✅. The deploy itself is a human action: `render.yaml` describes it,
-and a public URL has a bill and an audience attached. Two follow-ups from the new
-lesson remain open in the project checklist: a dataset manifest/hash recorded with the
-model artefact, and the serving benchmark run against the real entry point rather than
-the notebook's fixture.
+verified end to end ✅, now with a corpus identity hash reported at `/version`
+(`scripts/build_corpus_artifact.py`) and a serving benchmark run against the real
+`/v1/ask` handler (`bench_serving.py`, sixteen tests total) ✅. The deploy itself is a
+human action: `render.yaml` describes it, and a public URL has a bill and an audience
+attached.
 
 ---
 

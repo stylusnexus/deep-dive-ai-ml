@@ -44,7 +44,7 @@ RATE_WINDOW_S = int(os.environ.get("RATE_WINDOW_S", "60"))
 _HITS: dict[str, deque[float]] = defaultdict(deque)
 
 STATE: dict = {"ready": False, "chunks": [], "encoder": None, "reranker": None,
-               "base": None, "model": None}
+               "base": None, "model": None, "corpus_hash": None}
 
 
 def _load_keys() -> set[str]:
@@ -132,6 +132,13 @@ async def lifespan(app: FastAPI):
         STATE["chunks"] = [{"doc_id": d["doc_id"], "text": c,
                             "lower": c.lower(), "len": len(c.split())}
                            for d in docs for c in chunk_structural(d["text"])]
+    # The data-identity artefact from scripts/build_corpus_artifact.py, committed
+    # alongside the corpus the same way manifest.json is. Its absence is not fatal —
+    # an older corpus built before this existed should still serve — but its hash is
+    # how a caller or an operator answers "which corpus is this instance running."
+    artifact = CORPUS / "corpus_id.json"
+    if artifact.exists():
+        STATE["corpus_hash"] = json.loads(artifact.read_text()).get("corpus_hash")
     STATE["base"], STATE["model"] = find_endpoint()
     STATE["ready"] = bool(STATE["chunks"]) and STATE["base"] is not None
     yield
@@ -192,7 +199,8 @@ def health():
 
 @app.get("/version")
 def version():
-    return {"version": API_VERSION, "model": STATE.get("model")}
+    return {"version": API_VERSION, "model": STATE.get("model"),
+            "corpus_hash": STATE.get("corpus_hash")}
 
 
 @app.post(f"/{API_VERSION}/ask", response_model=AskResponse)

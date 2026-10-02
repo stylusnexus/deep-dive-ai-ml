@@ -90,6 +90,16 @@ def test_version_is_public(client):
     assert client.get("/version").status_code == 200
 
 
+def test_version_reports_the_corpus_identity(client):
+    """The data identity scripts/build_corpus_artifact.py writes must be
+    queryable from the running service, or there is no way to answer which
+    corpus a deployed instance is actually serving."""
+    body = client.get("/version").json()
+    assert "corpus_hash" in body
+    assert body["corpus_hash"], "corpus_id.json was not built or not loaded"
+    assert len(body["corpus_hash"]) == 64  # sha256 hex
+
+
 def test_service_refuses_to_start_without_keys(monkeypatch):
     monkeypatch.setenv("API_KEYS", "")
     with pytest.raises(RuntimeError, match="API_KEYS"):
