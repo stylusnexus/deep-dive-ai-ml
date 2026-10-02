@@ -493,3 +493,12 @@ A sweep where nothing differs
 An aggregate over zero rows
 A check downstream of its own subject
 The loss
+Same task, same model, one variable changed
+One set, several models
+No single right answer, free-text output
+A published, community-standard harness rather than your own set
+Live traffic, real users, unpaired
+Multi-turn or agent output
+Smooth landscape, one slope, a cheap trusted signal
+A single climber keeps stalling on the same wall
+The real peak sits behind a worse valley — a climber would have to get worse before it gets better

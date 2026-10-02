@@ -42,6 +42,12 @@
       "title": "Recommendation Systems, and the Loop They Sit In",
       "file": "lsn-1788200000004-recommendation-systems.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1788200000005",
+      "title": "Agents That Improve Themselves",
+      "file": "lsn-1788200000005-agents-that-improve-themselves.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -66,6 +72,11 @@
       "starred": false
     },
     "lsn-1788200000004": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788200000005": {
       "viewed": false,
       "completed": false,
       "starred": false

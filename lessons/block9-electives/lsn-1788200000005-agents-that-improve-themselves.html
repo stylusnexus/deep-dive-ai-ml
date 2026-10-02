@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agents That Improve Themselves</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 6 of 6</span>
+  <h1>Agents That Improve Themselves</h1>
+  <p class="subtitle">A closed loop that measures its own output, searches for a better version, and ships the winner — without ever retraining the model.</p>
+
+  <p>Most production agents are improved by hand: a user complaint arrives, an engineer rewrites a prompt, redeploys, and waits for the next complaint. This course's own CI-gated evaluation (<em>Tracking Runs, and Running the Evals Automatically</em>) already fixes the slowest part of that — the battery runs itself and a human decides whether to ship. What it still does not do is <em>generate the next candidate</em>. A self-improving loop closes that last gap: it proposes its own variants, scores them against the same signal, and only then hands a human the winner to approve.</p>
+  <h2>The loop, named</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Act</div><div><div class="roadmap-title">The agent runs, unjudged</div><div class="roadmap-desc">A task completes. Left alone, the agent has no way of knowing whether the result was any good — that question is answered by the next step, not this one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Signal</div><div><div class="roadmap-title">A measurement of the gap</div><div class="roadmap-desc">Ground truth, an LLM-as-judge, or a reflection that critiques the trace in words rather than a score. This is exactly the signal family this course already teaches — see <em>Models Judging Models</em> and <em>Eval Data You Can Trust</em> — reused here as input to a search rather than as a report.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Search</div><div><div class="roadmap-title">Generate-and-test</div><div class="roadmap-desc">Propose variants of the artifact, score each with the signal, keep what wins. The three ways to do this are the rest of this lesson.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Apply</div><div><div class="roadmap-title">The winner replaces the artifact</div><div class="roadmap-desc">Versioned, roll-back-able, and for anything reaching production, gated by a human — the loop proposes, it does not unilaterally ship.</div></div></div></div>
+  <figure class="diagram"><svg viewBox="0 0 640 230" role="img" aria-label="The self-improvement loop: act, signal, search, apply, repeat">
+<defs><marker id="si1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="20" y="20" width="140" height="56" rx="7" class="d-box-accent"/>
+<text x="34" y="42" class="d-label-b">Act</text>
+<text x="34" y="60" class="d-label-sm">task runs, unjudged</text>
+<path d="M160 48 L206 48" class="d-arrow-accent" marker-end="url(#si1)"/>
+<rect x="206" y="20" width="140" height="56" rx="7" class="d-box"/>
+<text x="220" y="42" class="d-label-b">Signal</text>
+<text x="220" y="60" class="d-label-sm">measures the gap</text>
+<path d="M346 48 L392 48" class="d-arrow-accent" marker-end="url(#si1)"/>
+<rect x="392" y="20" width="140" height="56" rx="7" class="d-box"/>
+<text x="406" y="42" class="d-label-b">Search</text>
+<text x="406" y="60" class="d-label-sm">propose, score, keep</text>
+<path d="M462 76 L462 118" class="d-arrow-accent" marker-end="url(#si1)"/>
+<rect x="392" y="118" width="140" height="56" rx="7" class="d-box-accent"/>
+<text x="406" y="140" class="d-label-b">Apply</text>
+<text x="406" y="158" class="d-label-sm">winner, human-gated</text>
+<path d="M392 146 L160 192" class="d-arrow-accent" marker-end="url(#si1)"/>
+<text x="40" y="150" class="d-label-sm">model stays frozen —</text>
+<text x="40" y="170" class="d-label-sm">only the artifact</text>
+<text x="40" y="190" class="d-label-sm">around it changes</text>
+<text x="20" y="218" class="d-label-sm">the loop repeats from Act on every new task, with the applied artifact now in place</text>
+</svg><figcaption>Four steps, repeating. Signal and search are the general-purpose machinery; the artifact being changed — a prompt, a tool description, a memory entry — is what differs between runs.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A loop can only improve an agent as far as its signal can see.</p><p class="know-why">Search is machinery that climbs whatever landscape the signal draws. A judge with position bias or a checker nobody validated still returns a number, and the search will climb toward that number with total confidence — this is the same point <em>Models Judging Models</em> makes about a single comparison, now compounded over hundreds of proposed variants instead of one.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team automates prompt search against an unvalidated LLM-as-judge that happens to reward longer answers. The search finds a 40% score improvement in an afternoon. Every point of it is the judge's verbosity bias, and the production agent that ships is measurably worse and provably longer.</p></blockquote>
+  <h2>Three searches, three costs</h2>
+  <p>All three are the same generate-and-test loop wearing different clothes. The question is never which is cleverest — it is how much the landscape actually demands.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Smooth landscape, one slope, a cheap trusted signal</div><div><div class="roadmap-title">Hill-climbing</div><div class="roadmap-desc">Keep a rewrite only when the score strictly rises. A ratchet: cheap, reliable, and permanently stuck on the nearest local peak the moment the slope flattens.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A single climber keeps stalling on the same wall</div><div><div class="roadmap-title">Population with a Pareto front (GEPA)</div><div class="roadmap-desc">A spread of candidates, each one at least as good on every objective and strictly better on one, survives together rather than collapsing to a single ranked winner. A proposer reads the full failure trace of each run — not just its score — before mutating, so it edits toward a named gap instead of guessing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The real peak sits behind a worse valley — a climber would have to get worse before it gets better</div><div><div class="roadmap-title">An archive that never discards (DGM)</div><div class="roadmap-desc">Every version is kept, parent pointer and all, and the next candidate is sampled from the whole archive weighted by score rather than only from the current best. A low-scoring branch can still be the one branch that finds the peak a greedy climber could never reach, because greedy never goes downhill first.</div></div></div></div>
+  <div class="callout matters"><span class="label">Spend matches the landscape, not your preference for one algorithm</span><p>Population and archive search cost more to run than a hill-climb — more candidates, more scoring calls, more bookkeeping. That expense earns its keep only when the landscape actually has the shape that defeats a ratchet: several competing objectives, or a local optimum with no uphill path out of it. On a smooth, cheap, trustworthy signal, hill-climbing is not the naive choice, it is the correct one.</p></div>
+  <h2>What an evidence gate relaxes</h2>
+  <p>Schmidhuber's original Gödel machine rewrote itself only when it could <em>prove</em> a rewrite would help — mathematically rigorous, and useless beyond toy problems, because an agent can almost never prove anything about itself in advance. The Darwin Gödel Machine keeps the ambition and drops the word <em>prove</em>: a rewrite ships when it clears an <em>evidence</em> gate instead — a measured score improvement on a held-out set — and the archive that never discards is what makes saying yes on evidence, rather than proof, survivable. A candidate that looked wrong on this generation's evidence is not deleted; it stays sampleable, in case the evidence was the part that was wrong.</p>
+  <p>That is the same trade this course makes everywhere else in the measurement material — <em>How to Measure</em> opens with exactly this: you cannot prove a change helped, so you measure, and when one measurement is not enough you search by trying many. The Gödel machine's history is the receipt for why that trade is standard practice rather than a shortcut.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../engineering-practice/lsn-1787400000007-models-judging-models.html">Models Judging Models</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">LLM-as-judge — what it genuinely buys you, the four biases it ships with, and the failure that manufactures results.</span></li><li><a href="../engineering-practice/lsn-1787400000003-how-to-measure.html">How to Measure</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.</span></li><li><a href="../engineering-practice/lsn-1787400000014-tracking-runs-and-automating-evals.html">Tracking Runs, and Running the Evals Automatically</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The measurement discipline this course teaches does not survive contact with fifty experiments unless something records them for you.</span></li><li><a href="../core-vocabulary/lsn-1787000000008-overfitting-and-underfitting.html">Overfitting and Underfitting</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">The single most important pair of words in machine learning — and the reason you always hold data back.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/cs/0309048" target="_blank" rel="noopener">Gödel Machines (Schmidhuber, 2003)</a><span class="link-note">The proof-gated original: rewrite any part of your own code the moment you can prove the rewrite helps. The demand almost no real agent can meet, and the reason every method since relaxes it.</span></li><li><a href="https://arxiv.org/abs/2507.19457" target="_blank" rel="noopener">GEPA: Reflective Prompt Evolution Can Outperform Reinforcement Learning (2025)</a><span class="link-note">A population that reads its own failure trace before mutating. Outperforms the reinforcement-learning baseline GRPO by 6% on average, by up to 20% on individual tasks, while using up to 35 times fewer rollouts.</span></li><li><a href="https://arxiv.org/abs/2505.22954" target="_blank" rel="noopener">Darwin Gödel Machine: Open-Ended Evolution of Self-Improving Agents (Zhang et al., Sakana AI, 2025)</a><span class="link-note">An archive that never discards, sampled by quality and taxed by reuse. Raised its own coding-agent score on SWE-bench from 20.0% to 50.0%, and on Polyglot from 14.2% to 30.7%, by rewriting its own code.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. A judge rewards longer answers, and nobody checked for that before running an automated prompt search against it. What happens?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The search is unaffected, since bias only matters for single comparisons</div>
+      <div class="quiz-opt">The search climbs toward the judge&#x27;s bias with full confidence — the same error that corrupts one comparison corrupts hundreds of proposed variants identically</div>
+      <div class="quiz-opt">The search self-corrects once enough variants have been tried</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why does an archive-based search (DGM) sometimes succeed where hill-climbing cannot?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It runs more trials per unit time</div>
+      <div class="quiz-opt">It can sample a low-scoring, structurally different branch instead of only the current best — reaching a peak that requires going downhill first, which a strict ratchet will never do</div>
+      <div class="quiz-opt">It uses a more accurate scoring function</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What did the Darwin Gödel Machine keep from Schmidhuber&#x27;s original Gödel machine, and what did it drop?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It kept the proof requirement and dropped the archive</div>
+      <div class="quiz-opt">It kept the ambition to rewrite its own code, and dropped the requirement to prove a rewrite helps in advance — a measured evidence gate replaces the proof</div>
+      <div class="quiz-opt">It kept evolutionary search and dropped self-modification entirely</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

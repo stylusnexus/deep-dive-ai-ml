@@ -242,13 +242,22 @@ Built:
 - Recommendation systems, and the loop they sit in — the one system whose training
   data is its own past output ✅
 
-5 lessons in `lessons/block9-electives/` and 3 notebooks in `notebooks/09-electives/`.
+A seventh, beyond the original six: **Agents that improve themselves** — the closed
+act/signal/search/apply loop, and when hill-climbing, a population with a Pareto front
+(GEPA), or an archive that never discards (the Darwin Gödel Machine) each earn their
+cost. Surfaced by `/check-worth` against the *Self-Improving Agents* MEAP (Lanham,
+Manning); scoped to the two ideas this course did not already teach, cross-linking to
+`models-judging-models` and `how-to-measure` rather than restating them ✅
+
+6 lessons in `lessons/block9-electives/` and 4 notebooks in `notebooks/09-electives/`.
 The convolution notebook hand-rolls the sliding window rather than calling a library,
-and the recommender notebook runs the feedback loop until the catalogue narrows.
+the recommender notebook runs the feedback loop until the catalogue narrows, and the
+self-improvement notebook runs hill-climbing, population and archive search against
+the same synthetic deceptive landscape — no model calls, seeded and reproducible.
 
 **Exit:** Each elective has lessons and at least one runnable notebook — met for cost,
-convolutions and recommenders; `when-the-input-is-not-text` and
-`asking-the-database-properly` still have lessons only.
+convolutions, recommenders and self-improvement search; `when-the-input-is-not-text`
+and `asking-the-database-properly` still have lessons only.
 
 ---
 
@@ -269,6 +278,11 @@ convolutions and recommenders; `when-the-input-is-not-text` and
 | 4 | Deployed energy intelligence assistant | 8 | Original's deployed RAG project |
 
 Each starts with the intake sheet and ends as a published HF Space.
+
+The required path ends there. Optional transfer practice is documented in
+[`projects/README.md`](projects/README.md): one small open-ended challenge after
+Block 2, followed by at most one portfolio extension such as a paper reproduction,
+technical note, upstream contribution or interview walkthrough.
 
 ---
 

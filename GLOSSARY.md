@@ -869,6 +869,10 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Confidence interval vs prediction interval** — The first is about the mean, the second about the next case. As the sample grows the confidence interval shrinks towards nothing while the prediction interval converges on the real spread and stays wide.
 
+**Baseline vs candidate** — The baseline is the unchanged configuration, the candidate is the one with your change. A number with nothing to compare to is a measurement of your setup, not your change — and the baseline must be re-run concurrently, alongside the candidate, or a stored number from last month attributes every change since (a model updated under you, a busier machine) to your treatment.
+
+**Paired vs unpaired** — Whether the same unit appears in both arms of a comparison. An eval on a fixed set is paired by construction: question one is scored under system A and under system B. Live-traffic A/B is not paired, because no user appears in both arms — using an unpaired test on paired data can take a real effect from almost always detected to almost never.
+
 **Learning curve** — Score plotted against the fraction of training data used. Turns "we need more data" from an assumption into a measurement: a flat validation curve means more of the same data will not help.
 
 **Double descent** — Past the capacity where a model can fit the training data exactly, test error peaks and then falls again. Why very large models generalise with far more parameters than data points, in apparent defiance of the classical U-curve.
@@ -1069,6 +1073,12 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Spend attribution** — Recording input, output and cached tokens per request at the time it happens, since an invoice gives a total and cannot be decomposed afterwards.
 
+**Act / signal / search / apply** — The four steps of a self-improvement loop. The agent acts, producing an unjudged result; a signal measures the gap against what good would have been; a search proposes and scores variants against that signal; apply ships the winner, versioned and human-gated. The model never changes — only the artifact the loop is running on.
+
+**Evidence gate** — Shipping a self-rewrite when it clears a measured score improvement, rather than when it can be proven to help in advance. What the Darwin Gödel Machine relaxes from Schmidhuber's original Gödel machine, which demanded proof.
+
+**Evolutionary archive** — A store of every candidate version ever produced, kept rather than discarded even when it scored poorly. The next candidate is sampled from the whole archive weighted by score, so a low-scoring, structurally different branch stays reachable instead of being pruned away.
+
 ---
 
 ## Closing · The Future of Work
@@ -1082,4 +1092,3 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **The apprenticeship problem** — That junior work is simultaneously output and the mechanism by which judgement is built, so automating it removes the second function as an unintended consequence of removing the first. An argument in this course's closing chapter, not a finding.
 
 **Complementary assets** — The skilled staff, organisational processes and data infrastructure that decide whether AI adoption produces a gain. Their importance is why adoption concentrates among firms that were already productive.
-

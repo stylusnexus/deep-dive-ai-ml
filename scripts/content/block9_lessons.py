@@ -366,4 +366,107 @@ LESSONS = [
     ]),
   ],
 },
+{
+  "slug": "agents-that-improve-themselves",
+  "title": "Agents That Improve Themselves",
+  "subtitle": "A closed loop that measures its own output, searches for a better version, and ships the winner — without ever retraining the model.",
+  "body": [
+    ("p", "Most production agents are improved by hand: a user complaint arrives, an engineer rewrites a prompt, redeploys, and waits for the next complaint. This course's own CI-gated evaluation (<em>Tracking Runs, and Running the Evals Automatically</em>) already fixes the slowest part of that — the battery runs itself and a human decides whether to ship. What it still does not do is <em>generate the next candidate</em>. A self-improving loop closes that last gap: it proposes its own variants, scores them against the same signal, and only then hands a human the winner to approve."),
+
+    ("h2", "The loop, named"),
+    ("terms", [
+      ("Act",
+       "The agent runs, unjudged",
+       "A task completes. Left alone, the agent has no way of knowing whether the result was any good — that question is answered by the next step, not this one."),
+      ("Signal",
+       "A measurement of the gap",
+       "Ground truth, an LLM-as-judge, or a reflection that critiques the trace in words rather than a score. This is exactly the signal family this course already teaches — see <em>Models Judging Models</em> and <em>Eval Data You Can Trust</em> — reused here as input to a search rather than as a report."),
+      ("Search",
+       "Generate-and-test",
+       "Propose variants of the artifact, score each with the signal, keep what wins. The three ways to do this are the rest of this lesson."),
+      ("Apply",
+       "The winner replaces the artifact",
+       "Versioned, roll-back-able, and for anything reaching production, gated by a human — the loop proposes, it does not unilaterally ship."),
+    ]),
+
+    ("figure", "Four steps, repeating. Signal and search are the general-purpose machinery; the artifact being changed — a prompt, a tool description, a memory entry — is what differs between runs.", '''<svg viewBox="0 0 640 230" role="img" aria-label="The self-improvement loop: act, signal, search, apply, repeat">
+<defs><marker id="si1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="20" y="20" width="140" height="56" rx="7" class="d-box-accent"/>
+<text x="34" y="42" class="d-label-b">Act</text>
+<text x="34" y="60" class="d-label-sm">task runs, unjudged</text>
+<path d="M160 48 L206 48" class="d-arrow-accent" marker-end="url(#si1)"/>
+<rect x="206" y="20" width="140" height="56" rx="7" class="d-box"/>
+<text x="220" y="42" class="d-label-b">Signal</text>
+<text x="220" y="60" class="d-label-sm">measures the gap</text>
+<path d="M346 48 L392 48" class="d-arrow-accent" marker-end="url(#si1)"/>
+<rect x="392" y="20" width="140" height="56" rx="7" class="d-box"/>
+<text x="406" y="42" class="d-label-b">Search</text>
+<text x="406" y="60" class="d-label-sm">propose, score, keep</text>
+<path d="M462 76 L462 118" class="d-arrow-accent" marker-end="url(#si1)"/>
+<rect x="392" y="118" width="140" height="56" rx="7" class="d-box-accent"/>
+<text x="406" y="140" class="d-label-b">Apply</text>
+<text x="406" y="158" class="d-label-sm">winner, human-gated</text>
+<path d="M392 146 L160 192" class="d-arrow-accent" marker-end="url(#si1)"/>
+<text x="40" y="150" class="d-label-sm">model stays frozen —</text>
+<text x="40" y="170" class="d-label-sm">only the artifact</text>
+<text x="40" y="190" class="d-label-sm">around it changes</text>
+<text x="20" y="218" class="d-label-sm">the loop repeats from Act on every new task, with the applied artifact now in place</text>
+</svg>'''),
+
+    ("know",
+     "A loop can only improve an agent as far as its signal can see.",
+     "Search is machinery that climbs whatever landscape the signal draws. A judge with position bias or a checker nobody validated still returns a number, and the search will climb toward that number with total confidence — this is the same point <em>Models Judging Models</em> makes about a single comparison, now compounded over hundreds of proposed variants instead of one.",
+     "A team automates prompt search against an unvalidated LLM-as-judge that happens to reward longer answers. The search finds a 40% score improvement in an afternoon. Every point of it is the judge's verbosity bias, and the production agent that ships is measurably worse and provably longer."),
+
+    ("h2", "Three searches, three costs"),
+    ("p", "All three are the same generate-and-test loop wearing different clothes. The question is never which is cleverest — it is how much the landscape actually demands."),
+    ("terms", [
+      ("Smooth landscape, one slope, a cheap trusted signal",
+       "Hill-climbing",
+       "Keep a rewrite only when the score strictly rises. A ratchet: cheap, reliable, and permanently stuck on the nearest local peak the moment the slope flattens."),
+      ("A single climber keeps stalling on the same wall",
+       "Population with a Pareto front (GEPA)",
+       "A spread of candidates, each one at least as good on every objective and strictly better on one, survives together rather than collapsing to a single ranked winner. A proposer reads the full failure trace of each run — not just its score — before mutating, so it edits toward a named gap instead of guessing."),
+      ("The real peak sits behind a worse valley — a climber would have to get worse before it gets better",
+       "An archive that never discards (DGM)",
+       "Every version is kept, parent pointer and all, and the next candidate is sampled from the whole archive weighted by score rather than only from the current best. A low-scoring branch can still be the one branch that finds the peak a greedy climber could never reach, because greedy never goes downhill first."),
+    ]),
+
+    ("callout", "matters", "Spend matches the landscape, not your preference for one algorithm",
+     "<p>Population and archive search cost more to run than a hill-climb — more candidates, more scoring calls, more bookkeeping. That expense earns its keep only when the landscape actually has the shape that defeats a ratchet: several competing objectives, or a local optimum with no uphill path out of it. On a smooth, cheap, trustworthy signal, hill-climbing is not the naive choice, it is the correct one.</p>"),
+
+    ("h2", "What an evidence gate relaxes"),
+    ("p", "Schmidhuber's original Gödel machine rewrote itself only when it could <em>prove</em> a rewrite would help — mathematically rigorous, and useless beyond toy problems, because an agent can almost never prove anything about itself in advance. The Darwin Gödel Machine keeps the ambition and drops the word <em>prove</em>: a rewrite ships when it clears an <em>evidence</em> gate instead — a measured score improvement on a held-out set — and the archive that never discards is what makes saying yes on evidence, rather than proof, survivable. A candidate that looked wrong on this generation's evidence is not deleted; it stays sampleable, in case the evidence was the part that was wrong."),
+
+    ("p", "That is the same trade this course makes everywhere else in the measurement material — <em>How to Measure</em> opens with exactly this: you cannot prove a change helped, so you measure, and when one measurement is not enough you search by trying many. The Gödel machine's history is the receipt for why that trade is standard practice rather than a shortcut."),
+
+    ("related", ["models-judging-models", "how-to-measure", "tracking-runs-and-automating-evals", "overfitting-and-underfitting"]),
+    ("links", [
+      ('Gödel Machines (Schmidhuber, 2003)', 'https://arxiv.org/abs/cs/0309048',
+       'The proof-gated original: rewrite any part of your own code the moment you can prove the rewrite helps. The demand almost no real agent can meet, and the reason every method since relaxes it.'),
+      ('GEPA: Reflective Prompt Evolution Can Outperform Reinforcement Learning (2025)', 'https://arxiv.org/abs/2507.19457',
+       'A population that reads its own failure trace before mutating. Outperforms the reinforcement-learning baseline GRPO by 6% on average, by up to 20% on individual tasks, while using up to 35 times fewer rollouts.'),
+      ('Darwin Gödel Machine: Open-Ended Evolution of Self-Improving Agents (Zhang et al., Sakana AI, 2025)', 'https://arxiv.org/abs/2505.22954',
+       'An archive that never discards, sampled by quality and taxed by reuse. Raised its own coding-agent score on SWE-bench from 20.0% to 50.0%, and on Polyglot from 14.2% to 30.7%, by rewriting its own code.'),
+    ]),
+
+    ("quiz", [
+      ("A judge rewards longer answers, and nobody checked for that before running an automated prompt search against it. What happens?",
+       ["The search is unaffected, since bias only matters for single comparisons",
+        "The search climbs toward the judge's bias with full confidence — the same error that corrupts one comparison corrupts hundreds of proposed variants identically",
+        "The search self-corrects once enough variants have been tried"],
+       1),
+      ("Why does an archive-based search (DGM) sometimes succeed where hill-climbing cannot?",
+       ["It runs more trials per unit time",
+        "It can sample a low-scoring, structurally different branch instead of only the current best — reaching a peak that requires going downhill first, which a strict ratchet will never do",
+        "It uses a more accurate scoring function"],
+       1),
+      ("What did the Darwin Gödel Machine keep from Schmidhuber's original Gödel machine, and what did it drop?",
+       ["It kept the proof requirement and dropped the archive",
+        "It kept the ambition to rewrite its own code, and dropped the requirement to prove a rewrite helps in advance — a measured evidence gate replaces the proof",
+        "It kept evolutionary search and dropped self-modification entirely"],
+       1),
+    ]),
+  ],
+},
 ]
