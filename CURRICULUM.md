@@ -278,12 +278,12 @@ and `asking-the-database-properly` still have lessons only.
 
 ## Projects
 
-| # | Project | Block | Mirrors |
-|---|---|---|---|
-| 1 | Wind turbine failure prediction | 2 | Original's energy project |
-| 2 | Financial report RAG assistant | 3 | Original's finance project |
-| 3 | Multi-agent delivery exceptions | 4 | Original's operations project |
-| 4 | Deployed energy intelligence assistant | 8 | Original's deployed RAG project |
+| # | Project | Block |
+|---|---|---|
+| 1 | Wind turbine failure prediction | 2 |
+| 2 | Financial report RAG assistant | 3 |
+| 3 | Multi-agent delivery exceptions | 4 |
+| 4 | Deployed energy intelligence assistant | 8 |
 
 Each starts with the intake sheet and ends as a published HF Space.
 
