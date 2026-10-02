@@ -36,6 +36,12 @@
       "title": "After It Ships",
       "file": "lsn-1788100000003-after-it-ships.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1788100000004",
+      "title": "The Artefact Is Code, Data and Configuration",
+      "file": "lsn-1788100000004-the-artefact-is-code-data-and-config.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -55,6 +61,11 @@
       "starred": false
     },
     "lsn-1788100000003": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788100000004": {
       "viewed": false,
       "completed": false,
       "starred": false

@@ -43,6 +43,16 @@ curl -X POST localhost:8000/v1/ask \
 pytest tests/
 ```
 
+The test boundary has three layers:
+
+- **Training-system tests** prove that the build loads the intended corpus and
+  writes a named artefact with its data identity.
+- **Validation tests** belong to Project 2: the candidate is scored against the
+  frozen held-out set and compared with the incumbent before promotion.
+- **Functionality tests** are the nine API tests below: authentication,
+  validation, rate limiting, health and a real corpus load through the service
+  entry point.
+
 Nine tests, none of which check answer quality — that is Project 2's job and it
 needs a model. These check the interface contract: that an unauthenticated caller
 cannot get in, that a wrong key is indistinguishable from a missing one, that the
@@ -61,6 +71,8 @@ nothing are worse than red ones, and the guard is there so it cannot recur.
 - [x] Auth, rate limiting, validation and health implemented and tested
 - [x] Container builds, runs as non-root, and answers correctly end to end
 - [x] Health check reports dependency state rather than "something is listening"
+- [ ] Dataset manifest/hash recorded with the model artefact
+- [ ] Serving benchmark run against the real entry point (`notebooks/08-deploy-apis/02-serving-measured.ipynb`)
 - [x] Deploy configuration committed (`render.yaml`), secrets not committed
 - [ ] Deployed to a public URL — a human action, see below
 - [ ] Rate limit verified against the deployed instance

@@ -292,4 +292,43 @@ LESSONS = [
     ]),
   ],
 },
+{
+  "slug": "the-artefact-is-code-data-and-config",
+  "title": "The Artefact Is Code, Data and Configuration",
+  "subtitle": "A model file is not a deployment; behaviour only becomes reproducible when its inputs and assumptions travel with it.",
+  "body": [
+    ("p", "A commit identifies the program, not the behaviour. The same training code against a changed dataset, a different base model or a new preprocessing rule can produce a different system while every source file looks unchanged. Treat the deployable unit as a small bundle: code, model weights, data identity and configuration."),
+
+    ("figure", "A rollback is only real when every input that shaped behaviour can be named and retrieved.", '''<svg viewBox="0 0 640 190" role="img" aria-label="A model release made from code, data, weights and configuration"><rect x="18" y="26" width="136" height="52" rx="7" class="d-box"/><text x="86" y="48" class="d-label-b" text-anchor="middle">code</text><text x="86" y="66" class="d-label-sm" text-anchor="middle">commit</text><rect x="176" y="26" width="136" height="52" rx="7" class="d-box"/><text x="244" y="48" class="d-label-b" text-anchor="middle">data</text><text x="244" y="66" class="d-label-sm" text-anchor="middle">manifest + hash</text><rect x="334" y="26" width="136" height="52" rx="7" class="d-box"/><text x="402" y="48" class="d-label-b" text-anchor="middle">weights</text><text x="402" y="66" class="d-label-sm" text-anchor="middle">immutable URI</text><rect x="492" y="26" width="130" height="52" rx="7" class="d-box"/><text x="557" y="48" class="d-label-b" text-anchor="middle">config</text><text x="557" y="66" class="d-label-sm" text-anchor="middle">schema + limits</text><path d="M86 86 L557 86" class="d-arrow-accent"/><rect x="154" y="112" width="332" height="48" rx="7" class="d-box-accent"/><text x="320" y="134" class="d-label-b" text-anchor="middle">reproducible release</text><text x="320" y="151" class="d-label-sm" text-anchor="middle">promote, compare, or roll back as one unit</text></svg>'''),
+
+    ("h2", "Make the identity cheap to record"),
+    ("p", "A dataset version does not need a heavyweight platform for a small project. Start with a manifest containing file paths, row counts, schema, generation seed, source revision and a content hash. Store that manifest beside the run record. The point is not the brand of registry; it is being able to answer which exact bytes trained the weights."),
+    ("know",
+     "If you cannot name the data that produced a model, you cannot reproduce or safely roll it back.",
+     "A model artefact without its dataset identity is like a binary without its compiler inputs: you may be able to run it, but you cannot explain why it behaves differently or rebuild it when the file is lost. A manifest and hash turn an informal promise into a checkable identity.",
+     "The maintenance model improves from 0.71 to 0.76 after a retrain. The run record points to commit abc123 and dataset hash 9f2e. When the score later falls, the team can fetch that exact pair, rerun it, and determine whether the change came from code, data or the serving environment."),
+
+    ("h2", "Three tests, three different questions"),
+    ("terms", [
+      ("Training-system test", "Did the pipeline execute the intended work?", "Checks loading, splitting, preprocessing, checkpoint writing and artefact metadata. It should fail quickly without requiring a full expensive run."),
+      ("Validation test", "Does the candidate meet the measured bar?", "Runs the frozen evaluation set and compares the candidate with the incumbent using the metric and slices chosen before the run."),
+      ("Functionality test", "Does the service still behave on known cases?", "Uses a few named fixtures to catch schema, refusal, routing and preprocessing regressions that an aggregate score can hide."),
+    ]),
+    ("p", "These tests are complementary. A pipeline can finish successfully while training on the wrong split; a model can clear the aggregate score while losing a critical slice; an API can answer the right cases offline while failing to load its corpus in the container. The test suite should make each failure legible rather than calling all of them 'the model failed'."),
+    ("callout", "pitfall", "A green test suite that never reached the model is not evidence",
+     "Keep one readiness check that proves the real dependency path: the artefact loads, the data identity matches the run record, and one prediction travels through the same entry point production uses. Mock the expensive call where appropriate, but do not let every test mock away the thing it claims to protect."),
+    ("h2", "Measure the serving boundary"),
+    ("p", "The prediction function and the HTTP service have different failure modes. Measure both: correctness belongs to the prediction path; throughput, queueing, p95 latency, memory and error handling belong to the service. Run a small local load sweep and record the concurrency, payload, model revision and machine state with the results. A single fast request is not a capacity estimate."),
+    ("links", [
+      ("Production-Level Deep Learning", "https://github.com/alirezadir/Production-Level-Deep-Learning", "Source for the production-system framing; this lesson is independently written and measured here."),
+      ("Full Stack Deep Learning", "https://fullstackdeeplearning.com/", "Upstream source credited by the repository for the code-plus-data and production lifecycle ideas."),
+    ]),
+    ("related", ["the-image-is-the-unit", "after-it-ships", "where-evaluation-lives", "the-artifact-and-when-to-retrain"]),
+    ("quiz", [
+      ("What must accompany a model weight file for a reproducible release?", ["Only the latest source commit", "The code, data identity and configuration that shaped its behaviour", "A larger validation set"], 1),
+      ("Which test catches a container that starts but cannot load its corpus?", ["A functionality or readiness test through the deployed entry point", "A training-system test on a different machine", "A larger aggregate evaluation set"], 0),
+      ("Why is one successful request not a capacity estimate?", ["It says nothing about queueing, concurrency or tail latency", "The response may be cached", "Single requests are never valid"], 0),
+    ]),
+  ],
+},
 ]

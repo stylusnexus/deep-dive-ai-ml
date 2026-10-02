@@ -1037,6 +1037,18 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Image promotion** — Deploying the artefact you tested rather than rebuilding from source at deploy time. Rebuilding discards the guarantee that building an image was for.
 
+**Training-system test** — A test of the pipeline that produces a model: loading,
+splitting, preprocessing, checkpoint writing and provenance. It asks whether the
+intended work happened, not whether the resulting model is good.
+
+**Validation test** — A test that scores a candidate against the frozen evaluation
+set and compares it with the incumbent using the predeclared metric and slices. It
+asks whether the candidate clears the release bar.
+
+**Functionality test** — A small set of named cases run through the real prediction
+or service entry point. It catches schema, refusal, routing and preprocessing
+regressions that an aggregate score can hide.
+
 ---
 
 ## Block 9 · Electives

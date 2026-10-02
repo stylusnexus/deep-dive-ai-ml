@@ -261,4 +261,95 @@ The checklist is `artifacts/sop/llm-engineering.md`, and the failure this notebo
 makes concrete — a retry that charges twice — is the reason its idempotency line is
 there."""),
 ]),
+(
+"02-serving-measured.ipynb", [
+
+("md", """# 08 · Serving, Measured
+
+The prediction function and the service around it answer different questions.
+This lab uses a deliberately small local HTTP service so the boundary is visible:
+the handler sleeps for a fixed amount of time, then returns a response. The useful
+measurements are latency percentiles, throughput and the effect of concurrency —
+not a claim about a particular model or machine.
+
+The benchmark is self-contained and makes no network calls. Re-run it on the
+machine and with the artefact you actually plan to serve before treating the
+numbers as capacity evidence."""),
+
+("code", """import json, statistics, threading, time
+from concurrent.futures import ThreadPoolExecutor
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.request import Request, urlopen
+
+MODEL_REVISION = "fixture-model-v1"
+WORK_SECONDS = 0.02
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *_):
+        pass
+
+    def do_POST(self):
+        n = int(self.headers.get("Content-Length", 0))
+        self.rfile.read(n)
+        time.sleep(WORK_SECONDS)  # stand in for prediction work
+        body = json.dumps({"model": MODEL_REVISION, "ok": True}).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+threading.Thread(target=server.serve_forever, daemon=True).start()
+URL = f"http://127.0.0.1:{server.server_port}/predict"
+print({"url": URL, "model": MODEL_REVISION, "work_seconds": WORK_SECONDS})"""),
+
+("code", """def request_once():
+    started = time.perf_counter()
+    req = Request(URL, data=b"{}", method="POST", headers={"Content-Type": "application/json"})
+    with urlopen(req, timeout=5) as response:
+        assert response.status == 200
+        payload = json.loads(response.read())
+    elapsed_ms = (time.perf_counter() - started) * 1000
+    assert payload["model"] == MODEL_REVISION
+    return elapsed_ms
+
+def benchmark(concurrency, requests=32):
+    started = time.perf_counter()
+    with ThreadPoolExecutor(max_workers=concurrency) as pool:
+        latencies = list(pool.map(lambda _: request_once(), range(requests)))
+    elapsed = time.perf_counter() - started
+    ordered = sorted(latencies)
+    p50 = statistics.median(ordered)
+    p95 = ordered[max(0, int(len(ordered) * 0.95) - 1)]
+    return {
+        "concurrency": concurrency,
+        "requests": requests,
+        "throughput_rps": round(requests / elapsed, 1),
+        "p50_ms": round(p50, 1),
+        "p95_ms": round(p95, 1),
+        "errors": 0,
+    }
+
+rows = [benchmark(c) for c in (1, 2, 4, 8)]
+print(json.dumps(rows, indent=2))"""),
+
+("md", """## Read the result without overclaiming
+
+At low concurrency, throughput rises because the server overlaps independent
+requests. Tail latency can rise once the machine is contended. The exact values
+belong to this fixture and this run; the transferable result is the measurement
+shape and the metadata recorded with it.
+
+For a real service, repeat this against the production entry point with the real
+payload size and model revision. Add memory, CPU, queue depth and non-200 responses
+to the run record. Compare candidates on identical request mixes, and keep the
+baseline rather than reporting only the new number."""),
+
+("code", """assert all(row["errors"] == 0 for row in rows)
+assert rows[0]["concurrency"] == 1
+assert rows[-1]["concurrency"] == 8
+server.shutdown()
+print("benchmark complete; server stopped")"""),
+]),
 ]

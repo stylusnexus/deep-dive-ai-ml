@@ -55,6 +55,24 @@ This repo holds a higher bar than most. Before you assert something in a lesson:
 - **When a result is an artefact of your setup, fix it and say so.** Two results
   in Block 2 were wrong for that reason and the commit messages explain both.
 
+## External-source reuse
+
+When using another repository, article, course or diagram as input:
+
+- Import **ideas and engineering lessons**, not the source's expression.
+- Rewrite explanations, examples, exercises, diagrams and terminology in this
+  repo's own voice; do not copy distinctive prose, figures, screenshots or code.
+- Check the source repository's licence before reusing any text, artwork or code.
+  If no licence is present, treat the material as reference-only and do not copy
+  it under an assumed open-source licence.
+- Cite the source and any upstream sources it credits in the lesson's verified
+  links. Do not imply that borrowed ideas or measurements originated here.
+- Prefer a small, evidence-producing addition over importing a framework,
+  vendor catalogue or whole curriculum. Record the local measurement that makes
+  the idea useful here.
+- If the boundary between an independently written explanation and a derivative
+  reproduction is unclear, stop and escalate before committing the material.
+
 ## Content conventions
 
 - Every lesson carries at least one inline SVG diagram

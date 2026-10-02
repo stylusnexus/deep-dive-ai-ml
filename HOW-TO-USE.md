@@ -14,6 +14,9 @@ Then, per block: read the lessons, run the notebook, build the project if the bl
 has one, and stop when you hit the block's exit criterion. [`CURRICULUM.md`](CURRICULUM.md)
 is the map and tells you what each exit criterion is.
 
+Before Block 1, run the [entry diagnostic](artifacts/prerequisite-diagnostic.md).
+It routes repair work; it is not an admissions test.
+
 That's the whole loop. The rest of this page is detail you can come back for.
 
 ## What each part is for
@@ -25,6 +28,7 @@ That's the whole loop. The rest of this page is detail you can come back for.
 | `notebooks/` | Runnable labs, one folder per block | See [`notebooks/README.md`](notebooks/README.md) |
 | `projects/` | Four portfolio builds | At block boundaries 2, 3, 4 and 8 |
 | [`artifacts/sop/`](artifacts/sop/) | Checklists, aviation-style | Open before you build, tick as you go |
+| [`artifacts/engineering-foundations.md`](artifacts/engineering-foundations.md) | Optional systems-engineering reading map | Experienced developers can skip it; otherwise use it when a project exposes a representation, time, distributed-failure or maintenance assumption |
 | [`GLOSSARY.md`](GLOSSARY.md) | Every term, cumulative | Add to it as you go; feed into spaced repetition |
 | [`things-to-know.html`](things-to-know.html) | 158 rules harvested from the lessons | The revision sheet. Read it when you've forgotten a block |
 
@@ -35,7 +39,8 @@ That's the whole loop. The rest of this page is detail you can come back for.
 2. **Read the block's lessons.** They assume the previous blocks' vocabulary but not
    your memory of it — every acronym re-expands.
 3. **Run the block's notebook.** It arrives already executed so you can read the
-   results first, then re-run it yourself.
+   results first, then re-run it yourself. After the guided run, close the notebook
+   and rebuild one small example from memory before looking back at the answer.
 4. **Open the matching SOP** when you start building. There's one for training,
    deep learning, fine-tuning, generative AI, LLM engineering, measurement and
    security, plus a non-normal checklist for when something is already broken.

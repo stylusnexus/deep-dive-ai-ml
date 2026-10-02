@@ -267,4 +267,5 @@ inside-an-llm|0dbd96779ba6|seeded, not individually traced
 inside-an-llm|138188e61f46|seeded, not individually traced
 embeddings-and-retrieval|08f92fb61a7e|illustrative value, no claim attached
 embeddings-and-retrieval|569a714c4a08|measured in this repository by scripts/measure_semantic_threshold.py
+the-artefact-is-code-data-and-config|332d9808a738|illustrative value, explicitly a worked example rather than a measured claim
 agents-that-improve-themselves|b9f921c5da4d|illustrative hypothetical, explicitly a worked example rather than a measured claim

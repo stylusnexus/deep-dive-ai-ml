@@ -214,14 +214,22 @@ Spine: `LLMS_from_Scratch` ch05–07 (Apache 2.0) plus the installed HF training
   as a decision rather than an outcome ✅
 - After it ships — availability against correctness, and why drift needs a scheduled
   measurement rather than a dashboard ✅
+- The artefact is code, data and configuration — a model file is not a deployment;
+  the manifest and hash that make a rollback real, and the three tests that ask
+  different questions (training-system, validation, functionality) ✅
 
-4 lessons in `lessons/block8-deployment/` and 1 notebook in `notebooks/08-deploy-apis/`,
-which runs two clients against a server that fails on a scripted schedule. Deploying to Render or an HF Space remains
-a human action; `projects/p4-deployed-assistant/render.yaml` describes it.
+5 lessons in `lessons/block8-deployment/` and 2 notebooks in `notebooks/08-deploy-apis/`:
+the first runs two clients against a server that fails on a scripted schedule, the
+second measures the serving boundary (throughput, concurrency, tail latency) against
+a local fixture service. Deploying to Render or an HF Space remains a human action;
+`projects/p4-deployed-assistant/render.yaml` describes it.
 
 **Exit:** Project 4 — an authenticated, rate-limited, containerised endpoint, built and
 verified end to end ✅. The deploy itself is a human action: `render.yaml` describes it,
-and a public URL has a bill and an audience attached.
+and a public URL has a bill and an audience attached. Two follow-ups from the new
+lesson remain open in the project checklist: a dataset manifest/hash recorded with the
+model artefact, and the serving benchmark run against the real entry point rather than
+the notebook's fixture.
 
 ---
 

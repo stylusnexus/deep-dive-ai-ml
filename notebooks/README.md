@@ -75,6 +75,16 @@ jupyter nbconvert --clear-output --inplace notebooks/05-evaluation/01-*.ipynb
 
 Then run it cell by cell. `git checkout` that file to get the committed results back.
 
+For learning rather than transcription, use a two-pass loop:
+
+1. Read the executed notebook and run it once.
+2. Close it, recreate one small example or helper from memory, and test your
+   version against the same assertion or fixture.
+3. Reopen the notebook only to compare decisions and investigate differences.
+
+The independent rebuild is deliberately small. It is evidence that you understood
+the mechanism, not a second full implementation of the lab.
+
 ## Running one end to end
 
 ```bash
