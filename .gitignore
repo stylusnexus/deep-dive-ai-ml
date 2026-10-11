@@ -24,3 +24,4 @@ data/finetune/
 adapters/**
 !adapters/*/
 !adapters/*/README.md
+data/quant/
