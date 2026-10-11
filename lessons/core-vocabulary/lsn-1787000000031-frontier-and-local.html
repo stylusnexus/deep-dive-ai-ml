@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frontier and Local, and What Each Is Actually For</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 32 of 33</span>
+  <h1>Frontier and Local, and What Each Is Actually For</h1>
+  <p class="subtitle">Not a ladder with one at the top. Two different sets of constraints, and the choice is which set you would rather have.</p>
+
+  <p>This course has taught local serving in detail &mdash; what fits, what is fast, what quantisation costs &mdash; and it has taught hosted APIs in detail, including the ones that fail. What it has not done is put them side by side, which leaves the impression that local is the budget option and a frontier model is what you use when you can afford it. That framing is wrong often enough to be worth dismantling.</p>
+  <h2>What a frontier model has that you cannot reproduce</h2>
+  <p>Be honest about this half first, because the local case is stronger when it is not overstated. Frontier models are trained with compute and data budgets that are not available to you at any price you would pay, and several capabilities follow from that scale rather than from cleverness you could copy.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Reasoning trained against verifiers</div><div><div class="roadmap-title">The expensive kind of training</div><div class="roadmap-desc">Block 7&#39;s reinforcement fine-tuning, run at a scale that requires thousands of accelerators and a very large verified problem set. This is the capability gap that widened most in recent years, and it is the least reproducible.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Long context that works</div><div><div class="roadmap-title">Not just a large number</div><div class="roadmap-desc">A large window is easy to advertise and hard to make usable. The position-bias lesson applies to every model; the difference is how far into the window a model still retrieves reliably, and that is bought with training rather than configuration.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Tool-use reliability</div><div><div class="roadmap-title">Under compounding</div><div class="roadmap-desc">A model that emits a valid tool call 97 per cent of the time and one that manages 99.5 look similar in a demo and behave completely differently over a twenty-step agent loop, where the difference compounds into a large gap in completed tasks.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Breadth you did not plan for</div><div><div class="roadmap-title">The long tail of requests</div><div class="roadmap-desc">A general model handles the question nobody anticipated. A small local model is frequently excellent on the task you tuned it for and poor one step outside it, which matters when real users arrive.</div></div></div></div>
+  <h2>What local has that no amount of money buys from a vendor</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The data never leaves</div><div><div class="roadmap-title">The one that ends arguments</div><div class="roadmap-desc">For regulated, confidential or personal material this is not a preference, it is the entire reason the option exists. No contract makes a third party as safe as not sending it, and this alone decides a great many architectures.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Fixed cost, not marginal</div><div><div class="roadmap-title">The economics invert at volume</div><div class="roadmap-desc">Hardware is paid for once and then the tokens are free. A workload with high, steady volume and modest quality requirements can be dramatically cheaper locally; a spiky, low-volume workload is almost always cheaper hosted. The crossover is arithmetic, not ideology.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Nothing is deprecated under you</div><div><div class="roadmap-title">The version is yours</div><div class="roadmap-desc">A hosted model can change beneath a system that was working, and the sampling controls this course documented are being removed rather than added. A local weights file behaves the same next year as it does today, which is worth something to anything that must be reproducible.</div></div></div><div class="roadmap-item"><div class="roadmap-num">You own the sampler</div><div><div class="roadmap-title">Where local is genuinely ahead</div><div class="roadmap-desc">Constrained decoding against a grammar, logit bias, arbitrary sampling parameters, deterministic seeds, log probabilities. Several of these are unavailable from major hosted APIs at any price, and the structured-output lesson&#39;s strongest rung is the one only a local stack can offer.</div></div></div></div>
+  <figure class="diagram"><svg viewBox="0 0 560 178" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two columns comparing what frontier models and local models each uniquely offer.">
+<rect x="10" y="16" width="258" height="146" rx="7" class="d-box"/>
+<text x="139" y="38" class="d-label-b" text-anchor="middle">frontier</text>
+<text x="26" y="62" class="d-label-sm">reasoning trained against verifiers</text>
+<text x="26" y="80" class="d-label-sm">long context that stays usable</text>
+<text x="26" y="98" class="d-label-sm">tool-call reliability under compounding</text>
+<text x="26" y="116" class="d-label-sm">breadth for the unplanned request</text>
+<text x="26" y="142" class="d-label-sm">per-token cost, and it can change</text>
+<rect x="292" y="16" width="258" height="146" rx="7" class="d-box-good"/>
+<text x="421" y="38" class="d-label-b" text-anchor="middle">local</text>
+<text x="308" y="62" class="d-label-sm">the data never leaves</text>
+<text x="308" y="80" class="d-label-sm">fixed cost, free tokens after</text>
+<text x="308" y="98" class="d-label-sm">nothing deprecated under you</text>
+<text x="308" y="116" class="d-label-sm">you own the sampler and the grammar</text>
+<text x="308" y="142" class="d-label-sm">capability ceiling is your hardware</text>
+</svg><figcaption>The choice is which constraints you prefer, not which model is better. Both columns contain things the other cannot supply.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">The question is never which model is better. It is which constraint you are unwilling to accept.</p><p class="know-why">Capability, privacy, cost shape, reproducibility and control are five axes and no option leads on all of them. A workload where confidentiality is non-negotiable has already chosen, whatever the benchmark says. A workload where the hard part is genuinely difficult reasoning has also already chosen, whatever the invoice says. Most real systems have one axis that dominates, and finding it is the actual design decision &mdash; the rest is implementation.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team compares a local 8B and a frontier model on their eval set, finds a fourteen-point gap, and concludes local is not viable. The material they process cannot legally leave their premises. The comparison was never a decision; the only real question was whether the local option clears their quality bar, and against what fallback for the cases it does not.</p></blockquote>
+  <h2>The arrangement most systems actually end up with</h2>
+  <p>Framing it as a choice at all is the last thing to give up. The routing lesson makes the argument in general terms and it lands here specifically: run the cheap local path first, detect when it is out of its depth, and escalate. What makes this work is that the detection is usually easier than the task &mdash; a schema that fails to validate, a refusal, a confidence signal, a verifier that says no.</p>
+  <p>The hybrid also inverts the privacy argument in a way worth noticing. If the local model handles the ordinary cases and only the hard ones escalate, then only the hard ones leave, and you have reduced the exposure surface rather than eliminated it. Whether that is acceptable is a question for someone other than the engineer, and it should be asked explicitly rather than discovered in an audit.</p>
+  <div class="callout pitfall"><span class="label">Two comparisons that are not fair, and both are common</span><p><strong>Comparing a quantised local model against a frontier model at full precision, and calling the gap the local penalty.</strong> Some of that gap is the quantisation and some is the model, and the compression lesson says the loss is uneven &mdash; so the aggregate difference tells you very little about where you will actually be hurt. Slice it.</p><p><strong>Comparing the local model you can run against the frontier model as it is today.</strong> Local capability at a given hardware budget has moved quickly, and a conclusion drawn eighteen months ago about what fits on one machine is unlikely to still hold. Re-run the comparison rather than inheriting it, which is cheap because you kept the eval set.</p></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000027-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li><li><a href="lsn-1787000000008-routing-and-escalation.html">Routing, Escalation and Sampling Controls</a><span class="link-note">Cheap-first architecture — plus temperature and top-k, which decide how a model picks words.</span></li><li><a href="lsn-1787000000004-serving-locally.html">Serving Locally: Ollama, llama.cpp and tok/s</a><span class="link-note">The most-mentioned tool in your codebase, and how to read a speed number.</span></li><li><a href="lsn-1787000000002-weights-gguf-quantization.html">Weights, GGUF and Quantization</a><span class="link-note">What Q4_K_M actually means, and the trade you're making when you pick it.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. A team finds a fourteen-point quality gap between a local model and a frontier one. Their data cannot leave the premises. What does the comparison establish?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">That local is not viable for this workload</div>
+      <div class="quiz-opt">Only whether the local option clears their quality bar — the privacy constraint had already decided the architecture, so the gap is not a choice</div>
+      <div class="quiz-opt">That they should quantise less aggressively to close the gap</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Which capability listed here is genuinely unavailable from major hosted APIs?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Long context windows</div>
+      <div class="quiz-opt">Constrained decoding against an arbitrary grammar, along with logit bias and seeds — you have to own the sampler</div>
+      <div class="quiz-opt">Reliable tool calling</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why is comparing a quantised local model against a full-precision frontier model unfair?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Quantised models are always worse, so the comparison is pointless</div>
+      <div class="quiz-opt">The gap mixes the quantisation penalty with the model difference, and compression loss is uneven — so the aggregate says little about where you will actually be hurt</div>
+      <div class="quiz-opt">Precision differences make latency incomparable</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

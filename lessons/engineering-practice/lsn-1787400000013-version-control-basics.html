@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Version Control, and Why Agents Make It Non-Optional</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 14 of 17</span>
+  <h1>Version Control, and Why Agents Make It Non-Optional</h1>
+  <p class="subtitle">Git and GitHub from zero — plus the argument for why this matters more now, not less.</p>
+
+  <p>If you have never used version control, this is the lesson that unlocks several others: the course has already told you to commit at phase boundaries, to revert a fix to confirm it caused the improvement, and to isolate agent work on a branch. All three assume git. Here is enough to do them.</p>
+  <h2>The idea, in one paragraph</h2>
+  <p>Git records snapshots of your project over time. Each snapshot — a <strong>commit</strong> — captures every file as it stood, with a message saying why. You can compare any two, return to any one, and work on several versions at once without them interfering. GitHub is a hosted copy of that history, which gives you a backup, a place to collaborate, and somewhere to review changes before they land.</p>
+  <h2>The seven commands that cover most days</h2>
+  <pre><code>git status                    # what has changed but is not yet saved
+git diff                      # exactly what changed, line by line
+git add .                     # stage the changes you want in the next snapshot
+git commit -m &quot;fix: ...&quot;      # take the snapshot, with a reason
+git log --oneline             # the history, one line per commit
+git push                      # send commits to GitHub
+git pull                      # bring down what others (or another machine) pushed</code></pre>
+  <div class="callout matters"><span class="label">Run the first two before every commit</span><code>git status</code> and <code>git diff</code> take five seconds and prevent the two commonest mistakes: committing something you did not mean to (a key, a large data file, a debugging change), and committing only half of a change because the other half was never staged. A feature that ships with its configuration flag but not the code that reads the flag is a real and common bug — the flag exists, nothing uses it, and no test fails.</div>
+  <h2>Branches</h2>
+  <p>A <strong>branch</strong> is an independent line of work. You start one, make commits on it, and the main line is untouched until you deliberately merge. This is what lets you try something risky without endangering anything that works.</p>
+  <pre><code>git switch -c feat/turbine-baseline   # start a branch and move onto it
+# ... work, commit, work, commit ...
+git push -u origin feat/turbine-baseline
+# open a pull request on GitHub, review the diff, merge
+
+git switch main &amp;&amp; git pull            # back to the main line, now updated</code></pre>
+  <p>A <strong>pull request</strong> is a proposal to merge a branch, with the full diff laid out for review and discussion. Even working alone it is worth using, because reading your own change as a diff — separated from the act of writing it — catches things nothing else does.</p>
+  <h2>Why this matters more with an agent, not less</h2>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Agent work with and without version control">
+<text x="12" y="18" class="d-fill-red" font-size="12" font-weight="600">NO VERSION CONTROL</text>
+<rect x="12" y="30" width="290" height="52" rx="6" class="d-box-warn"/>
+<text x="28" y="52" class="d-label-sm">40 files changed across 3 hours</text>
+<text x="28" y="70" class="d-label-sm">accept all of it, or lose all of it</text>
+<text x="12" y="112" class="d-fill-green" font-size="12" font-weight="600">WITH VERSION CONTROL</text>
+<circle cx="30" cy="146" r="7" class="d-fill-green"/>
+<circle cx="98" cy="146" r="7" class="d-fill-green"/>
+<circle cx="166" cy="146" r="7" class="d-fill-green"/>
+<circle cx="234" cy="146" r="7" class="d-fill-red"/>
+<circle cx="302" cy="146" r="7" class="d-fill-muted"/>
+<line x1="30" y1="146" x2="302" y2="146" stroke="var(--border)" stroke-width="2"/>
+<text x="12" y="176" class="d-label-sm">good · good · good · broke it · return here</text>
+<path d="M234 158 Q200 182 172 160" stroke="var(--accent)" stroke-width="1.8" fill="none"/>
+<rect x="340" y="30" width="288" height="140" rx="7" class="d-box"/>
+<text x="356" y="52" class="d-label-b">What the history buys you</text>
+<text x="356" y="74" class="d-label-sm">· the diff is how you review agent output</text>
+<text x="356" y="94" class="d-label-sm">· revert the fix, re-run, confirm it was the fix</text>
+<text x="356" y="114" class="d-label-sm">· branches isolate risky autonomous work</text>
+<text x="356" y="134" class="d-label-sm">· bisect finds which change broke it</text>
+<text x="356" y="154" class="d-label-sm">· the log says what changed when a run regressed</text>
+</svg><figcaption>Without version control an agent's changes accumulate into one indivisible blob you can only accept or abandon. With it, every step is a place you can return to, and the diff is the review surface.</figcaption></figure>
+  <ul><li><strong>The diff is your review surface.</strong> You did not write the code, so reading it as a diff is how you actually review it. Without commits there is no diff, only a changed working tree.</li><li><strong>Reverting is a measurement technique.</strong> The measurement checklist ends with removing the fix and re-running to confirm the number moves back. That step is impossible without version control, which is why it is the step people skip.</li><li><strong>Branches are isolation.</strong> An agent working autonomously on a branch cannot damage anything that works. This is the cheapest safety control available for unattended runs.</li><li><strong>Bisect finds the culprit.</strong> When something broke somewhere in forty commits, <code>git bisect</code> finds which one by binary search rather than by guesswork.</li><li><strong>Commits are the incident timeline.</strong> When an agent's behaviour regresses and nothing on your side changed, the log is the first place to check whether that is actually true.</li></ul>
+  <div class="callout insight"><span class="label">Commit more often than feels necessary</span>The course tells you to commit at every phase boundary rather than at feature end, and agent work makes the case stronger. A three-hour autonomous run that produces one enormous commit is nearly unreviewable; the same work as twelve commits is a sequence you can read, and revert partially. Reverting from a clean checkpoint costs nothing. Reverting from a snarl costs an afternoon.</div>
+  <h2>Three habits worth forming immediately</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Write why, not what</div><div><div class="roadmap-title">The diff already says what</div><div class="roadmap-desc">"fix: reject empty vibration readings before scaling" beats "updated file". Six weeks later, only one of those helps.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Never commit secrets</div><div><div class="roadmap-title">Once pushed, treat as leaked</div><div class="roadmap-desc">A <code>.env</code> in <code>.gitignore</code> before the first commit. History is hard to scrub and mirrors already exist.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Keep data out</div><div><div class="roadmap-title">Large files bloat forever</div><div class="roadmap-desc">Git stores every version of everything. A 400MB CSV committed once is in the history permanently. Generate data from a seeded script instead — which is how the Block 1 dataset works.</div></div></div></div>
+  <h2>The two commands worth being careful with</h2>
+  <p><code>git push --force</code> rewrites history on a shared branch and can destroy someone else's work. <code>git reset --hard</code> discards uncommitted changes irrecoverably. Both have legitimate uses and neither should be typed reflexively. Everything else in git is recoverable, which is worth knowing when you are new — the fear of breaking something is mostly unfounded.</p>
+  <h2>What GitHub adds</h2>
+  <p>Beyond hosting: pull requests for review, issues for tracking work, and Actions for running your tests automatically on every push. That last one connects directly to the evaluation material — a benchmark that runs itself on every change is the difference between measuring occasionally and measuring always.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000000-three-artifacts.html">Recipes, ADRs and the Harness</a><span class="link-note">Three things every LLM project grows, answering three different questions.</span></li><li><a href="lsn-1787400000010-code-nobody-decided.html">Code Nobody Decided</a><span class="link-note">The previous lesson asked whether to use a model. This one asks who chose the behaviour when you did.</span></li><li><a href="lsn-1787400000016-the-artifact-and-when-to-retrain.html">The Artifact, and When to Retrain</a><span class="link-note">What actually ships is not the code — and the drift lesson tells you something moved without telling you what to do about it.</span></li><li><a href="lsn-1787400000012-spec-driven-development.html">Vibe Coding and Spec-Driven Development</a><span class="link-note">A spectrum, not a binary — and the question that tells you where on it a task belongs.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://git-scm.com/book/en/v2" target="_blank" rel="noopener">Git Book — chapters 1 to 3</a><span class="link-note">Free and genuinely the best reference. The first three chapters cover everything above properly.</span></li><li><a href="https://docs.github.com/en/get-started/quickstart" target="_blank" rel="noopener">GitHub Quickstart</a><span class="link-note">Account through first pull request, with the interface shown.</span></li><li><a href="https://www.conventionalcommits.org/" target="_blank" rel="noopener">Conventional Commits</a><span class="link-note">The message format used throughout this course — type(scope): description. Machine-readable, so tooling can derive changelogs from it.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why is reverting a change a measurement technique rather than just a recovery tool?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It restores a known-good state after a failed experiment</div>
+      <div class="quiz-opt">Removing the fix and re-running confirms the fix was what moved the number — otherwise you have learned the wrong lesson</div>
+      <div class="quiz-opt">It reduces the size of the repository</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. An agent runs autonomously for three hours. What should the output look like in git?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">One commit, so the change is atomic and easy to revert</div>
+      <div class="quiz-opt">Many commits, so the work is reviewable as a sequence and can be reverted partially</div>
+      <div class="quiz-opt">No commits until a human has reviewed everything</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What should you run before every commit?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">git log, to see recent history</div>
+      <div class="quiz-opt">git status and git diff — they catch unintended files and half-staged changes</div>
+      <div class="quiz-opt">git pull, to avoid conflicts</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Why keep large data files out of git?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">GitHub rejects files over a size limit</div>
+      <div class="quiz-opt">Git stores every version permanently, so a large file committed once bloats the history forever — generate it from a seeded script instead</div>
+      <div class="quiz-opt">Binary files cannot be diffed</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

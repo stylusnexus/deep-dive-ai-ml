@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Managed Cloud Surfaces</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 6 of 6</span>
+  <h1>Managed Cloud Surfaces</h1>
+  <p class="subtitle">Calling a model through Amazon Bedrock, Google Vertex AI or Microsoft Foundry keeps the request in your hands and the capacity, the cache and the calendar in the provider's.</p>
+
+  <p>The first lesson in this block treated a model API as a service you do not control. The big three clouds sell the same models behind a managed surface: Amazon Bedrock, Google Vertex AI and Microsoft Foundry. Each adds an account, a billing meter, a region choice and a set of policy features. The useful question is not which one is best. It is which parts of the behaviour you can still set, and which have moved into the provider.</p>
+  <div class="callout warning"><span class="label">Read this as shapes, not numbers</span>Everything here was read from provider documentation on 2026-10-10 through a summarising fetch tool. No dollar price was obtainable from any of the three, so none appears. Default quota values, latency targets and several retention periods were not retrieved and are left out rather than guessed. Model names, multipliers and dates change; treat every figure as dated.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 230" role="img" aria-label="What a team keeps and what the provider keeps on a managed model API"><rect x="14" y="14" width="296" height="196" rx="8" class="d-box"/><text x="162" y="38" class="d-label-b" text-anchor="middle">You keep</text><text x="30" y="66" class="d-label-sm">which model and version you call</text><text x="30" y="88" class="d-label-sm">prompt layout and max_tokens</text><text x="30" y="110" class="d-label-sm">region or profile you route through</text><text x="30" y="132" class="d-label-sm">retries and fallbacks</text><text x="30" y="154" class="d-label-sm">guardrail settings, log destinations</text><text x="30" y="176" class="d-label-sm">whether to buy reserved capacity</text><text x="30" y="198" class="d-label-sm">the regression suite for a model swap</text><rect x="330" y="14" width="296" height="196" rx="8" class="d-box d-fill-amber"/><text x="478" y="38" class="d-label-b" text-anchor="middle">The provider keeps</text><text x="346" y="66" class="d-label-sm">hardware and routing inside your scope</text><text x="346" y="88" class="d-label-sm">quota values and whether they rise</text><text x="346" y="110" class="d-label-sm">how the quota is counted</text><text x="346" y="132" class="d-label-sm">cache storage and eviction</text><text x="346" y="154" class="d-label-sm">the models behind safety filters</text><text x="346" y="176" class="d-label-sm">abuse-monitoring carve-outs</text><text x="346" y="198" class="d-label-sm">the retirement date of every model</text></svg><figcaption>Control follows the request and the account. Capacity, cache internals and retirement dates follow the provider.</figcaption></figure>
+  <h2>Quota is counted differently from the bill</h2>
+  <p>All three providers throttle with HTTP 429. Two document how the quota is counted, and in both the number that limits you is not the number you are billed for. Bedrock deducts the input tokens plus <code>max_tokens</code> when a request starts, then refunds the unused part when it finishes. Foundry's tokens-per-minute check likewise uses an estimate of the maximum tokens at the moment the request arrives, and its page says that is not the count used for billing.</p>
+  <p>Bedrock also multiplies output tokens when it counts them against quota: its page lists 15x for one model family, 10x for several current ones, 5x for older Anthropic models and 1:1 for all others. Its worked example has 3,000 input tokens, 1,000 cache-write tokens, 1,000 output tokens and a <code>max_tokens</code> of 32,000. The initial deduction is 36,000 tokens and the final one is 9,000. With a <code>max_tokens</code> of 1,250 the same request starts at 5,250. A generous output cap can throttle you before the model has written anything.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Set max_tokens to what the task needs, not to the largest value the API allows.</p><p class="know-why">On Bedrock and Foundry the quota check reserves your output cap at the start of the request. An oversized cap reserves capacity you will not use, so concurrent requests are rejected earlier than their real size would suggest, and the bill never shows the reason.</p><p class="know-eg"><span class="know-eg-label">For example</span>A summariser that returns about 300 tokens is configured with a cap of 32,000. Each request reserves roughly 32,000 tokens of quota while it runs, so a handful of concurrent calls hit a 429 on a quota that would have carried dozens at a cap of 1,000.</p></blockquote>
+  <div class="callout pitfall"><span class="label">A 429 is not always your quota</span>Bedrock separates its 429 (account quota) from its 503 and 529 (capacity on the provider's side). Google says a pay-as-you-go 429 on Vertex AI does not mean you hit a fixed quota, because that traffic runs on shared capacity. Foundry documents temporary reductions of your effective limit when a shared pool is under pressure. Log the status and the response headers, because raising a quota will not fix a capacity error.</div>
+  <h2>Reserved capacity buys throughput, and few pages promise latency</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Bedrock</div><div><div class="roadmap-title">Model units, or a Reserved tier</div><div class="roadmap-desc">Provisioned Throughput is hourly capacity per model with no commitment, one month or six months. A newer Reserved service tier states a 99.5% uptime target and overflows to the Standard tier. Whether Provisioned Throughput itself carries a latency or availability guarantee is not stated on its page.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Vertex AI</div><div><div class="roadmap-title">Generative AI Scale Units (GSUs)</div><div class="roadmap-desc">A fixed-term subscription of one week, one month, three months or one year. Fees cannot be cancelled and apply regardless of usage. By default overage is billed as pay-as-you-go, and a request header can force a 429 instead. SLA terms were not retrieved.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Foundry</div><div><div class="roadmap-title">Provisioned Throughput Units (PTUs)</div><div class="roadmap-desc">Capacity held for your deployment whether or not you send requests, with a defined latency target per model. The numeric targets sit on a sizing page that was not retrieved. Holding PTU quota does not guarantee that capacity exists in the region.</div></div></div></div>
+  <p>Reservation changes who pays for idle time, not who owns the failure. Even with reserved capacity a deployment can reach full utilisation, so the retry or spillover path still has to exist.</p>
+  <h2>Caching and batching: you shape the prompt, they own the cache</h2>
+  <p>Prompt caching is best effort on all three, and the only lever you hold is putting the stable part of the prompt first. Foundry needs an identical prefix of at least 1,024 tokens. Bedrock publishes per-model minimums between 512 and 4,096 tokens, and says an identical prompt does not guarantee a hit, so you verify with the cache-read and cache-write token counts in the response. Cache writes can cost more than uncached input on newer models, so a prompt that never repeats can cost more with caching switched on.</p>
+  <p>Batch is the cheapest option and has the weakest timing promise. Vertex AI and Foundry both describe a 24-hour target for their batch modes. Google says batch is excluded from the service-level objective. Foundry's own page both says it does not expire slow jobs and lists an <code>expired</code> status, so teach it as a target with no hard guarantee. Bedrock's batch turnaround time was not found.</p>
+  <h2>Data: the defaults hold, with carve-outs you must read</h2>
+  <p>Bedrock states that by default it does not store model inputs or outputs. The carve-outs are model-specific: for two named Anthropic models, traffic is retained for up to 30 days for automated abuse detection, and flagged traffic for a list of OpenAI models is retained for up to 30 days. A per-Region retention setting can refuse any model that requires retention.</p>
+  <p>On Vertex AI, data at rest stays in the location you chose, but machine-learning processing is only guaranteed on regional and multi-region endpoints. The global endpoint may process in any Google Cloud location, and Google advises against it when you have processing-location requirements. The same endpoint can reduce 429 errors, so relieving throttling and keeping a residency promise pull in opposite directions. Foundry draws the same line by deployment type: Global may process in any Azure region, Data Zone inside the zone, and Standard or Regional inside the geography.</p>
+  <div class="callout matters"><span class="label">Logging creates a copy the provider did not keep</span>Bedrock invocation logging is off by default and writes to your own storage. Vertex AI request-response logging is off by default and writes to BigQuery. Turning either on creates a copy of your prompts that the provider otherwise would not hold, and the retention policy of that copy is now yours. For Foundry, resource logs are not collected until you create a diagnostic setting. Whether those logs include prompt content was not confirmed.</div>
+  <h2>Guardrails are provider-run filters you tune</h2>
+  <p>Each provider offers content filtering, and none of it is a guarantee. Bedrock Guardrails evaluate input and output and can run on their own through an <code>ApplyGuardrail</code> call without invoking a model. AWS updates the models behind them automatically. If a guardrail blocks the output you still pay for the inference already generated. Foundry switches default filters on for its OpenAI models at a Medium threshold, and its classic page says that if the filter service is down or times out the request completes without filtering. Vertex AI's safety-filter default differs by model, and its own page lists both OFF and a medium threshold. Because the models behind these filters change without notice, a regression suite that includes refusals and edge cases is the control you own.</p>
+  <h2>Retirement: the provider owns the calendar</h2>
+  <p>Pinning a model version does not pin it forever. Foundry gives standard generally available (GA) models a retirement date 18 months out (12 months for some partner families) with at least 60 days' notice, and states that retirement dates are not extendable. A deployment set to <code>NoAutoUpgrade</code> stops working at retirement, and provisioned deployments are never upgraded automatically. Vertex AI commits that a retirement date may be extended but will not move earlier, and gives at least 45 days' notice for shorter-lived models. Bedrock moves a model from Active to Legacy to end of life; for models launched on or after 2026-09-07 the Legacy period is six months or 45 days, existing customers can lose access to a Legacy model after 15 days of inactivity, and at end of life nothing migrates automatically.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Your regression suite must be re-runnable inside the shortest retirement notice you depend on.</p><p class="know-why">The provider sets the calendar and, on Foundry, says plainly that it cannot be extended. A swap you cannot evaluate within the notice window becomes a forced, unmeasured migration, and a rarely called fallback model can disappear before anyone notices.</p><p class="know-eg"><span class="know-eg-label">For example</span>A fallback model called a few times a month is moved to Legacy on Bedrock. After 15 days without a call, access may lapse, well before the end-of-life date. The first sign is a failed request during a primary-model outage.</p></blockquote>
+  <h2>What was not retrieved</h2>
+  <ul><li>Every dollar price, from all three providers. The Foundry pricing page rendered placeholders and the Vertex AI page returned only its title.</li><li>Default quota values, and numeric latency targets for reserved capacity.</li><li>Bedrock batch turnaround, and any retention period for Azure abuse-monitoring data.</li><li>The status of the older Azure AI Model Inference API, and Vertex AI's Priority and Flex pay-as-you-go semantics.</li><li>Where the providers' own pages disagree, this lesson teaches the disagreement: Foundry names the retry header both <code>retry-after-ms</code> and <code>Retry-After</code>, and its pages list the Data Zone options as US or EU in one place and US, EU or APAC in another.</li></ul>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://docs.aws.amazon.com/bedrock/latest/userguide/quotas-token-burndown.html" target="_blank" rel="noopener">Bedrock: token counting and quota burndown</a><span class="link-note">Source for the max_tokens deduction and the 36,000 and 9,000 example.</span></li><li><a href="https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle.html" target="_blank" rel="noopener">Bedrock: model lifecycle</a><span class="link-note">Active, Legacy and end-of-life states and notice periods.</span></li><li><a href="https://docs.aws.amazon.com/bedrock/latest/userguide/data-retention.html" target="_blank" rel="noopener">Bedrock: data retention</a><span class="link-note">The per-Region retention setting.</span></li><li><a href="https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/data-residency" target="_blank" rel="noopener">Vertex AI: data residency</a><span class="link-note">Which endpoints guarantee a processing location.</span></li><li><a href="https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions" target="_blank" rel="noopener">Vertex AI: model versions and retirement</a><span class="link-note">Retirement dates and the commitment not to move them earlier.</span></li><li><a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types" target="_blank" rel="noopener">Foundry: deployment types</a><span class="link-note">Global, Data Zone, Standard, Provisioned and Batch, and where each processes data.</span></li><li><a href="https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirements" target="_blank" rel="noopener">Foundry: model retirements</a><span class="link-note">The 18-month and 12-month lifetimes and the 60-day notice.</span></li><li><a href="https://learn.microsoft.com/en-us/azure/foundry-classic/openai/how-to/quota" target="_blank" rel="noopener">Foundry: quota (classic portal page)</a><span class="link-note">Source for the estimate-at-receipt token check. A classic-portal page dated 2026-05.</span></li></ul></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788100000000-calling-an-api-you-do-not-control.html">Calling an API You Do Not Control</a><span class="link-note">It will fail, it will be slow, and it will occasionally charge you twice for the same work.</span></li><li><a href="lsn-1788100000001-serving-one-yourself.html">Serving One Yourself</a><span class="link-note">The concerns that appear the moment the caller is not you — worked against Project 4.</span></li><li><a href="lsn-1788100000003-after-it-ships.html">After It Ships</a><span class="link-note">What to watch, what to wake someone for, and the difference between the service being up and the service being right.</span></li><li><a href="../core-vocabulary/lsn-1787000000028-latency-and-caching.html">Latency, Prefills and Caching</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why can an oversized max_tokens cause a 429 on Bedrock before the model has produced any output?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">The quota check reserves input tokens plus max_tokens when the request starts</div>
+      <div class="quiz-opt">Large caps disable prompt caching</div>
+      <div class="quiz-opt">The provider bills the full cap in advance</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. A team picks the Vertex AI global endpoint to reduce 429 errors. What does it give up?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Access to Gemini models</div>
+      <div class="quiz-opt">The guarantee of where machine-learning processing happens</div>
+      <div class="quiz-opt">Prompt caching</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. What is the safest way to describe a provider&#x27;s batch mode on Vertex AI or Foundry?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">A 24-hour target with no hard real-time guarantee</div>
+      <div class="quiz-opt">A guaranteed 24-hour turnaround</div>
+      <div class="quiz-opt">Always faster than real-time inference</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Why must a regression suite be re-runnable within the shortest retirement notice you depend on?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">The provider sets the retirement date and may not extend it, so an unmeasured swap becomes forced</div>
+      <div class="quiz-opt">Retired models are deleted from your account</div>
+      <div class="quiz-opt">Notice periods are set by the customer</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

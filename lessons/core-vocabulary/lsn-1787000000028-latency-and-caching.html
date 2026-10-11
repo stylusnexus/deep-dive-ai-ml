@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latency, Prefills and Caching</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 29 of 33</span>
+  <h1>Latency, Prefills and Caching</h1>
+  <p class="subtitle">Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.</p>
+
+  <p>"The model is slow" is four different problems wearing one description. Separating them is the difference between fixing latency and buying a bigger machine that does not help.</p>
+  <h2>The two phases, and why the split matters</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Prefill</div><div><div class="roadmap-title">Processing your prompt</div><div class="roadmap-desc">All tokens at once, in parallel. Fast per token, and it scales with how much you sent.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decode</div><div><div class="roadmap-title">Generating the answer</div><div class="roadmap-desc">One token at a time, each requiring a full pass. Slow, sequential, and what you watch while waiting.</div></div></div></div>
+  <p>Two numbers follow, and they move independently. <strong>Time to first token</strong> is dominated by prefill, so it grows with prompt length. <strong>Tokens per second</strong> is decode, and it barely changes with prompt length at all. Quoted throughput figures are almost always decode.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Prefill and decode across two request shapes">
+<text x="12" y="18" class="d-label-sm">short prompt, long answer</text>
+<rect x="12" y="28" width="60" height="28" rx="4" class="d-fill-accent" opacity="0.8"/>
+<text x="22" y="47" class="d-label-sm">prefill</text>
+<rect x="76" y="28" width="380" height="28" rx="4" class="d-fill-green" opacity="0.55"/>
+<text x="230" y="47" class="d-label-sm">decode</text>
+<text x="466" y="47" class="d-fill-green" font-size="11" font-weight="600">feels responsive</text>
+<text x="12" y="88" class="d-label-sm">long prompt (retrieved context), short answer</text>
+<rect x="12" y="98" width="300" height="28" rx="4" class="d-fill-accent" opacity="0.8"/>
+<text x="140" y="117" class="d-label-sm">prefill</text>
+<rect x="316" y="98" width="70" height="28" rx="4" class="d-fill-green" opacity="0.55"/>
+<text x="330" y="117" class="d-label-sm">decode</text>
+<text x="396" y="117" class="d-fill-red" font-size="11" font-weight="600">long silence, then a quick answer</text>
+<line x1="12" y1="146" x2="628" y2="146" stroke="var(--border)"/>
+<text x="12" y="170" class="d-label-sm">Both may report the same tokens per second. Only one of them feels slow — and the fix for that one is</text>
+<text x="12" y="188" class="d-label-sm">to send fewer tokens or reuse the cache, not to find a faster model.</text>
+</svg><figcaption>The same request, two very different profiles. A long prompt with a short answer feels sluggish before anything appears; a short prompt with a long answer starts instantly and takes a while. Both might report identical tokens per second.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Time to first token and tokens per second are different problems with different fixes.</p><p class="know-why">TTFT is prefill and scales with what you sent. Throughput is decode and barely moves with prompt length. Optimising the wrong one produces no perceptible change while looking like diligent work.</p><p class="know-eg"><span class="know-eg-label">For example</span>A retrieval-augmented generation (RAG) endpoint takes four seconds before anything appears, then streams quickly. Swapping to a model with 40% higher throughput changes almost nothing, because the four seconds was prefill on 8,000 tokens of retrieved context. Retrieving five chunks instead of twenty halves it.</p></blockquote>
+  <h2>The cost curve in a conversation</h2>
+  <p>The whole conversation is re-sent every turn, so prefill grows with the transcript. Turn twenty prefills roughly twenty times what turn one did, and it happens on every single turn — which is why long agent sessions get slower and more expensive in a way that feels disproportionate.</p>
+  <p>This is not a gentle slope. Because the cost of turn <em>n</em> is proportional to <em>n</em>, the total cost of a conversation grows with the square of its length. A forty-turn session is not twice a twenty-turn session; it is around four times.</p>
+  <h2>Prompt caching, which is the lever</h2>
+  <p>Providers can keep the processed form of an unchanged prefix — the keys and values already computed — rather than recomputing it. On a cache hit you pay for the new tokens only. That is prefill almost entirely eliminated for the stable part of your prompt.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">It keys on an exact prefix</div><div><div class="roadmap-title">Byte-identical, from the start</div><div class="roadmap-desc">Change one character early and everything after it is a miss. Order is not a style choice.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Stable content goes first</div><div><div class="roadmap-title">System prompt, tools, long documents</div><div class="roadmap-desc">Variable content — the user's turn — goes last.</div></div></div><div class="roadmap-item"><div class="roadmap-num">It has a lifetime</div><div><div class="roadmap-title">Minutes, typically</div><div class="roadmap-desc">A cache that has expired is a cold start again.</div></div></div><div class="roadmap-item"><div class="roadmap-num">It is priced differently</div><div><div class="roadmap-title">Writes cost slightly more, reads much less</div><div class="roadmap-desc">Which means caching a prefix used once is a small loss, and one used fifty times is a large win.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Prompt caching keys on an exact, unchanged prefix — so anything variable must go last.</p><p class="know-why">The cache matches from the beginning of the prompt until the first difference. A timestamp, a session id, or a re-ordered tool list near the front invalidates everything after it, and the hit rate silently goes to zero while the code looks correct.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team added the current date to the top of their system prompt for freshness. Cache hit rate went from 90% to zero overnight, cost tripled, and nothing in the application errored. The date changed the first line, so every subsequent token had to be reprocessed on every request.</p></blockquote>
+  <h2>Six things are called caching, on four levels</h2>
+  <p>They share a word and almost nothing else, which is why a conversation about &ldquo;adding caching&rdquo; can run for ten minutes with two people meaning different things. Sorting them by <em>what they store</em> and <em>who controls them</em> makes the differences visible, and puts the only dangerous one on its own.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Hardware caches</div><div><div class="roadmap-title">The chip — you never name them</div><div class="roadmap-desc">Registers, shared memory and the L1 and L2 caches: the memory ladder from the hardware lesson. Automatic, invisible in your code, and influenced only through access patterns. Nothing you write addresses them by name.</div></div></div><div class="roadmap-item"><div class="roadmap-num">KV cache</div><div><div class="roadmap-title">Inside one request</div><div class="roadmap-desc">The keys and values for tokens already processed, held so that generating token 500 does not reprocess the first 499. Not a feature you enable — it is how generation works at all. It lives in memory, it grows with context length and batch size, and it is usually what runs you out of it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Prefix caching</div><div><div class="roadmap-title">Across requests, in the server</div><div class="roadmap-desc">Reusing those same keys and values when a new request begins with a prefix that has already been computed. Serving engines do this automatically and without being asked, which is why a second identical request is often faster with no code change at all.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Prompt caching</div><div><div class="roadmap-title">The same thing, billed</div><div class="roadmap-desc">Prefix caching exposed as a product: you mark where the stable part ends, entries have a lifetime, and writes and reads are priced differently. This is the one you can get wrong, because it is the one with a knob.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Semantic caching</div><div><div class="roadmap-title">Before the model, in your application</div><div class="roadmap-desc">Embed the incoming question, and if it is close enough to one you have answered before, return the stored answer without calling the model. Nothing to do with keys, values or prefixes — a different layer solving a different problem.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Exact-match response cache</div><div><div class="roadmap-title">Also before the model, and much safer</div><div class="roadmap-desc">Return a stored answer when the request is byte-identical to an earlier one. It saves the output tokens too, like a semantic cache, and carries no false-positive risk because it does no similarity matching at all. Measure your byte-identical repeat rate before reaching for embeddings — it is often higher than people expect, and it cannot be wrong.</div></div></div></div>
+  <figure class="diagram"><svg viewBox="0 0 640 260" role="img" aria-label="Four kinds of caching, by layer"><defs><marker id="cch" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="14" width="200" height="58" rx="7" class="d-box-accent"/>
+<text x="26" y="38" class="d-label-b">SEMANTIC CACHE</text>
+<text x="26" y="58" class="d-label-sm">your app — answers, by similarity</text>
+<path d="M212 43 L266 43" class="d-arrow-accent" marker-end="url(#cch)"/>
+<text x="276" y="40" class="d-label-sm">hit? the model is never called</text>
+<path d="M112 72 L112 104" class="d-arrow-accent" marker-end="url(#cch)"/>
+<text x="126" y="94" class="d-label-sm">miss</text>
+<rect x="12" y="104" width="200" height="58" rx="7" class="d-box"/>
+<text x="26" y="128" class="d-label-b">PROMPT CACHING</text>
+<text x="26" y="148" class="d-label-sm">the provider — prefix, billed</text>
+<path d="M212 133 L266 133" class="d-arrow-accent" marker-end="url(#cch)"/>
+<text x="276" y="130" class="d-label-sm">you mark the breakpoint</text>
+<path d="M112 162 L112 194" class="d-arrow-accent" marker-end="url(#cch)"/>
+<rect x="12" y="194" width="200" height="54" rx="7" class="d-box"/>
+<text x="26" y="216" class="d-label-b">PREFIX + KV CACHE</text>
+<text x="26" y="236" class="d-label-sm">the server — keys and values</text>
+<path d="M212 221 L266 221" class="d-arrow-accent" marker-end="url(#cch)"/>
+<text x="276" y="218" class="d-label-sm">automatic; nothing to configure</text>
+</svg><figcaption>Four levels. The hardware ladder is beneath everything and never named in code; the KV, prefix and prompt caches are one mechanism exposed at three levels; the answer caches sit in front and can skip the model entirely. Only the middle band holds decisions you make.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">All but the answer caches reuse computation. Those skip the model, which is a different risk entirely.</p><p class="know-why">A prefix cache can only ever return what the model would have returned anyway, because it is replaying arithmetic that was already done. A semantic cache returns an answer to a <em>different question</em> that scored as similar — so its failure mode is not a slow response or a larger bill, but a confident wrong answer with nothing in the logs to suggest anything happened.</p><p class="know-eg"><span class="know-eg-label">For example</span>Two support queries: &ldquo;how do I cancel my subscription?&rdquo; and &ldquo;how do I cancel my subscription without losing my data?&rdquo;. They embed close together. A semantic cache tuned loosely answers the second with the first, and the customer loses their data.</p></blockquote>
+  <h3>The threshold, measured</h3>
+  <p>That is a strong claim, so here it is as a measurement rather than an assertion. Twelve question pairs through the same encoder the retrieval block uses, scored by cosine similarity, sorted by score. Reproduce it with <code>python3 scripts/measure_semantic_threshold.py</code>.</p>
+  <pre><code> score  may share?  class                pair
+ 0.992  YES         paraphrase           &#x27;How do I reset my password?&#x27; vs &#x27;How can I reset my password?&#x27;
+ 0.984  NO          negation             &#x27;Should I restart the turbine?&#x27; vs &#x27;Should I not restart the turbine?&#x27;
+ 0.969  NO          one value changed    &#x27;turbines under 5 years&#x27; vs &#x27;turbines over 12 years&#x27;
+ 0.966  NO          one value changed    &#x27;threshold at 0.80 mm/s&#x27; vs &#x27;threshold at 0.45 mm/s&#x27;
+ 0.949  YES         paraphrase           &#x27;What is the gearbox oil temperature limit?&#x27; vs &quot;What&#x27;s the maximum...?&quot;
+ 0.940  YES         paraphrase           &#x27;How do I cancel my subscription?&#x27; vs &quot;What&#x27;s the process for cancelling...?&quot;
+ 0.928  NO          negation             &#x27;Is the API rate limited?&#x27; vs &#x27;Is the API not rate limited?&#x27;
+ 0.913  NO          one value changed    &#x27;Refund policy for annual plans&#x27; vs &#x27;Refund policy for monthly plans&#x27;
+ 0.839  NO          negation             &#x27;Is this covered under warranty?&#x27; vs &#x27;Is this excluded from warranty?&#x27;
+ 0.644  NO          added constraint     &#x27;How do I cancel my subscription?&#x27; vs &#x27;...without losing my data?&#x27;
+ 0.149  NO          missing prior turn   &#x27;What is the failure rate at Clyde?&#x27; vs &#x27;And at Whitelee?&#x27;
+ 0.073  NO          unrelated (control)  &#x27;How do I reset my password?&#x27; vs &#x27;What are your office hours?&#x27;
+
+lowest score among pairs that SHOULD share an answer : 0.940
+highest score among pairs that MUST NOT share one    : 0.984</code></pre>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A negation that reverses the answer scores higher than a genuine paraphrase.</p><p class="know-why">&ldquo;Should I restart the turbine?&rdquo; and &ldquo;Should I not restart the turbine?&rdquo; need opposite answers and score 0.984. Two of the three real paraphrases in the same run score lower than that. Since the must-differ pairs reach above the weakest should-share pair, no cut-off separates them: set it below 0.940 and you answer the negation with its opposite, set it above and you stop hitting on genuine rephrasings while still paying to embed every request.</p><p class="know-eg"><span class="know-eg-label">For example</span>Three of the twelve pairs — one negation and two where a single operational value changed — score at or above the weakest genuine paraphrase. Those are the hits that return a confident wrong answer, and nothing distinguishes them from a correct hit except reading both questions.</p></blockquote>
+  <p>One honest note about that table: the follow-up needing its previous turn scored 0.149, far below anything a cache would hit on. In this run it would have been a miss rather than a wrong answer — a cost problem, not a correctness one. The failures that bite are the ones that look almost identical and mean the opposite.</p>
+  <h3>Two places this course contradicts itself, and how to resolve it</h3>
+  <p>The caching material and the agent material were written separately, and they give advice that collides. Both collisions are real and worth knowing before you follow either lesson.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Compaction rewrites the front</div><div><div class="roadmap-title">Summarising history destroys the cache</div><div class="roadmap-desc">The agent lessons offer a ladder of compaction strategies. Caching rewards appending at the tail and summarising edits the beginning, so replacing history with a summary makes the next call pay full price on everything. Truncating a tool result <em>in place</em> keeps the prefix byte-identical and the cache alive; summarising the transcript does not. Choose knowing which one you are buying.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Retrieval reorders the middle</div><div><div class="roadmap-title">Prefix caching gives a guarantee retrieval cannot use</div><div class="roadmap-desc">A retrieval prompt is instructions, then retrieved chunks, then the question. The chunks change per request and — worse — change <em>order</em> between requests, because retrieval scores shift with small rewordings and rerankers reorder by design. Retrieve the same three documents in a different order and the very first block after the system prompt differs, so every block hash after it diverges and the hit rate is <em>zero</em>, not merely lower. The direction is what matters and it follows from the mechanism rather than from a study: every additional retrieved fragment is another chance for the block sequence to differ, so hit rate falls as the retrieved portion grows and as its ordering varies. The mechanism needs a shared prefix and retrieval produces a shared <em>set</em>; those are different things. Sorting retrieved chunks deterministically before rendering is the cheapest partial fix.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Two sort keys, one ordering</div><div><div class="roadmap-title">Caching orders by volatility; attention orders by importance</div><div class="roadmap-desc">Different keys applied to the same list, and you only sort once. Caching is not expressing a preference &mdash; the prefix must be literal, so stable content goes first and volatile last or there is no cache at all. Attention wants whatever matters at an end. Where the two keys agree the rules agree: the user&#39;s question is both the most volatile and among the most important, and belongs last under either. Where they disagree you are choosing, not optimising.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The tail belongs to volatile content</div><div><div class="roadmap-title">So stable material competes for one good position</div><div class="roadmap-desc">Because the end is reserved for whatever changes per request, important <em>stable</em> content can only ever take the early slot, never the late one. A long stable prefix &mdash; system prompt, tools, examples, fixed documents &mdash; pushes most of itself into the middle, which is the position the evidence says is used least. Cache economics reward lengthening that prefix; attention penalises what lands in the middle of it. Both pressures act at once and nothing resolves them for you.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A high hit rate can cost more memory</div><div><div class="roadmap-title">Hit rate and memory efficiency are separate measurements</div><div class="roadmap-desc">Because a block's identity includes everything before it, the same chunk appearing at position two and at position five is two cache entries holding two full copies of its keys and values. Across a corpus where popular chunks appear in many positions, a system can report an excellent hit rate while consuming more memory than one reporting a worse figure. Report the two numbers separately or the good one hides the bad one.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Repeating a critical instruction at the very end is nearly free, because appending to the tail does not invalidate a prefix.</p><p class="know-why">This is the way out of the bind above, and it rests on an asymmetry worth holding onto: editing the front of a prompt destroys the cache while adding to the back does not. A constraint that must land can therefore be paid for once inside the cached prefix, where it is effectively free after the first call, and again in the final few tokens, where attention is strongest and the only cost is those tokens. You buy the late position without giving up the cache, which the two rules taken separately imply you cannot do.</p><p class="know-eg"><span class="know-eg-label">For example</span>A two-thousand-token system prompt holds the policies, cached and near-free after the first call. The one constraint that must not be missed &mdash; never send a customer message without approval &mdash; is thirty tokens repeated immediately before the user&#39;s turn. The cache still hits on the two thousand; the thirty are recomputed every call and sit exactly where the model reads most reliably.</p></blockquote>
+  <div class="callout warning"><span class="label">A cache that stopped working raises no error</span><p>Every failure on this page fails open. The request still succeeds, the answer is still correct, and the only symptom is the bill — which is why these are typically found a month late. A timestamp near the front, a reordered tool list, a model switch mid-session, or a compaction pass will each take the hit rate to zero silently. Read <code>cache_read_input_tokens</code> on real traffic rather than trusting that it is working.</p></div>
+  <div class="callout pitfall"><span class="label">The threshold is the whole design</span><p>Semantic caching lives or dies on the similarity threshold, and there is no setting that is safe everywhere. Tight enough to be correct and it almost never hits; loose enough to hit often and it starts answering questions nobody asked. If you cannot state what a near-miss costs, you are not ready to turn it on.</p></div>
+  <h2>Inside the serving engine: the trie and the disk tier</h2>
+  <p>Prefix caching is easy to describe and fiddly to build. A server has to find, among thousands of cached prompts, the one that shares the longest opening with a new request, and it has to do that on every request without scanning them all. The data structure that does it is a <strong>trie</strong>, also called a prefix tree: each step down the tree is one token (or one block of tokens), so two prompts that begin the same way share the same path and only diverge where their text does.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Prefix-trie cache</div><div><div class="roadmap-title">Longest match in one walk</div><div class="roadmap-desc">The cache stored as a tree keyed by token blocks. A new request walks down from the root for as long as its tokens match, reuses the stored keys and values for that whole path, and computes only the rest. A system prompt shared by a thousand requests is stored once. The same idea ships as a radix tree in the SGLang engine (RadixAttention); vllm-mlx describes its prefix cache as trie-based. Same mechanism, different tree.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Why a tree and not a dictionary</div><div><div class="roadmap-title">Sharing is partial</div><div class="roadmap-desc">A dictionary keyed on the full prompt only hits on an identical prompt. A trie hits on any shared opening, so two conversations that diverge at turn four still share turns one to three. This is the exact-prefix rule from earlier, stored efficiently.</div></div></div><div class="roadmap-item"><div class="roadmap-num">SSD cache (disk tier)</div><div><div class="roadmap-title">Memory is the limit, so spill</div><div class="roadmap-desc">Keys and values for a long prefix take real memory, and on a laptop that memory is also holding the weights. An SSD (solid-state drive) tier writes older prefix entries to disk instead of discarding them, to be read back when a request matches. The bet is that reading stored keys and values is cheaper than recomputing them. Whether it pays depends on the prefix length, the drive and the engine&#39;s implementation, so it is something to test rather than assume.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Eviction</div><div><div class="roadmap-title">Something has to go</div><div class="roadmap-desc">Whichever tier is full drops the entries least likely to be wanted again, typically the least recently used. The prefix that falls out is then a cold start in miniature, exactly as with an expired provider cache.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Test a disk-backed cache before you depend on it, because it only runs under the memory pressure a quick test never creates.</p><p class="know-why">A disk tier adds a writer thread, a file format and an eviction path to a cache that already works. That path runs only when memory is full, so a short test with a few small prompts never reaches it, and a failure there shows up weeks later on a long agent session.</p><p class="know-eg"><span class="know-eg-label">For example</span>Run for this course: vllm-mlx 0.4.1 and then 0.5.0, a 1.5-billion-parameter 4-bit text model, memory cap lowered to force eviction. Both times the server process aborted on the first eviction, with a thread-stream error from the MLX library, after answering one request. A 9-billion-parameter model on the same flags went through the engine&#39;s multimodal code path, which never touched the disk tier, so that run neither confirmed nor cleared it. The cause was not established. The lesson is the procedure below: force eviction on purpose and look at the result.</p></blockquote>
+  <div class="callout matters"><span class="label">Same word, same mechanism, three places it lives</span><p>Prefix caching in a server, a trie to find the match, and a disk tier to keep it are one idea at three layers: <em>reuse the arithmetic you already did</em>. Everything in the earlier caching section still applies. The prefix must still be literal, volatile content must still go last, and a cache that stops hitting still raises no error. A disk tier just makes the cache bigger and longer-lived, and does not change what counts as a hit.</p></div>
+  <h3>Measure it on your own engine</h3>
+  <p>Everything in this section is a claim about an engine, and engines differ. <code>scripts/bench_engines.py</code> turns each claim into a measurement. It uses only the standard library and talks to any OpenAI-compatible streaming endpoint, so the same commands work against vllm-mlx, <code>mlx_lm.server</code>, <code>llama-server</code>, Ollama and LM Studio, and against vLLM or SGLang on an NVIDIA machine. Start the server, then run one test against it:</p>
+  <pre><code># 1. Which kinds of reuse does the prefix cache serve?
+python3 scripts/bench_engines.py --model MODEL prefix
+
+# 2. Does the disk tier survive memory pressure, and a restart?
+#    Start the server with a SMALL memory cap and the disk tier on, then:
+python3 scripts/bench_engines.py --model MODEL evict --count 6 --words 3000 --state /tmp/evict.json
+#    restart the server (same flags), then:
+python3 scripts/bench_engines.py --model MODEL revisit --state /tmp/evict.json
+
+# 3. What does batching do under load, and to a short request behind a long one?
+python3 scripts/bench_engines.py --model MODEL batching --concurrency 1 4 8
+python3 scripts/bench_engines.py --model MODEL staggered
+
+# 4. What does thinking cost, and what does it buy?
+python3 scripts/bench_engines.py --model MODEL thinking \
+    --arm on=&#x27;{}&#x27; --arm off=&#x27;{&quot;chat_template_kwargs&quot;:{&quot;enable_thinking&quot;:false}}&#x27;</code></pre>
+  <ul><li><strong>Change one flag between runs.</strong> Run each test with the option off, then on. A single number says little. The comparison is the result.</li><li><strong>The prefix test separates three kinds of reuse.</strong> The same request again, a new question after the same long opening, and a next conversation turn. Engines differ on which they serve, and a workload that needs the one yours does not serve gets no benefit from the cache. A warm column close to the cold one means that kind is not cached.</li><li><strong>Every cold run uses a fresh random prefix.</strong> An engine can keep cache entries across restarts, so a prompt reused from an earlier run is already warm. Run for this course, vllm-mlx wrote its in-memory entries to a cache directory on shutdown and started the next server with them loaded.</li><li><strong>The batching test counts failures.</strong> The <code>ok</code> column is how many streams actually returned text. A server that rejects concurrent requests produces fast empty replies, and an average over them would look like a speedup.</li><li><strong>The staggered test refuses to report when nothing overlapped.</strong> If the long request ended before the short one arrived, it says so instead of printing a flattering number.</li></ul>
+  <p>Results from running it here, one run each on one machine, so they show direction. In default mode a 2,360-token prefix took 1.75 seconds cold and 0.09 seconds warm, and a 7,071-token prefix took 5.18 seconds cold and 0.12 seconds warm, for all three kinds of reuse. A one-word edit at the very front took 3.14 and 5.51 seconds: as cold as a new prefix. With continuous batching on, a new question and a next turn were served warm, but repeating the identical request was not: 4.42 seconds against 3.40 cold at the shorter prefix, and 15.66 against 14.93 at the longer. That was not explained. It is the kind of surprise the test exists to find.</p>
+  <div class="callout pitfall"><span class="label">A busy machine ruins a latency test</span><p>During these runs another job on the same machine pushed the load average past fifty. Decode speed for the same server moved from about 308 tokens per second in one run to about 41 in another, and one cold prefill took about three times as long as the next. The script prints the load average before it starts, reports medians over repeated trials, and flags a busy machine, but it cannot fix one. Close other work first, repeat the run, and distrust any figure you could not reproduce.</p></div>
+  <h2>Cold start</h2>
+  <p>Separate from caching, and often confused with it. A cold start is the time before your system can serve <em>any</em> request: loading weights from disk into memory, allocating the KV cache, warming the runtime. For a large local model this can be tens of seconds.</p>
+  <ul><li><strong>Local serving.</strong> First request after loading a model pays for the load. Ollama and similar keep a model resident for a while, then evict it — so an idle system goes cold and the next user waits.</li><li><strong>Serverless.</strong> The classic case: no traffic means no container, and the first request pays for everything.</li><li><strong>Model switching.</strong> Routing between two large local models can mean unloading one to load the other. On constrained memory, alternating requests is pathological.</li><li><strong>Cache expiry.</strong> A warm prefix that has aged out is a cold start in miniature.</li></ul>
+  <div class="callout matters"><span class="label">The fix is usually keeping something warm, not making it faster</span>A periodic keep-alive request, a longer residency setting, or provisioned capacity. None of these make the system faster; they move the cost off the user's critical path onto a schedule. That is almost always the right trade, and it is a configuration change rather than an engineering project.</div>
+  <h2>Warm, cold, and the states in between</h2>
+  <p>"Is it warm?" is really four questions, and they fail at different scales. Knowing which one you are in tells you whether to wait, to configure something, or to change the design.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Fully cold</div><div><div class="roadmap-title">Nothing loaded</div><div class="roadmap-desc">Weights being read from disk into memory. Tens of seconds for a large local model. Affects the first user after any idle period.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Model warm, cache cold</div><div><div class="roadmap-title">Loaded, no cached prefix</div><div class="roadmap-desc">The common steady state. You pay full prefill on every request, which is fine for short prompts and painful for long ones.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Fully warm</div><div><div class="roadmap-title">Loaded, prefix cached</div><div class="roadmap-desc">The good case. New tokens only. This is what a well-designed multi-turn loop spends most of its time in.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Warm but evicted</div><div><div class="roadmap-title">The trap</div><div class="roadmap-desc">Runtimes unload idle models and caches expire. A system that was warm ten minutes ago is cold now, and nothing announced the transition.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Warm is a state you have to maintain, not one you reach.</p><p class="know-why">Models get evicted after idle periods and cached prefixes expire on a timer. A system that was fast during testing can be cold in production simply because real traffic is bursty and test traffic was not.</p><p class="know-eg"><span class="know-eg-label">For example</span>An internal tool is snappy all through development, because someone is always using it. In production it serves twenty requests a day, spread out. Almost every one is a cold start, and users describe it as unusably slow — the same code, the same model, a different traffic shape.</p></blockquote>
+  <h2>What inference cannot do for you</h2>
+  <p>Some limits are architectural rather than a matter of tuning, and recognising them saves you from optimising toward a wall:</p>
+  <ul><li><strong>Decode is sequential and cannot be parallelised within one response.</strong> Each token depends on the previous one. More hardware serves more users concurrently; it does not make a single response arrive faster past a point.</li><li><strong>Batching helps throughput, not latency.</strong> Serving eight users at once is far more efficient in total, and any individual user may wait slightly longer. These are different objectives and you must pick one to optimise.</li><li><strong>Context has a hard ceiling.</strong> Not a soft slope — beyond the trained length, behaviour degrades or the request is rejected outright.</li><li><strong>Local inference is memory-bandwidth bound.</strong> A faster processor with the same memory bandwidth generates tokens at nearly the same rate.</li><li><strong>Quantisation buys speed and capacity, not capability.</strong> It makes a bigger model fit. It does not make a model better at the task.</li></ul>
+  <h2>Where the time actually goes</h2>
+  <p>Before optimising, measure the split. A single end-to-end number tells you nothing about which lever to pull:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Retrieval</div><div><div class="roadmap-title">Often larger than expected</div><div class="roadmap-desc">An unoptimised vector query or a reranker over too many candidates can dominate everything else.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Prefill</div><div><div class="roadmap-title">Scales with what you send</div><div class="roadmap-desc">Reduce context or improve cache hits.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decode</div><div><div class="roadmap-title">Scales with what you ask for</div><div class="roadmap-desc">Shorter outputs, or a smaller model for this step.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Tool calls</div><div><div class="roadmap-title">Each is a round trip plus a model turn</div><div class="roadmap-desc">Five sequential tools is five of both. Parallelise where the calls are independent.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Queueing</div><div><div class="roadmap-title">Invisible until you look</div><div class="roadmap-desc">Under concurrency, waiting for a slot can exceed the work itself.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Measure the split before optimising, because the biggest component is rarely the model.</p><p class="know-why">Retrieval, prefill, decode, tool round trips and queueing all live inside one end-to-end number. Teams routinely spend weeks on model selection when most of their latency was a reranker scoring 500 candidates.</p><p class="know-eg"><span class="know-eg-label">For example</span>A 6-second p95 broke down as: 2.4s retrieval, 1.9s prefill, 0.9s decode, 0.8s in two sequential tool calls. The model accounted for under a sixth of it. Capping the rerank candidate set at 50 removed two seconds in a one-line change.</p></blockquote>
+  <h2>Speculative decoding, which attacks the decode bound directly</h2>
+  <p>Decode is slow for a structural reason this lesson has already established: producing one token means reading the whole model out of memory, and the arithmetic done with those bytes is trivial by comparison. You are paying for byte movement, and one token is all you get for it. Speculative decoding is the trick that gets more than one.</p>
+  <p>A small, cheap draft model runs ahead and proposes the next few tokens. The real model then <em>checks all of them in a single forward pass</em> — because verifying a handful of tokens is one pass over the weights, in the same way a prefill is, not one pass per token. Where the draft was right, you keep the tokens and have got several for roughly the price of one. Where it was wrong, you discard from the first mismatch onwards and have lost only the draft model's cheap work.</p>
+  <figure class="diagram"><svg viewBox="0 0 520 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A draft model proposes four tokens; the target model verifies them in one pass and accepts the first three.">
+<text x="8" y="16" class="d-label-sm">draft model proposes (cheap, one small pass each)</text>
+<rect x="8" y="24" width="86" height="30" rx="5" class="d-box"/><text x="51" y="43" class="d-label" text-anchor="middle">the</text>
+<rect x="100" y="24" width="86" height="30" rx="5" class="d-box"/><text x="143" y="43" class="d-label" text-anchor="middle">cat</text>
+<rect x="192" y="24" width="86" height="30" rx="5" class="d-box"/><text x="235" y="43" class="d-label" text-anchor="middle">sat</text>
+<rect x="284" y="24" width="86" height="30" rx="5" class="d-box"/><text x="327" y="43" class="d-label" text-anchor="middle">down</text>
+<text x="8" y="78" class="d-label-sm">target model verifies all four in ONE pass</text>
+<rect x="8" y="86" width="86" height="30" rx="5" class="d-box-good"/><text x="51" y="105" class="d-label" text-anchor="middle">accept</text>
+<rect x="100" y="86" width="86" height="30" rx="5" class="d-box-good"/><text x="143" y="105" class="d-label" text-anchor="middle">accept</text>
+<rect x="192" y="86" width="86" height="30" rx="5" class="d-box-good"/><text x="235" y="105" class="d-label" text-anchor="middle">accept</text>
+<rect x="284" y="86" width="86" height="30" rx="5" class="d-box-bad"/><text x="327" y="105" class="d-label" text-anchor="middle">reject</text>
+<text x="382" y="105" class="d-label-sm">3 tokens for</text>
+<text x="382" y="118" class="d-label-sm">one pass&#39;s cost</text>
+</svg><figcaption>The draft proposes several tokens; one pass of the target model verifies them all, and the run is kept up to the first disagreement.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Speculative decoding changes when tokens arrive, not what they are.</p><p class="know-why">With the standard acceptance rule the output is drawn from exactly the target model&#39;s distribution — the draft model only proposes, and every proposal is checked against the real model before it survives. This is what separates it from every other technique in this course that makes inference cheaper. Quantisation, pruning and distillation all trade some quality for speed and therefore oblige you to re-evaluate. Speculative decoding does not, so it needs no quality re-check.</p><p class="know-eg"><span class="know-eg-label">For example</span>Leviathan and colleagues, who introduced it, report a 2&ndash;3&times; acceleration on T5-XXL &ldquo;without changing the distribution&rdquo;. If a vendor quotes you a speculative-decoding speedup, the right question is not whether the answers got worse — they did not — but which batch size the figure was measured at.</p></blockquote>
+  <div class="callout pitfall"><span class="label">It buys latency with spare compute, so a busy server has none to sell</span><p>Speculation does more arithmetic, not less: you run the draft model as well, and you verify tokens you may throw away. At batch size one that is free, because the hardware was idle waiting on memory anyway — this is the memory-bound decode the lesson opened with, and the win is large. Under heavy batching the machine is already compute-saturated, the spare capacity speculation was exploiting has been sold to the other requests, and the extra work can leave throughput flat or slightly worse.</p><p>The rule of thumb: speculation is a <em>latency</em> technique for small batches, batching is a <em>throughput</em> technique for large ones, and they compete for the same headroom. Which of the two you want depends on whether one user is waiting or a thousand are.</p></div>
+  <p>How well it works depends entirely on how often the draft agrees with the target, so predictable text speeds up more than genuinely surprising text. That also explains the cheapest variant: rather than running a second model, draft by copying from the prompt itself. For work with a lot of quoting — editing a document, summarising with quotations, rewriting code in place — the next tokens are frequently already sitting in the context, and this costs almost nothing to attempt. You will not find any of this as an API parameter; it is a property of the serving stack, configured by whoever runs the model.</p>
+  <h3>Amdahl&#x27;s law, which is why you measure the split first</h3>
+  <p>The instruction above &mdash; find where the time goes before optimising &mdash; has a name and an arithmetic. <strong>Amdahl&#39;s law</strong> says the speedup available from improving one part of a system is bounded by the fraction of total time that part occupies. Make a stage that is a fifth of your latency infinitely fast and you have saved a fifth; the other four fifths are untouched and now dominate completely.</p>
+  <p>It is worth having as a number rather than a sentiment, because it kills whole projects cheaply. Retrieval taking 200ms of a 2-second request caps any retrieval optimisation at ten per cent, so a fortnight spent halving it buys five per cent &mdash; and the same fortnight spent on the decode that occupies most of the remainder buys considerably more. The law does not tell you what to fix. It tells you the ceiling on what fixing each thing could possibly be worth, which is enough to stop you starting.</p>
+  <h3>Little&#x27;s law, for the capacity question</h3>
+  <p><strong>Little&#39;s law</strong> relates three quantities in any queueing system at steady state: the average number of requests in the system equals the arrival rate multiplied by the average time each one spends there. It holds regardless of how the queue behaves internally, which is what makes it useful when you know nothing about the internals.</p>
+  <p>For serving a model it answers the sizing question directly. Ten requests per second at an average of four seconds each means about forty requests resident at any moment &mdash; forty concurrent generations, forty KV caches in memory. If your hardware holds twelve, you do not have a tuning problem, you have a capacity shortfall of more than threefold, and no amount of prompt work closes it. The same arithmetic run backwards tells you the latency you would need in order to fit, which is often the more useful direction.</p>
+  <h2>Concurrency, which changes the shape of everything</h2>
+  <p>Everything above describes one request in isolation. Under concurrent load the picture changes, and the change is not proportional.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Batching raises throughput</div><div><div class="roadmap-title">And can raise your latency</div><div class="roadmap-desc">A server groups requests to use the hardware efficiently. Total work per second goes up; your individual request may wait to join a batch.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Continuous batching</div><div><div class="roadmap-title">Requests join and leave mid-flight</div><div class="roadmap-desc">Rather than waiting for a whole batch to finish, the server refills a slot at every decoding step. Where the throughput comes from on a shared server. Explained below.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The KV cache is per request</div><div><div class="roadmap-title">And they are all resident at once</div><div class="roadmap-desc">Eight concurrent long conversations means eight caches in memory. This is usually what caps concurrency on local hardware, not compute.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Queueing dominates past saturation</div><div><div class="roadmap-title">Sharply</div><div class="roadmap-desc">Below capacity, latency is roughly flat as load rises. Past it, queue time grows without limit and p95 detaches from p50 violently.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Rate limits are a concurrency ceiling</div><div><div class="roadmap-title">Imposed from outside</div><div class="roadmap-desc">Hosted providers cap tokens per minute and requests in flight. Hitting either produces retries, which look like latency and are really admission control.</div></div></div></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Below capacity, added load barely moves latency; past it, latency grows without limit.</p><p class="know-why">Queueing systems have a knee, not a slope. Testing at 60% of capacity tells you almost nothing about behaviour at 95%, which is where real traffic spends its worst minutes — and where the difference between p50 and p95 explodes.</p><p class="know-eg"><span class="know-eg-label">For example</span>A service holds a steady 800ms p95 through load testing at 50 requests per second. At 70 it goes to nine seconds. Nothing degraded gradually in between; requests started waiting for a slot, and every additional request made the wait longer for everyone behind it.</p></blockquote>
+  <h3>Continuous batching, which is how a server batches without making everyone wait</h3>
+  <p>The simple way to batch is static: collect a handful of requests, run them together, and return when the <em>slowest</em> one finishes. Generation lengths differ wildly, so a request that needs twenty tokens sits finished and idle behind one that needs two thousand, and nothing new can start until the whole batch drains. The hardware is busy, but a growing share of it is busy producing nothing.</p>
+  <p><strong>Continuous batching</strong> (also called in-flight or iteration-level batching) makes the scheduling decision once per decoding step instead of once per batch. When a sequence emits its end-of-sequence token it leaves immediately, and a waiting request takes its slot on the next step. The batch is never empty of useful work and a short request is never held hostage by a long one. The idea was introduced as iteration-level scheduling in the Orca serving system, and it is now the default in vLLM. The Apple Silicon servers modelled on it vary: vllm-mlx needs a flag to turn it on.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 214" role="img" aria-label="Two timelines of three request slots. Static batching leaves idle gaps after short requests; continuous batching fills each gap with the next waiting request."><text x="8" y="16" class="d-label-b">STATIC: the batch ends when the longest request ends</text>
+<rect x="8" y="24" width="230" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="39" class="d-label-sm">A</text>
+<rect x="8" y="50" width="90" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="65" class="d-label-sm">B</text><rect x="100" y="50" width="138" height="22" rx="4" class="d-box"/><text x="118" y="65" class="d-label-sm">idle, waiting on A</text>
+<rect x="8" y="76" width="140" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="91" class="d-label-sm">C</text><rect x="150" y="76" width="88" height="22" rx="4" class="d-box"/><text x="160" y="91" class="d-label-sm">idle</text>
+<text x="252" y="65" class="d-label-sm">D and E are queued until here</text>
+<text x="8" y="130" class="d-label-b">CONTINUOUS: a finished request is replaced on the next step</text>
+<rect x="8" y="138" width="230" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="153" class="d-label-sm">A</text>
+<rect x="8" y="164" width="90" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="179" class="d-label-sm">B</text><rect x="100" y="164" width="138" height="22" rx="4" class="d-fill-green" opacity="0.6"/><text x="110" y="179" class="d-label-sm">D starts at once</text>
+<rect x="8" y="190" width="140" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="205" class="d-label-sm">C</text><rect x="150" y="190" width="88" height="22" rx="4" class="d-fill-green" opacity="0.6"/><text x="160" y="205" class="d-label-sm">E</text>
+<text x="252" y="179" class="d-label-sm">same hardware, no idle slots</text>
+</svg><figcaption>Static batching holds every slot until the longest request finishes. Continuous batching refills a slot the moment its request ends.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Continuous batching is a concurrency feature: it costs a little for one user and pays when several requests overlap.</p><p class="know-why">Slots refill at every decoding step, so a short request finishes when it finishes and a new arrival starts almost at once instead of waiting for a batch to drain. Each stream still decodes one token per step, and the scheduler has a price. vllm-mlx&#39;s own help text calls continuous batching slower for a single user.</p><p class="know-eg"><span class="know-eg-label">For example</span>One run on this course&#39;s machine, vllm-mlx 0.5.0 with a 1.5-billion-parameter 4-bit model. One stream: about 290 tokens per second with continuous batching, about 309 without. Four concurrent streams with continuous batching: all four answered, about 800 tokens per second combined. A later run, on a busier machine, gave about 318 against 257 for one stream, so the multiple at four streams has ranged from about 1.2 to 2.8 here. Four concurrent streams in default mode: one answered and three were rejected with a &ldquo;serialized route is busy&rdquo; error, so that mode is single-user by design. At eight streams the combined rate fell to about 430 and each stream to about 55 tokens per second, and the cause was not established. One run, with other jobs on the machine: read the direction, not the digits.</p></blockquote>
+  <h2>Percentiles, not averages</h2>
+  <p>Report p50 and p95, never the mean. Latency distributions have long tails — a few requests hitting a cache miss, a retry, or a queue take many times the median — and the mean hides exactly the experience that makes people abandon the product. Your p95 is what a frustrated user is describing.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000030-why-the-gpu-is-waiting.html">Why the Graphics Processing Unit (GPU) Is Waiting</a><span class="link-note">One number — work done per byte fetched — explains quantization, batching, and why a chip rated for a quadrillion operations a second gives you thirty tokens a second.</span></li><li><a href="lsn-1787000000001-tokens-context-and-kv-cache.html">Tokens, the Context Window, and the KV Cache</a><span class="link-note">Why a model 'forgets', why long conversations get expensive, and what's actually being cached.</span></li><li><a href="../block3-retrieval/lsn-1787600000004-preloading-instead-of-retrieving.html">Preloading Instead of Retrieving</a><span class="rel-set">Block 3 · Retrieval and Agentic RAG</span><span class="link-note">If the corpus does not change between queries, nothing forces you to wait for a question before reading it.</span></li><li><a href="lsn-1787000000029-session-lifecycle.html">Memory, Compaction and Session Decay</a><span class="link-note">A model has no memory. Everything that looks like memory is something you built — and all of it degrades.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://docs.claude.com/en/docs/build-with-claude/prompt-caching" target="_blank" rel="noopener">Prompt caching</a><span class="link-note">The mechanics, including what invalidates a cached prefix and how the pricing differs for writes and reads.</span></li><li><a href="https://arxiv.org/abs/2211.17192" target="_blank" rel="noopener">Fast Inference from Transformers via Speculative Decoding</a><span class="link-note">Leviathan, Kalman and Matias. The original method and the proof that the output distribution is unchanged.</span></li><li><a href="https://docs.vllm.ai/en/latest/features/speculative_decoding/" target="_blank" rel="noopener">Speculative decoding in vLLM</a><span class="link-note">The serving-side view: draft models, n-gram prompt lookup, and where the speedup goes at higher batch sizes.</span></li><li><a href="https://docs.vllm.ai" target="_blank" rel="noopener">vLLM documentation</a><span class="link-note">Continuous batching and prefix caching from the serving side — the engine-level versions of the levers above.</span></li><li><a href="https://www.usenix.org/conference/osdi22/presentation/yu" target="_blank" rel="noopener">Orca: A Distributed Serving System for Transformer-Based Generative Models</a><span class="link-note">Yu and colleagues, OSDI 2022. Iteration-level scheduling, the origin of what is now called continuous batching.</span></li><li><a href="https://arxiv.org/abs/2309.06180" target="_blank" rel="noopener">Efficient Memory Management for Large Language Model Serving with PagedAttention</a><span class="link-note">Kwon and colleagues. The vLLM paper: why the KV cache is stored in blocks, which is also what makes sharing a prefix between requests cheap.</span></li><li><a href="https://arxiv.org/abs/2312.07104" target="_blank" rel="noopener">SGLang: Efficient Execution of Structured Language Model Programs</a><span class="link-note">Zheng and colleagues. Introduces RadixAttention, the radix-tree prefix cache.</span></li><li><a href="https://github.com/waybarrios/vllm-mlx" target="_blank" rel="noopener">vllm-mlx</a><span class="link-note">A vLLM-style server for Apple Silicon. Its README lists continuous batching, a trie-based prefix cache and an SSD-tiered cache as separate options.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Your endpoint takes four seconds before the first token, then streams quickly. What should you look at?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A model with higher throughput</div>
+      <div class="quiz-opt">Prefill — how many tokens you are sending, and whether the cache is being hit</div>
+      <div class="quiz-opt">The decode sampling parameters</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why does adding a timestamp to the top of a system prompt increase costs sharply?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Timestamps are expensive to tokenize</div>
+      <div class="quiz-opt">The cache keys on an exact prefix, so a change at the front invalidates everything after it</div>
+      <div class="quiz-opt">It forces the model to reason about time</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. A forty-turn conversation costs roughly how much relative to a twenty-turn one?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">About twice as much</div>
+      <div class="quiz-opt">About four times, since the whole transcript is re-sent each turn and cost grows with the square of length</div>
+      <div class="quiz-opt">The same, if caching is enabled</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Why report p95 rather than the mean?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">p95 is easier to compute at scale</div>
+      <div class="quiz-opt">Latency has a long tail, and the mean hides the slow requests that actually make people abandon</div>
+      <div class="quiz-opt">The mean is only valid for normally distributed data</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

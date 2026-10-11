@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MLP Patterns: Twelve Wirings of One Layer</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 11 of 11</span>
+  <h1>MLP Patterns: Twelve Wirings of One Layer</h1>
+  <p class="subtitle">Most architectures are the same layer wired differently. The wiring tells you what a model is for, and where it will fail.</p>
+
+  <p>Almost every network in this course is one layer repeated: a matrix multiply that mixes the inputs, then a <strong>nonlinearity</strong>, a function such as ReLU (the rectified linear unit, which zeroes negative values). Without the nonlinearity, any number of stacked layers collapses into a single multiply. A stack of such layers is a <strong>multi-layer perceptron</strong>, or MLP. What changes between architectures is the wiring: how wide each layer is, how many there are, and how the pieces connect.</p>
+  <p>This lesson names twelve wirings and, for each, says why it exists, when to reach for it and when not to. Every number comes from <code>notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb</code>, which trains small networks on synthetic problems with known answers, or is cited to a paper. The twelve-pattern framing follows Prof. Tom Yeh's AI by Hand series; the text and the measurements are this course's own.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 250" role="img" aria-label="Eight layer-width silhouettes: each pattern is the same layer with a different sequence of widths"><rect x="26" y="26" width="12" height="44" rx="2" class="d-box"/><rect x="44" y="34" width="12" height="28" rx="2" class="d-box"/><rect x="62" y="40" width="12" height="16" rx="2" class="d-box"/><rect x="80" y="44" width="12" height="8" rx="2" class="d-box"/><text x="26" y="92" class="d-label-sm">Encoder</text><rect x="182" y="44" width="12" height="8" rx="2" class="d-box"/><rect x="200" y="40" width="12" height="16" rx="2" class="d-box"/><rect x="218" y="34" width="12" height="28" rx="2" class="d-box"/><rect x="236" y="26" width="12" height="44" rx="2" class="d-box"/><text x="182" y="92" class="d-label-sm">Decoder</text><rect x="338" y="26" width="12" height="44" rx="2" class="d-box"/><rect x="356" y="35" width="12" height="26" rx="2" class="d-box"/><rect x="374" y="44" width="12" height="8" rx="2" class="d-box"/><rect x="392" y="35" width="12" height="26" rx="2" class="d-box"/><rect x="410" y="26" width="12" height="44" rx="2" class="d-box"/><text x="338" y="92" class="d-label-sm">Autoencoder</text><rect x="494" y="40" width="12" height="16" rx="2" class="d-box"/><rect x="512" y="26" width="12" height="44" rx="2" class="d-box"/><rect x="530" y="40" width="12" height="16" rx="2" class="d-box"/><text x="494" y="92" class="d-label-sm">Expand, then shrink</text><rect x="26" y="144" width="12" height="44" rx="2" class="d-box"/><rect x="44" y="162" width="12" height="8" rx="2" class="d-box"/><rect x="62" y="144" width="12" height="44" rx="2" class="d-box"/><text x="26" y="210" class="d-label-sm">Shrink, then expand</text><rect x="182" y="162" width="12" height="8" rx="2" class="d-box"/><rect x="200" y="157" width="12" height="18" rx="2" class="d-box"/><rect x="218" y="150" width="12" height="32" rx="2" class="d-box"/><rect x="236" y="144" width="12" height="44" rx="2" class="d-box"/><rect x="254" y="150" width="12" height="32" rx="2" class="d-box"/><rect x="272" y="158" width="12" height="16" rx="2" class="d-box"/><rect x="290" y="162" width="12" height="8" rx="2" class="d-box"/><rect x="308" y="164" width="12" height="3" rx="2" class="d-box"/><text x="182" y="210" class="d-label-sm">GAN: decoder, then encoder</text><rect x="338" y="134" width="12" height="30" rx="2" class="d-box"/><rect x="356" y="140" width="12" height="18" rx="2" class="d-box"/><rect x="374" y="144" width="12" height="10" rx="2" class="d-box"/><rect x="338" y="174" width="12" height="30" rx="2" class="d-box"/><rect x="356" y="180" width="12" height="18" rx="2" class="d-box"/><rect x="374" y="184" width="12" height="10" rx="2" class="d-box"/><rect x="396" y="156" width="12" height="20" rx="2" class="d-box-accent"/><text x="338" y="210" class="d-label-sm">Two-tower</text><rect x="494" y="144" width="12" height="44" rx="2" class="d-box"/><rect x="512" y="149" width="12" height="34" rx="2" class="d-box"/><rect x="530" y="149" width="12" height="34" rx="2" class="d-box"/><rect x="554" y="138" width="12" height="16" rx="2" class="d-box-accent"/><rect x="554" y="166" width="12" height="16" rx="2" class="d-box-accent"/><text x="494" y="210" class="d-label-sm">Head on a trunk</text><text x="18" y="238" class="d-label-sm">Bar height is layer width. The shape of the silhouette is the pattern.</text></svg><figcaption>Bar height is layer width. Each pattern is the same layer with a different sequence of widths.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Read a model's layer widths before you read its description. The silhouette says what the middle is for.</p><p class="know-why">A narrowing stack discards information, a widening stack rebuilds it, a wide middle computes, and a narrow middle is a budget. Those four facts predict what each design can and cannot do, long before any benchmark does.</p><p class="know-eg"><span class="know-eg-label">For example</span>A transformer block's feed-forward part goes from 512 to 2,048 and back to 512. A LoRA adapter goes wide, to thin, back to wide. Same layer, opposite intent: the first adds room to compute, the second limits how much can change.</p></blockquote>
+  <h2>The building blocks</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Perceptron</div><div><div class="roadmap-title">One matrix multiply, then a nonlinearity</div><div class="roadmap-desc"><strong>Why:</strong> the nonlinearity is what lets stacking add power. <strong>When:</strong> it is the unit inside every other pattern. Alone, one layer draws a single straight line. <strong>Measured:</strong> on XOR, where the two classes sit on opposite diagonals, one layer scored 0.525 and one hidden layer of eight scored 1.000 (test accuracy, mean of five seeds). <strong>Not when:</strong> the classes are not separable by a line.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Wide</div><div><div class="roadmap-title">More outputs in a layer</div><div class="roadmap-desc"><strong>Why:</strong> more feature combinations per layer, and the way a layer changes width between its input and its output. <strong>When:</strong> one layer has to hold many combinations at once, as in the middle of a feed-forward block. <strong>Not when:</strong> parameters grow with every unit of width. At about 200 parameters on a target folded three times, a wide net averaged an error of 0.0250 against 0.0389 for a deep one, so width is not the poor option it is sometimes made out to be.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Deep</div><div><div class="roadmap-title">More layers at the same width</div><div class="roadmap-desc"><strong>Why:</strong> each layer builds on the last, so folded or hierarchical structure can be described with fewer parameters in principle. <strong>When:</strong> the problem is compositional and the network has the stabilisers deep stacks need, such as skip connections. <strong>Not when:</strong> the budget is small and nothing says the structure is nested. In the same experiment the deep net's worst seed scored 0.0645 against 0.0489 for the wide one: depth shortens the description, it does not make training easier.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Binary classifier</div><div><div class="roadmap-title">A funnel to one number, then a sigmoid</div><div class="roadmap-desc"><strong>Why:</strong> the sigmoid turns the score into a probability, so the yes or no is a threshold you choose by cost rather than a fixed 0.5. <strong>When:</strong> any yes-or-no decision. <strong>Not when:</strong> there are more than two exclusive classes, which want a score per class instead, or when nobody has chosen the threshold: the model's output is a probability, and the decision is the threshold.</div></div></div></div>
+  <h2>Compressing and rebuilding</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Encoder</div><div><div class="roadmap-title">A narrowing stack, for example 64 to 32 to 16 to 8</div><div class="roadmap-desc"><strong>Why:</strong> each layer has less room than the one before, so it must discard information, and the final numbers are a compact code. <strong>When:</strong> you need one vector that stands for an input, for search, for clustering, or as features for another model. <strong>Not when:</strong> you need the original back, since the encoder alone loses it, or when the code has not been tied to a task. A code is only as useful as the training that shaped it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decoder</div><div><div class="roadmap-title">A widening stack, for example 8 to 16 to 32 to 64</div><div class="roadmap-desc"><strong>Why:</strong> it turns a short code into a full-width output, and it can produce a plausible output from a code it never saw, which is the basis of generation. <strong>When:</strong> you are reconstructing from a code or generating from one. <strong>Not when:</strong> you need the output to be true to a source. A decoder never sees the original; it rebuilds from learned weights, so its output can be plausible and wrong.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Autoencoder</div><div><div class="roadmap-title">An encoder, then a decoder, trained to reproduce the input</div><div class="roadmap-desc"><strong>Why:</strong> everything the decoder needs must pass through the narrow middle, so the network learns a compact code with no labels at all. <strong>When:</strong> you have no labels and want compression or features. <strong>Measured:</strong> on data with three hidden factors across 20 columns, the autoencoder's error stopped falling at a bottleneck of 3 (0.0033, against a noise floor of 0.0025). PCA, the straight-line method, needed 8 to reach 0.0031, and at a bottleneck of 2 scored 0.0903 against the autoencoder's 0.0346. <strong>Not when:</strong> a linear baseline already matches it. Try PCA first. Too wide a bottleneck lets the network copy its input and learn nothing.</div></div></div></div>
+  <h2>The middle: wide or narrow</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Expand then shrink</div><div><div class="roadmap-title">Two layers with a wide middle, for example 512 to 2,048 to 512</div><div class="roadmap-desc"><strong>Why:</strong> the wide middle can represent combinations of features that do not fit in the narrow input, and the second layer chooses which to pass on. Input and output widths match, so the block can be stacked and added back to its own input. <strong>When:</strong> there is computation to do on each item. This is the feed-forward part of a transformer block, which processes each position separately after attention has mixed across positions. <strong>Measured:</strong> error against a rich target fell from 0.0428 at a middle width of 2 to 0.0019 at 16 and 0.0004 at 256, while parameters grew from 82 to 8,464. <strong>Not when:</strong> parameters are the constraint. The cost scales with the expansion factor, which is the problem the mixture-of-experts lesson attacks.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Shrink then expand</div><div><div class="roadmap-title">Two layers with a narrow middle, for example 64 to 8 to 64</div><div class="roadmap-desc"><strong>Why:</strong> two thin matrices have far fewer parameters than one full one, so a change expressed this way is cheap to train, store and swap. This is the shape of LoRA, which freezes the pretrained weights and trains small matrices beside them. <strong>When:</strong> the change you need is itself thin, as when adapting a frozen model. <strong>Measured:</strong> against a target that was the identity plus a small correction, a width-2 middle scored 0.8229 on its own, because the whole input had to squeeze through two numbers, and 0.0212 once a skip connection carried the input around it. <strong>Not when:</strong> it has to carry the whole input. It has the same silhouette as an autoencoder, but the autoencoder narrows to get a compact code and this narrows to get a cheap one.</div></div></div></div>
+  <h2>Wiring models together</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">GAN</div><div><div class="roadmap-title">A generator shaped like a decoder against a discriminator shaped like an encoder</div><div class="roadmap-desc"><strong>Why:</strong> a generative adversarial network trains two models against each other, a generator that tries to fool and a discriminator that tries not to be fooled, so the generator learns without ever being shown the data directly. <strong>When:</strong> you need realistic samples and can check how much of the real distribution they cover. <strong>Measured:</strong> on two clusters in one dimension all six seeds worked (distance to the real data 0.16 to 0.43, against 1.96 for an untrained generator). On eight clusters in a ring the six seeds reached 2, 8, 4, 2, 3 and 0 of them. <strong>Not when:</strong> coverage matters and you cannot measure it. The failure is silent: a generator can lose whole clusters while its remaining samples look sharp.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Two-tower</div><div><div class="roadmap-title">Two separate networks, one per side, then combined</div><div class="roadmap-desc"><strong>Why:</strong> each side is encoded on its own, so with a dot product as the combiner every item's vector can be computed once and searched with a vector index. Concatenating the two outputs and projecting is the other common combiner, and it keeps the towers but loses that precomputation. CLIP is a two-tower model, trained on about 400 million image and caption pairs to predict which caption goes with which image. <strong>When:</strong> the candidate set is large and the score is roughly a match between two summaries. <strong>Measured:</strong> when true affinity was a dot product, two towers beat a joint model on recall@10 (0.865 against 0.819) and scored 100 users against 2,000 items in 0.1 ms against about 25 ms. When it depended on the pair, the joint model won (0.746 against 0.623) at over a hundred times the cost. <strong>Not when:</strong> the score depends on the pair in ways no short summary of each side can hold. Use the towers to shortlist and a joint model to order the shortlist.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Heads</div><div><div class="roadmap-title">A shared trunk with small output layers on the end</div><div class="roadmap-desc"><strong>Why:</strong> one learned representation can serve several outputs, and a new head is cheap to train. Object detectors use one head for the class and another for the box. <strong>When:</strong> a new task has few labels and the trunk already knows the inputs. <strong>Measured:</strong> with 20 labels, a frozen trunk and a new head scored 0.711 against 0.604 for training from scratch, and with 50 labels 0.799 against 0.711. With 1,000 labels, tuning the whole network scored 0.929, ahead of the frozen trunk at 0.888. <strong>Not when:</strong> the trunk never learned what the new task needs, in which case no head can recover it, or when labels are plentiful and tuning does better.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">A narrow middle needs a skip connection</span>A shrink-then-expand block alone has to push its entire input through the narrow width. It only works as an adapter because the original path stays open beside it, which is exactly what LoRA does. Drop that path and the block loses the input: in the measurement above, 0.8229 without it and 0.0212 with it.</div>
+  <div class="callout warning"><span class="label">Sharp samples do not mean full coverage</span>A generator that reached 2 of 8 clusters still put 56 percent of its samples on a cluster, so its output looked clean. Count what it covers, not how good the samples look.</div>
+  <h2>Choosing between them</h2>
+  <ul><li><strong>You need a vector for each input and have no labels:</strong> an autoencoder, after checking that PCA does not already do the job.</li><li><strong>You need to adapt a frozen model cheaply:</strong> a shrink-then-expand block with a skip connection, which is LoRA.</li><li><strong>You need to retrieve from a large catalogue:</strong> two towers to shortlist, then a joint model to reorder the shortlist.</li><li><strong>You need a new output on a trained trunk with few labels:</strong> a new head on a frozen trunk. Tune the trunk when labels are plentiful.</li><li><strong>You need samples from a distribution:</strong> a GAN, but measure coverage before you trust it.</li></ul>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Judge compressing and generating patterns by what they lose, not by what they produce.</p><p class="know-why">An autoencoder's output, a decoder's output and a generator's samples can all look right while the network has dropped the part of the data you needed. The check is a number about coverage or reconstruction against a baseline, not a look at a few outputs.</p><p class="know-eg"><span class="know-eg-label">For example</span>On the ring of eight clusters seed 3 put 56 percent of its samples on a cluster and reached two of the eight. On three hidden factors the autoencoder's error stopped falling at a bottleneck of 3 and stayed high below it: 0.1216 at a width of 1 and 0.0346 at 2, against a noise floor of 0.0025. Both beat PCA at the same width, and both still lost most of the signal. Only the number, not a glance at the output, shows it.</p></blockquote>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.byhand.ai/p/library-series-models-mlp" target="_blank" rel="noopener">AI by Hand: MLP patterns, 12 common patterns</a><span class="link-note">The twelve-pattern framing this lesson follows. Landing page for the series; this lesson is independently written and measured.</span></li><li><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Attention Is All You Need</a><span class="link-note">Source for the feed-forward width of 512 to 2,048 and back to 512, in the section on position-wise feed-forward networks.</span></li><li><a href="https://arxiv.org/abs/2106.09685" target="_blank" rel="noopener">LoRA: Low-Rank Adaptation of Large Language Models</a><span class="link-note">Freezes the pretrained weights and trains small rank-decomposition matrices; the abstract reports 10,000 times fewer trainable parameters than full fine-tuning of GPT-3 175B with Adam.</span></li><li><a href="https://arxiv.org/abs/1406.2661" target="_blank" rel="noopener">Generative Adversarial Networks</a><span class="link-note">The original paper: two models trained simultaneously in a minimax game.</span></li><li><a href="https://arxiv.org/abs/2103.00020" target="_blank" rel="noopener">Learning Transferable Visual Models From Natural Language Supervision (CLIP)</a><span class="link-note">A two-tower model trained on about 400 million image and text pairs.</span></li></ul></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787100000000-gradient-descent-and-backprop.html">Gradient Descent and Backpropagation</a><span class="link-note">The one algorithm underneath every trained model you will ever use.</span></li><li><a href="../block2-classical-ml/lsn-1787500000002-neural-networks-both-ways.html">Neural Networks, in Keras and in PyTorch</a><span class="rel-set">Block 2 · Predictive Modelling</span><span class="link-note">The same network written twice — and an honest account of when it is the wrong tool.</span></li><li><a href="lsn-1787100000005-attention-and-transformers.html">Attention and the Transformer</a><span class="link-note">The algorithm every model in this program is built from.</span></li><li><a href="lsn-1787100000006-mixture-of-experts.html">Mixture of Experts</a><span class="link-note">How a model gets larger without getting slower — and why that trade lands badly on the machine under your desk.</span></li><li><a href="lsn-1787100000007-vector-search-algorithms.html">Nearest-Neighbour Search at Scale</a><span class="link-note">Exact search, HNSW, and the recall you quietly trade away for speed.</span></li><li><a href="lsn-1787100000008-ranking-and-hybrid-retrieval.html">Ranking and Hybrid Retrieval</a><span class="link-note">Best Matching 25 (BM25), reciprocal rank fusion and rerankers — why pure vector search is rarely the best answer.</span></li><li><a href="../block7-training/lsn-1788000000002-lora-qlora-and-full-fine-tuning.html">LoRA, QLoRA and the Full Fine-Tune</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">What low-rank adaptation actually changes, what rank buys you, and the one case where updating every weight is still right.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. A network narrows 64, 32, 16, 8 and then widens back to 64, trained to reproduce its input. What is it, and what forces it to learn a compact code?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">An autoencoder; everything the decoder needs must pass through the 8-wide middle</div>
+      <div class="quiz-opt">A GAN; the discriminator forces compression</div>
+      <div class="quiz-opt">A two-tower model; each tower keeps half the input</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. You want to adapt a frozen pretrained model with a few thousand new parameters. Which wiring fits, and what must it keep?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Expand then shrink, without any shortcut</div>
+      <div class="quiz-opt">Shrink then expand, with a skip path so the original input still passes</div>
+      <div class="quiz-opt">A deeper stack of the same width</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Affinity depends on the pair in a way no short summary of each side can hold. Which statement fits what was measured?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Two towers still win on recall and cost</div>
+      <div class="quiz-opt">A joint model won on recall at over a hundred times the scoring cost, so use two towers to shortlist and the joint model to reorder</div>
+      <div class="quiz-opt">A dot product is always the best combiner</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. A GAN trained on eight clusters produces sharp samples. Why is that not evidence it worked?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Sharp samples prove the discriminator is too weak</div>
+      <div class="quiz-opt">It can lose whole clusters while the rest look clean, so coverage has to be counted</div>
+      <div class="quiz-opt">GANs cannot model more than two clusters</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

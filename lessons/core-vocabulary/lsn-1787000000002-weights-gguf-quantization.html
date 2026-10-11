@@ -217,7 +217,7 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 3 of 31</span>
+  <span class="pill">Lesson 3 of 33</span>
   <h1>Weights, GGUF and Quantization</h1>
   <p class="subtitle">What Q4_K_M actually means, and the trade you're making when you pick it.</p>
 
@@ -236,23 +236,35 @@
 <rect x="120" y="34" width="500" height="24" rx="4" class="d-fill-muted" opacity="0.55"/>
 <text x="12" y="51" class="d-label">F16</text>
 <text x="628" y="51" class="d-label-sm" text-anchor="end">~140 GB</text>
-<rect x="120" y="70" width="250" height="24" rx="4" class="d-fill-accent" opacity="0.6"/>
+<rect x="120" y="70" width="264" height="24" rx="4" class="d-fill-accent" opacity="0.6"/>
 <text x="12" y="87" class="d-label">Q8_0</text>
-<text x="380" y="87" class="d-label-sm">~70 GB · near-lossless</text>
-<rect x="120" y="106" width="156" height="24" rx="4" class="d-fill-green" opacity="0.75"/>
+<text x="394" y="87" class="d-label-sm">~74 GB · near-lossless</text>
+<rect x="120" y="106" width="179" height="24" rx="4" class="d-fill-green" opacity="0.75"/>
 <text x="12" y="123" class="d-label">Q5_K_M</text>
-<text x="286" y="123" class="d-label-sm">~44 GB</text>
-<rect x="120" y="142" width="125" height="24" rx="4" class="d-fill-green" opacity="0.9"/>
+<text x="309" y="123" class="d-label-sm">~50 GB</text>
+<rect x="120" y="142" width="154" height="24" rx="4" class="d-fill-green" opacity="0.9"/>
 <text x="12" y="159" class="d-label">Q4_K_M</text>
-<text x="255" y="159" class="d-label-sm">~35 GB · the usual default</text>
-<text x="12" y="190" class="d-label-sm">Q = quantized · 4 = bits per weight · K = k-quant method · M = medium size within that family</text>
+<text x="284" y="159" class="d-label-sm">~43 GB · the usual default</text>
+<text x="12" y="190" class="d-label-sm">Q = quantized · 4 = roughly 4 to 5 bits per weight · K = k-quant method · M = medium size within that family</text>
 </svg><figcaption>Same 70B model at four precisions. Four-bit is the usual default because the quality loss is small and the size reduction is what makes the model runnable at all.</figcaption></figure>
   <h2>GGUF is the container</h2>
   <p><strong>GGUF</strong> (GPT-Generated Unified Format) is the file format that holds quantized weights plus the metadata needed to run them — tokenizer, architecture, prompt template. It's the format <code>llama.cpp</code> and Ollama consume. One file, self-describing, no Python environment required.</p>
   <p>This is distinct from Hugging Face's <code>safetensors</code>, which stores full-precision weights for training and fine-tuning. The usual pipeline: fine-tune in safetensors, convert to GGUF, quantize, serve.</p>
   <div class="callout pitfall"><span class="label">Your orphaned 95GB</span>Your own audit found roughly 95GB of local weights that nothing actually serves — a very common outcome. Quantized models are cheap to download and easy to forget. Before pulling another, check what's already on disk.</div>
-  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Prefer the bigger model, more heavily quantized.</p><p class="know-why">Quantization stores each weight approximately, and large models tolerate that surprisingly well. Cutting parameters, by contrast, removes capability outright. Given a fixed memory budget, spend it on parameters and economise on precision.</p><p class="know-eg"><span class="know-eg-label">For example</span>You have 40GB. A 13B model at full 16-bit precision fits, and so does a 70B quantized to 4 bits — both around 35-40GB on disk. The 4-bit 70B will win on nearly every task, despite storing each of its weights far less precisely.</p></blockquote>
-  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block7-training/lsn-1788000000005-the-four-ways-to-shrink-a-model.html">The Four Ways to Shrink a Model</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.</span></li><li><a href="lsn-1787000000025-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li><li><a href="lsn-1787000000003-serving-locally.html">Serving Locally: Ollama, llama.cpp and tok/s</a><span class="link-note">The most-mentioned tool in your codebase, and how to read a speed number.</span></li><li><a href="lsn-1787000000028-why-the-gpu-is-waiting.html">Why the Graphics Processing Unit (GPU) Is Waiting</a><span class="link-note">One number — work done per byte fetched — explains quantization, batching, and why a chip rated for a quadrillion operations a second gives you thirty tokens a second.</span></li></ul></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Prefer the bigger model, more heavily quantized.</p><p class="know-why">Quantization stores each weight approximately, and large models tolerate that surprisingly well. Cutting parameters, by contrast, removes capability outright. Given a fixed memory budget, spend it on parameters and economise on precision.</p><p class="know-eg"><span class="know-eg-label">For example</span>You have 48GB. A 13B model at full 16-bit precision is about 26GB and fits, and so does a 70B at Q4_K_M, about 43GB on disk (llama.cpp lists 4.89 bits per weight for that type). The 4-bit 70B will win on nearly every task, despite storing each of its weights far less precisely.</p></blockquote>
+  <h2>Do it yourself: the one-liners</h2>
+  <p>Quantizing a small model takes seconds, and doing it once makes the rest of this lesson concrete. These are the commands, run for real on Qwen2.5-0.5B-Instruct on an Apple M4 Max:</p>
+  <pre><code># MLX, on Apple Silicon (pip install mlx-lm)
+mlx_lm.convert --hf-path Qwen/Qwen2.5-0.5B-Instruct -q --q-bits 4 --q-group-size 64 --mlx-path q4-g64
+
+# GGUF, with llama.cpp: convert once to 16-bit, then quantize (the converter needs gguf, torch, transformers)
+python convert_hf_to_gguf.py &lt;model folder&gt; --outfile m-f16.gguf --outtype f16
+llama-quantize m-f16.gguf m-q4_k_m.gguf Q4_K_M
+
+# What did it cost? Size, perplexity, and how far the answers moved from the 16-bit model
+python3 scripts/measure_quantization.py --reference Qwen/Qwen2.5-0.5B-Instruct --model q4-g64</code></pre>
+  <p>What came out: the MLX command printed <em>Quantized model with 4.502 bits per weight</em> and turned a 988 MB model into 278 MB. The GGUF Q4_K_M file was 398 MB, which is 6.35 bits per weight rather than 4.9, because for a small model most of the file is not stored at 4 bits. Both surprises are examined in the notebook <em>Quantize It Yourself</em> (<code>notebooks/09-electives/05-quantize-it-yourself.ipynb</code>), which also measures seven settings side by side. When plain 4-bit rounding costs more than you can accept, the <em>Quantization Recipes</em> lesson covers what to do about it.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000003-quantization-recipes.html">Quantization Recipes: Beyond Plain Rounding</a><span class="link-note">The same number of bits, chosen better. What the recipes are, what they cost, how to make your own, and where to get them already made.</span></li><li><a href="../block7-training/lsn-1788000000005-the-four-ways-to-shrink-a-model.html">The Four Ways to Shrink a Model</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.</span></li><li><a href="lsn-1787000000027-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li><li><a href="lsn-1787000000004-serving-locally.html">Serving Locally: Ollama, llama.cpp and tok/s</a><span class="link-note">The most-mentioned tool in your codebase, and how to read a speed number.</span></li><li><a href="lsn-1787000000030-why-the-gpu-is-waiting.html">Why the Graphics Processing Unit (GPU) Is Waiting</a><span class="link-note">One number — work done per byte fetched — explains quantization, batching, and why a chip rated for a quadrillion operations a second gives you thirty tokens a second.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://huggingface.co/docs/hub/gguf" target="_blank" rel="noopener">GGUF on the Hugging Face Hub</a><span class="link-note">Format reference, and the quantization table naming every Q-variant.</span></li><li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a><span class="link-note">The engine. The README's quantization section is the primary source for the trade-offs here.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>

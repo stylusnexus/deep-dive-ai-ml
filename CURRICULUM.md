@@ -17,12 +17,12 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 - `lessons/orientation/` - one map placing every term in the program ✅
 - `lessons/core-vocabulary/` - 31 lessons: the vocabulary an LLM system is built from, plus overfitting, agents and danger, RLHF and human-in-the-loop, context engineering, structured output, hallucination and grounding, in-context learning, class imbalance and thresholds, drift, distillation, chain-of-thought, and loops at inference and in training ✅
 - `lessons/engineering-practice/` - 16 lessons: harnesses, recipes and ADRs; the measurement discipline that corrects them; SWE-bench; invisible confounds; localising a failure; LLM-as-judge; deterministic-first; experiment tracking and continuous evaluation; and the trained artefact with its retraining triggers ✅
-- `lessons/algorithms/` - 10 lessons on the algorithms this domain runs on, from gradient descent to HNSW and data leakage ✅
+- `lessons/algorithms/` - 11 lessons on the algorithms this domain runs on, from gradient descent to HNSW and data leakage, including twelve MLP wirings with when to use each ✅
 - Wire in the two finished courses (statistics, governance) ✅
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 102 lessons built, 13 executed notebooks, every lesson cross-referenced.**
+**Status: 113 lessons built, 26 executed notebooks, every lesson cross-referenced.**
 
 Every planned lesson is written. What remains is not lesson content: two Block 7
 bullets that need a GPU budget and a training run, notebooks for Blocks 5 to 9,
@@ -52,9 +52,12 @@ alarms; at 0.7 you catch 44% with 77. Choosing a row is a business decision.
 - The model ladder: baseline → one rule → logistic → forest → boosting, compared honestly ✅
 - Neural networks in **Keras 3** and raw PyTorch, with an honest account of when they are wrong ✅
 - Time series - because so many real business problems are time-series problems ✅
+- MLP patterns, measured - perceptron, wide, deep, encoder, decoder, autoencoder, expand-then-shrink,
+  shrink-then-expand, GAN, two-tower and heads, each with why, when and when not, backed by a seeded
+  notebook (`05-mlp-patterns-measured`; lesson `algorithms/mlp-patterns`) ✅
 
-4 lessons in `lessons/block2-classical-ml/` and 2 notebooks in
-`notebooks/02-classical-ml/`, both verified executing end to end.
+4 lessons in `lessons/block2-classical-ml/` and 5 notebooks in
+`notebooks/02-classical-ml/`, all verified executing end to end.
 
 4 lessons, 4 notebooks and the project, all verified running end to end.
 
@@ -136,10 +139,14 @@ padding, so this block is a door plus the two genuine gaps.
 - Judging a conversation - scoring the trajectory, since the failure is rarely
   in the turn you graded ✅
 
-6 lessons in `lessons/block5-evaluation/` and 1 notebook in
+6 lessons in `lessons/block5-evaluation/` and 2 notebooks in
 `notebooks/05-evaluation/`. The statistics notebook needs no model, network or API
-key - every figure the lesson quotes is produced by running it. A battery across
-several providers still needs keys this repository does not assume.
+key - every figure the lesson quotes is produced by running it. The second tests an
+essay's claim that annotating a graph's triples makes a model answer better: one
+synthetic graph, three formats, gold answers computed from the graph, run against
+whatever local models are reachable. On the one model available here the annotated
+format did not help. A battery across several providers still needs keys this
+repository does not assume.
 
 **Exit:** Your own eval set, run across ≥6 models, with a defensible ranking - and a
 non-completion column, without which the ranking is not defensible.
@@ -217,8 +224,12 @@ Spine: `LLMS_from_Scratch` ch05–07 (Apache 2.0) plus the installed HF training
 - The artefact is code, data and configuration - a model file is not a deployment;
   the manifest and hash that make a rollback real, and the three tests that ask
   different questions (training-system, validation, functionality) ✅
+- Managed cloud surfaces - what you keep and what moves to the provider on Bedrock,
+  Vertex AI and Foundry: quota counted differently from the bill, reserved capacity,
+  caching and batch, data residency, guardrails, and retirement dates. Prices and
+  default quotas were not obtainable and are marked as such ✅
 
-5 lessons in `lessons/block8-deployment/` and 2 notebooks in `notebooks/08-deploy-apis/`:
+6 lessons in `lessons/block8-deployment/` and 2 notebooks in `notebooks/08-deploy-apis/`:
 the first runs two clients against a server that fails on a scripted schedule, the
 second measures the serving boundary (throughput, concurrency, tail latency) against
 a local fixture service. Deploying to Render or an HF Space remains a human action;
@@ -257,7 +268,7 @@ cost. Surfaced by `/check-worth` against the *Self-Improving Agents* MEAP (Lanha
 Manning); scoped to the two ideas this course did not already teach, cross-linking to
 `models-judging-models` and `how-to-measure` rather than restating them ✅
 
-6 lessons in `lessons/block9-electives/` and 4 notebooks in `notebooks/09-electives/`.
+6 lessons in `lessons/block9-electives/` and 5 notebooks in `notebooks/09-electives/` (the fifth, quantize it yourself, pairs with the two quantization lessons in core vocabulary).
 The convolution notebook hand-rolls the sliding window rather than calling a library,
 the recommender notebook runs the feedback loop until the catalogue narrows, and the
 self-improvement notebook runs hill-climbing, population and archive search against

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantization Recipes: Beyond Plain Rounding</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 4 of 33</span>
+  <h1>Quantization Recipes: Beyond Plain Rounding</h1>
+  <p class="subtitle">The same number of bits, chosen better. What the recipes are, what they cost, how to make your own, and where to get them already made.</p>
+
+  <p>The quantization lesson ended with a loss: fewer bits means some precision gone in a large language model (LLM). How much is lost depends less on <em>how many</em> bits than on <em>how they were chosen</em>. Plain rounding, called round-to-nearest (RTN), treats every weight alike. A <strong>recipe</strong> spends some extra effort, usually a little sample text, to lose less at the same size. The best known are AWQ (activation-aware weight quantization), GPTQ (post-training quantization for generative pre-trained transformers) and DWQ (distilled weight quantization). This lesson covers the recipes you will meet, the evidence for and against them, and how to use or make one. The <em>Quantize It Yourself</em> notebook in Block 9 is the hands-on companion.</p>
+  <h2>What goes wrong with plain rounding</h2>
+  <p>A weight is rounded to the nearest of a few levels. The levels are spread across the range of its group, so one large weight stretches the range and every ordinary weight in that group is rounded coarsely. The notebook shows it in one group: a single outlier raised the error on the other 63 weights from 9% to 49%. The AWQ paper adds the second half of the story: <q>Protecting only 1% salient weights can greatly reduce quantization error</q>, and the salient ones are found by looking at the activations, not the weights. A weight that is small but multiplied by a large activation matters more than a large weight that is multiplied by almost nothing.</p>
+  <ul><li><strong>On a very large model.</strong> The GPTQ paper reports OPT-175B (Meta&#39;s Open Pre-trained Transformer, 175 billion parameters) on WikiText-2 (a standard text benchmark), perplexity 8.34 at full precision. At 4 bits, GPTQ 8.37 and RTN 10.54. At 3 bits, GPTQ 8.68 and RTN 7,300, which the paper describes as RTN collapsing completely. Measured by the authors of GPTQ.</li><li><strong>On a 7-billion-parameter model.</strong> The AWQ paper, group size 128, Llama-2-7B: full precision 5.47. At 3 bits RTN 6.66, GPTQ 6.43, AWQ 6.24. At 4 bits RTN 5.73, GPTQ 5.69, AWQ 5.60. Measured by the authors of AWQ.</li><li><strong>The honest part.</strong> The same paper says RTN <q>is actually quite strong when using a small group size like 128</q>. At 4 bits on a mid-sized model the gap is small. The recipes earn their keep at 3 bits and below, and where you cannot afford small groups.</li></ul>
+  <figure class="diagram"><svg viewBox="0 0 640 214" role="img" aria-label="Four quantization approaches in a row, from plain rounding to learned scales, with what each needs"><rect x="8" y="14" width="146" height="132" rx="7" class="d-box"/><text x="20" y="38" class="d-label-b">ROUND TO NEAREST</text><text x="20" y="62" class="d-label-sm">round every weight</text><text x="20" y="78" class="d-label-sm">on its own</text><text x="20" y="116" class="d-label-sm">needs: nothing</text><text x="20" y="134" class="d-label-sm">time: seconds</text>
+<rect x="166" y="14" width="146" height="132" rx="7" class="d-box"/><text x="178" y="38" class="d-label-b">AWQ</text><text x="178" y="62" class="d-label-sm">scale up the weights</text><text x="178" y="78" class="d-label-sm">that loud inputs use</text><text x="178" y="116" class="d-label-sm">needs: sample text</text><text x="178" y="134" class="d-label-sm">time: minutes to hours</text>
+<rect x="324" y="14" width="146" height="132" rx="7" class="d-box"/><text x="336" y="38" class="d-label-b">GPTQ</text><text x="336" y="62" class="d-label-sm">pick weights that keep</text><text x="336" y="78" class="d-label-sm">each layer&#39;s output close</text><text x="336" y="116" class="d-label-sm">needs: sample text</text><text x="336" y="134" class="d-label-sm">time: minutes to hours</text>
+<rect x="482" y="14" width="150" height="132" rx="7" class="d-box-accent"/><text x="494" y="38" class="d-label-b">DWQ</text><text x="494" y="62" class="d-label-sm">train the scales and</text><text x="494" y="78" class="d-label-sm">biases to match the</text><text x="494" y="94" class="d-label-sm">full-precision model</text><text x="494" y="116" class="d-label-sm">needs: text and training</text><text x="494" y="134" class="d-label-sm">time: longer than dynamic</text>
+<text x="8" y="180" class="d-label-sm">Separate from these: mixed precision gives sensitive layers more bits, and an importance</text><text x="8" y="198" class="d-label-sm">matrix steers rounding toward the weights that matter. Both combine with any of the above.</text>
+</svg><figcaption>Four ways to choose the same four bits. Each spends something different to lose less than the one before.</figcaption></figure>
+  <h2>The recipes, one line each</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">RTN</div><div><div class="roadmap-title">Round to nearest, group by group</div><div class="roadmap-desc">The baseline. It needs no data and takes seconds. It is what <code>mlx_lm.convert -q</code> does, and what a plain <code>-4bit</code> model on the Hub usually is.</div></div></div><div class="roadmap-item"><div class="roadmap-num">GPTQ</div><div><div class="roadmap-title">Weights that keep each layer&amp;#39;s output close</div><div class="roadmap-desc">In the words of the MLX (Apple&#39;s machine-learning framework) documentation, it &ldquo;finds quantized weights which minimize the squared error of each layer&#39;s output given the provided input&rdquo;. Needs calibration text. The MLX docs put its run time at &ldquo;from a few minutes to several hours&rdquo;.</div></div></div><div class="roadmap-item"><div class="roadmap-num">AWQ</div><div><div class="roadmap-title">Scale first, then round</div><div class="roadmap-desc">&ldquo;Scales and clips the weights prior to quantization&rdquo;, using the activations to decide which channels to protect. Needs far less calibration text than GPTQ: on one model the AWQ paper reports good results with 16 sequences against 192.</div></div></div><div class="roadmap-item"><div class="roadmap-num">DWQ</div><div><div class="roadmap-title">Train the scales to match the teacher</div><div class="roadmap-desc">&ldquo;Fine-tunes non-quantized parameters (including quantization scales and biases) using the non-quantized model as a teacher.&rdquo; The MLX docs say it works best for 2-bit to 4-bit and &ldquo;often doesn&#39;t work well&rdquo; when distilling to 8-bit or 6-bit. Slower than dynamic quantization, and typically better.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Dynamic quantization</div><div><div class="roadmap-title">More bits where it hurts</div><div class="roadmap-desc">Estimate how sensitive each layer is and give the sensitive ones more bits. <code>mlx_lm.dynamic_quant</code> defaults to 5 bits for sensitive layers and 4 for the rest. <code>mlx_lm.convert --quant-predicate mixed_4_6</code> is a fixed version: more bits for the attention value and feed-forward output projections in the first and last eighth of the layers and every third in between, plus the output head. llama.cpp&#39;s Q4_K_M is the same idea, in its own scheme.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Importance matrix (imatrix)</div><div><div class="roadmap-title">llama.cpp&amp;#39;s sample-text recipe</div><div class="roadmap-desc">Run sample text through the full-precision model, record how large the activations are on each input channel, and use that as weights when choosing how to round. It is produced with <code>llama-imatrix</code> and used with <code>llama-quantize --imatrix</code>.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Unsloth Dynamic (UD)</div><div><div class="roadmap-title">A vendor&amp;#39;s per-model schemes</div><div class="roadmap-desc">In the Dynamic 2.0 section of its documentation Unsloth says it now <q>dynamically adjust[s] the quantization type of every possible layer</q> with a scheme tailored to each model, and calibrates on a curated set of more than 1.5 million tokens. It sells and promotes its own tools and its comparisons are self-measured. A <code>UD-Q4_K_M</code> file is not published for every model.</div></div></div></div>
+  <h2>Why bother: what the measurements show</h2>
+  <p>Three kinds of evidence, in rising order of how much to trust them on <em>your</em> model: the authors&#39; papers (above), published measurements by others, and your own. The second:</p>
+  <ul><li><strong>llama.cpp&#39;s importance matrix.</strong> From the llama.cpp perplexity README, Llama-3 8B on an NVIDIA RTX 4090 graphics card, scored on WikiText-2, with the matrix made from WikiText too, which probably flatters it. Full precision scores 6.233. A q3_K_M file: perplexity 6.888 and KL divergence (Kullback&ndash;Leibler divergence, how far one probability distribution has moved from another) 0.1019 without a matrix, 6.734 and 0.0844 with one. A q4_K_M file: 6.407 and 0.0313, then 6.383 and 0.0282. The gain is larger at fewer bits.</li><li><strong>On MLX, one blogger&#39;s measurements.</strong> On the Qwen3.6 35B-A3B mixture-of-experts model, KL divergence against an 8-bit reference on an M5 Max: plain 4-bit 0.074, DWQ 4-bit 0.027. On the 27B model, plain 4-bit 0.113 against 0.059 for Unsloth&#39;s MLX build, which that post also measured at 8.6 effective bits per weight and about twice as far from the original as a plain 6-bit file. The author wrote the measuring tool and the post has no peer review. It is a single run, and a reminder that a clever name is not a guarantee.</li></ul>
+  <p>And our own, using <code>scripts/measure_quantization.py</code> on public Qwen3-0.6B files against the 16-bit original, on the course&#39;s own documents, 8 windows of 512 tokens each:</p>
+  <pre><code>model                          MB   bits/w  perplexity       KL  top-1 same
+16-bit original              1192    16.00      35.151   0.0000     100.0%
+4bit  (plain)                 335     4.50      41.910   0.2337      73.7%
+4bit-AWQ                      345     4.63      38.752   0.1420      78.6%
+4bit-DWQ                      335     4.50      40.299   0.3277      76.8%</code></pre>
+  <p>The AWQ file is best on all three measures, and also uses 4.63 bits per weight against 4.50, so some of its win may be bits. The DWQ file beats plain rounding on perplexity and on how often it picks the same word, and is <em>worse</em> on KL divergence. The three measures disagree about DWQ. We did not find out why. It may be that its calibration text was chat while ours is incident reports, or that the model is tiny, or something else. That disagreement is the finding: pick your measure, and your text, before you look.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Compare quantizations at equal bits per weight and judge them on your own text, because the label hides both.</p><p class="know-why">&ldquo;4-bit&rdquo; names a bit width, not a cost. MLX files in this course are 4.50 bits per weight, the AWQ file above is 4.63, and the Q4_K_M file we made from a 0.5-billion-parameter model is 6.35. Perplexity on a standard text can stay flat while the model starts choosing different words, and a recipe tuned on one kind of text can lose on another.</p><p class="know-eg"><span class="know-eg-label">For example</span>The notebook&#39;s own results show the shape on a small model, Qwen2.5-0.5B. Dropping from 6.5 to 4.5 bits per weight multiplied the KL divergence by about 12 (0.018 to 0.219), and 3.5 bits multiplied it by about six more (1.24), with the model picking the same next word only 43% of the time. At 2.5 bits it was no longer a working model: perplexity 217,328.</p></blockquote>
+  <div class="callout pitfall"><span class="label">Accuracy can hold still while the answers change</span><p>The paper &ldquo;Accuracy is Not All You Need&rdquo; (Microsoft Research) reports that compressed models can match the original on accuracy while many individual answers flip between right and wrong, in what it calls flips. It reports accuracy differences of 0&ndash;2% against flips of up to 13.6%, and proposes KL divergence and the share of flips as the better measures. A model that scores the same on average has not necessarily kept your task intact. Test your own task.</p></div>
+  <h2>Do you have to start from scratch?</h2>
+  <p>Almost never. The recipes above are implemented in maintained tools, and most popular models already have quantizations made by someone. What exists:</p>
+  <ul><li><strong>MLX (Apple Silicon):</strong> <code>mlx_lm.dwq --model Qwen/Qwen3-0.6B</code>, <code>mlx_lm.awq</code>, <code>mlx_lm.gptq</code> and <code>mlx_lm.dynamic_quant</code>. Install with <code>pip install &quot;mlx-lm[train]&quot;</code>. All use calibration data to tune parameters. By default <code>mlx_lm.awq</code>, <code>gptq</code> and <code>dynamic_quant</code> download one public calibration text and sample random chunks of it, while <code>mlx_lm.dwq</code> defaults to a Hugging Face chat dataset, allenai/tulu-3-sft-mixture, which is part of why a DWQ file may be tuned for conversation rather than your text.</li><li><strong>llama.cpp (GGUF, the GPT-Generated Unified Format it reads):</strong> <code>llama-imatrix -m model-f16.gguf -f calibration.txt -ngl 99</code>, then <code>llama-quantize --imatrix imatrix.gguf model-f16.gguf out.gguf q4_k_m</code>.</li><li><strong>NVIDIA and vLLM:</strong> LLM Compressor (from the vLLM project, which saves in its compressed-tensors format), GPTQModel (from the company ModelCloud) and NVIDIA&#39;s Model Optimizer (vendor-run and NVIDIA-focused). AutoAWQ is archived, and its README says it is deprecated and points users to LLM Compressor and mlx-lm.</li></ul>
+  <p><strong>What we ran ourselves:</strong> <code>mlx_lm.convert</code> and <code>llama-quantize</code>, in the notebook. The commands above for DWQ, AWQ, GPTQ and imatrix are from the tools&#39; own documentation and were not run here. The first DWQ attempt failed because it needs the extra <code>datasets</code> package that the <code>[train]</code> install adds, and this llama.cpp build does not include <code>llama-imatrix</code>.</p>
+  <h3>When you do need your own, what to know</h3>
+  <ul><li><strong>Start from the 16-bit original, once.</strong> <code>llama-quantize</code> refuses to requantize an already-quantized file unless you pass <code>--allow-requantize</code>, and warns that it &ldquo;can severely reduce quality compared to quantizing from 16bit or 32bit&rdquo;. The notebook shows the refusal. We found no published measurement of how much it costs, so that is vendor guidance, not a number.</li><li><strong>Calibration text should look like your use, and must not be your test.</strong> The AWQ paper found matching the calibration and evaluation domain worked best. On a different domain AWQ lost 0.5&ndash;0.6 perplexity while GPTQ lost 2.3&ndash;4.9, on one model and two domains. GPTQ&#39;s paper used 128 random 2048-token segments of a web text collection. We found no study that measures domain-matched calibration on downstream task accuracy.</li><li><strong>Give sensitive layers more bits.</strong> The output head and embeddings are the usual ones. MLX&#39;s preset gives the head extra bits, llama.cpp has <code>--leave-output-tensor</code> and <code>--token-embedding-type</code>, and the blog post above suggests that the router of a mixture-of-experts model is sensitive enough that saving bits there costs more than it saves. It did not isolate the router, so treat that as a lead.</li><li><strong>Measure distance, not just perplexity.</strong> llama.cpp says the loss is usually measured in perplexity and KL divergence, and warns that perplexity is not comparable across models with different tokenizers. Its KL workflow saves the full-precision model&#39;s outputs to a file that it says is 37 GiB for Llama 3 on WikiText-2, so budget disk.</li><li><strong>Write the recipe down.</strong> The tool and its version, the base model revision, the calibration text, the settings, and the type of each tensor. You will want it when the numbers surprise you.</li></ul>
+  <p>If your architecture is new, check two things before anything else. Does the tool support its layers? And does the engine you will serve with have a fast kernel for the format you are about to produce? A format with no fast kernel runs slowly or not at all, as the formats lesson explains.</p>
+  <h2>Where to get recipes and ready-made quantizations</h2>
+  <ul><li><strong>mlx-community</strong> on Hugging Face publishes MLX files, and its cards are terse. The Qwen3-0.6B <code>-4bit</code>, <code>-4bit-AWQ</code> and <code>-4bit-DWQ</code> cards we read are word for word the same: converted to MLX format from the base model using mlx-lm 0.24.0. The recipe appears only in the file name. A card with no recipe named should be assumed to be plain rounding.</li><li><strong>unsloth</strong> publishes GGUF files, including the <code>UD-</code> ones, with its recipe documented. Self-measured, and not every model has every variant: the Qwen3-Coder 30B repository has <code>UD-*_XL</code> files and no <code>UD-Q4_K_M</code>.</li><li><strong>bartowski</strong>, an individual who publishes GGUF files. The Llama 3.1 card we read names the llama.cpp release used, says every file was made with an importance matrix and links its dataset, and describes its <code>Q6_K_L</code> variant as keeping embedding and output weights at Q8_0.</li><li><strong>lmstudio-community</strong> publishes GGUF and MLX files. Cards vary: some name the llama.cpp release and say nothing about an importance matrix, and the Llama 3.1 card credits a dataset used to calculate one. LM Studio says it does not guarantee community models.</li><li><strong>The model makers themselves.</strong> Qwen publishes GGUF, GPTQ and AWQ versions of its models. Official cards are not free of mistakes: the Qwen2.5-7B AWQ card says 72B in its text.</li></ul>
+  <p><strong>How to judge a file before you trust it</strong> (our inference from the cards above, not an official standard): does the card name the base model and revision, the tool and its version, the recipe, and the calibration data? Does it say which type each file is? A card that names none of these is a file you should score yourself. You can, with one command:</p>
+  <pre><code>python3 scripts/measure_quantization.py --reference mlx-community/Qwen3-0.6B-bf16 \
+    --model mlx-community/Qwen3-0.6B-4bit --model mlx-community/Qwen3-0.6B-4bit-AWQ</code></pre>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000002-weights-gguf-quantization.html">Weights, GGUF and Quantization</a><span class="link-note">What Q4_K_M actually means, and the trade you're making when you pick it.</span></li><li><a href="lsn-1787000000005-formats-and-engines.html">Formats and Engines: GGUF, MLX and What NVIDIA Runs</a><span class="link-note">Which file, which engine, which chip — and which of these numbers we measured ourselves.</span></li><li><a href="../engineering-practice/lsn-1787400000005-benchmarks-what-to-trust.html">Benchmarks: Why They Matter, Why They Fail, and When to Build Your Own</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">Existing tools save you the load generator. They do not save you from asking whether the number answers your question.</span></li><li><a href="lsn-1787000000027-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2306.00978" target="_blank" rel="noopener">AWQ: Activation-aware Weight Quantization</a><span class="link-note">The salient-weight observation, the RTN comparison, and the calibration-domain experiment. Read its authorship in mind.</span></li><li><a href="https://arxiv.org/abs/2210.17323" target="_blank" rel="noopener">GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers</a><span class="link-note">The OPT-175B results, including RTN collapsing at 3 bits.</span></li><li><a href="https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LEARNED_QUANTS.md" target="_blank" rel="noopener">Learned quantization in MLX LM</a><span class="link-note">DWQ, AWQ, GPTQ and dynamic quantization, with commands, from the people who wrote them.</span></li><li><a href="https://github.com/ggml-org/llama.cpp/tree/master/tools/quantize" target="_blank" rel="noopener">llama.cpp quantize tool</a><span class="link-note">The quantization types, the options, and how it says to measure the loss.</span></li><li><a href="https://github.com/ggml-org/llama.cpp/tree/master/tools/imatrix" target="_blank" rel="noopener">llama.cpp importance matrix</a><span class="link-note">What it computes and how to produce one.</span></li><li><a href="https://github.com/ggml-org/llama.cpp/tree/master/tools/perplexity" target="_blank" rel="noopener">llama.cpp perplexity and KL divergence</a><span class="link-note">The KL-divergence workflow and the scoreboard used above.</span></li><li><a href="https://arxiv.org/abs/2407.09141" target="_blank" rel="noopener">Accuracy is Not All You Need</a><span class="link-note">Why compressed models should be judged by flips and KL divergence as well as accuracy.</span></li><li><a href="https://smcleod.net/2026/04/measuring-model-quantisation-quality-with-kl-divergence/" target="_blank" rel="noopener">Measuring model quantisation quality with KL divergence</a><span class="link-note">One author&#39;s measurements of MLX quantizations. Read it with its caveats in mind.</span></li><li><a href="https://unsloth.ai/docs/basics/dynamic-3.0-ggufs" target="_blank" rel="noopener">Unsloth Dynamic quantization</a><span class="link-note">The vendor&#39;s own description of its approach.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Two 4-bit models from the same base. One was made with plain rounding, the other with AWQ. What is the fairest way to compare them?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">By their file names, since the recipe is in the name</div>
+      <div class="quiz-opt">By KL divergence and how often they pick the same word, at the same bits per weight, on text like your own</div>
+      <div class="quiz-opt">By perplexity on a standard text alone</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. A model card says only: converted to MLX format from the base model using mlx-lm. What should you assume about the recipe?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">Plain rounding, unless the card or name says otherwise</div>
+      <div class="quiz-opt">A learned recipe such as DWQ</div>
+      <div class="quiz-opt">Nothing can be assumed, so do not use the model</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why should you quantize from the 16-bit original rather than from an already-quantized file?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The tool does not accept quantized input</div>
+      <div class="quiz-opt">The tool warns that requantizing can severely reduce quality, because the first rounding error is already baked in</div>
+      <div class="quiz-opt">Quantized files cannot be converted to other formats</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. In our run of public Qwen3-0.6B files, the DWQ model beat plain rounding on perplexity but lost on KL divergence. What does that tell you?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">DWQ is a worse recipe</div>
+      <div class="quiz-opt">The measures can disagree, so choose your measure and your text before looking at the results</div>
+      <div class="quiz-opt">KL divergence is not a useful measure</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

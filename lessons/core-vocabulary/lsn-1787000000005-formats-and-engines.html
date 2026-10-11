@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formats and Engines: GGUF, MLX and What NVIDIA Runs</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 6 of 33</span>
+  <h1>Formats and Engines: GGUF, MLX and What NVIDIA Runs</h1>
+  <p class="subtitle">Which file, which engine, which chip — and which of these numbers we measured ourselves.</p>
+
+  <p>A large language model (LLM) arrives with four labels stuck together: a <strong>file format</strong> (GGUF, the GPT-Generated Unified Format that llama.cpp reads, or safetensors), a <strong>quantization recipe</strong> (Q4_K_M, 4-bit, AWQ for activation-aware weight quantization, FP8 for 8-bit floating point), an <strong>engine</strong> (llama.cpp, mlx-lm, vLLM) and a <strong>chip</strong> (Apple Metal, or NVIDIA CUDA, NVIDIA&#39;s GPU programming platform). Speed, memory and answer quality come from the combination, and most arguments in this area are one label standing in for all four. This lesson separates them, shows what we measured on one Mac, and is explicit about the NVIDIA material, which we could not measure and have cited instead.</p>
+  <h2>Container, method, kernel</h2>
+  <p>Three different things get called &ldquo;the format&rdquo;. Keeping them apart removes most of the confusion:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Container</div><div><div class="roadmap-title">How the file is laid out</div><div class="roadmap-desc">GGUF is one file holding the quantized weights, tokenizer and prompt template. Safetensors holds tensors plus a small header and is what MLX (Apple&#39;s machine-learning framework for its own chips) and vLLM load. A container says nothing about how good the quantization is or how fast it runs.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Method</div><div><div class="roadmap-title">How the 4-bit values were chosen</div><div class="roadmap-desc">Rounding every weight is the crude way. Better methods spend calibration data to lose less. GPTQ (post-training quantization for generative pre-trained transformers) finds quantized weights that minimise the squared error of each layer&#39;s output on sample inputs. AWQ (Activation-aware Weight Quantization) scales and clips weights before quantizing, guided by which ones the activations lean on. DWQ (Distilled Weight Quantization) fine-tunes the leftover parameters, scales and biases included, using the unquantized model as a teacher. Those descriptions are from the MLX LM documentation, which ships tools for all three. So AWQ and GPTQ are not NVIDIA formats. They are recipes that any engine&#39;s weights can come from.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Kernel</div><div><div class="roadmap-title">The code that multiplies with packed weights</div><div class="roadmap-desc">A 4-bit weight has to be unpacked on the fly, and whether that is fast depends on the kernel the engine has for that layout and chip. MARLIN is a 4-bit kernel for NVIDIA graphics processing units (GPUs) whose authors report close to the maximum 4&times; quantization speedup at batch sizes up to 16&ndash;32. An engine without a fast kernel for your format runs it slowly or not at all.</div></div></div></div>
+  <figure class="diagram"><svg viewBox="0 0 640 264" role="img" aria-label="A grid of three weight types against two chips, naming the engines that serve each combination"><text x="196" y="18" class="d-label-b">APPLE METAL</text><text x="436" y="18" class="d-label-b">NVIDIA CUDA</text>
+<text x="8" y="68" class="d-label-b">GGUF</text><text x="8" y="84" class="d-label-sm">llama.cpp family</text>
+<rect x="150" y="28" width="226" height="74" rx="6" class="d-box-good"/><text x="162" y="52" class="d-label">llama.cpp, Ollama, LM Studio</text><text x="162" y="72" class="d-label-sm">llama.cpp, Ollama measured here</text>
+<rect x="386" y="28" width="246" height="74" rx="6" class="d-box-good"/><text x="398" y="52" class="d-label">llama.cpp</text><text x="398" y="72" class="d-label-sm">vLLM plugin: "highly experimental"</text>
+<text x="8" y="150" class="d-label-b">MLX weights</text><text x="8" y="166" class="d-label-sm">safetensors</text>
+<rect x="150" y="110" width="226" height="74" rx="6" class="d-box-good"/><text x="162" y="134" class="d-label">mlx-lm, vllm-mlx, Ollama (preview)</text><text x="162" y="154" class="d-label-sm">measured here, except Ollama&#39;s</text>
+<rect x="386" y="110" width="246" height="74" rx="6" class="d-box-warn"/><text x="398" y="134" class="d-label">mlx[cuda] backend exists</text><text x="398" y="154" class="d-label-sm">no LLM benchmark found: unmeasured</text>
+<text x="8" y="232" class="d-label-b">AWQ / GPTQ / FP8</text><text x="8" y="248" class="d-label-sm">checkpoints, safetensors</text>
+<rect x="150" y="192" width="226" height="64" rx="6" class="d-box"/><text x="162" y="216" class="d-label">as methods inside MLX weights</text><text x="162" y="236" class="d-label-sm">mlx-lm ships tools for AWQ and GPTQ</text>
+<rect x="386" y="192" width="246" height="64" rx="6" class="d-box-good"/><text x="398" y="216" class="d-label">vLLM, SGLang, TensorRT-LLM</text><text x="398" y="236" class="d-label-sm">cited, not measured here</text>
+</svg><figcaption>Which engines serve which weights on which chip, as far as we could establish. The amber cells are where the answer is &ldquo;possible, but unproven or unsupported&rdquo;.</figcaption></figure>
+  <h2>The formats you will meet</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">MLX</div><div><div class="roadmap-title">Apple&amp;#39;s framework, its own quantization</div><div class="roadmap-desc">MLX is Apple&#39;s array framework, built for the Metal GPU and unified memory. An MLX model is safetensors plus a quantization setting in its config. The 4-bit Qwen model used below records a group size of 64 at 4 bits. MLX also has a CUDA backend you can install on Linux with a recent CUDA toolkit, which is why the figure shows a cell there. We found no published LLM benchmark of it. Ollama announced an MLX backend in preview in March 2026, for Macs with more than 32 GB and initially one model. The Ollama run in this lesson used its llama.cpp path with a GGUF file.</div></div></div><div class="roadmap-item"><div class="roadmap-num">AWQ</div><div><div class="roadmap-title">A method, then a checkpoint</div><div class="roadmap-desc">Four-bit weights scaled by how much the activations use them. On NVIDIA, vLLM&#39;s documentation lists AWQ support on Turing, Ampere, Ada and Hopper GPUs.</div></div></div><div class="roadmap-item"><div class="roadmap-num">GPTQ</div><div><div class="roadmap-title">A method, then a checkpoint</div><div class="roadmap-desc">Four-bit weights chosen to minimise each layer&#39;s output error on calibration data. vLLM lists it on those GPUs and on Volta as well.</div></div></div><div class="roadmap-item"><div class="roadmap-num">FP8</div><div><div class="roadmap-title">Eight-bit floating point</div><div class="roadmap-desc">Half the bytes of 16-bit, keeping a floating-point range. vLLM lists weight-and-activation FP8 on Ada and Hopper. In one large study on the Llama 3.1 models it was effectively lossless.</div></div></div><div class="roadmap-item"><div class="roadmap-num">NF4</div><div><div class="roadmap-title">Four-bit NormalFloat, for training</div><div class="roadmap-desc">The data type QLoRA (quantized low-rank adaptation) uses to hold a frozen base model in 4 bits while adapters train. You meet it in fine-tuning, not in serving.</div></div></div></div>
+  <p>Seen in the wild and not covered here: EXL2 and EXL3 (formats from the ExLlama inference libraries, popular with hobbyists on NVIDIA GPUs), and TensorRT-LLM, NVIDIA&#39;s own engine, which appears in the published comparison below.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A speed number is a claim about a format, an engine, a chip and a concurrency level. Drop any one and it means nothing.</p><p class="know-why">The same weights run through two engines differ, the same engine differs between one request and sixteen, and the same server differs when something else is using the machine. A bare &ldquo;300 tokens per second&rdquo; fixes none of those, so it cannot be compared with anything.</p><p class="know-eg"><span class="know-eg-label">For example</span>In this repository&#39;s runs the same vllm-mlx server decoded at about 308 tokens per second in one run and about 41 in another. Nothing about the server changed. Another benchmark had started on the same Mac. That is why the engine table in this lesson leaves tokens per second out.</p></blockquote>
+  <h2>Measured here: one model, five engines, one Mac</h2>
+  <p>Qwen2.5-1.5B-Instruct on an Apple M4 Max with 128 GB, through <code>scripts/bench_engines.py</code>. The GGUF is Q4_K_M, 1,117,320,736 bytes. The MLX copy is 4-bit with a group size of 64, 839 MB on disk. <strong>These are not the same quantization</strong>, so a difference between a GGUF row and an MLX row is partly the engine and partly the recipe. Ollama ran the very same GGUF file as llama-server, loaded through a Modelfile with the context raised so a 7,000-token prompt fits.</p>
+  <pre><code>engine (weights)                  cold -&gt; warm, 7k tokens   4 streams   short request behind a long one
+llama-server, -np 4  (GGUF)       3.85s -&gt; 0.04s            4 of 4      0.10s   (alone 0.07s)
+Ollama, defaults     (same GGUF)  3.03s -&gt; 0.06s            4 of 4      17.19s  (it waited for the whole long reply)
+mlx_lm.server        (MLX 4-bit)  3.33s -&gt; 0.12s            4 of 4      1.5-1.8s (alone 0.30s)
+vllm-mlx, default    (MLX 4-bit)  6.55s -&gt; 0.20s            1 of 4      the others were rejected
+vllm-mlx --continuous-batching    3.95s -&gt; 0.09s            4 of 4      0.15s   (alone 0.05s)
+
+warm = a new question after the same long opening. Time to first token, medians of 2 trials.</code></pre>
+  <ul><li><strong>Every engine served the prefix from cache, with one exception.</strong> A new question after the same opening, and a next conversation turn, came back warm on all five. With continuous batching on, vllm-mlx did not serve the <em>identical</em> request again from cache: 1.05 seconds against 0.95 cold at 2,359 tokens, and 3.90 against 3.95 at 7,072. That held across two separate runs and we did not find out why.</li><li><strong>The engine, not the file, decided what concurrency did.</strong> The same GGUF file gave a short request 0.10 seconds behind a long one on llama-server with four slots, and 17.19 seconds on Ollama with its defaults. With its defaults Ollama answered all four streams, but the evidence is that it ran them one after another: the short request finished only when the long one did.</li><li><strong>vllm-mlx in default mode rejected concurrent requests in our run.</strong> Three of four came back empty, and its log reports that its serialized route is busy.</li><li><strong>Read the cold column as direction only.</strong> The vllm-mlx default row ran while the machine was heavily loaded by other work, which is why its cold time is roughly double the others.</li></ul>
+  <div class="callout pitfall"><span class="label">Same model name, different weights, different answers</span><p>The file sizes above differ by about a quarter, and that is one label away from being invisible. &ldquo;Qwen2.5-1.5B 4-bit&rdquo; names a model and a bit width. It does not name the method, the group size or which tensors stayed at higher precision. Before comparing engines, check that the weights are the same artefact, or say plainly that they are not.</p></div>
+  <h2>Published by others: cited, not measured here</h2>
+  <p>We have no NVIDIA hardware here, and one Mac is not Apple Silicon in general. These come from other people&#39;s runs. Each figure was read on the page cited, and each is labelled with who ran it, because a benchmark by an engine&#39;s own authors is evidence about that engine&#39;s best day.</p>
+  <ul><li><strong>MLX versus llama.cpp, decode, 4-bit, M4 Pro (24 GB).</strong> Tokens per second, llama.cpp then MLX: Qwen3-0.6B 297.4 and 343.6, Llama-3.2-1B 230.4 and 257.8, Qwen3-30B-A3B 80.7 and 83.1. MLX leads on small models and the gap nearly closes at 30 billion parameters. At a 512-token prompt, prefill on that 30B model was 668 against 664. From the BaseRT paper (arXiv 2607.00501, July 2026), whose authors build a rival engine and report these two as baselines.</li><li><strong>Continuous batching on a Mac.</strong> The vllm-mlx paper reports Qwen3-0.6B scaling from 441 to 1,642 tokens per second at 16 concurrent requests, about 3.7 times. Its abstract says 4.3 times, and also claims 21% to 87% higher throughput than llama.cpp across models from Qwen3-0.6B to Nemotron-30B, a larger gap than the BaseRT table above shows. The figures in the paper&#39;s body and its abstract disagree, and it is the project&#39;s own benchmark with no run counts. Our own runs at four streams ranged from about 1.2 to 2.8 times depending on what else the machine was doing, which is the same direction and a reminder of the noise.</li><li><strong>One stream on NVIDIA is close to a tie.</strong> On one NVIDIA RTX 4090 graphics card (clock-limited to 1,350 MHz) with Qwen2.5-3B, llama.cpp needed 93.6&ndash;100.2% of vLLM&#39;s time for a single request, and 99.2&ndash;125.6% with 16 in parallel. Run by a llama.cpp maintainer, who writes that the 16-parallel result &ldquo;could be improved&rdquo;. Both used 16-bit weights, so this tests the engines, not GGUF quantization.</li><li><strong>GGUF is a second-class citizen in vLLM.</strong> Its documentation says GGUF support is &ldquo;highly experimental and under-optimized&rdquo; and now lives in a separate plugin.</li><li><strong>On NVIDIA, 4-bit is fast when the kernel is.</strong> The MARLIN paper reports close to the maximum 4&times; speedup for batch sizes up to 16&ndash;32 and up to 2.8&times; end to end inside vLLM. A study of more than 500,000 evaluations on Llama 3.1 found FP8 effectively lossless, well-tuned 8-bit integer (INT8) quantization within 1&ndash;3% and 4-bit weight-only competitive with 8-bit, and says 4-bit suits low-concurrency serving while 8-bit weights and activations win under continuous batching.</li><li><strong>Engine against engine on one NVIDIA H100 data-centre GPU.</strong> Llama 3.3 70B in FP8, 50 concurrent requests, from a GPU-rental company, one three-minute window per concurrency level and no repeat runs stated: vLLM 1,850 tokens per second, SGLang 1,920, TensorRT-LLM 2,100, with TensorRT-LLM taking about 28 minutes to cold-start against about a minute for the other two. The blog of the SGLang (Structured Generation Language) team claims up to 3.1 times vLLM on Llama-70B. Treat a gap of under 15% from a setup like that as a tie.</li><li><strong>Continuous batching and prefix caching, from the papers.</strong> The vLLM paper reports 2&ndash;4&times; the throughput of FasterTransformer and Orca at the same latency, and Orca is itself a continuous-batching system, so that is not a comparison against naive serving. SGLang&#39;s RadixAttention paper reports up to 6.4&times; across a mix of tasks, bundled with its other optimisations rather than the prefix cache alone.</li></ul>
+  <p>We found no solid published comparison of GGUF against AWQ or GPTQ on NVIDIA for answer quality, and no LLM benchmark of MLX on CUDA. Those two rows are gaps in the public record as well as in ours.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Read who ran a benchmark and what they sell before you read its number.</p><p class="know-why">A comparison written by an engine&#39;s authors measures that engine at its best, and a comparison written by a rival measures the incumbent as a baseline. Neither is dishonest. Both are evidence about a particular setup, and the setup is where the surprise usually lives.</p><p class="know-eg"><span class="know-eg-label">For example</span>The vllm-mlx paper states 4.3 times in its abstract and 3.7 times in its results. The BaseRT paper that gives the MLX and llama.cpp decode figures above is written by a team selling a third engine. Neither detail changes the direction of the finding. Both change how much weight a single digit deserves.</p></blockquote>
+  <h2>Choosing, as a judgement</h2>
+  <p>These follow from the evidence above. They are recommendations, so weigh them against your own measurements:</p>
+  <ul><li><strong>One person on a Mac who wants it to work:</strong> Ollama or LM Studio are the easy start. In our run Ollama at its default settings queued concurrent requests, and LM Studio was not tested.</li><li><strong>Several agents sharing one Mac:</strong> an engine with batching switched on: vllm-mlx with <code>--continuous-batching</code>, <code>mlx_lm.server</code>, or llama-server with several slots. In our run a short request behind a long one waited 0.15 seconds on vllm-mlx with batching, 0.10 on llama-server with four slots, and 1.5 to 1.8 on mlx_lm.server against 0.30 alone, so batching is not all-or-nothing. Then run the prefix test for your own pattern, because the identical-request miss above is the kind of thing that only your pattern finds.</li><li><strong>Fastest single stream on a Mac:</strong> MLX was ahead in both published comparisons above, by roughly 3% to 20% in one table and 21% to 87% in the other, and the gap was smallest at 30 billion parameters. Both come from authors with an engine of their own, so verify on your model before moving a workload.</li><li><strong>NVIDIA, one user:</strong> llama.cpp is a reasonable default. The one primary comparison found it close to vLLM at a single request, though with 16-bit weights on one small model, so it says little about GGUF quantization itself.</li><li><strong>NVIDIA, many users:</strong> vLLM or SGLang with an AWQ, GPTQ or FP8 checkpoint. TensorRT-LLM may buy a little throughput for a much longer build. In the one comparison above the gap is about what a single run cannot separate from noise.</li></ul>
+  <h2>Reproduce the Mac comparison</h2>
+  <pre><code># the engines, each alone on a quiet machine
+llama-server -m model-q4_k_m.gguf -c 49152 -np 4 -ngl 99 --port 8012
+mlx_lm.server --model mlx-community/Qwen2.5-1.5B-Instruct-4bit --port 8013
+vllm-mlx serve mlx-community/Qwen2.5-1.5B-Instruct-4bit --port 8011            # default mode
+vllm-mlx serve mlx-community/Qwen2.5-1.5B-Instruct-4bit --port 8011 --continuous-batching
+#   Ollama: a Modelfile with  FROM /path/model.gguf  and  PARAMETER num_ctx 16384,
+#   then  ollama create bench -f Modelfile
+
+# against each one
+python3 scripts/bench_engines.py --base-url http://127.0.0.1:PORT/v1 --model NAME prefix --lengths 2000 6000
+python3 scripts/bench_engines.py --base-url http://127.0.0.1:PORT/v1 --model NAME batching --concurrency 1 4
+python3 scripts/bench_engines.py --base-url http://127.0.0.1:PORT/v1 --model NAME staggered</code></pre>
+  <p>Run one engine at a time, and read the load average the script prints first. Raw outputs from the runs behind this lesson are in <code>scripts/bench_engines_runs.md</code>.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000002-weights-gguf-quantization.html">Weights, GGUF and Quantization</a><span class="link-note">What Q4_K_M actually means, and the trade you're making when you pick it.</span></li><li><a href="lsn-1787000000004-serving-locally.html">Serving Locally: Ollama, llama.cpp and tok/s</a><span class="link-note">The most-mentioned tool in your codebase, and how to read a speed number.</span></li><li><a href="lsn-1787000000028-latency-and-caching.html">Latency, Prefills and Caching</a><span class="link-note">Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.</span></li><li><a href="lsn-1787000000027-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://ml-explore.github.io/mlx/build/html/install.html" target="_blank" rel="noopener">MLX installation</a><span class="link-note">The CUDA backend, its requirements, and the CPU-only Linux build.</span></li><li><a href="https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LEARNED_QUANTS.md" target="_blank" rel="noopener">Learned quantization in MLX LM</a><span class="link-note">DWQ, AWQ, GPTQ and dynamic quantization described in one page by the people who implemented them.</span></li><li><a href="https://docs.vllm.ai/en/latest/features/quantization/" target="_blank" rel="noopener">vLLM quantization support</a><span class="link-note">Which methods run on which NVIDIA architectures.</span></li><li><a href="https://docs.vllm.ai/en/latest/features/quantization/gguf.html" target="_blank" rel="noopener">GGUF in vLLM</a><span class="link-note">The experimental-support warning, in the engine&#39;s own words.</span></li><li><a href="https://github.com/ggml-org/llama.cpp/discussions/15180" target="_blank" rel="noopener">llama.cpp against vLLM, measured</a><span class="link-note">A maintainer&#39;s benchmark with the method, the commands and the fits written out.</span></li><li><a href="https://arxiv.org/abs/2408.11743" target="_blank" rel="noopener">MARLIN: Mixed-Precision Auto-Regressive Parallel Inference</a><span class="link-note">Why 4-bit weights can stay fast under batching.</span></li><li><a href="https://arxiv.org/abs/2411.02355" target="_blank" rel="noopener">Give Me BF16 or Give Me Death</a><span class="link-note">Accuracy and performance of 8-bit floating point and 8-bit and 4-bit integer quantization across the Llama 3.1 family.</span></li><li><a href="https://arxiv.org/abs/2601.19139" target="_blank" rel="noopener">Native LLM and MLLM Inference at Scale on Apple Silicon</a><span class="link-note">The vllm-mlx paper. Read it with its authorship in mind.</span></li><li><a href="https://arxiv.org/abs/2607.00501" target="_blank" rel="noopener">BaseRT</a><span class="link-note">MLX and llama.cpp compared on M3 and M4 Pro, as baselines for a third engine.</span></li><li><a href="https://www.lmsys.org/blog/2024-07-25-sglang-llama3" target="_blank" rel="noopener">SGLang v0.3 Runtime (LMSYS blog)</a><span class="link-note">The SGLang team&#39;s own comparison with vLLM and TensorRT-LLM. Where the 3.1 times figure comes from.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. A forum post says a setup runs at 300 tokens per second. Why can you not compare it with your own 120?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">Speed depends on the format, the engine, the chip and how many requests run at once, and the post fixes none of them</div>
+      <div class="quiz-opt">Tokens per second is a marketing number with no real meaning</div>
+      <div class="quiz-opt">Forum posts always overstate speed</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. What are GPTQ and AWQ best described as?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">File formats that only work on NVIDIA GPUs</div>
+      <div class="quiz-opt">Methods for choosing the quantized values, which different engines&amp;#39; weights can come from</div>
+      <div class="quiz-opt">Two names for the same compression scheme</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. In the Mac comparison, a short request arrived while a long one was generating. Which setup made it wait for the whole long reply?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">llama-server with four slots</div>
+      <div class="quiz-opt">Ollama with its defaults, running the same GGUF file</div>
+      <div class="quiz-opt">vllm-mlx with continuous batching</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. A paper by an engine&amp;#39;s authors states 4.3 times in its abstract and 3.7 times in its results. What is the sensible reading?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The paper is worthless</div>
+      <div class="quiz-opt">The direction is probably right, one digit deserves little weight, and your own run is the check</div>
+      <div class="quiz-opt">Use the larger number because it is the headline</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

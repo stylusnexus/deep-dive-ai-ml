@@ -24,6 +24,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Context window** — The maximum tokens a model can consider at once, covering prompt, history, retrieved documents and the answer together. A capacity limit, not a promise of attention.
 
+**Inference** — Running a trained model on a new input to get an output, as opposed to training it. This is the meaning everywhere in this course. Outside it the word has others: logical inference (deriving conclusions from premises, as in OWL reasoners) and Bayesian inference (updating a probability from evidence). When a paper or article says "inference", check which one it means before reading on.
+
 **Frontier vs local** — Not a quality ladder but two constraint sets. Frontier buys reasoning trained against verifiers, long context that stays usable, and tool-call reliability under compounding. Local buys data that never leaves, fixed rather than marginal cost, a version nothing deprecates under you, and ownership of the sampler — including constrained decoding against a grammar, which major hosted APIs do not offer at any price.
 
 **Technique transfer** — Most of the distance between a good agent and a bad one is harness rather than model, and harness is portable. Several techniques are worth *more* locally than where they were invented: progressive disclosure, because local prefill is slower; speculative decoding, because a single-user machine has the spare compute a batched server has already sold; and grammars, because you own the sampler.
@@ -57,6 +59,36 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **Q4_K_M** — Four-bit K-quant, medium size. The usual local default. Q = quantized, 4 = bits, K = k-quant method, M = medium.
 
 **GGUF (*.gguf)** — The self-contained file format holding quantized weights plus tokenizer and metadata. What llama.cpp and Ollama consume.
+
+**MLX** — Apple's array framework for the Metal GPU and unified memory, and by extension the weights and engines built on it (mlx-lm, vllm-mlx). An MLX model is safetensors plus a quantization setting such as 4 bits at a group size of 64. Has a CUDA backend for Linux, with no published LLM benchmark found.
+
+**AWQ (Activation-aware Weight Quantization)** — A method for choosing low-bit weights, typically four-bit: scale and clip them before quantizing, guided by which ones the activations rely on. A recipe, not a file format; the same idea ships in MLX LM and in the checkpoints vLLM serves.
+
+**GPTQ** — A method for choosing quantized weights that minimise each layer's output error on sample inputs. A recipe, not a file format.
+
+**FP8** — Eight-bit floating point. Half the bytes of 16-bit with a floating-point range. Reported effectively lossless on the Llama 3.1 models in one large study ("Give Me BF16 or Give Me Death"), and supported by vLLM on Ada and Hopper GPUs.
+
+**DWQ (Distilled Weight Quantization)** — An MLX LM method that fine-tunes the parameters left unquantized, scales and biases included, using the full-precision model as a teacher.
+
+**NF4 (4-bit NormalFloat)** — The four-bit data type QLoRA (quantized low-rank adaptation) uses to hold a frozen base model while adapters train. A fine-tuning tool, not a serving format.
+
+**RTN (round-to-nearest)** — The plain way to quantize: round every weight to the closest of a few levels, group by group. Needs no data, takes seconds, and is what a plain `-4bit` model usually is. The baseline every recipe is measured against.
+
+**Group size** — How many weights share one scale and offset. Smaller groups are more accurate and cost more bits per weight: in MLX each group stores 32 bits, so 4-bit weights at group size 64 cost 4.5 bits each.
+
+**Bits per weight** — What a quantized file really costs per weight, scales and any higher-precision tensors included. The label hides it: a MLX 4-bit file is about 4.5, and a Q4_K_M file for a small model came out at 6.35. Compare quantizations at equal bits per weight.
+
+**Perplexity** — How surprised a model is by a text. Lower is better. Cheap to compute and useful for ranking, but it can stay flat while the model starts choosing different words, and it is not comparable across different tokenizers.
+
+**KL divergence** — Kullback–Leibler divergence: how far one probability distribution has moved from another. Used to score a quantized model against its 16-bit original, averaged over every position in a text. It catches changes perplexity misses.
+
+**Calibration data** — The sample text a quantization recipe uses to find out which weights matter. It should look like your use and must not be the text you test on.
+
+**Importance matrix (imatrix)** — llama.cpp's calibration recipe: run sample text through the full-precision model, record how large the activations are on each input channel, and weight the rounding error by that. Made with `llama-imatrix`, used with `llama-quantize --imatrix`.
+
+**Dynamic quantization** — Giving sensitive layers more bits than the rest, for example 5 bits for sensitive layers and 4 elsewhere in `mlx_lm.dynamic_quant`. A form of mixed precision. Q4_K_M is the same idea in llama.cpp's own scheme.
+
+**Unsloth Dynamic (UD)** — A vendor's per-model schemes that adjust the quantization type of every layer, published as `UD-` GGUF files. Self-measured, and not every model has every variant.
 
 **llama.cpp** — The C++ inference engine doing the actual arithmetic, including on Apple Silicon via Metal.
 
@@ -334,6 +366,14 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Batching** — Grouping requests so hardware is used efficiently. Raises total throughput and can raise the latency of any individual request.
 
+**Continuous batching** — A server refilling the batch at every decoding step: a finished request leaves at once and a waiting one takes its slot, instead of everyone waiting for the slowest request. Raises throughput under concurrent load and does nothing for a single stream. Also called in-flight or iteration-level batching.
+
+**Prefix-trie cache** — A prefix cache stored as a tree keyed by token blocks, so a new request walks down as far as its opening matches and reuses everything on that path. Finds the longest shared prefix without scanning every entry. SGLang's radix tree is the same idea.
+
+**SSD cache (disk tier)** — Prefix-cache entries spilled from memory to a solid-state drive instead of being discarded. Slower than memory, usually far faster than recomputing, and survives a restart. Pays only for long, reused prefixes.
+
+**Eviction** — A full cache dropping entries to make room, usually the least recently used. An evicted prefix is a cold start in miniature: nothing errors, the next request just pays full prefill.
+
 **Conversation history** — The default form of agent memory: everything re-sent every turn. Simple, and it grows without limit until something manages it.
 
 **External notes** — Memory an agent writes to a file and reads back. It survives resets because it was never in the context to begin with, which makes it the most durable kind.
@@ -546,6 +586,34 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **Tuning against the test set** — Leakage by repetition. Every time you read the test score and change something, a little of that set moves into your model, and the number stops being an estimate of anything.
 
 ---
+
+**Perceptron** — One matrix multiply followed by a nonlinearity. Alone it draws a single straight line through the inputs, which is why it cannot separate two classes that sit on opposite diagonals.
+
+**Wide** — A layer with many outputs. Width is the design choice that decides how many feature combinations a layer can hold at once, and what each layer costs in parameters.
+
+**Deep** — A stack of many layers. Each layer builds on the one before, so nested structure can be described with fewer parameters, but gradients have further to travel and training is harder.
+
+**Binary classifier** — A network that ends in one number passed through a sigmoid, giving a probability. The yes-or-no decision is a threshold chosen separately, by cost.
+
+**Encoder** — A stack that narrows layer by layer, so it must discard information and ends in a short code. Useful when you need one vector that stands for an input.
+
+**Decoder** — A stack that widens layer by layer, turning a short code into a full-width output. It rebuilds from learned weights and never sees the original, so its output can be plausible and wrong.
+
+**Autoencoder** — An encoder followed by a decoder, trained to reproduce its own input. Everything the decoder needs must pass through the narrow middle, so it learns a compact code without labels. Check a linear method such as PCA first, because a straight line often does as well.
+
+**Bottleneck** — The narrowest layer in a network. In an autoencoder it is the code, and its width is the knob: too narrow loses signal, too wide lets the network copy its input.
+
+**Expand then shrink** — Two layers with a wide middle, such as 512 to 2,048 to 512. The wide middle holds feature combinations the narrow input cannot, and matching input and output widths let the block be stacked. It is the feed-forward part of a transformer block.
+
+**Shrink then expand** — Two layers with a narrow middle, such as 64 to 8 to 64. Two thin matrices cost far less than one full one, which is why LoRA uses the shape. Without a skip connection beside it, it loses the input.
+
+**Skip connection** — A path that carries a layer's input around the layer and adds it back to the output. It lets a narrow block learn only a correction rather than the whole mapping.
+
+**GAN (generative adversarial network)** — Two networks trained against each other: a generator that makes samples and a discriminator that tries to tell them from real ones. The generator never sees the data directly. It can silently lose whole parts of the real distribution, so measure coverage, not just how sharp the samples look.
+
+**Two-tower** — Two separate networks, one for each side of a match such as user and item, combined at the end. With a dot product as the combiner, every item vector can be computed once and searched in an index. A joint model that reads the pair together can be more accurate when the score depends on the pair, at a cost for every candidate.
+
+**Head** — The last layer or two of a network, turning a shared representation into a particular output. A trained trunk can serve many heads, and a new head on a frozen trunk is the cheap way to use few labels.
 
 ## Block 1 · Python, Data & EDA
 

@@ -51,3 +51,20 @@ Verified outputs: the random split scores 0.494 average precision and the
 time-ordered split with a 7-day gap scores 0.343 - **optimistic by 0.151**, with
 nothing about the model changed. Walk-forward folds range 0.029 to 0.441, which
 is the honest uncertainty a single split would have hidden.
+
+## 05 · MLP patterns, measured
+
+Companion to the lesson `algorithms/mlp-patterns`. Needs PyTorch and NumPy, CPU only, a
+few minutes; every dataset is synthetic and seeded, so the ground truth is known.
+
+Verified outputs: one layer scores 0.525 on XOR and one hidden layer of eight scores 1.000.
+At about 200 parameters a wide net averages 0.0250 error on a threefold-folded target and a
+deep net 0.0389, so depth did not win. An autoencoder's error stops falling at a bottleneck
+of 3, the true number of factors (0.0033 against a noise floor of 0.0025), where PCA needs 8.
+A width-2 middle scores 0.8229 against a low-rank change alone and 0.0212 with a skip
+connection. Two towers beat a joint model when affinity is a dot product (recall@10 0.865
+against 0.819, 0.1 ms against about 25 ms) and lose when it depends on the pair (0.623
+against 0.746). On a ring of eight clusters six GAN seeds reach 2, 8, 4, 2, 3 and 0 of them.
+With 20 labels a frozen trunk and new head score 0.711 against 0.604 from scratch; with 1000
+labels fine-tuning scores 0.929 against 0.888 frozen.
+

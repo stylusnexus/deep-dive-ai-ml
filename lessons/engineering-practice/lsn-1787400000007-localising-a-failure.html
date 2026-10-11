@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Localising a Failure</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 8 of 17</span>
+  <h1>Localising a Failure</h1>
+  <p class="subtitle">Knowing something is broken is easy. Knowing which part is the whole job.</p>
+
+  <p>A zero is ambiguous. "The models scored 0 of 7" is consistent with the models being incapable, the harness strangling them before they engage, the rubric being too strict, or the fixtures being broken. Every one of those calls for a different fix, and picking wrongly costs you weeks.</p>
+  <p>Four techniques turn an ambiguous result into a located one. None is expensive.</p>
+  <h2>1 · A control fixture</h2>
+  <p>Add one task you are confident is easy, in the same domain, exercised by the same harness. Then read the pair:</p>
+  <figure class="diagram"><svg viewBox="0 0 640 190" role="img" aria-label="Reading a control fixture against a hard fixture">
+<rect x="12" y="34" width="180" height="26" rx="4" class="d-box"/><text x="24" y="52" class="d-label-sm">control (easy)</text>
+<rect x="12" y="66" width="180" height="26" rx="4" class="d-box"/><text x="24" y="84" class="d-label-sm">target (hard)</text>
+<text x="228" y="26" class="d-label-sm">control ✓ / target ✗</text>
+<rect x="228" y="34" width="180" height="58" rx="5" class="d-box-good"/>
+<text x="240" y="56" class="d-label-sm">the wall is the specific</text>
+<text x="240" y="72" class="d-label-sm">difficulty — scope, not ability</text>
+<text x="440" y="26" class="d-label-sm">control ✗ / target ✗</text>
+<rect x="440" y="34" width="188" height="58" rx="5" class="d-box-warn"/>
+<text x="452" y="56" class="d-label-sm">the harness or the rubric,</text>
+<text x="452" y="72" class="d-label-sm">not the model</text>
+<text x="12" y="128" class="d-label-sm">Without the control, 0/7 is consistent with both columns and you cannot tell which you are looking at.</text>
+<text x="12" y="150" class="d-label-sm">Worked case: a 30B model failed every multi-file fixture and passed the single-file control cleanly, under both guard</text>
+<text x="12" y="168" class="d-label-sm">conditions — which located the wall at multi-file scope rather than at coding ability.</text>
+</svg><figcaption>The control is what separates the explanations. Same model, same harness, same domain — only difficulty differs, so the pattern of pass and fail tells you which component is the wall.</figcaption></figure>
+  <div class="callout matters"><span class="label">Build the control before you need it</span>Every benchmark should carry at least one task you would be alarmed to fail. Its job is not to be scored — it is to tell you, on the day everything reads zero, whether the instrument is still working. This is instrument validity from lesson 3, running continuously rather than once at setup.</div>
+  <h2>2 · Suspect the harness when every tier fails identically</h2>
+  <p>A frontier model with a strong published benchmark score produced zero edit attempts and zero source recall on one battery — dying in the first few iterations, before it engaged with the task at all. A capable model failing <em>without trying</em> is not a capability signal. It is a harness signal.</p>
+  <p>The general rule: when models of very different capability fail in the same way and at the same point, the thing they have in common is the scaffolding, not their weights. Capability differences should produce differently-shaped failures.</p>
+  <h2>3 · Metric definition decides what you can see</h2>
+  <p>One battery scored task-pass on recall over the full expected file set, including documentation and tests. Real near-misses — runs that found the right code and broke the build — scored zero alongside runs that never found anything, and the whole board read as uniform failure.</p>
+  <p>Rescoring on source files only surfaced that the same model was reaching 0.50–0.67 on hard fixtures. Same runs, same data, different metric, and a completely different conclusion: not "never found the code" but "found it and couldn't edit it correctly" — two different problems with two different fixes.</p>
+  <div class="callout insight"><span class="label">Design the metric to separate the failures you care about</span>A metric that collapses distinct failure modes into one number is not neutral — it actively hides the distinction you need. Report engagement separately from correctness. If your score cannot tell <em>never attempted</em> from <em>attempted and got it wrong</em>, it cannot tell you what to fix next, however precise it looks.</div>
+  <h2>4 · State what a green result proves — and what it does not</h2>
+  <p>An end-to-end test on a new serving runtime landed a correct single-file edit and it was tempting to record it as "the new runtime works". It proved the serving path and the integration. It said nothing about the multi-file capability that was the entire point of the investigation, because the runtime was serving the same weights.</p>
+  <p>Every passing test has a scope. Writing down what it does <em>not</em> establish, at the moment you record the pass, is what stops "the plumbing works" quietly becoming "the problem is solved" three weeks later when nobody remembers the distinction.</p>
+  <h2>The error underneath all four</h2>
+  <p>One project logged the same reasoning failure at least three times in a fortnight, in unrelated areas:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">&quot;This model can&#x27;t run on that engine&quot;</div><div><div class="roadmap-title">One build format tested</div><div class="roadmap-desc">A different build of the same weights loaded first try.</div></div></div><div class="roadmap-item"><div class="roadmap-num">&quot;This architecture can&#x27;t reuse its cache&quot;</div><div><div class="roadmap-title">Three tests, all truncated</div><div class="roadmap-desc">The truncation caused the failure, not the architecture.</div></div></div><div class="roadmap-item"><div class="roadmap-num">&quot;This runtime is twice as fast&quot;</div><div><div class="roadmap-title">Measured on the wrong engine mode</div><div class="roadmap-desc">The flag was inert in the configuration tested.</div></div></div></div>
+  <div class="callout pitfall"><span class="label">A true narrow observation promoted to a false general one</span>In each case the specific measurement was correct. What was wrong was the scope of the claim built on it. Before writing "X cannot do Y", name exactly what you tested — which build, which configuration, which budget, which mode — and ask whether the claim you are about to make is larger than the evidence under it. It usually is.</div>
+  <h2>In practice</h2>
+  <ul><li>Put an easy control in every benchmark and read it first when a board looks uniform</li><li>When every model fails identically, investigate the harness before the models</li><li>Report engagement and correctness as separate numbers</li><li>Record what each passing test does not establish, at the time you record the pass</li><li>Write claims at the scope of the evidence — name the build, the config, the budget</li></ul>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000006-confounds-you-cannot-see.html">Confounds You Cannot See</a><span class="link-note">The limits, overrides and truncations that end a run silently — and get read as capability.</span></li><li><a href="lsn-1787400000014-rungs-and-experiments.html">Rungs: Running Experiments on an Agent</a><span class="link-note">A ladder of progressively more assistance — and the only design that tells you where the wall actually is.</span></li><li><a href="lsn-1787400000003-how-to-measure.html">How to Measure</a><span class="link-note">A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.</span></li><li><a href="lsn-1787400000004-swe-bench-and-how-to-run-it.html">SWE-bench, and How to Actually Run It</a><span class="link-note">The benchmark behind the numbers in lesson 2 — how it is built, how to run it, and what it does not tell you.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.swebench.com/" target="_blank" rel="noopener">SWE-bench</a><span class="link-note">Note that variants exist precisely to separate difficulty from capability — Lite versus Verified is a control-fixture argument at benchmark scale.</span></li><li><a href="https://arxiv.org/abs/2305.20050" target="_blank" rel="noopener">Let&#x27;s Verify Step by Step (Lightman et al., 2023)</a><span class="link-note">Process versus outcome scoring — the same idea as separating engagement from correctness, done at the step level.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Every model in your battery scores zero, from a small local one to a frontier model. What should you investigate first?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The models — the task may be beyond current capability</div>
+      <div class="quiz-opt">The harness, since the thing they all share is the scaffolding, not their weights</div>
+      <div class="quiz-opt">The fixtures, which are probably mislabelled</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. What is a control fixture for?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Establishing a floor score for the leaderboard</div>
+      <div class="quiz-opt">Telling you, when everything reads zero, whether the instrument still works and where the wall is</div>
+      <div class="quiz-opt">Giving weaker models something they can pass</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Rescoring the same runs on a narrower metric changes &#x27;uniform failure&#x27; into &#x27;0.50-0.67 on hard tasks&#x27;. What does that show?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The original metric was miscalculated</div>
+      <div class="quiz-opt">A metric that collapses distinct failure modes hides the distinction you need to choose a fix</div>
+      <div class="quiz-opt">The narrower metric is too generous</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. An integration test on a new runtime passes with a single-file edit. What have you established?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">That the runtime works and the investigation can close</div>
+      <div class="quiz-opt">That the serving path and integration work — and nothing about the multi-file question, since the weights are unchanged</div>
+      <div class="quiz-opt">That the previous runtime was the bottleneck</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deterministic First</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 10 of 17</span>
+  <h1>Deterministic First</h1>
+  <p class="subtitle">The best AI engineering decision is frequently to use less of it.</p>
+
+  <p>This idea has appeared five times already in this course, each time as a footnote to something else. It deserves stating on its own, because it is the highest-leverage engineering judgement in the field and it is the one most often skipped.</p>
+  <p><strong>A model is the most expensive, slowest, least debuggable and least testable component you can put in a system.</strong> Sometimes it is the only thing that can do the job, and then it is worth every one of those costs. Frequently it is not, and reaching for it anyway is a choice you will pay for on every request forever.</p>
+  <h2>Where it has already come up</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Intake question 1</div><div><div class="roadmap-title">Is this even an ML problem?</div><div class="roadmap-desc">Could a rule, a lookup, a SQL query or a person twice a day solve it? Most projects that die should die here.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Agent or workflow?</div><div><div class="roadmap-title">Did you decide the sequence?</div><div class="roadmap-desc">If you know the steps, write the steps. An agent is for when the sequence genuinely cannot be known in advance.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Prompt or tool?</div><div><div class="roadmap-title">Can the model tell it complied?</div><div class="roadmap-desc">A mechanically checkable rule belongs in a tool as a precondition. Refusal beats hope.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Judge or verifier?</div><div><div class="roadmap-title">Is there something checkable?</div><div class="roadmap-desc">A typechecker is narrower than a model judge and it is not an opinion. Where a real check exists, take it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Embeddings or keywords?</div><div><div class="roadmap-title">Is the text jargon-heavy?</div><div class="roadmap-desc">Best Matching 25 (BM25) beats vector search outright on identifiers, error codes and rare terms, at a fraction of the cost.</div></div></div></div>
+  <div class="callout insight"><span class="label">The pattern</span>Every one of those is the same question at a different altitude: <em>is there a bounded, checkable mechanism that does this job?</em> When there is, it wins on cost, latency, testability and the ability to explain what happened — and it does not drift, hallucinate, or change behaviour when a provider updates a model behind an alias.</div>
+  <h2>What a deterministic component gives you that a model cannot</h2>
+  <figure class="diagram"><svg viewBox="0 0 640 230" role="img" aria-label="Deterministic component compared against a model">
+<text x="250" y="20" class="d-accent">deterministic</text>
+<text x="440" y="20" class="d-label-b">model</text>
+<line x1="12" y1="28" x2="628" y2="28" stroke="var(--border)"/>
+<text x="12" y="50" class="d-label-sm">handles open-ended input</text>
+<text x="262" y="50" class="d-fill-red" font-size="13" font-weight="700">✗</text>
+<text x="452" y="50" class="d-fill-green" font-size="13" font-weight="700">✓</text>
+<line x1="12" y1="60" x2="628" y2="60" stroke="var(--border)" stroke-dasharray="3 3"/>
+<text x="12" y="82" class="d-label-sm">same input, same output, always</text>
+<text x="262" y="82" class="d-fill-green" font-size="13" font-weight="700">✓</text>
+<text x="452" y="82" class="d-fill-red" font-size="13" font-weight="700">✗</text>
+<text x="12" y="108" class="d-label-sm">cost per call</text>
+<text x="252" y="108" class="d-fill-green" font-size="12" font-weight="600">~0</text>
+<text x="446" y="108" class="d-fill-red" font-size="12" font-weight="600">per token</text>
+<text x="12" y="134" class="d-label-sm">latency</text>
+<text x="250" y="134" class="d-fill-green" font-size="12" font-weight="600">µs–ms</text>
+<text x="450" y="134" class="d-fill-red" font-size="12" font-weight="600">100ms–60s</text>
+<text x="12" y="160" class="d-label-sm">can be unit tested</text>
+<text x="262" y="160" class="d-fill-green" font-size="13" font-weight="700">✓</text>
+<text x="452" y="160" class="d-fill-yellow" font-size="12" font-weight="600">statistically</text>
+<text x="12" y="186" class="d-label-sm">you can say why it did that</text>
+<text x="262" y="186" class="d-fill-green" font-size="13" font-weight="700">✓</text>
+<text x="452" y="186" class="d-fill-red" font-size="13" font-weight="700">✗</text>
+<text x="12" y="212" class="d-label-sm">behaviour changes without you</text>
+<text x="262" y="212" class="d-fill-green" font-size="13" font-weight="700">✗</text>
+<text x="452" y="212" class="d-fill-red" font-size="13" font-weight="700">✓</text>
+</svg><figcaption>The comparison people skip. A model wins the top row decisively and loses every row beneath it — so the question is whether you actually need the top row.</figcaption></figure>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A model is the most expensive, slowest, least debuggable and least testable component you can put in a system.</p><p class="know-why">Sometimes it is the only thing that can do the job, and then it earns every one of those costs. Frequently it is not, and reaching for it anyway is a bill you pay on every request forever.</p><p class="know-eg"><span class="know-eg-label">For example</span>Extracting an order number that always matches ORD-######. A regex is free, runs in microseconds, can be unit tested exhaustively, and cannot invent a number that was not in the text. An LLM call costs money per invocation, takes a second, and will occasionally return a plausible order number that does not exist.</p></blockquote>
+  <h2>The tasks people reach for a model on that don&#x27;t need one</h2>
+  <ul><li><strong>Extraction from structured or semi-structured text.</strong> Invoice numbers, dates, order ids in a known format. A regex is free, instant, and cannot invent a value that wasn't there.</li><li><strong>Routing on explicit signals.</strong> If the request contains an order number, it's an order query. Rules first; a classifier for what falls through.</li><li><strong>Validation.</strong> Schema checks, range checks, referential integrity. Never ask a model whether data is valid when you can assert it.</li><li><strong>Deduplication and matching on identifiers.</strong> A join, not a similarity search.</li><li><strong>Formatting and templating.</strong> If the output shape is fixed, a template with slots beats generation, and it cannot drift.</li><li><strong>Arithmetic and aggregation.</strong> Give the model the tool; do not ask it for the number.</li><li><strong>Anything with a lookup table.</strong> Country codes, tax rates, product mappings. A model will approximate a table it could simply have been given.</li></ul>
+  <div class="callout matters"><span class="label">The hybrid is usually the right answer</span>This is not an argument for avoiding models. It is an argument for putting them where they earn their cost. Deterministic code handles the 80% that is structured, and the model handles the ambiguous remainder — which means it sees fewer calls, on harder inputs, where its judgement is actually worth paying for. Systems built this way are cheaper, faster, easier to debug, and usually more accurate, because each component is doing what it is good at.</div>
+  <h2>How to make the call</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">1 · Can you write the rule?</div><div><div class="roadmap-title">If yes, write it</div><div class="roadmap-desc">If you can state the logic in a sentence, it is code, not a prompt.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2 · Is the input space bounded?</div><div><div class="roadmap-title">Enumerable inputs mean rules</div><div class="roadmap-desc">Open-ended natural language is where models earn their place.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3 · What does a wrong answer cost?</div><div><div class="roadmap-title">High cost favours determinism</div><div class="roadmap-desc">Because you can test a rule exhaustively and you cannot test a model exhaustively.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4 · Do you have to explain it?</div><div><div class="roadmap-title">Regulators want mechanisms</div><div class="roadmap-desc">"The model decided" is not an answer to an auditor, or to a customer.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5 · What is the volume?</div><div><div class="roadmap-title">Per-call cost compounds</div><div class="roadmap-desc">A model call that is fine at a thousand a day may be untenable at a million.</div></div></div></div>
+  <h2>The honest counter-argument</h2>
+  <p>Rules have a real failure mode of their own: they accumulate. A routing system that starts as four clean conditions becomes two hundred over three years, each one added for a case nobody remembers, and no one dares delete any of them. That is a maintenance burden models genuinely do avoid, and it is why "just write rules" is not universally correct either.</p>
+  <p>The distinction worth holding: rules are right where the logic is <em>stable and stateable</em>. Models are right where it is <em>fuzzy or evolving</em>. When you find yourself writing the fortieth special case, that is the signal to reconsider — not the fourth.</p>
+  <div class="callout warning"><span class="label">And the failure mode of this whole lesson</span>Applied too enthusiastically, this becomes an argument for never using AI, which is just as wrong as reaching for it first. The test is not "could this conceivably be done with rules" — almost anything could, badly. It is "does a bounded mechanism do this <em>well</em>?" A hand-written rule system that approximates language understanding badly is worse than a model call, and considerably more work.</div>
+  <h2>Where this lands</h2>
+  <p>Every block of this program has a version of this decision in it, and the intake sheet asks it first for a reason. Before the model selection, before the prompt, before the fine-tune: is there a bounded mechanism that does this job? Ask it early, because the answer is easy to act on at the start of a project and very expensive to act on once the model is load-bearing.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000011-what-ai-makes-worse.html">What AI Makes Worse</a><span class="link-note">You do not need to want to be a software engineer. You do need the parts of it that generation puts under pressure.</span></li><li><a href="../core-vocabulary/lsn-1787000000014-structured-output-json.html">Structured Output: JSON You Can Actually Parse</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">The gap between 'the model returned JSON' and 'the model always returns valid JSON'.</span></li><li><a href="../block2-classical-ml/lsn-1787500000001-baseline-to-model.html">From Baseline to Model</a><span class="rel-set">Block 2 · Predictive Modelling</span><span class="link-note">A ladder of increasing complexity, climbed only as far as the evidence justifies.</span></li><li><a href="../block9-electives/lsn-1788200000001-asking-the-database-properly.html">Asking the Database Properly</a><span class="rel-set">Block 9 · Electives</span><span class="link-note">The intake sheet keeps asking whether a query would do. This is what that query looks like.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">Opens with the same argument: find the simplest solution possible, and only increase complexity when it demonstrably improves outcomes.</span></li><li><a href="https://developers.google.com/machine-learning/guides/rules-of-ml" target="_blank" rel="noopener">Rules of Machine Learning — Google</a><span class="link-note">Rule 1 is: do not be afraid to launch a product without machine learning. Written for classical ML and it has aged well.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. You need to pull order numbers out of support emails, and they always match a known format. What should you reach for?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">An LLM with a structured-output schema, for robustness to format variation</div>
+      <div class="quiz-opt">A regex — it is free, instant, and cannot invent a value that was not there</div>
+      <div class="quiz-opt">An embedding model to find the most order-number-like span</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. What does a deterministic component give you that a model cannot?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Better handling of ambiguous input</div>
+      <div class="quiz-opt">Same input to same output always, exhaustive testability, and an explanation of why it did that</div>
+      <div class="quiz-opt">Lower engineering effort in every case</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. When is the rules-based approach the wrong call?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Whenever the input is natural language</div>
+      <div class="quiz-opt">When the logic is fuzzy or evolving — the tell is finding yourself writing the fortieth special case</div>
+      <div class="quiz-opt">Whenever a model would also work</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. What is the strongest form of this argument in practice?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Avoid models wherever a rule could conceivably do the job</div>
+      <div class="quiz-opt">Handle the structured majority deterministically so the model sees fewer, harder calls where its judgement is worth paying for</div>
+      <div class="quiz-opt">Use rules for prototypes and models in production</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>
