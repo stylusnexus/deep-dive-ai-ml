@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-10-15T01:24:26Z",
+  "timestamp": "2026-10-15T02:31:40Z",
   "tests": {
     "passed": true,
-    "summary": "39 passed in 27.30s"
+    "summary": "40 passed in 30.16s"
   },
   "drill": [
     {
@@ -10,7 +10,7 @@
       "expected": "rung-1",
       "observed": "rung-1",
       "pass": true,
-      "ms": 8
+      "ms": 7
     },
     {
       "scenario": "primary erroring, breaker open",
@@ -24,7 +24,7 @@
       "expected": "rung-2",
       "observed": "rung-2",
       "pass": true,
-      "ms": 1008
+      "ms": 1006
     },
     {
       "scenario": "every provider down, default caller",
@@ -38,7 +38,7 @@
       "expected": "retrieval-only",
       "observed": "retrieval-only",
       "pass": true,
-      "ms": 5,
+      "ms": 4,
       "degraded": true,
       "x_degraded": "retrieval-only",
       "answer_is_only_a_notice": true,
@@ -49,7 +49,7 @@
       "expected": "rung-1",
       "observed": "rung-1",
       "pass": true,
-      "ms": 9
+      "ms": 4
     }
   ],
   "gold": {
@@ -117,30 +117,30 @@
     {
       "concurrency": 1,
       "requests": 32,
-      "throughput_rps": 63.1,
+      "throughput_rps": 63.7,
       "p50_ms": 15.7,
-      "p95_ms": 17.5
+      "p95_ms": 17.3
     },
     {
       "concurrency": 2,
       "requests": 32,
-      "throughput_rps": 101.6,
-      "p50_ms": 18.3,
-      "p95_ms": 26.1
+      "throughput_rps": 110.7,
+      "p50_ms": 17.5,
+      "p95_ms": 21.3
     },
     {
       "concurrency": 4,
       "requests": 32,
-      "throughput_rps": 194.8,
-      "p50_ms": 19.0,
-      "p95_ms": 24.0
+      "throughput_rps": 220.6,
+      "p50_ms": 16.3,
+      "p95_ms": 22.1
     },
     {
       "concurrency": 8,
       "requests": 32,
-      "throughput_rps": 196.4,
-      "p50_ms": 28.3,
-      "p95_ms": 70.7
+      "throughput_rps": 252.5,
+      "p50_ms": 24.2,
+      "p95_ms": 51.1
     }
   ]
 }

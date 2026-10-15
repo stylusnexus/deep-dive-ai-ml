@@ -15,11 +15,13 @@ Every endpoint except /health and /version requires an API key.
 """
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import pathlib
 import re
 import time
+import urllib.parse
 import urllib.request
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
@@ -167,10 +169,41 @@ def generate(rung: Rung, deadline_s: float, system: str, user: str,
     body = json.dumps({"model": rung.model, "temperature": 0, "max_tokens": max_tokens,
                        "messages": [{"role": "system", "content": system},
                                     {"role": "user", "content": user}]}).encode()
-    request = urllib.request.Request(f"{rung.base}/chat/completions", data=body,
-                                     headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(request, timeout=deadline_s) as r:
-        return json.loads(r.read())["choices"][0]
+    return json.loads(_post(f"{rung.base}/chat/completions", body, deadline_s))["choices"][0]
+
+
+def _post(url: str, body: bytes, deadline_s: float) -> bytes:
+    """POST and return the response body, or raise once `deadline_s` seconds of wall
+    clock have passed. urllib's timeout restarts on every socket read, so a provider
+    that drips one byte at a time would never trip it; here each blocking step is given
+    only the time that is left."""
+    start = time.monotonic()
+    parts = urllib.parse.urlsplit(url)
+    conn = http.client.HTTPConnection(parts.netloc, timeout=deadline_s)
+    try:
+        conn.request("POST", parts.path, body, {"Content-Type": "application/json"})
+        sock = conn.sock  # getresponse() may drop conn.sock when the server closes
+        sock.settimeout(_left(start, deadline_s))
+        response = conn.getresponse()
+        if response.status >= 400:
+            raise RuntimeError(f"provider returned {response.status}")
+        chunks = []
+        while not response.isclosed():  # read1 = at most one socket read per call
+            sock.settimeout(_left(start, deadline_s))
+            chunk = response.read1(8192)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        return b"".join(chunks)
+    finally:
+        conn.close()
+
+
+def _left(start: float, deadline_s: float) -> float:
+    left = deadline_s - (time.monotonic() - start)
+    if left <= 0:
+        raise TimeoutError(f"deadline of {deadline_s}s exceeded")
+    return left
 
 
 def retrieve(question: str, k: int) -> list[dict]:

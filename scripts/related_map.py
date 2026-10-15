@@ -95,6 +95,8 @@ RELATED = {
                                        "baseline-to-model", "drift"],
 
     # --- retrieval, end to end
+    "retrieval-at-scale": ["vector-search-algorithms", "measuring-retrieval",
+                           "building-a-rag-system", "the-artefact-is-code-data-and-config"],
     "building-a-rag-system": ["embeddings-and-retrieval", "measuring-retrieval",
                               "ranking-and-hybrid-retrieval", "designing-the-whole-system"],
     "embeddings-and-retrieval": ["vector-search-algorithms", "building-a-rag-system",
@@ -167,6 +169,10 @@ RELATED = {
               "the-artifact-and-when-to-retrain", "telemetry-and-instrumentation"],
     "calling-an-api-you-do-not-control": ["after-it-ships", "where-the-money-goes",
                                           "when-the-provider-goes-down", "routing-and-escalation"],
+    "when-the-provider-goes-down": ["calling-an-api-you-do-not-control", "managed-cloud-surfaces",
+                                    "after-it-ships", "designing-the-whole-system"],
+    "designing-the-whole-system": ["when-the-provider-goes-down", "retrieval-at-scale",
+                                   "after-it-ships", "managed-cloud-surfaces"],
     "serving-one-yourself": ["the-image-is-the-unit", "serving-locally",
                              "calling-an-api-you-do-not-control", "latency-and-caching"],
     "the-image-is-the-unit": ["serving-one-yourself", "sandboxing-and-what-actually-works",

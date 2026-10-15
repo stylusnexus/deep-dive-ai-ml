@@ -29,7 +29,7 @@ That's the whole loop. The rest of this page is detail you can come back for.
 | `projects/` | Four portfolio builds; Project 4 is also the capstone | At block boundaries 2, 3, 4 and 8 |
 | [`artifacts/sop/`](artifacts/sop/) | Checklists, aviation-style | Open before you build, tick as you go |
 | [`artifacts/engineering-foundations.md`](artifacts/engineering-foundations.md) | Optional systems-engineering reading map | Experienced developers can skip it; otherwise use it when a project exposes a representation, time, distributed-failure or maintenance assumption |
-| [`artifacts/cumulative-exam.md`](artifacts/cumulative-exam.md) and [`artifacts/design-interview-rubric.md`](artifacts/design-interview-rubric.md) | A written exam across Blocks 3 to 8, and a scored mock design interview | After Block 8, with the [Project 4 capstone run](projects/p4-deployed-assistant/README.md#capstone) |
+| [`artifacts/cumulative-exam.md`](artifacts/cumulative-exam.md) and [`artifacts/design-interview-rubric.md`](artifacts/design-interview-rubric.md) | A written exam across Blocks 3, 5, 6, 7 and 8, and a scored mock design interview | After Block 8, with the [Project 4 capstone run](projects/p4-deployed-assistant/README.md#capstone) |
 | [`GLOSSARY.md`](GLOSSARY.md) | Every term, cumulative | Add to it as you go; feed into spaced repetition |
 | [`things-to-know.html`](things-to-know.html) | Every rule harvested from the lessons | The revision sheet. Read it when you've forgotten a block |
 

@@ -76,6 +76,18 @@ def test_slow_primary_is_abandoned_at_the_deadline(world):
     assert waited < 2.5, f"waited {waited:.1f}s; the 1s deadline should have cut it off"
 
 
+def test_a_provider_that_drips_bytes_is_cut_off_at_the_total_deadline(world):
+    """Every socket read succeeds within the deadline, so a per-read timeout never
+    fires. The wall-clock limit must."""
+    client, primary, secondary = world
+    primary.mode, primary.delay_s = "drip", 0.3
+    started = time.perf_counter()
+    body = ask(client).json()
+    waited = time.perf_counter() - started
+    assert body["rung"] == "rung-2"
+    assert waited < 2.5, f"waited {waited:.1f}s; the 1s deadline is a total, not per read"
+
+
 def test_both_down_is_an_error_by_default(world):
     """A caller that knows nothing about degraded replies must still see a failure."""
     client, primary, secondary = world

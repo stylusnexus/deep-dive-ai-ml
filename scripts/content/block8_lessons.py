@@ -487,12 +487,12 @@ LESSONS = [
       "Quality of each rung on the eval set, re-run on a schedule, because a fallback model changes under you too.",
       "A recovery drill: switch the primary off on purpose in a test environment and read the trace.",
     ]),
+    ("related", ["calling-an-api-you-do-not-control", "managed-cloud-surfaces", "after-it-ships", "designing-the-whole-system"]),
     ("links", [
       ("Google SRE Book: Handling Overload", "https://sre.google/sre-book/handling-overload/", "Why retrying and failing over can make an overload worse, and what load shedding is for."),
       ("Google SRE Book: Addressing Cascading Failures", "https://sre.google/sre-book/addressing-cascading-failures/", "How one failing dependency becomes a system-wide failure, and the timeout and breaker patterns that stop it."),
       ("Martin Fowler: Circuit Breaker", "https://martinfowler.com/bliki/CircuitBreaker.html", "The closed, open and half-open states in two screens."),
     ]),
-    ("related", ["calling-an-api-you-do-not-control", "managed-cloud-surfaces", "after-it-ships", "routing-and-escalation"]),
     ("quiz", [
       ("A provider's responses start taking 30 seconds and return no errors. What detects it?",
        ["A failover rule that triggers on 5xx status codes",
@@ -581,7 +581,7 @@ LESSONS = [
      "Asked where to add a cache, a weak answer names a product. A strong one says: exact-match first because it cannot return a wrong answer; prompt caching with the stable prefix first; a similarity cache only for low-stakes questions and never shared across tenants; and measures the hit rate and the wrong-hit rate for each."),
     ("callout", "matters", "Where the course is thinner",
      "The course teaches each part and its failure modes against runnable projects. It does not give you practice at saying them aloud under time pressure. Projects 2 and 4 are the best raw material: explain their trade-offs out loud, and time yourself drawing the figure above from memory."),
-    ("related", ["building-a-rag-system", "retrieval-at-scale", "when-the-provider-goes-down", "after-it-ships"]),
+    ("related", ["when-the-provider-goes-down", "retrieval-at-scale", "after-it-ships", "managed-cloud-surfaces"]),
     ("quiz", [
       ("An interviewer says &ldquo;design a RAG system&rdquo;. What should you do first?",
        ["Name a vector database", "Ask for the corpus size, query rate, latency budget, cost of an error and access rules", "Start with the prompt"], 1),

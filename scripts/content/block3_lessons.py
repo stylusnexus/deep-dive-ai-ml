@@ -603,7 +603,7 @@ LESSONS = [
     ]),
     ("callout", "matters", "Most corpora are smaller than the question assumes",
      "The honest first answer to a scale question is a number: how many chunks, how many queries a second, what latency budget. Forty thousand vectors is exact-search territory. The design above is for the day the measurement says otherwise, not the first day."),
-    ("related", ["vector-search-algorithms", "measuring-retrieval", "ranking-and-hybrid-retrieval", "weights-gguf-quantization"]),
+    ("related", ["vector-search-algorithms", "measuring-retrieval", "building-a-rag-system", "the-artefact-is-code-data-and-config"]),
     ("links", [
       ("pgvector: indexing and filtering", "https://github.com/pgvector/pgvector", "HNSW and IVFFlat in Postgres, including how filtering interacts with approximate indexes."),
       ("Efficient and robust ANN search using HNSW (Malkov & Yashunin)", "https://arxiv.org/abs/1603.09320", "The graph index the memory sum above is about."),

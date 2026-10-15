@@ -13,7 +13,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 class StubProvider:
-    """mode: "ok" answers, "error" returns 500, "slow" sleeps `delay_s` first."""
+    """mode: "ok" answers, "error" returns 500, "slow" sleeps `delay_s` first, "drip"
+    answers one byte every `delay_s` seconds (every read succeeds, the whole is slow)."""
 
     def __init__(self, name: str, mode: str = "ok", delay_s: float = 5.0):
         self.name, self.mode, self.delay_s = name, mode, delay_s
@@ -47,7 +48,21 @@ class StubProvider:
                     return
                 payload = {"choices": [{"message": {"content": f"answer from {owner.name} [1]"},
                                         "finish_reason": "stop"}]}
-                self._send(200, json.dumps(payload).encode())
+                data = json.dumps(payload).encode()
+                if owner.mode == "drip":
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Content-Length", str(len(data)))
+                    self.end_headers()
+                    try:
+                        for i in range(len(data)):
+                            self.wfile.write(data[i:i + 1])
+                            self.wfile.flush()
+                            time.sleep(owner.delay_s)
+                    except OSError:
+                        pass
+                    return
+                self._send(200, data)
 
         self._server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.base = f"http://127.0.0.1:{self._server.server_port}/v1"

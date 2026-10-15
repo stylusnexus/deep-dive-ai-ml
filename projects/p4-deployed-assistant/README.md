@@ -19,7 +19,7 @@ failure that only you see. A service may assume none of those. Everything in
 | Meaningful `/health` | Reports whether the corpus loaded and the model is reachable, and returns 503 when not |
 | Versioned path | `/v1/ask`, so the contract can change without breaking callers |
 | Refusal to start unconfigured | No `API_KEYS`, no service - better than a default that ships to production |
-| Provider fallback | A model endpoint will fail or stall. `src/resilience.py` walks a ladder of endpoints under a deadline with a circuit breaker, and the last step returns the retrieved passages instead of an error |
+| Provider fallback | A model endpoint will fail or stall. `src/resilience.py` walks a ladder of endpoints under a deadline with a circuit breaker, and the last step is a `503` with `Retry-After` by default, or the retrieved passages for a caller that opts in with `allow_degraded` |
 | Generic error responses | An exception message is the cheapest way to leak a path or a hostname |
 
 ## Running it
@@ -41,8 +41,13 @@ curl -X POST localhost:8000/v1/ask \
 ## Tests
 
 ```bash
-pytest tests/
+python3 ../../scripts/make_corpus.py      # once, on a fresh clone
+python3 scripts/build_corpus_artifact.py  # writes corpus/corpus_id.json
+CORPUS_DIR=corpus pytest tests/
 ```
+
+`CORPUS_DIR` matters: the default points at `data/corpus/`, which has no
+`corpus_id.json`, so the corpus-identity test fails without it.
 
 The test boundary has three layers:
 
@@ -114,7 +119,10 @@ GENERATION_DEADLINE_S=60 BREAKER_THRESHOLD=3 BREAKER_COOLDOWN_S=30 \
 ```
 
 Each endpoint is one rung, tried in order. A request that errors or exceeds
-`GENERATION_DEADLINE_S` moves down a rung. After `BREAKER_THRESHOLD` consecutive
+`GENERATION_DEADLINE_S` of wall-clock time moves down a rung. The limit covers the whole
+call, so a provider that sends one byte at a time is cut off too. The limit applies to each rung,
+so when every rung stalls a caller waits up to the deadline times the number of rungs (120 s
+for two rungs at 60 s). Lower the deadline if that is too long. After `BREAKER_THRESHOLD` consecutive
 failures a rung is skipped for `BREAKER_COOLDOWN_S`, then one probe request is let
 through. Throttling (`429`) counts as a failure of the rung; a real deployment would
 shed load instead, as the lesson explains.
@@ -152,7 +160,7 @@ stop sending *new* traffic to the instance only if it wants full answers.
 
 ## Capstone
 
-The graded run for Block 8 and the cumulative exam for Blocks 3, 5 and 8:
+The graded run for Block 8. It also scores retrieval (Block 3) against a gold set (Block 5). It is separate from the written [cumulative exam](../../artifacts/cumulative-exam.md):
 
 ```bash
 python3 capstone/run_capstone.py              # retrieval-only, no model needed
