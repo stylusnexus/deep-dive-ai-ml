@@ -143,7 +143,7 @@ doc = f"""<!DOCTYPE html>
 
 <p class="eyebrow">🎯 Self-built curriculum</p>
 <h1>Building and Measuring LLM Systems</h1>
-<p class="lede">Applied AI and machine learning as ~13 weeks of lessons, runnable notebooks and four portfolio projects — with the security, evaluation, cost and fine-tuning material the original leaves out.</p>
+<p class="lede">Applied AI and machine learning as ~13 weeks of lessons, runnable notebooks and four portfolio projects — including the security, evaluation, cost and fine-tuning material that short courses usually leave out.</p>
 
 <div class="meta">
   <span class="chip">{total} lessons built</span>

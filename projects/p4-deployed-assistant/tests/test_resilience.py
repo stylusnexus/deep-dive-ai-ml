@@ -1,7 +1,7 @@
 """The ladder and breaker on their own, with a fake clock and no network."""
 import pytest
 
-from src.resilience import AllRungsFailed, Breaker, Ladder, Rung
+from src.resilience import AllRungsFailed, Breaker, Ladder, RequestRejected, Rung
 
 
 class Clock:
@@ -95,3 +95,20 @@ def test_deadline_is_passed_to_every_call():
     seen = []
     _ladder(deadline_s=7.5).complete(lambda r, d: seen.append(d))
     assert seen == [7.5]
+
+
+def test_a_rejected_request_is_not_a_breaker_failure_and_frees_the_probe():
+    clock = Clock()
+    lad = _ladder(clock, threshold=1, cooldown_s=10)
+    lad.breakers["a"].failure()
+    clock.t = 11  # half-open: one probe allowed
+
+    def send(r, d):
+        if r.name == "a":
+            raise RequestRejected("400")
+        return "ok"
+
+    rung, _ = lad.complete(send)
+    assert rung.name == "b"
+    assert lad.breakers["a"].state == "half-open", "probe slot must be given back, breaker not closed"
+    assert lad.breakers["a"].allow(), "the next request may probe again"

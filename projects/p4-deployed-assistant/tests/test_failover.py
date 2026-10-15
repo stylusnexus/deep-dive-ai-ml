@@ -178,3 +178,62 @@ def test_health_stays_degraded_while_the_provider_lists_models_but_cannot_answer
     assert client.get("/health").status_code == 503
     assert primary.calls + secondary.calls > calls_before, "the probe must be a real completion"
     assert set(client.get("/health").json()["rungs"].values()) <= {"open", "half-open"}
+
+
+def test_a_rejected_request_does_not_open_the_breaker(world):
+    """A 400 blames the request. Three of them must not take a healthy rung out."""
+    client, primary, secondary = world
+    primary.mode, primary.status = "status", 400
+    for _ in range(3):
+        assert ask(client).json()["rung"] == "rung-2"
+    assert primary.calls == 3, "a request fault must not trip the breaker"
+    assert appmod.STATE["ladder"].states()["rung-1"] == "closed"
+
+
+def test_a_server_error_still_opens_the_breaker(world):
+    client, primary, secondary = world
+    primary.mode, primary.status = "status", 503
+    for _ in range(3):
+        ask(client)
+    assert primary.calls == 2, "threshold is 2; the third call must skip the rung"
+
+
+def test_a_404_clears_the_stored_model_name(world):
+    client, primary, secondary = world
+    ask(client)  # discovers and stores the model name
+    rung = appmod.STATE["ladder"].rungs[0]
+    assert rung.model == "stub-primary"
+    primary.mode, primary.status = "status", 404
+    ask(client)
+    assert rung.model is None
+
+
+def test_a_failing_rung_is_logged(world, caplog):
+    client, primary, secondary = world
+    primary.mode = "error"
+    with caplog.at_level("WARNING", logger="p4.resilience"):
+        ask(client)
+    assert any("rung-1" in m and "failed" in m for m in caplog.messages)
+
+
+def test_https_addresses_use_a_tls_connection(monkeypatch):
+    """The stubs are plain http, so nothing else exercises this. A real provider
+    is https; speaking plain http to port 443 would fail every request."""
+    used = []
+
+    class Boom(Exception):
+        pass
+
+    def fake(kind):
+        def make(netloc, timeout):
+            used.append((kind, netloc))
+            raise Boom
+        return make
+
+    monkeypatch.setattr(appmod.http.client, "HTTPSConnection", fake("https"))
+    monkeypatch.setattr(appmod.http.client, "HTTPConnection", fake("http"))
+    for url in ("https://api.example.com/v1/chat/completions",
+                "http://127.0.0.1:9/v1/chat/completions"):
+        with pytest.raises(Boom):
+            appmod._post(url, b"{}", 1.0)
+    assert used == [("https", "api.example.com"), ("http", "127.0.0.1:9")]

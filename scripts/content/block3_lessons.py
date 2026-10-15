@@ -607,7 +607,7 @@ LESSONS = [
     ("links", [
       ("pgvector: indexing and filtering", "https://github.com/pgvector/pgvector", "HNSW and IVFFlat in Postgres, including how filtering interacts with approximate indexes."),
       ("Efficient and robust ANN search using HNSW (Malkov & Yashunin)", "https://arxiv.org/abs/1603.09320", "The graph index the memory sum above is about."),
-      ("Product Quantization for Nearest Neighbor Search (Jegou et al.)", "https://ieeexplore.ieee.org/document/5432202", "The original compression method behind the 64-byte code."),
+      ("Product Quantization for Nearest Neighbor Search (Jegou et al.)", "https://doi.org/10.1109/TPAMI.2010.57", "The original compression method behind the 64-byte code."),
     ]),
     ("quiz", [
       ("Ten million 1,024-dimension float32 vectors need roughly how much memory for the vectors alone?",

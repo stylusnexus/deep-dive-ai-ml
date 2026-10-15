@@ -14,10 +14,12 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 class StubProvider:
     """mode: "ok" answers, "error" returns 500, "slow" sleeps `delay_s` first, "drip"
-    answers one byte every `delay_s` seconds (every read succeeds, the whole is slow)."""
+    answers one byte every `delay_s` seconds (every read succeeds, the whole is slow),
+    "status" returns `self.status`."""
 
     def __init__(self, name: str, mode: str = "ok", delay_s: float = 5.0):
         self.name, self.mode, self.delay_s = name, mode, delay_s
+        self.status = 400  # used by mode "status"
         self.calls = 0
         owner = self
 
@@ -43,6 +45,9 @@ class StubProvider:
                 owner.calls += 1
                 if owner.mode == "slow":
                     time.sleep(owner.delay_s)
+                if owner.mode == "status":
+                    self._send(owner.status, b'{"error":"stub status"}')
+                    return
                 if owner.mode == "error":
                     self._send(500, b'{"error":"stub failure"}')
                     return

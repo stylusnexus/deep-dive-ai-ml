@@ -10,9 +10,18 @@ decides what the last step is; the service answers with the retrieved passages.
 """
 from __future__ import annotations
 
+import logging
 import threading
 import time
 from dataclasses import dataclass, field
+
+
+log = logging.getLogger("p4.resilience")
+
+
+class RequestRejected(Exception):
+    """The provider refused this request (a 400-class fault in the request itself).
+    The rung is fine, so it must not count toward opening its breaker."""
 
 
 class AllRungsFailed(Exception):
@@ -65,6 +74,11 @@ class Breaker:
             self._opened_at = None
             self._probing = False
 
+    def release(self) -> None:
+        """Give back a half-open probe slot without recording success or failure."""
+        with self._lock:
+            self._probing = False
+
     def failure(self) -> None:
         with self._lock:
             self._failures += 1
@@ -92,7 +106,8 @@ class Ladder:
     def complete(self, send):
         """Call `send(rung, deadline_s)` down the ladder; return (rung, result).
 
-        `send` raises on any failure, including exceeding the deadline. Raises
+        `send` raises on any failure, including exceeding the deadline; raise
+        RequestRejected for a fault in the request itself. Raises
         AllRungsFailed when nothing answered."""
         for rung in self.rungs:
             breaker = self.breakers[rung.name]
@@ -100,8 +115,14 @@ class Ladder:
                 continue
             try:
                 result = send(rung, self.deadline_s)
-            except Exception:
+            except RequestRejected as exc:
+                breaker.release()
+                log.warning("rung %s rejected the request: %s", rung.name, exc)
+                continue
+            except Exception as exc:
                 breaker.failure()
+                log.warning("rung %s failed (%s: %s); breaker %s", rung.name,
+                            type(exc).__name__, exc, breaker.state)
                 continue
             breaker.success()
             with self._lock:

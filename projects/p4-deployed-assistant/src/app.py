@@ -30,7 +30,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from .resilience import AllRungsFailed, Ladder, Rung
+from .resilience import AllRungsFailed, Ladder, RequestRejected, Rung
 
 API_VERSION = "v1"
 # Resolved from the environment first, because the repository layout and the
@@ -169,7 +169,24 @@ def generate(rung: Rung, deadline_s: float, system: str, user: str,
     body = json.dumps({"model": rung.model, "temperature": 0, "max_tokens": max_tokens,
                        "messages": [{"role": "system", "content": system},
                                     {"role": "user", "content": user}]}).encode()
-    return json.loads(_post(f"{rung.base}/chat/completions", body, deadline_s))["choices"][0]
+    try:
+        raw = _post(f"{rung.base}/chat/completions", body, deadline_s)
+    except ProviderError as exc:
+        if exc.status == 404:
+            rung.model = None  # the model name went stale; look it up again next time
+        raise
+    return json.loads(raw)["choices"][0]
+
+
+# Statuses that blame the request, not the provider. Everything else at 400 or above,
+# including 401, 403, 404, 429 and 5xx, counts against the rung.
+REQUEST_FAULTS = {400, 413, 422}
+
+
+class ProviderError(RuntimeError):
+    def __init__(self, status: int):
+        super().__init__(f"provider returned {status}")
+        self.status = status
 
 
 def _post(url: str, body: bytes, deadline_s: float) -> bytes:
@@ -179,14 +196,19 @@ def _post(url: str, body: bytes, deadline_s: float) -> bytes:
     only the time that is left."""
     start = time.monotonic()
     parts = urllib.parse.urlsplit(url)
-    conn = http.client.HTTPConnection(parts.netloc, timeout=deadline_s)
+    connect = (http.client.HTTPSConnection if parts.scheme == "https"
+               else http.client.HTTPConnection)
+    conn = connect(parts.netloc, timeout=deadline_s)
     try:
-        conn.request("POST", parts.path, body, {"Content-Type": "application/json"})
+        conn.request("POST", parts.path + (f"?{parts.query}" if parts.query else ""), body,
+                     {"Content-Type": "application/json"})
         sock = conn.sock  # getresponse() may drop conn.sock when the server closes
         sock.settimeout(_left(start, deadline_s))
         response = conn.getresponse()
+        if response.status in REQUEST_FAULTS:
+            raise RequestRejected(f"provider returned {response.status}")
         if response.status >= 400:
-            raise RuntimeError(f"provider returned {response.status}")
+            raise ProviderError(response.status)
         chunks = []
         while not response.isclosed():  # read1 = at most one socket read per call
             sock.settimeout(_left(start, deadline_s))

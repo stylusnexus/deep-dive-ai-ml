@@ -1,18 +1,18 @@
 # Project 4 capstone report
 
-Run: 2026-10-15T02:31:40Z. Mode: retrieval-only (no model). Corpus hash: `5cf29b4172f79225943d7316318098230d10c169d68e9e213120389f9612fc70`.
+Run: 2026-10-15T02:44:59Z. Mode: retrieval-only (no model). Corpus hash: `5cf29b4172f79225943d7316318098230d10c169d68e9e213120389f9612fc70`.
 
 ## 1. Tests
 
-PASS: 40 passed in 30.16s
+PASS: 46 passed in 31.32s
 
 ## 2. Failure drill (stub providers, deadline 1s, breaker opens after 2 failures)
 
 | Scenario | Expected rung | Observed | Result | Detail |
 |---|---|---|---|---|
-| healthy primary | rung-1 | rung-1 | PASS | ms=7 |
+| healthy primary | rung-1 | rung-1 | PASS | ms=9 |
 | primary erroring, breaker open | rung-2 | rung-2 | PASS | primary_calls_after_open=0 |
-| primary slow, 1s deadline | rung-2 | rung-2 | PASS | ms=1006 |
+| primary slow, 1s deadline | rung-2 | rung-2 | PASS | ms=1010 |
 | every provider down, default caller | 503 | 503 | PASS | retry_after=1 |
 | every provider down, opted in | retrieval-only | retrieval-only | PASS | ms=4, degraded=True, x_degraded=retrieval-only, answer_is_only_a_notice=True, evidence_in_passages=True |
 | primary recovers after cooldown | rung-1 | rung-1 | PASS | ms=4 |
@@ -49,10 +49,10 @@ This service stores no vectors: it retrieves by keyword. The table is what an em
 
 | Concurrency | Requests/s | p50 ms | p95 ms |
 |---|---|---|---|
-| 1 | 63.7 | 15.7 | 17.3 |
-| 2 | 110.7 | 17.5 | 21.3 |
-| 4 | 220.6 | 16.3 | 22.1 |
-| 8 | 252.5 | 24.2 | 51.1 |
+| 1 | 66.0 | 15.1 | 16.9 |
+| 2 | 126.1 | 15.6 | 17.3 |
+| 4 | 216.4 | 17.9 | 20.4 |
+| 8 | 259.2 | 26.5 | 45.5 |
 
 Measured against a 10 ms local stub in place of a model, on this machine. Not a statement about model latency or the deployed instance.
 

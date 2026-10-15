@@ -124,7 +124,7 @@ call, so a provider that sends one byte at a time is cut off too. The limit appl
 so when every rung stalls a caller waits up to the deadline times the number of rungs (120 s
 for two rungs at 60 s). Lower the deadline if that is too long. After `BREAKER_THRESHOLD` consecutive
 failures a rung is skipped for `BREAKER_COOLDOWN_S`, then one probe request is let
-through. Throttling (`429`) counts as a failure of the rung; a real deployment would
+through. A reply that blames the request (`400`, `413`, `422`) does not count against the rung, so a bad question cannot take a healthy provider out. A `404` clears the stored model name so it is looked up again. Every failure is logged to `p4.resilience` with the rung and the error. Throttling (`429`) counts as a failure of the rung; a real deployment would
 shed load instead, as the lesson explains.
 
 ### When every rung fails: a contract callers must read
