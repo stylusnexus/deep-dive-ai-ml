@@ -130,7 +130,7 @@ shed load instead, as the lesson explains.
 ### When every rung fails: a contract callers must read
 
 By default an outage is an error, as it always was: `/v1/ask` returns `503` with a
-`Retry-After` header, and a caller that knows nothing about fallbacks sees a failure.
+`Retry-After` header, and a caller that knows nothing about fallbacks sees a failure. If every provider instead refuses the request itself (a `400`-class reply), the answer is `502` with no `Retry-After`, because trying again later gets the same refusal.
 
 A caller can opt in to a degraded reply by sending `"allow_degraded": true`. Then, when no
 model answers, the service returns `200` with:

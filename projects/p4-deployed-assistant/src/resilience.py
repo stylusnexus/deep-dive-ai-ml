@@ -28,6 +28,11 @@ class AllRungsFailed(Exception):
     """Every rung failed or was skipped by its breaker."""
 
 
+class AllRungsRejected(AllRungsFailed):
+    """Every rung that was tried refused the request and none failed. Retrying the
+    same request later will get the same answer, unlike an outage."""
+
+
 @dataclass
 class Rung:
     name: str
@@ -109,6 +114,7 @@ class Ladder:
         `send` raises on any failure, including exceeding the deadline; raise
         RequestRejected for a fault in the request itself. Raises
         AllRungsFailed when nothing answered."""
+        rejected = failed = 0
         for rung in self.rungs:
             breaker = self.breakers[rung.name]
             if not breaker.allow():
@@ -117,10 +123,12 @@ class Ladder:
                 result = send(rung, self.deadline_s)
             except RequestRejected as exc:
                 breaker.release()
+                rejected += 1
                 log.warning("rung %s rejected the request: %s", rung.name, exc)
                 continue
             except Exception as exc:
                 breaker.failure()
+                failed += 1
                 log.warning("rung %s failed (%s: %s); breaker %s", rung.name,
                             type(exc).__name__, exc, breaker.state)
                 continue
@@ -128,6 +136,8 @@ class Ladder:
             with self._lock:
                 self.served[rung.name] += 1
             return rung, result
+        if rejected and not failed:
+            raise AllRungsRejected("every rung refused the request")
         raise AllRungsFailed("no generation rung answered")
 
     def states(self) -> dict[str, str]:

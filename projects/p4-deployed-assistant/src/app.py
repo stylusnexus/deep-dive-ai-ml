@@ -30,7 +30,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from .resilience import AllRungsFailed, Ladder, RequestRejected, Rung
+from .resilience import AllRungsFailed, AllRungsRejected, Ladder, RequestRejected, Rung
 
 API_VERSION = "v1"
 # Resolved from the environment first, because the repository layout and the
@@ -380,8 +380,12 @@ def ask(req: AskRequest, response: Response, key: str = Depends(require_key)):
     try:
         rung, choice = STATE["ladder"].complete(
             lambda r, deadline: generate(r, deadline, system, user))
-    except AllRungsFailed:
+    except AllRungsFailed as exc:
         if not req.allow_degraded:
+            if isinstance(exc, AllRungsRejected):
+                # An outage clears; a refused request does not. No Retry-After.
+                raise HTTPException(status_code=502,
+                                    detail="generation provider rejected the request")
             # The contract callers already had: no model, no answer, and a status
             # that says so. Retrying after the breaker's cool-down is sensible.
             raise HTTPException(status_code=503, detail="generation unavailable",

@@ -237,3 +237,20 @@ def test_https_addresses_use_a_tls_connection(monkeypatch):
         with pytest.raises(Boom):
             appmod._post(url, b"{}", 1.0)
     assert used == [("https", "api.example.com"), ("http", "127.0.0.1:9")]
+
+
+def test_every_rung_rejecting_is_a_502_without_retry_after(world):
+    """Retrying the same request later cannot help, so it must not read as an outage."""
+    client, primary, secondary = world
+    primary.mode = secondary.mode = "status"
+    primary.status = secondary.status = 400
+    r = ask(client)
+    assert r.status_code == 502
+    assert "Retry-After" not in r.headers
+
+
+def test_a_mix_of_rejection_and_outage_is_still_a_503(world):
+    client, primary, secondary = world
+    primary.mode, primary.status = "status", 400
+    secondary.mode = "error"
+    assert ask(client).status_code == 503
