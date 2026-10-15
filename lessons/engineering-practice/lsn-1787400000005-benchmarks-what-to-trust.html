@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benchmarks: Why They Matter, Why They Fail, and When to Build Your Own</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 6 of 17</span>
+  <h1>Benchmarks: Why They Matter, Why They Fail, and When to Build Your Own</h1>
+  <p class="subtitle">Existing tools save you the load generator. They do not save you from asking whether the number answers your question.</p>
+
+  <p>Every choice in this course that involves a number, which engine, which model, which quantization, whether a change helped, rests on a benchmark. A benchmark is a measuring instrument, and an instrument has a validity question before it has a result: <em>does it measure the thing I am deciding about?</em> Most bad benchmark decisions are not arithmetic errors. They are a correct number answering a different question.</p>
+  <h2>Four instruments that get called &amp;ldquo;a benchmark&amp;rdquo;</h2>
+  <ul><li><strong>A quality benchmark</strong> asks whether the model gets the answer right: SWE-bench (software-engineering tasks drawn from real GitHub issues), MMLU (Massive Multitask Language Understanding, a multiple-choice knowledge test), your own golden set. The failure mode is the task set, not the stopwatch.</li><li><strong>A preference leaderboard</strong> asks which answer people like more, such as Chatbot Arena. The failure mode is who is voting, and who gets to submit.</li><li><strong>A serving benchmark</strong> asks how fast and how much: time to first token, tokens per second, throughput under concurrency. Tools: <code>vllm bench serve</code>, GuideLLM, AIPerf, <code>llama-bench</code>, <code>mlx_lm.benchmark</code>. The failure mode is a workload that is not yours.</li><li><strong>A load test</strong> asks whether the system holds up under traffic: scaling, queues, timeouts. NVIDIA&#39;s benchmarking guide separates it from performance benchmarking, which &ldquo;measures model-level throughput, latency, and token-level behavior under controlled conditions&rdquo;, and recommends doing both.</li></ul>
+  <figure class="diagram"><svg viewBox="0 0 640 170" role="img" aria-label="A line from public leaderboards, through published harnesses, to your own workload on your own hardware, trading comparability for relevance"><rect x="8" y="14" width="196" height="64" rx="7" class="d-box"/><text x="20" y="38" class="d-label-b">PUBLIC LEADERBOARD</text><text x="20" y="58" class="d-label-sm">comparable, but whose task?</text>
+<rect x="222" y="14" width="196" height="64" rx="7" class="d-box"/><text x="234" y="38" class="d-label-b">PUBLISHED HARNESS</text><text x="234" y="58" class="d-label-sm">repeatable, generic workload</text>
+<rect x="436" y="14" width="196" height="64" rx="7" class="d-box-accent"/><text x="448" y="38" class="d-label-b">YOUR WORKLOAD</text><text x="448" y="58" class="d-label-sm">relevant, nobody can compare</text>
+<path d="M204 46 L222 46" class="d-arrow-accent"/><path d="M418 46 L436 46" class="d-arrow-accent"/>
+<text x="8" y="112" class="d-label-sm">comparable with other people</text><text x="440" y="112" class="d-label-sm">relevant to your decision</text>
+<line x1="8" y1="124" x2="632" y2="124" stroke="var(--border)"/>
+<text x="8" y="148" class="d-label-sm">Start left to learn what is possible. Finish right before you decide anything that costs money.</text>
+</svg><figcaption>The more a benchmark looks like your own work, the less comparable it is with anyone else&#39;s. You are choosing a point on this line, not escaping it.</figcaption></figure>
+  <h2>How public benchmarks fail</h2>
+  <ul><li><strong>Broken tasks.</strong> The Decoder reported on 23 February 2026 that OpenAI says SWE-bench Verified has lost its value as a meaningful measure of coding ability: at least 59.4 percent of the benchmark&#39;s tasks are flawed, rejecting correct solutions because they enforce specific implementation details or check functions the task never describes. We could not open OpenAI&#39;s own post, so this is secondhand. Read the primary source before quoting it.</li><li><strong>Contamination.</strong> The same report says GPT-5.2, Claude Opus 4.5 and Gemini 3 Flash Preview could reproduce some original fixes from memory. When the answers are public, score growth can mean the model has seen them. OpenAI recommends SWE-bench Pro and is building its own non-public tests.</li><li><strong>Selection.</strong> The Leaderboard Illusion (NeurIPS 2025, the Neural Information Processing Systems conference) studied Chatbot Arena and reports that providers could test private variants and publish only the best. It identifies 27 private variants tested by one provider before a release. It estimates that two providers received 19.2% and 20.4% of all arena data, against 29.7% combined for 83 open-weight models.</li><li><strong>Harness sensitivity.</strong> The same model on the same 500 tasks differed by 16 points across five scaffolds, in the measurement lesson earlier in this block. A score belongs to a model <em>and</em> a harness.</li><li><strong>Different definitions of the same metric.</strong> NVIDIA&#39;s benchmarking guide says the available tools &ldquo;expose overlapping metrics but often define and calculate them differently&rdquo;. A tokens-per-second figure from one tool is not automatically the one from another.</li></ul>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A benchmark result is only as good as the match between its task and your decision, and the match is not on the leaderboard.</p><p class="know-why">A public number was produced on someone else&#39;s task set, with someone else&#39;s harness, on someone else&#39;s hardware. Each of those can be sound and the number can still say nothing about your workload. The failures above are not scandals. They are what happens when a number built for comparison gets used as a decision.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team picks the highest-ranked model on a coding leaderboard and sees no improvement on their own repository. The leaderboard task set was public, partly memorised, and tested single-file fixes. Their repository is a TypeScript service with long-running tests. The number was correct and answered a different question.</p></blockquote>
+  <h2>Tools that already exist, and what each one is for</h2>
+  <p>You do not have to write the load generator. These are maintained by people who have already hit the problems:</p>
+  <ul><li><strong>GuideLLM</strong> (vLLM project) describes itself as a benchmarking platform that is aware of service-level objectives (SLOs) for real-world inference. The vLLM benchmarking documentation says its own <code>vllm bench</code> commands are mainly for evaluating specific vLLM features and for regression testing, and recommends GuideLLM for benchmarking production servers.</li><li><strong>AIPerf</strong> (NVIDIA, Apache 2.0) measures generative models served by any inference solution and prints per-request and aggregate metrics.</li><li><strong><code>llama-bench</code></strong> (llama.cpp) tests prompt processing and generation speed on a model file. By default it repeats each test five times and does warmup runs first, which are the two habits that matter most and are the ones most often skipped by hand.</li><li><strong><code>mlx_lm.benchmark</code></strong> and <code>vllm-mlx bench-serve</code> do the same for MLX models on a Mac, with prompt length, generation length, batch size, trials and concurrency as options.</li><li><strong>Ask of any of them:</strong> what is the default workload, how many times does it repeat, does it count failed requests, and how does it define time to first token? The defaults are the part that decides whether your result is yours.</li></ul>
+  <h2>When to build your own</h2>
+  <p>A published tool measures a workload it can generate. Build your own when your questions are about <em>your</em> sequence of requests. Three cases came up in this course:</p>
+  <ul><li><strong>Agent-shaped requests.</strong> A loop re-sends a growing context every turn, so the next prompt extends the last. A benchmark of independent random prompts never asks whether the cache serves the extension.</li><li><strong>Cache state as the variable.</strong> Cold, warm, evicted, and warm after a restart are different conditions. We found no restart-survival or forced-eviction test in the documentation of the tools above, so check yours before assuming one exists.</li><li><strong>Behaviour that should be a failure.</strong> A server that rejects a second concurrent request answers quickly with nothing. A generic average can read that as a speedup.</li></ul>
+  <p>That is the case for <code>scripts/bench_engines.py</code>, which is under 500 lines of standard-library Python behind an OpenAI-compatible endpoint. It is not a replacement for the tools above. It exists because of three questions they were not built to ask.</p>
+  <h2>What a home-made harness has to get right</h2>
+  <p>Building your own is how you learn which of these matter. Each is a mistake this repository made and then fixed while writing the engine comparison:</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Count failures, do not average over them</div><div><div class="roadmap-title">Fast and empty is a failure</div><div class="roadmap-desc">The first batching run reported a healthy aggregate for four streams. Three of the four requests had been rejected by the server with an empty reply. The rates were computed over one real answer plus three nothings. The harness now prints how many streams returned text and computes rates only from those.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Refuse to report when nothing was measured</div><div><div class="roadmap-title">A test with no overlap measures nothing</div><div class="roadmap-desc">The staggered test was meant to show a short request arriving behind a long one. On a fast machine the long request finished before the short one was sent, and the script printed a flattering number anyway. It now starts the short requests only once the long one is generating and says NOT MEASURED when they did not overlap.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Record the machine&amp;#39;s state</div><div><div class="roadmap-title">Load is a variable</div><div class="roadmap-desc">Decode speed for the same server went from about 308 to about 41 tokens per second between two runs, because another benchmark had started on the same Mac. The script prints the load average before it begins. Nothing in it can fix a busy machine, so the lesson that came out of it is to withhold the numbers.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Fresh inputs for every cold run</div><div><div class="roadmap-title">A cache remembers across runs</div><div class="roadmap-desc">An engine can keep cache entries between server restarts, so a prompt reused from an earlier run is already warm. Each cold run begins with a random nonce at the very front of the prompt, which guarantees nothing has seen it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Repeat, discard warmup, report the spread</div><div><div class="roadmap-title">One run is an anecdote</div><div class="roadmap-desc">The first request to a fresh server pays one-time costs. The script sends and discards one, repeats each measurement, and reports medians. The same engine took 2.1 seconds on one cold run and 6.5 on the next on a busy machine, so a single cold number is unusable.</div></div></div></div>
+  <h3>A checklist before you believe your own number</h3>
+  <ul><li>Write the question before the run, and say what result would change your mind.</li><li>Fix the workload to match your use, and say how it differs.</li><li>Change one thing between runs.</li><li>Repeat, discard warmup, report the spread, and record the load.</li><li>Count failures, and refuse to print a number from runs that did not overlap or did not complete.</li><li>Record versions, weights, quantization and hardware. &ldquo;The same model&rdquo; is a claim to verify.</li><li>State what the result cannot tell you.</li></ul>
+  <div class="callout pitfall"><span class="label">Do not benchmark on a machine that is doing something else</span><p>The runs behind this course&#39;s engine comparison overlapped with another benchmark on the same machine, which pushed the load average past fifty at one point and made at least one engine&#39;s numbers meaningless. The fix is boring. Run one thing at a time, check the load line, and rerun anything you cannot reproduce. Two benchmarks sharing a machine are two disturbances, and neither is a result.</p></div>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A harness is trustworthy when it can say the run failed.</p><p class="know-why">Most benchmark code is written to produce a number. The valuable part is the code that refuses to: rejected requests counted, non-overlap reported, empty replies flagged, busy machines announced. Without those, every run produces something, and some of it is quietly wrong.</p><p class="know-eg"><span class="know-eg-label">For example</span>The throughput figure that looked healthy at four streams was computed from one working request and three rejected ones. Nothing errored and the table printed. The only reason it was caught is that the harness already counted replies, and the count said one of four.</p></blockquote>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000003-how-to-measure.html">How to Measure</a><span class="link-note">A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.</span></li><li><a href="lsn-1787400000004-swe-bench-and-how-to-run-it.html">SWE-bench, and How to Actually Run It</a><span class="link-note">The benchmark behind the numbers in lesson 2 — how it is built, how to run it, and what it does not tell you.</span></li><li><a href="lsn-1787400000006-confounds-you-cannot-see.html">Confounds You Cannot See</a><span class="link-note">The limits, overrides and truncations that end a run silently — and get read as capability.</span></li><li><a href="../core-vocabulary/lsn-1787000000005-formats-and-engines.html">Formats and Engines: GGUF, MLX and What NVIDIA Runs</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Which file, which engine, which chip — and which of these numbers we measured ourselves.</span></li><li><a href="../core-vocabulary/lsn-1787000000028-latency-and-caching.html">Latency, Prefills and Caching</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://docs.vllm.ai/en/latest/benchmarking/cli.html" target="_blank" rel="noopener">vLLM benchmark CLI</a><span class="link-note">The datasets it supports, and its own statement of what these benchmarks are for and when to use GuideLLM instead.</span></li><li><a href="https://github.com/vllm-project/guidellm" target="_blank" rel="noopener">GuideLLM</a><span class="link-note">A benchmarking platform with reports, built under the vLLM project.</span></li><li><a href="https://github.com/ai-dynamo/aiperf" target="_blank" rel="noopener">AIPerf</a><span class="link-note">NVIDIA&#39;s benchmarking tool for any OpenAI-compatible server.</span></li><li><a href="https://github.com/ggml-org/llama.cpp/tree/master/tools/llama-bench" target="_blank" rel="noopener">llama-bench</a><span class="link-note">Repetitions and warmup as defaults.</span></li><li><a href="https://docs.nvidia.com/nim/benchmarking/llm/latest/overview.html" target="_blank" rel="noopener">Differences in benchmarking tools and approaches (NVIDIA NIM)</a><span class="link-note">Why the same metric name can mean different things, and the benchmark-versus-load-test distinction.</span></li><li><a href="https://arxiv.org/abs/2504.20879" target="_blank" rel="noopener">The Leaderboard Illusion</a><span class="link-note">How a preference leaderboard can be distorted without anyone cheating on a single vote.</span></li><li><a href="https://the-decoder.com/openai-wants-to-retire-the-ai-coding-benchmark-that-everyone-has-been-competing-on/" target="_blank" rel="noopener">OpenAI wants to retire the AI coding benchmark that everyone has been competing on (The Decoder)</a><span class="link-note">A report on OpenAI&#39;s audit of SWE-bench Verified. Read OpenAI&#39;s own post for the primary account.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. A benchmark reports 4.3 times faster in its abstract and 3.7 times in its body. What should you take from that?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">The direction is probably right, one digit deserves little weight, and your own run is the check</div>
+      <div class="quiz-opt">The paper is worthless</div>
+      <div class="quiz-opt">Always use the higher number</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Your harness reports 800 tokens per second for four concurrent streams, but only one of the four requests returned text. What is the real situation?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The server is very fast</div>
+      <div class="quiz-opt">Three requests failed, so the rate is computed over one real answer and means little</div>
+      <div class="quiz-opt">Concurrency is working perfectly</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. When is writing your own benchmark harness justified?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Always, because published tools are unreliable</div>
+      <div class="quiz-opt">When your questions concern your own request sequence or cache state, which a generic workload does not ask</div>
+      <div class="quiz-opt">Never, because published tools cover everything</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. A model tops a public leaderboard but does not help on your repository. What is the most likely explanation?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The leaderboard is fraudulent</div>
+      <div class="quiz-opt">The leaderboard task set is not your task set, and the number was never about your decision</div>
+      <div class="quiz-opt">Your repository is too small</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

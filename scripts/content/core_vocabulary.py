@@ -219,16 +219,16 @@ LESSONS = [
 <rect x="120" y="34" width="500" height="24" rx="4" class="d-fill-muted" opacity="0.55"/>
 <text x="12" y="51" class="d-label">F16</text>
 <text x="628" y="51" class="d-label-sm" text-anchor="end">~140 GB</text>
-<rect x="120" y="70" width="250" height="24" rx="4" class="d-fill-accent" opacity="0.6"/>
+<rect x="120" y="70" width="264" height="24" rx="4" class="d-fill-accent" opacity="0.6"/>
 <text x="12" y="87" class="d-label">Q8_0</text>
-<text x="380" y="87" class="d-label-sm">~70 GB \u00b7 near-lossless</text>
-<rect x="120" y="106" width="156" height="24" rx="4" class="d-fill-green" opacity="0.75"/>
+<text x="394" y="87" class="d-label-sm">~74 GB \u00b7 near-lossless</text>
+<rect x="120" y="106" width="179" height="24" rx="4" class="d-fill-green" opacity="0.75"/>
 <text x="12" y="123" class="d-label">Q5_K_M</text>
-<text x="286" y="123" class="d-label-sm">~44 GB</text>
-<rect x="120" y="142" width="125" height="24" rx="4" class="d-fill-green" opacity="0.9"/>
+<text x="309" y="123" class="d-label-sm">~50 GB</text>
+<rect x="120" y="142" width="154" height="24" rx="4" class="d-fill-green" opacity="0.9"/>
 <text x="12" y="159" class="d-label">Q4_K_M</text>
-<text x="255" y="159" class="d-label-sm">~35 GB \u00b7 the usual default</text>
-<text x="12" y="190" class="d-label-sm">Q = quantized \u00b7 4 = bits per weight \u00b7 K = k-quant method \u00b7 M = medium size within that family</text>
+<text x="284" y="159" class="d-label-sm">~43 GB \u00b7 the usual default</text>
+<text x="12" y="190" class="d-label-sm">Q = quantized \u00b7 4 = roughly 4 to 5 bits per weight \u00b7 K = k-quant method \u00b7 M = medium size within that family</text>
 </svg>'''),
     ("h2", "GGUF is the container"),
     ("p", "<strong>GGUF</strong> (GPT-Generated Unified Format) is the file format that holds quantized weights plus the metadata needed to run them — tokenizer, architecture, prompt template. It's the format <code>llama.cpp</code> and Ollama consume. One file, self-describing, no Python environment required."),
@@ -238,8 +238,21 @@ LESSONS = [
     ("know",
      'Prefer the bigger model, more heavily quantized.',
      'Quantization stores each weight approximately, and large models tolerate that surprisingly well. Cutting parameters, by contrast, removes capability outright. Given a fixed memory budget, spend it on parameters and economise on precision.',
-     'You have 40GB. A 13B model at full 16-bit precision fits, and so does a 70B quantized to 4 bits — both around 35-40GB on disk. The 4-bit 70B will win on nearly every task, despite storing each of its weights far less precisely.'),
-    ("related", ["the-four-ways-to-shrink-a-model", "local-hardware-limits", "serving-locally", "why-the-gpu-is-waiting"]),
+     'You have 48GB. A 13B model at full 16-bit precision is about 26GB and fits, and so does a 70B at Q4_K_M, about 43GB on disk (llama.cpp lists 4.89 bits per weight for that type). The 4-bit 70B will win on nearly every task, despite storing each of its weights far less precisely.'),
+    ("h2", "Do it yourself: the one-liners"),
+    ("p", "Quantizing a small model takes seconds, and doing it once makes the rest of this lesson concrete. These are the commands, run for real on Qwen2.5-0.5B-Instruct on an Apple M4 Max:"),
+    ("code", """# MLX, on Apple Silicon (pip install mlx-lm)
+mlx_lm.convert --hf-path Qwen/Qwen2.5-0.5B-Instruct -q --q-bits 4 --q-group-size 64 --mlx-path q4-g64
+
+# GGUF, with llama.cpp: convert once to 16-bit, then quantize (the converter needs gguf, torch, transformers)
+python convert_hf_to_gguf.py <model folder> --outfile m-f16.gguf --outtype f16
+llama-quantize m-f16.gguf m-q4_k_m.gguf Q4_K_M
+
+# What did it cost? Size, perplexity, and how far the answers moved from the 16-bit model
+python3 scripts/measure_quantization.py --reference Qwen/Qwen2.5-0.5B-Instruct --model q4-g64"""),
+    ("p", "What came out: the MLX command printed <em>Quantized model with 4.502 bits per weight</em> and turned a 988 MB model into 278 MB. The GGUF Q4_K_M file was 398 MB, which is 6.35 bits per weight rather than 4.9, because for a small model most of the file is not stored at 4 bits. Both surprises are examined in the notebook <em>Quantize It Yourself</em> (<code>notebooks/09-electives/05-quantize-it-yourself.ipynb</code>), which also measures seven settings side by side. When plain 4-bit rounding costs more than you can accept, the <em>Quantization Recipes</em> lesson covers what to do about it."),
+
+    ("related", ["quantization-recipes", "the-four-ways-to-shrink-a-model", "local-hardware-limits", "serving-locally", "why-the-gpu-is-waiting"]),
     ("links", [
       ('GGUF on the Hugging Face Hub', 'https://huggingface.co/docs/hub/gguf',
        'Format reference, and the quantization table naming every Q-variant.'),
@@ -262,6 +275,137 @@ LESSONS = [
         "GGUF models are more accurate than safetensors",
         "It's required to publish to Hugging Face"],
        0),
+    ]),
+  ],
+},
+{
+  "slug": "quantization-recipes",
+  "title": "Quantization Recipes: Beyond Plain Rounding",
+  "subtitle": "The same number of bits, chosen better. What the recipes are, what they cost, how to make your own, and where to get them already made.",
+  "body": [
+    ("p", "The quantization lesson ended with a loss: fewer bits means some precision gone in a large language model (LLM). How much is lost depends less on <em>how many</em> bits than on <em>how they were chosen</em>. Plain rounding, called round-to-nearest (RTN), treats every weight alike. A <strong>recipe</strong> spends some extra effort, usually a little sample text, to lose less at the same size. The best known are AWQ (activation-aware weight quantization), GPTQ (post-training quantization for generative pre-trained transformers) and DWQ (distilled weight quantization). This lesson covers the recipes you will meet, the evidence for and against them, and how to use or make one. The <em>Quantize It Yourself</em> notebook in Block 9 is the hands-on companion."),
+
+    ("h2", "What goes wrong with plain rounding"),
+    ("p", "A weight is rounded to the nearest of a few levels. The levels are spread across the range of its group, so one large weight stretches the range and every ordinary weight in that group is rounded coarsely. The notebook shows it in one group: a single outlier raised the error on the other 63 weights from 9% to 49%. The AWQ paper adds the second half of the story: <q>Protecting only 1% salient weights can greatly reduce quantization error</q>, and the salient ones are found by looking at the activations, not the weights. A weight that is small but multiplied by a large activation matters more than a large weight that is multiplied by almost nothing."),
+    ("ul", [
+      "<strong>On a very large model.</strong> The GPTQ paper reports OPT-175B (Meta&#39;s Open Pre-trained Transformer, 175 billion parameters) on WikiText-2 (a standard text benchmark), perplexity 8.34 at full precision. At 4 bits, GPTQ 8.37 and RTN 10.54. At 3 bits, GPTQ 8.68 and RTN 7,300, which the paper describes as RTN collapsing completely. Measured by the authors of GPTQ.",
+      "<strong>On a 7-billion-parameter model.</strong> The AWQ paper, group size 128, Llama-2-7B: full precision 5.47. At 3 bits RTN 6.66, GPTQ 6.43, AWQ 6.24. At 4 bits RTN 5.73, GPTQ 5.69, AWQ 5.60. Measured by the authors of AWQ.",
+      "<strong>The honest part.</strong> The same paper says RTN <q>is actually quite strong when using a small group size like 128</q>. At 4 bits on a mid-sized model the gap is small. The recipes earn their keep at 3 bits and below, and where you cannot afford small groups.",
+    ]),
+
+    ("figure", "Four ways to choose the same four bits. Each spends something different to lose less than the one before.", '''<svg viewBox="0 0 640 214" role="img" aria-label="Four quantization approaches in a row, from plain rounding to learned scales, with what each needs"><rect x="8" y="14" width="146" height="132" rx="7" class="d-box"/><text x="20" y="38" class="d-label-b">ROUND TO NEAREST</text><text x="20" y="62" class="d-label-sm">round every weight</text><text x="20" y="78" class="d-label-sm">on its own</text><text x="20" y="116" class="d-label-sm">needs: nothing</text><text x="20" y="134" class="d-label-sm">time: seconds</text>
+<rect x="166" y="14" width="146" height="132" rx="7" class="d-box"/><text x="178" y="38" class="d-label-b">AWQ</text><text x="178" y="62" class="d-label-sm">scale up the weights</text><text x="178" y="78" class="d-label-sm">that loud inputs use</text><text x="178" y="116" class="d-label-sm">needs: sample text</text><text x="178" y="134" class="d-label-sm">time: minutes to hours</text>
+<rect x="324" y="14" width="146" height="132" rx="7" class="d-box"/><text x="336" y="38" class="d-label-b">GPTQ</text><text x="336" y="62" class="d-label-sm">pick weights that keep</text><text x="336" y="78" class="d-label-sm">each layer&#39;s output close</text><text x="336" y="116" class="d-label-sm">needs: sample text</text><text x="336" y="134" class="d-label-sm">time: minutes to hours</text>
+<rect x="482" y="14" width="150" height="132" rx="7" class="d-box-accent"/><text x="494" y="38" class="d-label-b">DWQ</text><text x="494" y="62" class="d-label-sm">train the scales and</text><text x="494" y="78" class="d-label-sm">biases to match the</text><text x="494" y="94" class="d-label-sm">full-precision model</text><text x="494" y="116" class="d-label-sm">needs: text and training</text><text x="494" y="134" class="d-label-sm">time: longer than dynamic</text>
+<text x="8" y="180" class="d-label-sm">Separate from these: mixed precision gives sensitive layers more bits, and an importance</text><text x="8" y="198" class="d-label-sm">matrix steers rounding toward the weights that matter. Both combine with any of the above.</text>
+</svg>'''),
+
+    ("h2", "The recipes, one line each"),
+    ("terms", [
+      ("RTN", "Round to nearest, group by group", "The baseline. It needs no data and takes seconds. It is what <code>mlx_lm.convert -q</code> does, and what a plain <code>-4bit</code> model on the Hub usually is."),
+      ("GPTQ", "Weights that keep each layer&#39;s output close", "In the words of the MLX (Apple&#39;s machine-learning framework) documentation, it &ldquo;finds quantized weights which minimize the squared error of each layer&#39;s output given the provided input&rdquo;. Needs calibration text. The MLX docs put its run time at &ldquo;from a few minutes to several hours&rdquo;."),
+      ("AWQ", "Scale first, then round", "&ldquo;Scales and clips the weights prior to quantization&rdquo;, using the activations to decide which channels to protect. Needs far less calibration text than GPTQ: on one model the AWQ paper reports good results with 16 sequences against 192."),
+      ("DWQ", "Train the scales to match the teacher", "&ldquo;Fine-tunes non-quantized parameters (including quantization scales and biases) using the non-quantized model as a teacher.&rdquo; The MLX docs say it works best for 2-bit to 4-bit and &ldquo;often doesn&#39;t work well&rdquo; when distilling to 8-bit or 6-bit. Slower than dynamic quantization, and typically better."),
+      ("Dynamic quantization", "More bits where it hurts", "Estimate how sensitive each layer is and give the sensitive ones more bits. <code>mlx_lm.dynamic_quant</code> defaults to 5 bits for sensitive layers and 4 for the rest. <code>mlx_lm.convert --quant-predicate mixed_4_6</code> is a fixed version: more bits for the attention value and feed-forward output projections in the first and last eighth of the layers and every third in between, plus the output head. llama.cpp&#39;s Q4_K_M is the same idea, in its own scheme."),
+      ("Importance matrix (imatrix)", "llama.cpp&#39;s sample-text recipe", "Run sample text through the full-precision model, record how large the activations are on each input channel, and use that as weights when choosing how to round. It is produced with <code>llama-imatrix</code> and used with <code>llama-quantize --imatrix</code>."),
+      ("Unsloth Dynamic (UD)", "A vendor&#39;s per-model schemes", "In the Dynamic 2.0 section of its documentation Unsloth says it now <q>dynamically adjust[s] the quantization type of every possible layer</q> with a scheme tailored to each model, and calibrates on a curated set of more than 1.5 million tokens. It sells and promotes its own tools and its comparisons are self-measured. A <code>UD-Q4_K_M</code> file is not published for every model."),
+    ]),
+
+    ("h2", "Why bother: what the measurements show"),
+    ("p", "Three kinds of evidence, in rising order of how much to trust them on <em>your</em> model: the authors&#39; papers (above), published measurements by others, and your own. The second:"),
+    ("ul", [
+      "<strong>llama.cpp&#39;s importance matrix.</strong> From the llama.cpp perplexity README, Llama-3 8B on an NVIDIA RTX 4090 graphics card, scored on WikiText-2, with the matrix made from WikiText too, which probably flatters it. Full precision scores 6.233. A q3_K_M file: perplexity 6.888 and KL divergence (Kullback&ndash;Leibler divergence, how far one probability distribution has moved from another) 0.1019 without a matrix, 6.734 and 0.0844 with one. A q4_K_M file: 6.407 and 0.0313, then 6.383 and 0.0282. The gain is larger at fewer bits.",
+      "<strong>On MLX, one blogger&#39;s measurements.</strong> On the Qwen3.6 35B-A3B mixture-of-experts model, KL divergence against an 8-bit reference on an M5 Max: plain 4-bit 0.074, DWQ 4-bit 0.027. On the 27B model, plain 4-bit 0.113 against 0.059 for Unsloth&#39;s MLX build, which that post also measured at 8.6 effective bits per weight and about twice as far from the original as a plain 6-bit file. The author wrote the measuring tool and the post has no peer review. It is a single run, and a reminder that a clever name is not a guarantee.",
+    ]),
+    ("p", "And our own, using <code>scripts/measure_quantization.py</code> on public Qwen3-0.6B files against the 16-bit original, on the course&#39;s own documents, 8 windows of 512 tokens each:"),
+    ("code", """model                          MB   bits/w  perplexity       KL  top-1 same
+16-bit original              1192    16.00      35.151   0.0000     100.0%
+4bit  (plain)                 335     4.50      41.910   0.2337      73.7%
+4bit-AWQ                      345     4.63      38.752   0.1420      78.6%
+4bit-DWQ                      335     4.50      40.299   0.3277      76.8%"""),
+    ("p", "The AWQ file is best on all three measures, and also uses 4.63 bits per weight against 4.50, so some of its win may be bits. The DWQ file beats plain rounding on perplexity and on how often it picks the same word, and is <em>worse</em> on KL divergence. The three measures disagree about DWQ. We did not find out why. It may be that its calibration text was chat while ours is incident reports, or that the model is tiny, or something else. That disagreement is the finding: pick your measure, and your text, before you look."),
+
+    ("know",
+     "Compare quantizations at equal bits per weight and judge them on your own text, because the label hides both.",
+     "&ldquo;4-bit&rdquo; names a bit width, not a cost. MLX files in this course are 4.50 bits per weight, the AWQ file above is 4.63, and the Q4_K_M file we made from a 0.5-billion-parameter model is 6.35. Perplexity on a standard text can stay flat while the model starts choosing different words, and a recipe tuned on one kind of text can lose on another.",
+     "The notebook&#39;s own results show the shape on a small model, Qwen2.5-0.5B. Dropping from 6.5 to 4.5 bits per weight multiplied the KL divergence by about 12 (0.018 to 0.219), and 3.5 bits multiplied it by about six more (1.24), with the model picking the same next word only 43% of the time. At 2.5 bits it was no longer a working model: perplexity 217,328."),
+
+    ("callout", "pitfall", "Accuracy can hold still while the answers change",
+     "<p>The paper &ldquo;Accuracy is Not All You Need&rdquo; (Microsoft Research) reports that compressed models can match the original on accuracy while many individual answers flip between right and wrong, in what it calls flips. It reports accuracy differences of 0&ndash;2% against flips of up to 13.6%, and proposes KL divergence and the share of flips as the better measures. A model that scores the same on average has not necessarily kept your task intact. Test your own task.</p>"),
+
+    ("h2", "Do you have to start from scratch?"),
+    ("p", "Almost never. The recipes above are implemented in maintained tools, and most popular models already have quantizations made by someone. What exists:"),
+    ("ul", [
+      "<strong>MLX (Apple Silicon):</strong> <code>mlx_lm.dwq --model Qwen/Qwen3-0.6B</code>, <code>mlx_lm.awq</code>, <code>mlx_lm.gptq</code> and <code>mlx_lm.dynamic_quant</code>. Install with <code>pip install &quot;mlx-lm[train]&quot;</code>. All use calibration data to tune parameters. By default <code>mlx_lm.awq</code>, <code>gptq</code> and <code>dynamic_quant</code> download one public calibration text and sample random chunks of it, while <code>mlx_lm.dwq</code> defaults to a Hugging Face chat dataset, allenai/tulu-3-sft-mixture, which is part of why a DWQ file may be tuned for conversation rather than your text.",
+      "<strong>llama.cpp (GGUF, the GPT-Generated Unified Format it reads):</strong> <code>llama-imatrix -m model-f16.gguf -f calibration.txt -ngl 99</code>, then <code>llama-quantize --imatrix imatrix.gguf model-f16.gguf out.gguf q4_k_m</code>.",
+      "<strong>NVIDIA and vLLM:</strong> LLM Compressor (from the vLLM project, which saves in its compressed-tensors format), GPTQModel (from the company ModelCloud) and NVIDIA&#39;s Model Optimizer (vendor-run and NVIDIA-focused). AutoAWQ is archived, and its README says it is deprecated and points users to LLM Compressor and mlx-lm.",
+    ]),
+    ("p", "<strong>What we ran ourselves:</strong> <code>mlx_lm.convert</code> and <code>llama-quantize</code>, in the notebook. The commands above for DWQ, AWQ, GPTQ and imatrix are from the tools&#39; own documentation and were not run here. The first DWQ attempt failed because it needs the extra <code>datasets</code> package that the <code>[train]</code> install adds, and this llama.cpp build does not include <code>llama-imatrix</code>."),
+
+    ("h3", "When you do need your own, what to know"),
+    ("ul", [
+      "<strong>Start from the 16-bit original, once.</strong> <code>llama-quantize</code> refuses to requantize an already-quantized file unless you pass <code>--allow-requantize</code>, and warns that it &ldquo;can severely reduce quality compared to quantizing from 16bit or 32bit&rdquo;. The notebook shows the refusal. We found no published measurement of how much it costs, so that is vendor guidance, not a number.",
+      "<strong>Calibration text should look like your use, and must not be your test.</strong> The AWQ paper found matching the calibration and evaluation domain worked best. On a different domain AWQ lost 0.5&ndash;0.6 perplexity while GPTQ lost 2.3&ndash;4.9, on one model and two domains. GPTQ&#39;s paper used 128 random 2048-token segments of a web text collection. We found no study that measures domain-matched calibration on downstream task accuracy.",
+      "<strong>Give sensitive layers more bits.</strong> The output head and embeddings are the usual ones. MLX&#39;s preset gives the head extra bits, llama.cpp has <code>--leave-output-tensor</code> and <code>--token-embedding-type</code>, and the blog post above suggests that the router of a mixture-of-experts model is sensitive enough that saving bits there costs more than it saves. It did not isolate the router, so treat that as a lead.",
+      "<strong>Measure distance, not just perplexity.</strong> llama.cpp says the loss is usually measured in perplexity and KL divergence, and warns that perplexity is not comparable across models with different tokenizers. Its KL workflow saves the full-precision model&#39;s outputs to a file that it says is 37 GiB for Llama 3 on WikiText-2, so budget disk.",
+      "<strong>Write the recipe down.</strong> The tool and its version, the base model revision, the calibration text, the settings, and the type of each tensor. You will want it when the numbers surprise you.",
+    ]),
+    ("p", "If your architecture is new, check two things before anything else. Does the tool support its layers? And does the engine you will serve with have a fast kernel for the format you are about to produce? A format with no fast kernel runs slowly or not at all, as the formats lesson explains."),
+
+    ("h2", "Where to get recipes and ready-made quantizations"),
+    ("ul", [
+      "<strong>mlx-community</strong> on Hugging Face publishes MLX files, and its cards are terse. The Qwen3-0.6B <code>-4bit</code>, <code>-4bit-AWQ</code> and <code>-4bit-DWQ</code> cards we read are word for word the same: converted to MLX format from the base model using mlx-lm 0.24.0. The recipe appears only in the file name. A card with no recipe named should be assumed to be plain rounding.",
+      "<strong>unsloth</strong> publishes GGUF files, including the <code>UD-</code> ones, with its recipe documented. Self-measured, and not every model has every variant: the Qwen3-Coder 30B repository has <code>UD-*_XL</code> files and no <code>UD-Q4_K_M</code>.",
+      "<strong>bartowski</strong>, an individual who publishes GGUF files. The Llama 3.1 card we read names the llama.cpp release used, says every file was made with an importance matrix and links its dataset, and describes its <code>Q6_K_L</code> variant as keeping embedding and output weights at Q8_0.",
+      "<strong>lmstudio-community</strong> publishes GGUF and MLX files. Cards vary: some name the llama.cpp release and say nothing about an importance matrix, and the Llama 3.1 card credits a dataset used to calculate one. LM Studio says it does not guarantee community models.",
+      "<strong>The model makers themselves.</strong> Qwen publishes GGUF, GPTQ and AWQ versions of its models. Official cards are not free of mistakes: the Qwen2.5-7B AWQ card says 72B in its text.",
+    ]),
+    ("p", "<strong>How to judge a file before you trust it</strong> (our inference from the cards above, not an official standard): does the card name the base model and revision, the tool and its version, the recipe, and the calibration data? Does it say which type each file is? A card that names none of these is a file you should score yourself. You can, with one command:"),
+    ("code", """python3 scripts/measure_quantization.py --reference mlx-community/Qwen3-0.6B-bf16 \\
+    --model mlx-community/Qwen3-0.6B-4bit --model mlx-community/Qwen3-0.6B-4bit-AWQ"""),
+
+    ("related", ["weights-gguf-quantization", "formats-and-engines", "benchmarks-what-to-trust", "local-hardware-limits"]),
+    ("links", [
+      ("AWQ: Activation-aware Weight Quantization", "https://arxiv.org/abs/2306.00978",
+       "The salient-weight observation, the RTN comparison, and the calibration-domain experiment. Read its authorship in mind."),
+      ("GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers", "https://arxiv.org/abs/2210.17323",
+       "The OPT-175B results, including RTN collapsing at 3 bits."),
+      ("Learned quantization in MLX LM", "https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LEARNED_QUANTS.md",
+       "DWQ, AWQ, GPTQ and dynamic quantization, with commands, from the people who wrote them."),
+      ("llama.cpp quantize tool", "https://github.com/ggml-org/llama.cpp/tree/master/tools/quantize",
+       "The quantization types, the options, and how it says to measure the loss."),
+      ("llama.cpp importance matrix", "https://github.com/ggml-org/llama.cpp/tree/master/tools/imatrix",
+       "What it computes and how to produce one."),
+      ("llama.cpp perplexity and KL divergence", "https://github.com/ggml-org/llama.cpp/tree/master/tools/perplexity",
+       "The KL-divergence workflow and the scoreboard used above."),
+      ("Accuracy is Not All You Need", "https://arxiv.org/abs/2407.09141",
+       "Why compressed models should be judged by flips and KL divergence as well as accuracy."),
+      ("Measuring model quantisation quality with KL divergence", "https://smcleod.net/2026/04/measuring-model-quantisation-quality-with-kl-divergence/",
+       "One author&#39;s measurements of MLX quantizations. Read it with its caveats in mind."),
+      ("Unsloth Dynamic quantization", "https://unsloth.ai/docs/basics/dynamic-3.0-ggufs",
+       "The vendor&#39;s own description of its approach."),
+    ]),
+    ("quiz", [
+      ("Two 4-bit models from the same base. One was made with plain rounding, the other with AWQ. What is the fairest way to compare them?",
+       ["By their file names, since the recipe is in the name",
+        "By KL divergence and how often they pick the same word, at the same bits per weight, on text like your own",
+        "By perplexity on a standard text alone"],
+       1),
+      ("A model card says only: converted to MLX format from the base model using mlx-lm. What should you assume about the recipe?",
+       ["Plain rounding, unless the card or name says otherwise",
+        "A learned recipe such as DWQ",
+        "Nothing can be assumed, so do not use the model"],
+       0),
+      ("Why should you quantize from the 16-bit original rather than from an already-quantized file?",
+       ["The tool does not accept quantized input",
+        "The tool warns that requantizing can severely reduce quality, because the first rounding error is already baked in",
+        "Quantized files cannot be converted to other formats"],
+       1),
+      ("In our run of public Qwen3-0.6B files, the DWQ model beat plain rounding on perplexity but lost on KL divergence. What does that tell you?",
+       ["DWQ is a worse recipe",
+        "The measures can disagree, so choose your measure and your text before looking at the results",
+        "KL divergence is not a useful measure"],
+       1),
     ]),
   ],
 },
@@ -361,6 +505,157 @@ LESSONS = [
        ["It can't run large models",
         "It's optimised for a single developer on one machine; vLLM or TGI handle concurrent batching properly",
         "It doesn't expose an HTTP API"],
+       1),
+    ]),
+  ],
+},
+{
+  "slug": "formats-and-engines",
+  "title": "Formats and Engines: GGUF, MLX and What NVIDIA Runs",
+  "subtitle": "Which file, which engine, which chip — and which of these numbers we measured ourselves.",
+  "body": [
+    ("p", "A large language model (LLM) arrives with four labels stuck together: a <strong>file format</strong> (GGUF, the GPT-Generated Unified Format that llama.cpp reads, or safetensors), a <strong>quantization recipe</strong> (Q4_K_M, 4-bit, AWQ for activation-aware weight quantization, FP8 for 8-bit floating point), an <strong>engine</strong> (llama.cpp, mlx-lm, vLLM) and a <strong>chip</strong> (Apple Metal, or NVIDIA CUDA, NVIDIA&#39;s GPU programming platform). Speed, memory and answer quality come from the combination, and most arguments in this area are one label standing in for all four. This lesson separates them, shows what we measured on one Mac, and is explicit about the NVIDIA material, which we could not measure and have cited instead."),
+
+    ("h2", "Container, method, kernel"),
+    ("p", "Three different things get called &ldquo;the format&rdquo;. Keeping them apart removes most of the confusion:"),
+    ("terms", [
+      ("Container", "How the file is laid out", "GGUF is one file holding the quantized weights, tokenizer and prompt template. Safetensors holds tensors plus a small header and is what MLX (Apple&#39;s machine-learning framework for its own chips) and vLLM load. A container says nothing about how good the quantization is or how fast it runs."),
+      ("Method", "How the 4-bit values were chosen", "Rounding every weight is the crude way. Better methods spend calibration data to lose less. GPTQ (post-training quantization for generative pre-trained transformers) finds quantized weights that minimise the squared error of each layer&#39;s output on sample inputs. AWQ (Activation-aware Weight Quantization) scales and clips weights before quantizing, guided by which ones the activations lean on. DWQ (Distilled Weight Quantization) fine-tunes the leftover parameters, scales and biases included, using the unquantized model as a teacher. Those descriptions are from the MLX LM documentation, which ships tools for all three. So AWQ and GPTQ are not NVIDIA formats. They are recipes that any engine&#39;s weights can come from."),
+      ("Kernel", "The code that multiplies with packed weights", "A 4-bit weight has to be unpacked on the fly, and whether that is fast depends on the kernel the engine has for that layout and chip. MARLIN is a 4-bit kernel for NVIDIA graphics processing units (GPUs) whose authors report close to the maximum 4&times; quantization speedup at batch sizes up to 16&ndash;32. An engine without a fast kernel for your format runs it slowly or not at all."),
+    ]),
+
+    ("figure", "Which engines serve which weights on which chip, as far as we could establish. The amber cells are where the answer is &ldquo;possible, but unproven or unsupported&rdquo;.", '''<svg viewBox="0 0 640 264" role="img" aria-label="A grid of three weight types against two chips, naming the engines that serve each combination"><text x="196" y="18" class="d-label-b">APPLE METAL</text><text x="436" y="18" class="d-label-b">NVIDIA CUDA</text>
+<text x="8" y="68" class="d-label-b">GGUF</text><text x="8" y="84" class="d-label-sm">llama.cpp family</text>
+<rect x="150" y="28" width="226" height="74" rx="6" class="d-box-good"/><text x="162" y="52" class="d-label">llama.cpp, Ollama, LM Studio</text><text x="162" y="72" class="d-label-sm">llama.cpp, Ollama measured here</text>
+<rect x="386" y="28" width="246" height="74" rx="6" class="d-box-good"/><text x="398" y="52" class="d-label">llama.cpp</text><text x="398" y="72" class="d-label-sm">vLLM plugin: "highly experimental"</text>
+<text x="8" y="150" class="d-label-b">MLX weights</text><text x="8" y="166" class="d-label-sm">safetensors</text>
+<rect x="150" y="110" width="226" height="74" rx="6" class="d-box-good"/><text x="162" y="134" class="d-label">mlx-lm, vllm-mlx, Ollama (preview)</text><text x="162" y="154" class="d-label-sm">measured here, except Ollama&#39;s</text>
+<rect x="386" y="110" width="246" height="74" rx="6" class="d-box-warn"/><text x="398" y="134" class="d-label">mlx[cuda] backend exists</text><text x="398" y="154" class="d-label-sm">no LLM benchmark found: unmeasured</text>
+<text x="8" y="232" class="d-label-b">AWQ / GPTQ / FP8</text><text x="8" y="248" class="d-label-sm">checkpoints, safetensors</text>
+<rect x="150" y="192" width="226" height="64" rx="6" class="d-box"/><text x="162" y="216" class="d-label">as methods inside MLX weights</text><text x="162" y="236" class="d-label-sm">mlx-lm ships tools for AWQ and GPTQ</text>
+<rect x="386" y="192" width="246" height="64" rx="6" class="d-box-good"/><text x="398" y="216" class="d-label">vLLM, SGLang, TensorRT-LLM</text><text x="398" y="236" class="d-label-sm">cited, not measured here</text>
+</svg>'''),
+
+    ("h2", "The formats you will meet"),
+    ("terms", [
+      ("MLX", "Apple&#39;s framework, its own quantization", "MLX is Apple&#39;s array framework, built for the Metal GPU and unified memory. An MLX model is safetensors plus a quantization setting in its config. The 4-bit Qwen model used below records a group size of 64 at 4 bits. MLX also has a CUDA backend you can install on Linux with a recent CUDA toolkit, which is why the figure shows a cell there. We found no published LLM benchmark of it. Ollama announced an MLX backend in preview in March 2026, for Macs with more than 32 GB and initially one model. The Ollama run in this lesson used its llama.cpp path with a GGUF file."),
+      ("AWQ", "A method, then a checkpoint", "Four-bit weights scaled by how much the activations use them. On NVIDIA, vLLM&#39;s documentation lists AWQ support on Turing, Ampere, Ada and Hopper GPUs."),
+      ("GPTQ", "A method, then a checkpoint", "Four-bit weights chosen to minimise each layer&#39;s output error on calibration data. vLLM lists it on those GPUs and on Volta as well."),
+      ("FP8", "Eight-bit floating point", "Half the bytes of 16-bit, keeping a floating-point range. vLLM lists weight-and-activation FP8 on Ada and Hopper. In one large study on the Llama 3.1 models it was effectively lossless."),
+      ("NF4", "Four-bit NormalFloat, for training", "The data type QLoRA (quantized low-rank adaptation) uses to hold a frozen base model in 4 bits while adapters train. You meet it in fine-tuning, not in serving."),
+    ]),
+    ("p", "Seen in the wild and not covered here: EXL2 and EXL3 (formats from the ExLlama inference libraries, popular with hobbyists on NVIDIA GPUs), and TensorRT-LLM, NVIDIA&#39;s own engine, which appears in the published comparison below."),
+
+    ("know",
+     "A speed number is a claim about a format, an engine, a chip and a concurrency level. Drop any one and it means nothing.",
+     "The same weights run through two engines differ, the same engine differs between one request and sixteen, and the same server differs when something else is using the machine. A bare &ldquo;300 tokens per second&rdquo; fixes none of those, so it cannot be compared with anything.",
+     "In this repository&#39;s runs the same vllm-mlx server decoded at about 308 tokens per second in one run and about 41 in another. Nothing about the server changed. Another benchmark had started on the same Mac. That is why the engine table in this lesson leaves tokens per second out."),
+
+    ("h2", "Measured here: one model, five engines, one Mac"),
+    ("p", "Qwen2.5-1.5B-Instruct on an Apple M4 Max with 128 GB, through <code>scripts/bench_engines.py</code>. The GGUF is Q4_K_M, 1,117,320,736 bytes. The MLX copy is 4-bit with a group size of 64, 839 MB on disk. <strong>These are not the same quantization</strong>, so a difference between a GGUF row and an MLX row is partly the engine and partly the recipe. Ollama ran the very same GGUF file as llama-server, loaded through a Modelfile with the context raised so a 7,000-token prompt fits."),
+    ("code", """engine (weights)                  cold -> warm, 7k tokens   4 streams   short request behind a long one
+llama-server, -np 4  (GGUF)       3.85s -> 0.04s            4 of 4      0.10s   (alone 0.07s)
+Ollama, defaults     (same GGUF)  3.03s -> 0.06s            4 of 4      17.19s  (it waited for the whole long reply)
+mlx_lm.server        (MLX 4-bit)  3.33s -> 0.12s            4 of 4      1.5-1.8s (alone 0.30s)
+vllm-mlx, default    (MLX 4-bit)  6.55s -> 0.20s            1 of 4      the others were rejected
+vllm-mlx --continuous-batching    3.95s -> 0.09s            4 of 4      0.15s   (alone 0.05s)
+
+warm = a new question after the same long opening. Time to first token, medians of 2 trials."""),
+    ("ul", [
+      "<strong>Every engine served the prefix from cache, with one exception.</strong> A new question after the same opening, and a next conversation turn, came back warm on all five. With continuous batching on, vllm-mlx did not serve the <em>identical</em> request again from cache: 1.05 seconds against 0.95 cold at 2,359 tokens, and 3.90 against 3.95 at 7,072. That held across two separate runs and we did not find out why.",
+      "<strong>The engine, not the file, decided what concurrency did.</strong> The same GGUF file gave a short request 0.10 seconds behind a long one on llama-server with four slots, and 17.19 seconds on Ollama with its defaults. With its defaults Ollama answered all four streams, but the evidence is that it ran them one after another: the short request finished only when the long one did.",
+      "<strong>vllm-mlx in default mode rejected concurrent requests in our run.</strong> Three of four came back empty, and its log reports that its serialized route is busy.",
+      "<strong>Read the cold column as direction only.</strong> The vllm-mlx default row ran while the machine was heavily loaded by other work, which is why its cold time is roughly double the others.",
+    ]),
+    ("callout", "pitfall", "Same model name, different weights, different answers",
+     "<p>The file sizes above differ by about a quarter, and that is one label away from being invisible. &ldquo;Qwen2.5-1.5B 4-bit&rdquo; names a model and a bit width. It does not name the method, the group size or which tensors stayed at higher precision. Before comparing engines, check that the weights are the same artefact, or say plainly that they are not.</p>"),
+
+    ("h2", "Published by others: cited, not measured here"),
+    ("p", "We have no NVIDIA hardware here, and one Mac is not Apple Silicon in general. These come from other people&#39;s runs. Each figure was read on the page cited, and each is labelled with who ran it, because a benchmark by an engine&#39;s own authors is evidence about that engine&#39;s best day."),
+    ("ul", [
+      "<strong>MLX versus llama.cpp, decode, 4-bit, M4 Pro (24 GB).</strong> Tokens per second, llama.cpp then MLX: Qwen3-0.6B 297.4 and 343.6, Llama-3.2-1B 230.4 and 257.8, Qwen3-30B-A3B 80.7 and 83.1. MLX leads on small models and the gap nearly closes at 30 billion parameters. At a 512-token prompt, prefill on that 30B model was 668 against 664. From the BaseRT paper (arXiv 2607.00501, July 2026), whose authors build a rival engine and report these two as baselines.",
+      "<strong>Continuous batching on a Mac.</strong> The vllm-mlx paper reports Qwen3-0.6B scaling from 441 to 1,642 tokens per second at 16 concurrent requests, about 3.7 times. Its abstract says 4.3 times, and also claims 21% to 87% higher throughput than llama.cpp across models from Qwen3-0.6B to Nemotron-30B, a larger gap than the BaseRT table above shows. The figures in the paper&#39;s body and its abstract disagree, and it is the project&#39;s own benchmark with no run counts. Our own runs at four streams ranged from about 1.2 to 2.8 times depending on what else the machine was doing, which is the same direction and a reminder of the noise.",
+      "<strong>One stream on NVIDIA is close to a tie.</strong> On one NVIDIA RTX 4090 graphics card (clock-limited to 1,350 MHz) with Qwen2.5-3B, llama.cpp needed 93.6&ndash;100.2% of vLLM&#39;s time for a single request, and 99.2&ndash;125.6% with 16 in parallel. Run by a llama.cpp maintainer, who writes that the 16-parallel result &ldquo;could be improved&rdquo;. Both used 16-bit weights, so this tests the engines, not GGUF quantization.",
+      "<strong>GGUF is a second-class citizen in vLLM.</strong> Its documentation says GGUF support is &ldquo;highly experimental and under-optimized&rdquo; and now lives in a separate plugin.",
+      "<strong>On NVIDIA, 4-bit is fast when the kernel is.</strong> The MARLIN paper reports close to the maximum 4&times; speedup for batch sizes up to 16&ndash;32 and up to 2.8&times; end to end inside vLLM. A study of more than 500,000 evaluations on Llama 3.1 found FP8 effectively lossless, well-tuned 8-bit integer (INT8) quantization within 1&ndash;3% and 4-bit weight-only competitive with 8-bit, and says 4-bit suits low-concurrency serving while 8-bit weights and activations win under continuous batching.",
+      "<strong>Engine against engine on one NVIDIA H100 data-centre GPU.</strong> Llama 3.3 70B in FP8, 50 concurrent requests, from a GPU-rental company, one three-minute window per concurrency level and no repeat runs stated: vLLM 1,850 tokens per second, SGLang 1,920, TensorRT-LLM 2,100, with TensorRT-LLM taking about 28 minutes to cold-start against about a minute for the other two. The blog of the SGLang (Structured Generation Language) team claims up to 3.1 times vLLM on Llama-70B. Treat a gap of under 15% from a setup like that as a tie.",
+      "<strong>Continuous batching and prefix caching, from the papers.</strong> The vLLM paper reports 2&ndash;4&times; the throughput of FasterTransformer and Orca at the same latency, and Orca is itself a continuous-batching system, so that is not a comparison against naive serving. SGLang&#39;s RadixAttention paper reports up to 6.4&times; across a mix of tasks, bundled with its other optimisations rather than the prefix cache alone.",
+    ]),
+    ("p", "We found no solid published comparison of GGUF against AWQ or GPTQ on NVIDIA for answer quality, and no LLM benchmark of MLX on CUDA. Those two rows are gaps in the public record as well as in ours."),
+
+    ("know",
+     "Read who ran a benchmark and what they sell before you read its number.",
+     "A comparison written by an engine&#39;s authors measures that engine at its best, and a comparison written by a rival measures the incumbent as a baseline. Neither is dishonest. Both are evidence about a particular setup, and the setup is where the surprise usually lives.",
+     "The vllm-mlx paper states 4.3 times in its abstract and 3.7 times in its results. The BaseRT paper that gives the MLX and llama.cpp decode figures above is written by a team selling a third engine. Neither detail changes the direction of the finding. Both change how much weight a single digit deserves."),
+
+    ("h2", "Choosing, as a judgement"),
+    ("p", "These follow from the evidence above. They are recommendations, so weigh them against your own measurements:"),
+    ("ul", [
+      "<strong>One person on a Mac who wants it to work:</strong> Ollama or LM Studio are the easy start. In our run Ollama at its default settings queued concurrent requests, and LM Studio was not tested.",
+      "<strong>Several agents sharing one Mac:</strong> an engine with batching switched on: vllm-mlx with <code>--continuous-batching</code>, <code>mlx_lm.server</code>, or llama-server with several slots. In our run a short request behind a long one waited 0.15 seconds on vllm-mlx with batching, 0.10 on llama-server with four slots, and 1.5 to 1.8 on mlx_lm.server against 0.30 alone, so batching is not all-or-nothing. Then run the prefix test for your own pattern, because the identical-request miss above is the kind of thing that only your pattern finds.",
+      "<strong>Fastest single stream on a Mac:</strong> MLX was ahead in both published comparisons above, by roughly 3% to 20% in one table and 21% to 87% in the other, and the gap was smallest at 30 billion parameters. Both come from authors with an engine of their own, so verify on your model before moving a workload.",
+      "<strong>NVIDIA, one user:</strong> llama.cpp is a reasonable default. The one primary comparison found it close to vLLM at a single request, though with 16-bit weights on one small model, so it says little about GGUF quantization itself.",
+      "<strong>NVIDIA, many users:</strong> vLLM or SGLang with an AWQ, GPTQ or FP8 checkpoint. TensorRT-LLM may buy a little throughput for a much longer build. In the one comparison above the gap is about what a single run cannot separate from noise.",
+    ]),
+
+    ("h2", "Reproduce the Mac comparison"),
+    ("code", """# the engines, each alone on a quiet machine
+llama-server -m model-q4_k_m.gguf -c 49152 -np 4 -ngl 99 --port 8012
+mlx_lm.server --model mlx-community/Qwen2.5-1.5B-Instruct-4bit --port 8013
+vllm-mlx serve mlx-community/Qwen2.5-1.5B-Instruct-4bit --port 8011            # default mode
+vllm-mlx serve mlx-community/Qwen2.5-1.5B-Instruct-4bit --port 8011 --continuous-batching
+#   Ollama: a Modelfile with  FROM /path/model.gguf  and  PARAMETER num_ctx 16384,
+#   then  ollama create bench -f Modelfile
+
+# against each one
+python3 scripts/bench_engines.py --base-url http://127.0.0.1:PORT/v1 --model NAME prefix --lengths 2000 6000
+python3 scripts/bench_engines.py --base-url http://127.0.0.1:PORT/v1 --model NAME batching --concurrency 1 4
+python3 scripts/bench_engines.py --base-url http://127.0.0.1:PORT/v1 --model NAME staggered"""),
+    ("p", "Run one engine at a time, and read the load average the script prints first. Raw outputs from the runs behind this lesson are in <code>scripts/bench_engines_runs.md</code>."),
+
+    ("related", ["weights-gguf-quantization", "serving-locally", "latency-and-caching", "local-hardware-limits"]),
+    ("links", [
+      ("MLX installation", "https://ml-explore.github.io/mlx/build/html/install.html",
+       "The CUDA backend, its requirements, and the CPU-only Linux build."),
+      ("Learned quantization in MLX LM", "https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LEARNED_QUANTS.md",
+       "DWQ, AWQ, GPTQ and dynamic quantization described in one page by the people who implemented them."),
+      ("vLLM quantization support", "https://docs.vllm.ai/en/latest/features/quantization/",
+       "Which methods run on which NVIDIA architectures."),
+      ("GGUF in vLLM", "https://docs.vllm.ai/en/latest/features/quantization/gguf.html",
+       "The experimental-support warning, in the engine&#39;s own words."),
+      ("llama.cpp against vLLM, measured", "https://github.com/ggml-org/llama.cpp/discussions/15180",
+       "A maintainer&#39;s benchmark with the method, the commands and the fits written out."),
+      ("MARLIN: Mixed-Precision Auto-Regressive Parallel Inference", "https://arxiv.org/abs/2408.11743",
+       "Why 4-bit weights can stay fast under batching."),
+      ("Give Me BF16 or Give Me Death", "https://arxiv.org/abs/2411.02355",
+       "Accuracy and performance of 8-bit floating point and 8-bit and 4-bit integer quantization across the Llama 3.1 family."),
+      ("Native LLM and MLLM Inference at Scale on Apple Silicon", "https://arxiv.org/abs/2601.19139",
+       "The vllm-mlx paper. Read it with its authorship in mind."),
+      ("BaseRT", "https://arxiv.org/abs/2607.00501",
+       "MLX and llama.cpp compared on M3 and M4 Pro, as baselines for a third engine."),
+      ("SGLang v0.3 Runtime (LMSYS blog)", "https://www.lmsys.org/blog/2024-07-25-sglang-llama3",
+       "The SGLang team&#39;s own comparison with vLLM and TensorRT-LLM. Where the 3.1 times figure comes from."),
+    ]),
+    ("quiz", [
+      ("A forum post says a setup runs at 300 tokens per second. Why can you not compare it with your own 120?",
+       ["Speed depends on the format, the engine, the chip and how many requests run at once, and the post fixes none of them",
+        "Tokens per second is a marketing number with no real meaning",
+        "Forum posts always overstate speed"],
+       0),
+      ("What are GPTQ and AWQ best described as?",
+       ["File formats that only work on NVIDIA GPUs",
+        "Methods for choosing the quantized values, which different engines&#39; weights can come from",
+        "Two names for the same compression scheme"],
+       1),
+      ("In the Mac comparison, a short request arrived while a long one was generating. Which setup made it wait for the whole long reply?",
+       ["llama-server with four slots",
+        "Ollama with its defaults, running the same GGUF file",
+        "vllm-mlx with continuous batching"],
+       1),
+      ("A paper by an engine&#39;s authors states 4.3 times in its abstract and 3.7 times in its results. What is the sensible reading?",
+       ["The paper is worthless",
+        "The direction is probably right, one digit deserves little weight, and your own run is the check",
+        "Use the larger number because it is the headline"],
        1),
     ]),
   ],
@@ -1631,7 +1926,10 @@ LESSONS = [
     ("callout", "matters", "Always compute the trivial baseline", "Before reporting any accuracy figure, work out what 'always guess the majority class' scores. If your model is at 99.2% and the trivial baseline is 99.1%, you have not built anything. Your intake sheet asks for the dumb baseline for exactly this reason — on imbalanced data it isn't a formality, it's the whole interpretation."),
 
     ("h2", "Use precision and recall instead"),
-    ("p", "Your statistics course covers these in depth. The short version: precision asks what fraction of the things you flagged were real; recall asks what fraction of the real things you caught. Neither can hide behind a dominant negative class, which is why both are reported on imbalanced problems and accuracy usually isn't."),
+    ("p", "Your statistics course covers these in depth. The short version: precision asks what fraction of the things you flagged were real; recall asks what fraction of the real things you caught. Neither can be inflated by a dominant negative class the way accuracy is, which is why both are reported on imbalanced problems and accuracy usually isn't. That does not make them independent of the class mix: recall is measured only on the real cases, but precision still falls as the real class gets rarer, as the next note shows."),
+
+    ("callout", "pitfall", "Precision moves with how common the real thing is",
+     "<p>A false-alarm rate does not tell you how many of your flags are real. That depends on how often the real thing occurs. Take a filter that flags 0.3% of harmless items and catches 95% of attacks. If one input in a hundred is an attack, then in 10,000 inputs it catches 95 of the 100 attacks and raises about 30 false alarms, so roughly 76% of its flags are real. If one input in ten thousand is an attack, then in a million inputs it still catches 95 of 100 attacks but raises about 3,000 false alarms, so roughly 3% of its flags are real. Same filter, same test result, a very different workload for whoever reads the flags. When you report a false-alarm rate, say what mix of cases it was measured on and what mix you expect in use. The arithmetic here is constructed, not a run.</p>"),
 
     ("h2", "The threshold is a decision, not a default"),
     ("p", "A classifier outputs a probability. Turning it into an action requires a cut-off, and 0.5 is a convention inherited from balanced problems — nothing more. Moving the threshold trades the two error types against each other directly:"),
@@ -1951,6 +2249,9 @@ LESSONS = [
     ("h2", "Reasoning tokens change the cost model"),
     ("p", "With reasoning models you pay for tokens you may never see. A short answer can sit on top of thousands of hidden reasoning tokens, all billed. Cost stops tracking visible output length and starts tracking problem difficulty — which is a different budgeting exercise, and one that surprises people the first time."),
     ("p", "It also changes when to reach for what. Simple extraction, classification and formatting don't benefit from reasoning and just cost more slowly. The gains concentrate in genuinely multi-step problems — which is a routing decision, and exactly the kind of judgement escalation logic has to encode."),
+
+    ("callout", "matters", "Measured: the same six questions with thinking on and off",
+     "<p>Six short arithmetic and logic questions with exact answers, on a 9-billion-parameter 8-bit model served by vllm-mlx 0.5.0, run with <code>scripts/bench_engines.py thinking</code>. Median reply length with thinking on was 1,225 tokens against 392 with it off. Two of the six thinking replies reached the 1,500-token cap before giving an answer, so a thinking budget that is too small turns a reply into no answer at all. With thinking off, all six were right. Time is the part to notice: the first token arrived in under half a second either way, because the thinking streams, but the first token of the <em>answer</em> took between 17 and 56 seconds with thinking on. Median total time was 52.0 seconds against 14.8, and that includes load from other jobs, so trust the token counts more than the seconds. Six questions show direction, not accuracy, and these were mostly easy ones where thinking has little to add. Run it on your own hard cases before deciding.</p>"),
 
     ("figure", "Extra tokens buy accuracy on multi-step problems and buy nothing on recall or formatting. Matching the mode to the task is the actual skill.", '''<svg viewBox="0 0 640 180" role="img" aria-label="When chain-of-thought helps and when it does not">
 <text x="12" y="18" class="d-fill-green" font-size="12" font-weight="600">CLEAR GAIN</text>
@@ -2873,6 +3174,54 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
     ("callout", "pitfall", "The threshold is the whole design",
      "<p>Semantic caching lives or dies on the similarity threshold, and there is no setting that is safe everywhere. Tight enough to be correct and it almost never hits; loose enough to hit often and it starts answering questions nobody asked. If you cannot state what a near-miss costs, you are not ready to turn it on.</p>"),
 
+    ("h2", "Inside the serving engine: the trie and the disk tier"),
+    ("p", "Prefix caching is easy to describe and fiddly to build. A server has to find, among thousands of cached prompts, the one that shares the longest opening with a new request, and it has to do that on every request without scanning them all. The data structure that does it is a <strong>trie</strong>, also called a prefix tree: each step down the tree is one token (or one block of tokens), so two prompts that begin the same way share the same path and only diverge where their text does."),
+    ("terms", [
+      ("Prefix-trie cache", "Longest match in one walk",
+       "The cache stored as a tree keyed by token blocks. A new request walks down from the root for as long as its tokens match, reuses the stored keys and values for that whole path, and computes only the rest. A system prompt shared by a thousand requests is stored once. The same idea ships as a radix tree in the SGLang engine (RadixAttention); vllm-mlx describes its prefix cache as trie-based. Same mechanism, different tree."),
+      ("Why a tree and not a dictionary", "Sharing is partial", "A dictionary keyed on the full prompt only hits on an identical prompt. A trie hits on any shared opening, so two conversations that diverge at turn four still share turns one to three. This is the exact-prefix rule from earlier, stored efficiently."),
+      ("SSD cache (disk tier)", "Memory is the limit, so spill",
+       "Keys and values for a long prefix take real memory, and on a laptop that memory is also holding the weights. An SSD (solid-state drive) tier writes older prefix entries to disk instead of discarding them, to be read back when a request matches. The bet is that reading stored keys and values is cheaper than recomputing them. Whether it pays depends on the prefix length, the drive and the engine&#39;s implementation, so it is something to test rather than assume."),
+      ("Eviction", "Something has to go", "Whichever tier is full drops the entries least likely to be wanted again, typically the least recently used. The prefix that falls out is then a cold start in miniature, exactly as with an expired provider cache."),
+    ]),
+
+    ("know",
+     "Test a disk-backed cache before you depend on it, because it only runs under the memory pressure a quick test never creates.",
+     "A disk tier adds a writer thread, a file format and an eviction path to a cache that already works. That path runs only when memory is full, so a short test with a few small prompts never reaches it, and a failure there shows up weeks later on a long agent session.",
+     "Run for this course: vllm-mlx 0.4.1 and then 0.5.0, a 1.5-billion-parameter 4-bit text model, memory cap lowered to force eviction. Both times the server process aborted on the first eviction, with a thread-stream error from the MLX library, after answering one request. A 9-billion-parameter model on the same flags went through the engine&#39;s multimodal code path, which never touched the disk tier, so that run neither confirmed nor cleared it. The cause was not established. The lesson is the procedure below: force eviction on purpose and look at the result."),
+
+    ("callout", "matters", "Same word, same mechanism, three places it lives",
+     "<p>Prefix caching in a server, a trie to find the match, and a disk tier to keep it are one idea at three layers: <em>reuse the arithmetic you already did</em>. Everything in the earlier caching section still applies. The prefix must still be literal, volatile content must still go last, and a cache that stops hitting still raises no error. A disk tier just makes the cache bigger and longer-lived, and does not change what counts as a hit.</p>"),
+
+    ("h3", "Measure it on your own engine"),
+    ("p", "Everything in this section is a claim about an engine, and engines differ. <code>scripts/bench_engines.py</code> turns each claim into a measurement. It uses only the standard library and talks to any OpenAI-compatible streaming endpoint, so the same commands work against vllm-mlx, <code>mlx_lm.server</code>, <code>llama-server</code>, Ollama and LM Studio, and against vLLM or SGLang on an NVIDIA machine. Start the server, then run one test against it:"),
+    ("code", """# 1. Which kinds of reuse does the prefix cache serve?
+python3 scripts/bench_engines.py --model MODEL prefix
+
+# 2. Does the disk tier survive memory pressure, and a restart?
+#    Start the server with a SMALL memory cap and the disk tier on, then:
+python3 scripts/bench_engines.py --model MODEL evict --count 6 --words 3000 --state /tmp/evict.json
+#    restart the server (same flags), then:
+python3 scripts/bench_engines.py --model MODEL revisit --state /tmp/evict.json
+
+# 3. What does batching do under load, and to a short request behind a long one?
+python3 scripts/bench_engines.py --model MODEL batching --concurrency 1 4 8
+python3 scripts/bench_engines.py --model MODEL staggered
+
+# 4. What does thinking cost, and what does it buy?
+python3 scripts/bench_engines.py --model MODEL thinking \\
+    --arm on='{}' --arm off='{"chat_template_kwargs":{"enable_thinking":false}}'"""),
+    ("ul", [
+      "<strong>Change one flag between runs.</strong> Run each test with the option off, then on. A single number says little. The comparison is the result.",
+      "<strong>The prefix test separates three kinds of reuse.</strong> The same request again, a new question after the same long opening, and a next conversation turn. Engines differ on which they serve, and a workload that needs the one yours does not serve gets no benefit from the cache. A warm column close to the cold one means that kind is not cached.",
+      "<strong>Every cold run uses a fresh random prefix.</strong> An engine can keep cache entries across restarts, so a prompt reused from an earlier run is already warm. Run for this course, vllm-mlx wrote its in-memory entries to a cache directory on shutdown and started the next server with them loaded.",
+      "<strong>The batching test counts failures.</strong> The <code>ok</code> column is how many streams actually returned text. A server that rejects concurrent requests produces fast empty replies, and an average over them would look like a speedup.",
+      "<strong>The staggered test refuses to report when nothing overlapped.</strong> If the long request ended before the short one arrived, it says so instead of printing a flattering number.",
+    ]),
+    ("p", "Results from running it here, one run each on one machine, so they show direction. In default mode a 2,360-token prefix took 1.75 seconds cold and 0.09 seconds warm, and a 7,071-token prefix took 5.18 seconds cold and 0.12 seconds warm, for all three kinds of reuse. A one-word edit at the very front took 3.14 and 5.51 seconds: as cold as a new prefix. With continuous batching on, a new question and a next turn were served warm, but repeating the identical request was not: 4.42 seconds against 3.40 cold at the shorter prefix, and 15.66 against 14.93 at the longer. That was not explained. It is the kind of surprise the test exists to find."),
+    ("callout", "pitfall", "A busy machine ruins a latency test",
+     "<p>During these runs another job on the same machine pushed the load average past fifty. Decode speed for the same server moved from about 308 tokens per second in one run to about 41 in another, and one cold prefill took about three times as long as the next. The script prints the load average before it starts, reports medians over repeated trials, and flags a busy machine, but it cannot fix one. Close other work first, repeat the run, and distrust any figure you could not reproduce.</p>"),
+
     ("h2", "Cold start"),
     ("p", "Separate from caching, and often confused with it. A cold start is the time before your system can serve <em>any</em> request: loading weights from disk into memory, allocating the KV cache, warming the runtime. For a large local model this can be tens of seconds."),
     ("ul", [
@@ -2964,6 +3313,7 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
     ("p", "Everything above describes one request in isolation. Under concurrent load the picture changes, and the change is not proportional."),
     ("terms", [
       ("Batching raises throughput", "And can raise your latency", "A server groups requests to use the hardware efficiently. Total work per second goes up; your individual request may wait to join a batch."),
+      ("Continuous batching", "Requests join and leave mid-flight", "Rather than waiting for a whole batch to finish, the server refills a slot at every decoding step. Where the throughput comes from on a shared server. Explained below."),
       ("The KV cache is per request", "And they are all resident at once", "Eight concurrent long conversations means eight caches in memory. This is usually what caps concurrency on local hardware, not compute."),
       ("Queueing dominates past saturation", "Sharply", "Below capacity, latency is roughly flat as load rises. Past it, queue time grows without limit and p95 detaches from p50 violently."),
       ("Rate limits are a concurrency ceiling", "Imposed from outside", "Hosted providers cap tokens per minute and requests in flight. Hitting either produces retries, which look like latency and are really admission control."),
@@ -2973,6 +3323,26 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
      "Below capacity, added load barely moves latency; past it, latency grows without limit.",
      "Queueing systems have a knee, not a slope. Testing at 60% of capacity tells you almost nothing about behaviour at 95%, which is where real traffic spends its worst minutes — and where the difference between p50 and p95 explodes.",
      "A service holds a steady 800ms p95 through load testing at 50 requests per second. At 70 it goes to nine seconds. Nothing degraded gradually in between; requests started waiting for a slot, and every additional request made the wait longer for everyone behind it."),
+
+    ("h3", "Continuous batching, which is how a server batches without making everyone wait"),
+    ("p", "The simple way to batch is static: collect a handful of requests, run them together, and return when the <em>slowest</em> one finishes. Generation lengths differ wildly, so a request that needs twenty tokens sits finished and idle behind one that needs two thousand, and nothing new can start until the whole batch drains. The hardware is busy, but a growing share of it is busy producing nothing."),
+    ("p", "<strong>Continuous batching</strong> (also called in-flight or iteration-level batching) makes the scheduling decision once per decoding step instead of once per batch. When a sequence emits its end-of-sequence token it leaves immediately, and a waiting request takes its slot on the next step. The batch is never empty of useful work and a short request is never held hostage by a long one. The idea was introduced as iteration-level scheduling in the Orca serving system, and it is now the default in vLLM. The Apple Silicon servers modelled on it vary: vllm-mlx needs a flag to turn it on."),
+    ("figure", "Static batching holds every slot until the longest request finishes. Continuous batching refills a slot the moment its request ends.", '''<svg viewBox="0 0 640 214" role="img" aria-label="Two timelines of three request slots. Static batching leaves idle gaps after short requests; continuous batching fills each gap with the next waiting request."><text x="8" y="16" class="d-label-b">STATIC: the batch ends when the longest request ends</text>
+<rect x="8" y="24" width="230" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="39" class="d-label-sm">A</text>
+<rect x="8" y="50" width="90" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="65" class="d-label-sm">B</text><rect x="100" y="50" width="138" height="22" rx="4" class="d-box"/><text x="118" y="65" class="d-label-sm">idle, waiting on A</text>
+<rect x="8" y="76" width="140" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="91" class="d-label-sm">C</text><rect x="150" y="76" width="88" height="22" rx="4" class="d-box"/><text x="160" y="91" class="d-label-sm">idle</text>
+<text x="252" y="65" class="d-label-sm">D and E are queued until here</text>
+<text x="8" y="130" class="d-label-b">CONTINUOUS: a finished request is replaced on the next step</text>
+<rect x="8" y="138" width="230" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="153" class="d-label-sm">A</text>
+<rect x="8" y="164" width="90" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="179" class="d-label-sm">B</text><rect x="100" y="164" width="138" height="22" rx="4" class="d-fill-green" opacity="0.6"/><text x="110" y="179" class="d-label-sm">D starts at once</text>
+<rect x="8" y="190" width="140" height="22" rx="4" class="d-fill-accent" opacity="0.8"/><text x="18" y="205" class="d-label-sm">C</text><rect x="150" y="190" width="88" height="22" rx="4" class="d-fill-green" opacity="0.6"/><text x="160" y="205" class="d-label-sm">E</text>
+<text x="252" y="179" class="d-label-sm">same hardware, no idle slots</text>
+</svg>'''),
+
+    ("know",
+     "Continuous batching is a concurrency feature: it costs a little for one user and pays when several requests overlap.",
+     "Slots refill at every decoding step, so a short request finishes when it finishes and a new arrival starts almost at once instead of waiting for a batch to drain. Each stream still decodes one token per step, and the scheduler has a price. vllm-mlx&#39;s own help text calls continuous batching slower for a single user.",
+     "One run on this course&#39;s machine, vllm-mlx 0.5.0 with a 1.5-billion-parameter 4-bit model. One stream: about 290 tokens per second with continuous batching, about 309 without. Four concurrent streams with continuous batching: all four answered, about 800 tokens per second combined. A later run, on a busier machine, gave about 318 against 257 for one stream, so the multiple at four streams has ranged from about 1.2 to 2.8 here. Four concurrent streams in default mode: one answered and three were rejected with a &ldquo;serialized route is busy&rdquo; error, so that mode is single-user by design. At eight streams the combined rate fell to about 430 and each stream to about 55 tokens per second, and the cause was not established. One run, with other jobs on the machine: read the direction, not the digits."),
 
     ("h2", "Percentiles, not averages"),
     ("p", "Report p50 and p95, never the mean. Latency distributions have long tails — a few requests hitting a cache miss, a retry, or a queue take many times the median — and the mean hides exactly the experience that makes people abandon the product. Your p95 is what a frustrated user is describing."),
@@ -2986,6 +3356,14 @@ highest score among pairs that MUST NOT share one    : 0.984"""),
        "The serving-side view: draft models, n-gram prompt lookup, and where the speedup goes at higher batch sizes."),
       ("vLLM documentation", "https://docs.vllm.ai",
        "Continuous batching and prefix caching from the serving side — the engine-level versions of the levers above."),
+      ("Orca: A Distributed Serving System for Transformer-Based Generative Models", "https://www.usenix.org/conference/osdi22/presentation/yu",
+       "Yu and colleagues, OSDI 2022. Iteration-level scheduling, the origin of what is now called continuous batching."),
+      ("Efficient Memory Management for Large Language Model Serving with PagedAttention", "https://arxiv.org/abs/2309.06180",
+       "Kwon and colleagues. The vLLM paper: why the KV cache is stored in blocks, which is also what makes sharing a prefix between requests cheap."),
+      ("SGLang: Efficient Execution of Structured Language Model Programs", "https://arxiv.org/abs/2312.07104",
+       "Zheng and colleagues. Introduces RadixAttention, the radix-tree prefix cache."),
+      ("vllm-mlx", "https://github.com/waybarrios/vllm-mlx",
+       "A vLLM-style server for Apple Silicon. Its README lists continuous batching, a trie-based prefix cache and an SSD-tiered cache as separate options."),
     ]),
 
     ("quiz", [

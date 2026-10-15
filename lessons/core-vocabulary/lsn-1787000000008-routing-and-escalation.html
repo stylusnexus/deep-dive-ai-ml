@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Routing, Escalation and Sampling Controls</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 9 of 33</span>
+  <h1>Routing, Escalation and Sampling Controls</h1>
+  <p class="subtitle">Cheap-first architecture — plus temperature and top-k, which decide how a model picks words.</p>
+
+  <p><strong>Escalation</strong> is worth meeting as an argument rather than as a feature, because the argument is what tells you when the pattern applies and when it collapses.</p>
+  <h2>Predict versus try</h2>
+  <p>Commercial model routers try to <em>predict</em>, from your prompt, which model will handle it best. The counter-premise is that this is unreliable — models produce confident wrong answers, and so do the classifiers predicting them.</p>
+  <p>The inversion: try the cheap local model, <em>watch what happens</em>, and escalate only when the result actually fails. Prediction is replaced by observation. You pay a little latency on hard tasks in exchange for not paying frontier prices on easy ones.</p>
+  <div class="callout insight"><span class="label">Why this only works with a verifier</span>Escalation-on-failure requires knowing that something failed. Where failure is checkable — code doesn't compile, tests fail, output doesn't match a schema, tool call malformed — the strategy is sound. Where quality is subjective, there's no signal to escalate on, and you're back to guessing. Check what your failure detector actually detects before trusting a routing scheme.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Escalation flow"><defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker><marker id="aa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="76" width="120" height="48" rx="7" class="d-box"/>
+<text x="46" y="105" class="d-label-b">Request</text>
+<path d="M132 100 L176 100" class="d-arrow" marker-end="url(#a)"/>
+<rect x="176" y="76" width="130" height="48" rx="7" class="d-box-good"/>
+<text x="200" y="98" class="d-label-b">Local model</text>
+<text x="208" y="115" class="d-label-sm">free, fast</text>
+<path d="M306 100 L350 100" class="d-arrow" marker-end="url(#a)"/>
+<polygon points="350,100 412,72 474,100 412,128" class="d-box-accent"/>
+<text x="378" y="96" class="d-label-sm">verifier</text>
+<text x="374" y="112" class="d-label-sm">passed?</text>
+<path d="M474 100 L560 100" class="d-arrow" marker-end="url(#a)"/>
+<text x="492" y="92" class="d-accent">yes</text>
+<rect x="560" y="78" width="68" height="44" rx="7" class="d-box-good"/>
+<text x="576" y="105" class="d-label">done</text>
+<path d="M412 128 L412 168 L560 168" class="d-arrow" marker-end="url(#a)"/>
+<text x="424" y="162" class="d-fill-red" font-size="12" font-weight="600">no</text>
+<rect x="560" y="146" width="68" height="44" rx="7" class="d-box-warn"/>
+<text x="572" y="166" class="d-label">escalate</text>
+<text x="572" y="182" class="d-label-sm">paid</text>
+<text x="12" y="36" class="d-label-sm">Compilation, tests, schema validation and malformed tool calls are all checkable — those make good verifiers.</text>
+<text x="12" y="52" class="d-label-sm">"Is this prose any good?" is not, so there is nothing to route on.</text>
+</svg><figcaption>Observation replaces prediction. The verifier is load-bearing — remove it and there is no signal to escalate on, which is why subjective tasks can't use this pattern.</figcaption></figure>
+  <h2>What escalation costs</h2>
+  <ul><li><strong>Latency.</strong> A failed local attempt is time spent before the real answer starts.</li><li><strong>Tokens.</strong> You pay for the failed attempt too, though local attempts are near-free.</li><li><strong>Complexity.</strong> Two lanes, two sets of failure modes, and a decision layer that can itself be wrong.</li></ul>
+  <p>The trade is worth it when most tasks are easy — which, for coding assistance, they are. Routing is an economic bet on the shape of your workload, so it's worth measuring that shape rather than assuming it.</p>
+  <h2>Temperature and top-k: how the next word gets picked</h2>
+  <p>At each step the model produces a probability across every token in its vocabulary. Sampling controls decide how that distribution gets turned into one choice.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Temperature</div><div><div class="roadmap-title">Flattens or sharpens the distribution</div><div class="roadmap-desc">0 means always take the most likely token, which has its own name — <strong>greedy decoding</strong> — and is deterministic and repetitive. Around 0.7 is a conversational default. Above ~1.2, coherence degrades.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-k</div><div><div class="roadmap-title">Consider only the k most likely tokens</div><div class="roadmap-desc">Discards the long tail of nonsense before sampling.</div></div></div><div class="roadmap-item"><div class="roadmap-num">top-p</div><div><div class="roadmap-title">Consider the smallest set summing to probability p</div><div class="roadmap-desc">Adapts to the distribution's shape — more choices when the model is unsure, fewer when it's confident. Usually preferred over top-k.</div></div></div><div class="roadmap-item"><div class="roadmap-num">min-p</div><div><div class="roadmap-title">Keep tokens above a fraction of the top token&#x27;s probability</div><div class="roadmap-desc">A newer open-weights control: the floor moves with the model's confidence, so a confident step keeps few candidates and an uncertain one keeps many. Increasingly the recommended default over top-p in local serving stacks; hosted APIs generally do not expose it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Presence penalty</div><div><div class="roadmap-title">A flat penalty on any token already used</div><div class="roadmap-desc">Applied once to a token that has appeared at all, regardless of how often. Pushes the model toward introducing something new rather than staying on what it has said. An OpenAI-family parameter.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Frequency penalty</div><div><div class="roadmap-title">A penalty that grows with each reuse</div><div class="roadmap-desc">Scales with how many times the token has appeared, so it discourages overusing a word rather than merely reusing it. The distinction from presence penalty is that one asks &ldquo;has this appeared?&rdquo; and the other asks &ldquo;how often?&rdquo;</div></div></div><div class="roadmap-item"><div class="roadmap-num">repetition_penalty</div><div><div class="roadmap-title">The open-weights formulation</div><div class="roadmap-desc">Serving stacks like vLLM and llama.cpp expose a multiplicative penalty on the logits of tokens already seen, typically a little above 1.0. Same intent, different arithmetic, and not interchangeable with the two above.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Logit bias</div><div><div class="roadmap-title">Named tokens, moved by hand</div><div class="roadmap-desc">An adjustment added to specific tokens' logits before sampling, so you nudge or forbid particular tokens by name rather than shaping the whole distribution from history. At the extremes it is effectively a ban or a forced choice, which makes it the surgical instrument of this family and the easiest to cut yourself on.</div></div></div></div>
+  <div class="callout matters"><span class="label">The practical setting</span>For anything parsed by code — tool calls, structured output, classification, routing — use temperature 0 or very close. You want repeatability, not creativity. Save higher temperatures for prose where variation is the point. A surprising share of 'the agent is flaky' bugs are just an unnecessarily high temperature on a structured task.</div>
+  <h3>What the repetition penalties actually reach</h3>
+  <p>These are worth knowing about and worth being sceptical of, because they operate at the level of the token and the failures people reach for them to fix usually are not at that level. A model that has locked into repeating a long block of reasoning is repeating a structure, and a per-token penalty sees only that individual tokens have occurred before — which is a weak signal when the repeated unit is three hundred characters long and internally varied.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A token-level penalty is a poor instrument against a block-level loop.</p><p class="know-why">It is the natural thing to reach for when a model starts repeating itself, and it addresses a different problem than the one usually observed. Presence and frequency penalties discourage reusing individual tokens; they do not detect that the model has entered a cycle and is re-emitting a whole passage. Turning them up far enough to interrupt such a cycle tends to damage everything else first, because the model is now also penalised for reusing the words a coherent answer needs.</p><p class="know-eg"><span class="know-eg-label">For example</span>Structured output is where that damage shows first. Code, JSON and technical prose legitimately reuse the same identifiers and keywords constantly, and a penalty that does not know the difference will start substituting synonyms into places that require an exact string.</p></blockquote>
+  <h3>Logit bias, and the reason it disappoints people</h3>
+  <p>Presence and frequency penalties act on everything the model has already said. Logit bias acts on tokens you name, which sounds like the precise version of the same idea and behaves very differently. The problem is that you are naming <em>tokens</em>, not words, and the mapping between the two belongs to a particular tokenizer.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Banning a word by its token is not banning the word.</p><p class="know-why">A word is frequently several tokens, and the same word is a different token depending on whether it follows a space, opens a sentence, or is capitalised. Suppress the one you looked up and the model reaches the same idea by another route, hyphenates it, or picks a synonym. What you banned was one spelling of one path, and the result looks like the technique failing when it is doing exactly what you asked.</p><p class="know-eg"><span class="know-eg-label">For example</span>The corollary is that a bias table is tokenizer-specific and therefore model-specific. It is not portable, and it silently stops meaning anything the moment the model is swapped.</p></blockquote>
+  <div class="callout insight"><span class="label">Where it is genuinely the right tool</span><p>Constraining output to a small closed set — a yes or no, a fixed list of category labels — where every permitted token can be enumerated and there is no paraphrase to route around. That is the argument the structured-output lesson makes for enums over free text, arriving one layer lower down. For anything with more structure than that, a schema or grammar constraint does the job properly and a hand-built bias table is a worse version of it.</p></div>
+  <div class="callout matters"><span class="label">The knobs are being removed, not added</span><p>Worth noticing as a direction. Anthropic's interface never exposed presence penalties, frequency penalties or logit bias, and on the current generation of models the sampling controls above are rejected outright — sending temperature, top-p or top-k to Opus 5 or Sonnet 5 returns an error rather than being honoured. The bet being made is that a model good enough does not need the caller tuning its decoding, and whether or not that bet is right, it means a technique built on these parameters may simply have nowhere to attach in a year.</p></div>
+  <h3>Stop sequences, and what they do not do</h3>
+  <p>A stop sequence is a string that ends generation the moment it appears. Useful when you know the shape of what you want and the model has a habit of continuing past it — closing a single JSON object, ending before a chatty sign-off, cutting a transcript at the next speaker label.</p>
+  <p>Two things surprise people. The stop sequence itself is normally not returned, so if you stop on a closing brace you get output missing its last character and a parse failure that looks like the model's fault. And a stop sequence fires wherever it appears, including inside legitimate content — stopping on a newline truncates the first multi-line answer that comes along.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A stop sequence truncates; it does not prevent.</p><p class="know-why">The model generated the text either way. Stopping is something your client does to the stream, after the tokens exist — so a stop sequence used to keep the model from saying something has hidden it, not stopped it. Anything you are billed for by output token, you have already paid for.</p><p class="know-eg"><span class="know-eg-label">For example</span>If the requirement is &ldquo;never emit this&rdquo;, that is a constrained-decoding or output-filtering problem, not a stop-sequence one. If the requirement is &ldquo;stop once the answer is complete&rdquo;, a stop sequence is exactly right.</p></blockquote>
+  <h3>Log probabilities, where a provider offers them</h3>
+  <p>Some APIs will return the log probability the model assigned to each token it chose, and often the runners-up. That is a confidence signal you get for free, and unlike asking the model how sure it is, it does not depend on the model's self-report — which is the weakest evidence in the building. A routing layer can use it: low probability on the decisive tokens means escalate or ask a human, rather than answering confidently and being wrong.</p>
+  <div class="callout pitfall"><span class="label">Token probability is not answer confidence</span><p>The number describes one token given everything before it, not the truth of the claim the sentence makes. A model can be fluent and certain at every step and still be confidently wrong, and the log probabilities will look excellent throughout. Treat them as a signal to <em>calibrate against your own labelled set</em> — measure whether low-probability outputs really are the wrong ones on your task — rather than as a probability that the answer is correct.</p><p>Availability varies and is not universal: the Anthropic Messages API does not expose them, so anything you build on log probabilities is tied to the providers that do.</p></div>
+  <h3>Beam search, and why it is not here</h3>
+  <p>Older material on text generation is full of beam search: keep several candidate continuations alive at once, score whole sequences, return the best. It was the right answer for machine translation, where there is broadly one correct output. For open-ended generation it produces text that is measurably bland — optimising for total sequence likelihood favours safe, common phrasing — and it does not combine naturally with the sampling controls above. You will meet the term; you will almost never reach for it.</p>
+  <h2>Determinism, honestly</h2>
+  <p>Temperature 0 makes sampling deterministic but does not guarantee identical outputs across runs. Batching, hardware differences, and floating-point non-associativity introduce variation, especially with hosted providers. Design evaluations to tolerate small differences rather than assuming byte-identical replies.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000014-structured-output-json.html">Structured Output: JSON You Can Actually Parse</a><span class="link-note">The gap between 'the model returned JSON' and 'the model always returns valid JSON'.</span></li><li><a href="lsn-1787000000021-loops-at-inference.html">Loops at Inference: Control Flow, Limits and Dangers</a><span class="link-note">Running the model more than once — when that buys accuracy, and when it just buys tokens.</span></li><li><a href="../block9-electives/lsn-1788200000002-where-the-money-goes.html">Where the Money Goes</a><span class="rel-set">Block 9 · Electives</span><span class="link-note">Block 0 taught routing, which is architecture. This is the measurement — attributing spend, and the four places it hides.</span></li><li><a href="lsn-1787000000020-chain-of-thought-and-reasoning.html">Chain-of-Thought and Reasoning Tokens</a><span class="link-note">Why letting a model think out loud works — and why its explanation isn't necessarily its reason.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2406.18665" target="_blank" rel="noopener">RouteLLM (Ong et al., 2024)</a><span class="link-note">The predict-which-model approach this lesson argues against. Worth reading precisely to disagree with it.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why would a system try a local model first rather than predicting which model to use?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Local models are usually better than frontier models</div>
+      <div class="quiz-opt">Prediction is unreliable; observing an actual failure is a stronger signal than guessing in advance</div>
+      <div class="quiz-opt">It avoids sending data to third parties</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. When is escalation-on-failure a poor strategy?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">When the local model is small</div>
+      <div class="quiz-opt">When failure isn&#x27;t detectable — subjective quality gives you no signal to escalate on</div>
+      <div class="quiz-opt">When latency matters at all</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Your agent&#x27;s tool calls are intermittently malformed. What should you check first?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">Whether temperature is above 0 on a task that needs deterministic structured output</div>
+      <div class="quiz-opt">Whether the context window is full</div>
+      <div class="quiz-opt">Whether the model supports tool calling</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

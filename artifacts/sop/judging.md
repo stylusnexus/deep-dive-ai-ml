@@ -32,7 +32,8 @@ actually moved. Run it before trusting a comparison, not after publishing one.
       and badly harms a few moves the mean upward
 - [ ] ☠ Stopping point fixed before any data arrived; no peeking and stopping when
       it crosses
-- [ ] Agreement rate published alongside any judge score
+- [ ] Judge's precision and recall on the failure class published alongside any judge
+      score; raw agreement only where the calibration labels are roughly balanced
 
 > A rubric without blinding gives consistent bias. Blinding without a rubric gives
 > honest noise. Neither substitutes for the other.

@@ -19,8 +19,14 @@ RELATED = {
                                     "context-engineering", "local-hardware-limits"],
     "local-hardware-limits": ["frontier-and-local", "weights-gguf-quantization",
                               "serving-locally", "when-the-training-run-does-not-fit"],
+    "quantization-recipes": ["weights-gguf-quantization", "formats-and-engines",
+                             "benchmarks-what-to-trust", "local-hardware-limits"],
     "serving-locally": ["local-hardware-limits", "weights-gguf-quantization",
-                        "latency-and-caching", "the-image-is-the-unit"],
+                        "formats-and-engines", "latency-and-caching", "the-image-is-the-unit"],
+    "benchmarks-what-to-trust": ["how-to-measure", "swe-bench-and-how-to-run-it",
+                                 "confounds-you-cannot-see", "formats-and-engines"],
+    "formats-and-engines": ["weights-gguf-quantization", "serving-locally",
+                            "latency-and-caching", "local-hardware-limits"],
 
     # --- attention and what follows from it
     "attention-and-transformers": ["inside-an-llm", "tokens-context-and-kv-cache",

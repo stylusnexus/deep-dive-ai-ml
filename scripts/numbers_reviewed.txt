@@ -269,3 +269,148 @@ embeddings-and-retrieval|08f92fb61a7e|illustrative value, no claim attached
 embeddings-and-retrieval|569a714c4a08|measured in this repository by scripts/measure_semantic_threshold.py
 the-artefact-is-code-data-and-config|332d9808a738|illustrative value, explicitly a worked example rather than a measured claim
 agents-that-improve-themselves|b9f921c5da4d|illustrative hypothetical, explicitly a worked example rather than a measured claim
+chain-of-thought-and-reasoning|45238605116f|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+chain-of-thought-and-reasoning|34145eeccfca|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+chain-of-thought-and-reasoning|45e78bbb86b4|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+chain-of-thought-and-reasoning|714914893634|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+chain-of-thought-and-reasoning|cf1671a2b625|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+latency-and-caching|1edb349d2b84|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+latency-and-caching|17b5b5046710|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+latency-and-caching|778fa4458e0c|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+latency-and-caching|54864d65d71c|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+latency-and-caching|a9bc88c93481|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+latency-and-caching|03383c94bbed|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+latency-and-caching|f977518fb7a5|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+latency-and-caching|4aa56c8252c6|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+latency-and-caching|81e5245486dc|measured in this repository by scripts/bench_engines.py; single run on a loaded machine, raw output in scripts/bench_engines_runs.md; direction not rate
+formats-and-engines|99ca23c9fe4c|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|425575b0237c|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|8d4cd02e9fc2|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|50b8b660ebc7|hypothetical, identifier or arithmetic; no measurement claimed
+formats-and-engines|8c21a65bdef6|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+formats-and-engines|a0a179ff0d5f|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+formats-and-engines|d54261d18e9a|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+formats-and-engines|76f5599c9e8c|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+formats-and-engines|eb3417902e2f|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+formats-and-engines|65889ffbced4|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+formats-and-engines|a7e14575b332|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+formats-and-engines|caa208c98900|hypothetical, identifier or arithmetic; no measurement claimed
+formats-and-engines|8c5771f88469|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|3f6be3d48b48|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|368b6210abbd|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|68bcb521232e|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|9fc7c72ed03d|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|13c9aeb8e409|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|8c7b1d70581d|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+formats-and-engines|c747fca24a77|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|f3c3024d47dd|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|0778f8fff9b2|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|a29aca2cf459|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|bfb4dcd1df7c|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|299bcc668daf|hypothetical, identifier or arithmetic; no measurement claimed
+formats-and-engines|f2f05454c2d9|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|4ff8d7427104|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+latency-and-caching|81751344cabb|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+swe-bench-and-how-to-run-it|7f6dfce77e52|cited secondhand: The Decoder, 2026-02-23 (OpenAI's own post returned 403 to us); the lesson says so and tells the reader to check the primary source
+swe-bench-and-how-to-run-it|8434b6a6a282|cited secondhand: The Decoder, 2026-02-23 (OpenAI's own post returned 403 to us); the lesson says so and tells the reader to check the primary source
+benchmarks-what-to-trust|e083b6948b2a|cited secondhand: The Decoder, 2026-02-23 (OpenAI's own post returned 403 to us); the lesson says so and tells the reader to check the primary source
+benchmarks-what-to-trust|080a8a64c907|cited secondhand: The Decoder, 2026-02-23 (OpenAI's own post returned 403 to us); the lesson says so and tells the reader to check the primary source
+benchmarks-what-to-trust|1416cbce21d0|cited secondhand: The Decoder, 2026-02-23 (OpenAI's own post returned 403 to us); the lesson says so and tells the reader to check the primary source
+benchmarks-what-to-trust|b79eec638995|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+benchmarks-what-to-trust|9045e2234da3|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+benchmarks-what-to-trust|fb8a89e9febf|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+benchmarks-what-to-trust|eb1777413fb3|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+benchmarks-what-to-trust|67672f68c1c8|hypothetical, identifier or arithmetic; no measurement claimed
+benchmarks-what-to-trust|e287a5b249c2|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+benchmarks-what-to-trust|deec26589e88|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+formats-and-engines|5d88ded91994|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|53fb7c126f8d|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|ab4f693b503b|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|5d77c7fb0cec|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|c8d9c0e6f17c|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+formats-and-engines|46f0e4a8a278|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+formats-and-engines|12fabec22e41|arithmetic on the cited BaseRT table values (343.6/297.4, 83.1/80.7, 69.3/58.0) plus the vllm-mlx abstract's own range
+chain-of-thought-and-reasoning|320dbfac86b6|reasoning-chain cap of the run recorded in scripts/bench_engines_runs.md (two of six replies reached 1,500 tokens)
+latency-and-caching|dc5b4e02cb95|measured in this repository by scripts/bench_engines.py; one run on a shared machine, raw output in scripts/bench_engines_runs.md; direction not rate
+swe-bench-and-how-to-run-it|6adcdfcab25e|cited secondhand: The Decoder, 2026-02-23 (OpenAI's own post returned 403 to us); the lesson says so and tells the reader to check the primary source
+benchmarks-what-to-trust|e9011ba88382|cited secondhand: The Decoder, 2026-02-23 (OpenAI's own post returned 403 to us); the lesson says so and tells the reader to check the primary source
+benchmarks-what-to-trust|930b28ed2dc3|cited, not measured here: read on the source page named in the lesson's links; who ran it is stated in the lesson
+weights-gguf-quantization|217009cbde15|measured in this repository (notebooks/09-electives/05-quantize-it-yourself.ipynb and scripts/measure_quantization.py); raw output and setup in scripts/measure_quantization_runs.md; the figures repeated exactly across two runs
+weights-gguf-quantization|84627e22cf7e|measured in this repository (notebooks/09-electives/05-quantize-it-yourself.ipynb and scripts/measure_quantization.py); raw output and setup in scripts/measure_quantization_runs.md; the figures repeated exactly across two runs
+weights-gguf-quantization|01b062589dd6|measured in this repository (notebooks/09-electives/05-quantize-it-yourself.ipynb and scripts/measure_quantization.py); raw output and setup in scripts/measure_quantization_runs.md; the figures repeated exactly across two runs
+quantization-recipes|f0ee9c24aaaf|measured in this repository (notebooks/09-electives/05-quantize-it-yourself.ipynb and scripts/measure_quantization.py); raw output and setup in scripts/measure_quantization_runs.md; the figures repeated exactly across two runs
+quantization-recipes|232c4f80da68|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|dca6c15cd1e5|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|093cb8db84a2|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|213e0eb8342d|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|51d8fc2ac007|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|682ef2267357|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|0fe5eeac224c|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|041923c68df4|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|b12cb3e02a51|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|814ff6720672|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|0a190a13938d|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|48640b2ddaad|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|42d24c12d98b|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|914a93fd1ac8|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|ee3dfecd00da|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|2d56c2cfb16a|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|41327f347d29|measured in this repository (notebooks/09-electives/05-quantize-it-yourself.ipynb and scripts/measure_quantization.py); raw output and setup in scripts/measure_quantization_runs.md; the figures repeated exactly across two runs
+quantization-recipes|97c095872363|measured in this repository (notebooks/09-electives/05-quantize-it-yourself.ipynb and scripts/measure_quantization.py); raw output and setup in scripts/measure_quantization_runs.md; the figures repeated exactly across two runs
+quantization-recipes|b470dc622694|measured in this repository (notebooks/09-electives/05-quantize-it-yourself.ipynb and scripts/measure_quantization.py); raw output and setup in scripts/measure_quantization_runs.md; the figures repeated exactly across two runs
+quantization-recipes|95fcd6312489|measured in this repository (notebooks/09-electives/05-quantize-it-yourself.ipynb and scripts/measure_quantization.py); raw output and setup in scripts/measure_quantization_runs.md; the figures repeated exactly across two runs
+quantization-recipes|fbfd32fb4377|measured in this repository (notebooks/09-electives/05-quantize-it-yourself.ipynb and scripts/measure_quantization.py); raw output and setup in scripts/measure_quantization_runs.md; the figures repeated exactly across two runs
+quantization-recipes|361d211ad159|measured in this repository (notebooks/09-electives/05-quantize-it-yourself.ipynb and scripts/measure_quantization.py); raw output and setup in scripts/measure_quantization_runs.md; the figures repeated exactly across two runs
+quantization-recipes|4d7d4e7b8275|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|78698edb7cd4|identifier or command copied from the tool's documentation; no measurement claimed
+quantization-recipes|8359ae185050|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|b44127ffba73|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|5cafb31fc97c|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|4958d05bfa06|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+weights-gguf-quantization|435edb8f1ac1|arithmetic: 70 billion weights times the bits per weight llama.cpp lists for the type (F16 16, Q8_0 8.50, Q5_K_M 5.70, Q4_K_M 4.89) divided by 8; 13 billion at 16 bits is 26 GB; README lists 43.1 GB for 70B Q4_K_M
+weights-gguf-quantization|0c8959a1c78d|arithmetic: 70 billion weights times the bits per weight llama.cpp lists for the type (F16 16, Q8_0 8.50, Q5_K_M 5.70, Q4_K_M 4.89) divided by 8; 13 billion at 16 bits is 26 GB; README lists 43.1 GB for 70B Q4_K_M
+quantization-recipes|291eae83ed1d|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|d0fae9b002be|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|26133da2907c|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+quantization-recipes|a6cab7b094b9|cited, not measured here: read in the paper, README, blog post or model card named in the lesson's links or text; who ran it is stated in the lesson
+rubrics-and-blind-reads|3ea463762887|constructed example (50 items, 3 failures, pass-everything judge = 47/50 = 94%); arithmetic only, labelled as not a run
+class-imbalance-and-thresholds|633de382ec8f|hypothetical filter parameters (0.3% false alarms, 95% recall); chosen for illustration, labelled constructed
+class-imbalance-and-thresholds|aa2322c6e081|arithmetic: 95/(95+0.003*9900=29.7)=76.2%; labelled constructed, not a run
+class-imbalance-and-thresholds|5cbf3083558c|arithmetic: 95/(95+0.003*999900=2999.7)=3.07%; labelled constructed, not a run
+managed-cloud-surfaces|d22b2940132f|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|7e75cf0342c3|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|ee584a8c7d39|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|81657624c3e7|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|2356683d256b|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|6e419ee0d09d|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|af77f01fef9a|hypothetical example written for this lesson, not a measurement
+managed-cloud-surfaces|c47b6c99e002|hypothetical example written for this lesson, not a measurement
+managed-cloud-surfaces|759d462f1701|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|e9c11d24d722|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|756204961556|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|a5038603b51d|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|8fd956435b13|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|fd38862d2704|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|ba54dfd616ea|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+managed-cloud-surfaces|a66ec94547b7|cited: provider documentation read 2026-10-10 (links in the lesson), or arithmetic on the cited worked example
+mlp-patterns|41d162883166|cited: Vaswani et al. 2017 section 3.3, or the LoRA / CLIP abstracts, links in the lesson
+mlp-patterns|028aa0e58982|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|7eaf2ab9d042|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|d72bcb3f961b|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|cafeb7ee2a41|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|a1d3f49666a5|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|1f597d42293a|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|46a15c45148e|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|17b946fe9d11|cited: Vaswani et al. 2017 section 3.3, or the LoRA / CLIP abstracts, links in the lesson
+mlp-patterns|f544b871705f|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|323a001c8cf5|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|270275baefe1|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|dcb01a1df5e3|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|86b77c5dfb66|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|a685099e8bb5|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|ebec150a80aa|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|3a47636e700b|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|404135e93883|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|fb27a2cefbef|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|1ae2ecb05387|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+mlp-patterns|ae1d0cc3fc38|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs

@@ -2,6 +2,18 @@
 
 A self-built curriculum in applied AI and machine learning: ~13 weeks of lessons, runnable notebooks, and four portfolio projects.
 
+## Where it stands
+
+Counted from the repository on 2026-10-10:
+
+- **113 lessons** across 14 sets
+- **26 notebooks**, every one carrying its executed outputs
+- **4 portfolio projects**
+- **711 glossary terms**, and 158 entries on the revision sheet
+- **12 checklists** in [`artifacts/sop/`](artifacts/sop/)
+
+These are counts, not claims about quality. `make verify` runs the glossary, link, number and notebook checks that keep them honest.
+
 ## Why this exists
 
 Most applied AI curricula cover the same standard material and stop short of the parts that decide whether a system survives contact with production. This one covers the standard material and then keeps going, and every checkable claim in it has been checked.

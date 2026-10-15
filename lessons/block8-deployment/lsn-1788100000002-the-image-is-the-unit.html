@@ -217,7 +217,7 @@
 </head>
 <body>
 
-  <span class="pill">Lesson 3 of 5</span>
+  <span class="pill">Lesson 3 of 6</span>
   <h1>The Image Is the Unit</h1>
   <p class="subtitle">What goes inside, what stays configuration, and why the size is a design decision rather than an outcome.</p>
 
@@ -241,7 +241,7 @@
   <h2>Two habits that cost nothing</h2>
   <ul><li><strong>Run as a non-root user.</strong> A container running as root has isolated your filesystem from you and not from whatever reaches the process. One line in the Dockerfile.</li><li><strong>Give it a real healthcheck instruction.</strong> The orchestrator can only restart what it can tell is broken, and the default is to assume a running process is a working one.</li></ul>
   <div class="callout pitfall"><span class="label">The same image, or you have tested nothing</span><p>The value of building an image is that the artefact you tested is the artefact that runs. Rebuilding from source at deploy time, or applying a different configuration path in production, throws that away and returns you to hoping the environments match. Promote the image; change only the configuration.</p></div>
-  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788100000001-serving-one-yourself.html">Serving One Yourself</a><span class="link-note">The concerns that appear the moment the caller is not you — worked against Project 4.</span></li><li><a href="../block6-security/lsn-1787900000002-sandboxing-and-what-actually-works.html">Sandboxing, and What Actually Works</a><span class="rel-set">Block 6 · Security</span><span class="link-note">Sorting the mitigations that hold from the ones that mostly produce confidence.</span></li><li><a href="../engineering-practice/lsn-1787400000012-version-control-basics.html">Version Control, and Why Agents Make It Non-Optional</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">Git and GitHub from zero — plus the argument for why this matters more now, not less.</span></li><li><a href="lsn-1788100000003-after-it-ships.html">After It Ships</a><span class="link-note">What to watch, what to wake someone for, and the difference between the service being up and the service being right.</span></li></ul></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788100000001-serving-one-yourself.html">Serving One Yourself</a><span class="link-note">The concerns that appear the moment the caller is not you — worked against Project 4.</span></li><li><a href="../block6-security/lsn-1787900000002-sandboxing-and-what-actually-works.html">Sandboxing, and What Actually Works</a><span class="rel-set">Block 6 · Security</span><span class="link-note">Sorting the mitigations that hold from the ones that mostly produce confidence.</span></li><li><a href="../engineering-practice/lsn-1787400000013-version-control-basics.html">Version Control, and Why Agents Make It Non-Optional</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">Git and GitHub from zero — plus the argument for why this matters more now, not less.</span></li><li><a href="lsn-1788100000003-after-it-ships.html">After It Ships</a><span class="link-note">What to watch, what to wake someone for, and the difference between the service being up and the service being right.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
     <p class="quiz-q">1. Why does Project 4 bake its corpus into the image rather than mounting it?</p>

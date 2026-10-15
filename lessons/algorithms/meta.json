@@ -72,6 +72,12 @@
       "title": "Data Leakage",
       "file": "lsn-1787100000009-data-leakage.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787100000010",
+      "title": "MLP Patterns: Twelve Wirings of One Layer",
+      "file": "lsn-1787100000010-mlp-patterns.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -121,6 +127,11 @@
       "starred": false
     },
     "lsn-1787100000009": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787100000010": {
       "viewed": false,
       "completed": false,
       "starred": false

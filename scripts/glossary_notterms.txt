@@ -502,3 +502,13 @@ Multi-turn or agent output
 Smooth landscape, one slope, a cheap trusted signal
 A single climber keeps stalling on the same wall
 The real peak sits behind a worse valley — a climber would have to get worse before it gets better
+Why a tree and not a dictionary
+Method
+Count failures, do not average over them
+Fresh inputs for every cold run
+Record the machine&#39;s state
+Refuse to report when nothing was measured
+Repeat, discard warmup, report the spread
+Bedrock
+Foundry
+Vertex AI

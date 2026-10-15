@@ -373,7 +373,7 @@ LESSONS = [
       "<strong>Write the rubric first</strong>, with dimensions that fail independently and a criterion you could point at for each level.",
       "<strong>Score ten items with two people</strong>, independently, and sharpen wherever they disagreed. Cheap, and it finds the ambiguity while fixing it is still free.",
       "<strong>Hand-label thirty to fifty, blind</strong>, as the calibration set. This is the ground truth the judge is measured against, and it is worthless if it was labelled knowing the answers.",
-      "<strong>Run the judge against that set</strong> and report the agreement rate. A judge score published without a known agreement rate is an opinion with a decimal point.",
+      "<strong>Run the judge against that set</strong> and report how well it agrees, as precision and recall on the class you care about (the failures), not as one raw agreement rate. A judge score published without a known agreement figure is an opinion with a decimal point.",
       "<strong>Re-check agreement when anything changes</strong> — the judge model, the rubric wording, the prompt. All three are treatments, and a judge that drifted is worse than no judge because it is trusted.",
     ]),
 
@@ -382,7 +382,13 @@ LESSONS = [
 
     ("callout", "matters", "Blind the calibration set, or the whole exercise is circular",
      "<p>This is the failure that quietly voids a result. You label the ground truth knowing which system produced each answer, the judge is then tuned until it agrees with those labels, and the reported agreement rate measures how well the judge reproduces your expectations. Everything downstream inherits it, and nothing in the numbers looks wrong.</p>"),
+    ("callout", "pitfall", "Raw agreement flatters a judge when failures are rare",
+     "<p>Suppose your calibration set has fifty items and three of them are real failures. A judge that passes everything agrees with the labels on forty-seven of fifty, which is 94%, and it has caught none of the failures. The same rate would also describe a judge that finds all three. Agreement only tells you something when the two classes are roughly balanced. When they are not, report two numbers for the class that matters: of the items the judge failed, how many were real failures (precision), and of the real failures, how many the judge failed (recall). This is a constructed example, not a run.</p>"),
     ("related", ["models-judging-models", "judging-a-conversation", "labels-and-holdouts", "eval-data-you-can-trust"]),
+    ("links", [
+      ("Your AI Product Needs Evals (Hamel Husain)", "https://hamel.dev/blog/posts/evals/",
+       "Argues for tracking how closely a model judge matches human labels, and for measuring precision and recall separately rather than raw agreement when labels are imbalanced."),
+    ]),
     ("quiz", [
       ("What is the test of whether a rubric is a rubric?",
        ["That it covers every dimension of quality that matters",

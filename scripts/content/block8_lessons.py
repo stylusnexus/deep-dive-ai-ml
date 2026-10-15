@@ -331,4 +331,80 @@ LESSONS = [
     ]),
   ],
 },
+{
+  "slug": "managed-cloud-surfaces",
+  "title": "Managed Cloud Surfaces",
+  "subtitle": "Calling a model through Amazon Bedrock, Google Vertex AI or Microsoft Foundry keeps the request in your hands and the capacity, the cache and the calendar in the provider's.",
+  "body": [
+    ("p", "The first lesson in this block treated a model API as a service you do not control. The big three clouds sell the same models behind a managed surface: Amazon Bedrock, Google Vertex AI and Microsoft Foundry. Each adds an account, a billing meter, a region choice and a set of policy features. The useful question is not which one is best. It is which parts of the behaviour you can still set, and which have moved into the provider."),
+    ("callout", "warning", "Read this as shapes, not numbers",
+     "Everything here was read from provider documentation on 2026-10-10 through a summarising fetch tool. No dollar price was obtainable from any of the three, so none appears. Default quota values, latency targets and several retention periods were not retrieved and are left out rather than guessed. Model names, multipliers and dates change; treat every figure as dated."),
+
+    ("figure", "Control follows the request and the account. Capacity, cache internals and retirement dates follow the provider.", '''<svg viewBox="0 0 640 230" role="img" aria-label="What a team keeps and what the provider keeps on a managed model API"><rect x="14" y="14" width="296" height="196" rx="8" class="d-box"/><text x="162" y="38" class="d-label-b" text-anchor="middle">You keep</text><text x="30" y="66" class="d-label-sm">which model and version you call</text><text x="30" y="88" class="d-label-sm">prompt layout and max_tokens</text><text x="30" y="110" class="d-label-sm">region or profile you route through</text><text x="30" y="132" class="d-label-sm">retries and fallbacks</text><text x="30" y="154" class="d-label-sm">guardrail settings, log destinations</text><text x="30" y="176" class="d-label-sm">whether to buy reserved capacity</text><text x="30" y="198" class="d-label-sm">the regression suite for a model swap</text><rect x="330" y="14" width="296" height="196" rx="8" class="d-box d-fill-amber"/><text x="478" y="38" class="d-label-b" text-anchor="middle">The provider keeps</text><text x="346" y="66" class="d-label-sm">hardware and routing inside your scope</text><text x="346" y="88" class="d-label-sm">quota values and whether they rise</text><text x="346" y="110" class="d-label-sm">how the quota is counted</text><text x="346" y="132" class="d-label-sm">cache storage and eviction</text><text x="346" y="154" class="d-label-sm">the models behind safety filters</text><text x="346" y="176" class="d-label-sm">abuse-monitoring carve-outs</text><text x="346" y="198" class="d-label-sm">the retirement date of every model</text></svg>'''),
+
+    ("h2", "Quota is counted differently from the bill"),
+    ("p", "All three providers throttle with HTTP 429. Two document how the quota is counted, and in both the number that limits you is not the number you are billed for. Bedrock deducts the input tokens plus <code>max_tokens</code> when a request starts, then refunds the unused part when it finishes. Foundry's tokens-per-minute check likewise uses an estimate of the maximum tokens at the moment the request arrives, and its page says that is not the count used for billing."),
+    ("p", "Bedrock also multiplies output tokens when it counts them against quota: its page lists 15x for one model family, 10x for several current ones, 5x for older Anthropic models and 1:1 for all others. Its worked example has 3,000 input tokens, 1,000 cache-write tokens, 1,000 output tokens and a <code>max_tokens</code> of 32,000. The initial deduction is 36,000 tokens and the final one is 9,000. With a <code>max_tokens</code> of 1,250 the same request starts at 5,250. A generous output cap can throttle you before the model has written anything."),
+    ("know",
+     "Set max_tokens to what the task needs, not to the largest value the API allows.",
+     "On Bedrock and Foundry the quota check reserves your output cap at the start of the request. An oversized cap reserves capacity you will not use, so concurrent requests are rejected earlier than their real size would suggest, and the bill never shows the reason.",
+     "A summariser that returns about 300 tokens is configured with a cap of 32,000. Each request reserves roughly 32,000 tokens of quota while it runs, so a handful of concurrent calls hit a 429 on a quota that would have carried dozens at a cap of 1,000."),
+    ("callout", "pitfall", "A 429 is not always your quota",
+     "Bedrock separates its 429 (account quota) from its 503 and 529 (capacity on the provider's side). Google says a pay-as-you-go 429 on Vertex AI does not mean you hit a fixed quota, because that traffic runs on shared capacity. Foundry documents temporary reductions of your effective limit when a shared pool is under pressure. Log the status and the response headers, because raising a quota will not fix a capacity error."),
+
+    ("h2", "Reserved capacity buys throughput, and few pages promise latency"),
+    ("terms", [
+      ("Bedrock", "Model units, or a Reserved tier", "Provisioned Throughput is hourly capacity per model with no commitment, one month or six months. A newer Reserved service tier states a 99.5% uptime target and overflows to the Standard tier. Whether Provisioned Throughput itself carries a latency or availability guarantee is not stated on its page."),
+      ("Vertex AI", "Generative AI Scale Units (GSUs)", "A fixed-term subscription of one week, one month, three months or one year. Fees cannot be cancelled and apply regardless of usage. By default overage is billed as pay-as-you-go, and a request header can force a 429 instead. SLA terms were not retrieved."),
+      ("Foundry", "Provisioned Throughput Units (PTUs)", "Capacity held for your deployment whether or not you send requests, with a defined latency target per model. The numeric targets sit on a sizing page that was not retrieved. Holding PTU quota does not guarantee that capacity exists in the region."),
+    ]),
+    ("p", "Reservation changes who pays for idle time, not who owns the failure. Even with reserved capacity a deployment can reach full utilisation, so the retry or spillover path still has to exist."),
+
+    ("h2", "Caching and batching: you shape the prompt, they own the cache"),
+    ("p", "Prompt caching is best effort on all three, and the only lever you hold is putting the stable part of the prompt first. Foundry needs an identical prefix of at least 1,024 tokens. Bedrock publishes per-model minimums between 512 and 4,096 tokens, and says an identical prompt does not guarantee a hit, so you verify with the cache-read and cache-write token counts in the response. Cache writes can cost more than uncached input on newer models, so a prompt that never repeats can cost more with caching switched on."),
+    ("p", "Batch is the cheapest option and has the weakest timing promise. Vertex AI and Foundry both describe a 24-hour target for their batch modes. Google says batch is excluded from the service-level objective. Foundry's own page both says it does not expire slow jobs and lists an <code>expired</code> status, so teach it as a target with no hard guarantee. Bedrock's batch turnaround time was not found."),
+
+    ("h2", "Data: the defaults hold, with carve-outs you must read"),
+    ("p", "Bedrock states that by default it does not store model inputs or outputs. The carve-outs are model-specific: for two named Anthropic models, traffic is retained for up to 30 days for automated abuse detection, and flagged traffic for a list of OpenAI models is retained for up to 30 days. A per-Region retention setting can refuse any model that requires retention."),
+    ("p", "On Vertex AI, data at rest stays in the location you chose, but machine-learning processing is only guaranteed on regional and multi-region endpoints. The global endpoint may process in any Google Cloud location, and Google advises against it when you have processing-location requirements. The same endpoint can reduce 429 errors, so relieving throttling and keeping a residency promise pull in opposite directions. Foundry draws the same line by deployment type: Global may process in any Azure region, Data Zone inside the zone, and Standard or Regional inside the geography."),
+    ("callout", "matters", "Logging creates a copy the provider did not keep",
+     "Bedrock invocation logging is off by default and writes to your own storage. Vertex AI request-response logging is off by default and writes to BigQuery. Turning either on creates a copy of your prompts that the provider otherwise would not hold, and the retention policy of that copy is now yours. For Foundry, resource logs are not collected until you create a diagnostic setting. Whether those logs include prompt content was not confirmed."),
+
+    ("h2", "Guardrails are provider-run filters you tune"),
+    ("p", "Each provider offers content filtering, and none of it is a guarantee. Bedrock Guardrails evaluate input and output and can run on their own through an <code>ApplyGuardrail</code> call without invoking a model. AWS updates the models behind them automatically. If a guardrail blocks the output you still pay for the inference already generated. Foundry switches default filters on for its OpenAI models at a Medium threshold, and its classic page says that if the filter service is down or times out the request completes without filtering. Vertex AI's safety-filter default differs by model, and its own page lists both OFF and a medium threshold. Because the models behind these filters change without notice, a regression suite that includes refusals and edge cases is the control you own."),
+
+    ("h2", "Retirement: the provider owns the calendar"),
+    ("p", "Pinning a model version does not pin it forever. Foundry gives standard generally available (GA) models a retirement date 18 months out (12 months for some partner families) with at least 60 days' notice, and states that retirement dates are not extendable. A deployment set to <code>NoAutoUpgrade</code> stops working at retirement, and provisioned deployments are never upgraded automatically. Vertex AI commits that a retirement date may be extended but will not move earlier, and gives at least 45 days' notice for shorter-lived models. Bedrock moves a model from Active to Legacy to end of life; for models launched on or after 2026-09-07 the Legacy period is six months or 45 days, existing customers can lose access to a Legacy model after 15 days of inactivity, and at end of life nothing migrates automatically."),
+    ("know",
+     "Your regression suite must be re-runnable inside the shortest retirement notice you depend on.",
+     "The provider sets the calendar and, on Foundry, says plainly that it cannot be extended. A swap you cannot evaluate within the notice window becomes a forced, unmeasured migration, and a rarely called fallback model can disappear before anyone notices.",
+     "A fallback model called a few times a month is moved to Legacy on Bedrock. After 15 days without a call, access may lapse, well before the end-of-life date. The first sign is a failed request during a primary-model outage."),
+
+    ("h2", "What was not retrieved"),
+    ("ul", [
+      "Every dollar price, from all three providers. The Foundry pricing page rendered placeholders and the Vertex AI page returned only its title.",
+      "Default quota values, and numeric latency targets for reserved capacity.",
+      "Bedrock batch turnaround, and any retention period for Azure abuse-monitoring data.",
+      "The status of the older Azure AI Model Inference API, and Vertex AI's Priority and Flex pay-as-you-go semantics.",
+      "Where the providers' own pages disagree, this lesson teaches the disagreement: Foundry names the retry header both <code>retry-after-ms</code> and <code>Retry-After</code>, and its pages list the Data Zone options as US or EU in one place and US, EU or APAC in another.",
+    ]),
+    ("links", [
+      ("Bedrock: token counting and quota burndown", "https://docs.aws.amazon.com/bedrock/latest/userguide/quotas-token-burndown.html", "Source for the max_tokens deduction and the 36,000 and 9,000 example."),
+      ("Bedrock: model lifecycle", "https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle.html", "Active, Legacy and end-of-life states and notice periods."),
+      ("Bedrock: data retention", "https://docs.aws.amazon.com/bedrock/latest/userguide/data-retention.html", "The per-Region retention setting."),
+      ("Vertex AI: data residency", "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/data-residency", "Which endpoints guarantee a processing location."),
+      ("Vertex AI: model versions and retirement", "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions", "Retirement dates and the commitment not to move them earlier."),
+      ("Foundry: deployment types", "https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types", "Global, Data Zone, Standard, Provisioned and Batch, and where each processes data."),
+      ("Foundry: model retirements", "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirements", "The 18-month and 12-month lifetimes and the 60-day notice."),
+      ("Foundry: quota (classic portal page)", "https://learn.microsoft.com/en-us/azure/foundry-classic/openai/how-to/quota", "Source for the estimate-at-receipt token check. A classic-portal page dated 2026-05."),
+    ]),
+    ("related", ["calling-an-api-you-do-not-control", "serving-one-yourself", "after-it-ships", "latency-and-caching"]),
+    ("quiz", [
+      ("Why can an oversized max_tokens cause a 429 on Bedrock before the model has produced any output?", ["The quota check reserves input tokens plus max_tokens when the request starts", "Large caps disable prompt caching", "The provider bills the full cap in advance"], 0),
+      ("A team picks the Vertex AI global endpoint to reduce 429 errors. What does it give up?", ["Access to Gemini models", "The guarantee of where machine-learning processing happens", "Prompt caching"], 1),
+      ("What is the safest way to describe a provider's batch mode on Vertex AI or Foundry?", ["A 24-hour target with no hard real-time guarantee", "A guaranteed 24-hour turnaround", "Always faster than real-time inference"], 0),
+      ("Why must a regression suite be re-runnable within the shortest retirement notice you depend on?", ["The provider sets the retirement date and may not extend it, so an unmeasured swap becomes forced", "Retired models are deleted from your account", "Notice periods are set by the customer"], 0),
+    ]),
+  ],
+},
 ]

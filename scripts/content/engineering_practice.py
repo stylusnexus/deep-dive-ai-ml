@@ -500,6 +500,8 @@ LESSONS = [
       ("Multimodal / Multilingual", "Beyond Python", "Multimodal keeps its test split private and is graded through a cloud CLI — a deliberate defence against contamination."),
     ]),
     ("callout", "pitfall", "The comparison people get wrong", "A Lite score and a Verified score are not the same measurement, and neither is comparable to the full set. If a vendor quotes 'SWE-bench' without saying which, the number is uninterpretable. Ask. This is lesson 4's step 1 — write down what you are measuring before you run — applied to reading someone else's claim."),
+    ("callout", "warning", "Update: Verified is no longer a trusted headline number",
+     "<p>The Decoder reported on 23 February 2026 that OpenAI says SWE-bench Verified has lost its value as a meaningful measure of coding ability: at least 59.4 percent of the benchmark&#39;s tasks are flawed, rejecting correct solutions that enforce specific implementation details or check functions the task never describes, and leading models could reproduce some original fixes from memory. OpenAI recommends SWE-bench Pro and is building its own non-public tests. We could not open OpenAI&#39;s own post, so this is secondhand: read the primary source before quoting it. The scaffold comparison in lesson 2 holds the tasks fixed and varies the harness, so it still compares scaffolds fairly, but treat any absolute Verified score with suspicion. The <em>Benchmarks</em> lesson in this block covers how public benchmarks fail.</p>"),
 
     ("h2", "Running it"),
     ("p", "Evaluation is Docker-based: each instance gets a container with the repo and its dependencies at the right commit. That's the only way per-repo environments stay reproducible, and it's why the harness needs real memory and disk."),
@@ -569,6 +571,133 @@ swebench report my-run-01 -d verified"""),
        ["It's larger and more statistically rigorous",
         "It's in your language and codebase, and nobody has optimised against it",
         "It avoids the need for Docker"], 1),
+    ]),
+  ],
+},
+{
+  "slug": "benchmarks-what-to-trust",
+  "title": "Benchmarks: Why They Matter, Why They Fail, and When to Build Your Own",
+  "subtitle": "Existing tools save you the load generator. They do not save you from asking whether the number answers your question.",
+  "body": [
+    ("p", "Every choice in this course that involves a number, which engine, which model, which quantization, whether a change helped, rests on a benchmark. A benchmark is a measuring instrument, and an instrument has a validity question before it has a result: <em>does it measure the thing I am deciding about?</em> Most bad benchmark decisions are not arithmetic errors. They are a correct number answering a different question."),
+
+    ("h2", "Four instruments that get called &ldquo;a benchmark&rdquo;"),
+    ("ul", [
+      "<strong>A quality benchmark</strong> asks whether the model gets the answer right: SWE-bench (software-engineering tasks drawn from real GitHub issues), MMLU (Massive Multitask Language Understanding, a multiple-choice knowledge test), your own golden set. The failure mode is the task set, not the stopwatch.",
+      "<strong>A preference leaderboard</strong> asks which answer people like more, such as Chatbot Arena. The failure mode is who is voting, and who gets to submit.",
+      "<strong>A serving benchmark</strong> asks how fast and how much: time to first token, tokens per second, throughput under concurrency. Tools: <code>vllm bench serve</code>, GuideLLM, AIPerf, <code>llama-bench</code>, <code>mlx_lm.benchmark</code>. The failure mode is a workload that is not yours.",
+      "<strong>A load test</strong> asks whether the system holds up under traffic: scaling, queues, timeouts. NVIDIA&#39;s benchmarking guide separates it from performance benchmarking, which &ldquo;measures model-level throughput, latency, and token-level behavior under controlled conditions&rdquo;, and recommends doing both.",
+    ]),
+
+    ("figure", "The more a benchmark looks like your own work, the less comparable it is with anyone else&#39;s. You are choosing a point on this line, not escaping it.", '''<svg viewBox="0 0 640 170" role="img" aria-label="A line from public leaderboards, through published harnesses, to your own workload on your own hardware, trading comparability for relevance"><rect x="8" y="14" width="196" height="64" rx="7" class="d-box"/><text x="20" y="38" class="d-label-b">PUBLIC LEADERBOARD</text><text x="20" y="58" class="d-label-sm">comparable, but whose task?</text>
+<rect x="222" y="14" width="196" height="64" rx="7" class="d-box"/><text x="234" y="38" class="d-label-b">PUBLISHED HARNESS</text><text x="234" y="58" class="d-label-sm">repeatable, generic workload</text>
+<rect x="436" y="14" width="196" height="64" rx="7" class="d-box-accent"/><text x="448" y="38" class="d-label-b">YOUR WORKLOAD</text><text x="448" y="58" class="d-label-sm">relevant, nobody can compare</text>
+<path d="M204 46 L222 46" class="d-arrow-accent"/><path d="M418 46 L436 46" class="d-arrow-accent"/>
+<text x="8" y="112" class="d-label-sm">comparable with other people</text><text x="440" y="112" class="d-label-sm">relevant to your decision</text>
+<line x1="8" y1="124" x2="632" y2="124" stroke="var(--border)"/>
+<text x="8" y="148" class="d-label-sm">Start left to learn what is possible. Finish right before you decide anything that costs money.</text>
+</svg>'''),
+
+    ("h2", "How public benchmarks fail"),
+    ("ul", [
+      "<strong>Broken tasks.</strong> The Decoder reported on 23 February 2026 that OpenAI says SWE-bench Verified has lost its value as a meaningful measure of coding ability: at least 59.4 percent of the benchmark&#39;s tasks are flawed, rejecting correct solutions because they enforce specific implementation details or check functions the task never describes. We could not open OpenAI&#39;s own post, so this is secondhand. Read the primary source before quoting it.",
+      "<strong>Contamination.</strong> The same report says GPT-5.2, Claude Opus 4.5 and Gemini 3 Flash Preview could reproduce some original fixes from memory. When the answers are public, score growth can mean the model has seen them. OpenAI recommends SWE-bench Pro and is building its own non-public tests.",
+      "<strong>Selection.</strong> The Leaderboard Illusion (NeurIPS 2025, the Neural Information Processing Systems conference) studied Chatbot Arena and reports that providers could test private variants and publish only the best. It identifies 27 private variants tested by one provider before a release. It estimates that two providers received 19.2% and 20.4% of all arena data, against 29.7% combined for 83 open-weight models.",
+      "<strong>Harness sensitivity.</strong> The same model on the same 500 tasks differed by 16 points across five scaffolds, in the measurement lesson earlier in this block. A score belongs to a model <em>and</em> a harness.",
+      "<strong>Different definitions of the same metric.</strong> NVIDIA&#39;s benchmarking guide says the available tools &ldquo;expose overlapping metrics but often define and calculate them differently&rdquo;. A tokens-per-second figure from one tool is not automatically the one from another.",
+    ]),
+
+    ("know",
+     "A benchmark result is only as good as the match between its task and your decision, and the match is not on the leaderboard.",
+     "A public number was produced on someone else&#39;s task set, with someone else&#39;s harness, on someone else&#39;s hardware. Each of those can be sound and the number can still say nothing about your workload. The failures above are not scandals. They are what happens when a number built for comparison gets used as a decision.",
+     "A team picks the highest-ranked model on a coding leaderboard and sees no improvement on their own repository. The leaderboard task set was public, partly memorised, and tested single-file fixes. Their repository is a TypeScript service with long-running tests. The number was correct and answered a different question."),
+
+    ("h2", "Tools that already exist, and what each one is for"),
+    ("p", "You do not have to write the load generator. These are maintained by people who have already hit the problems:"),
+    ("ul", [
+      "<strong>GuideLLM</strong> (vLLM project) describes itself as a benchmarking platform that is aware of service-level objectives (SLOs) for real-world inference. The vLLM benchmarking documentation says its own <code>vllm bench</code> commands are mainly for evaluating specific vLLM features and for regression testing, and recommends GuideLLM for benchmarking production servers.",
+      "<strong>AIPerf</strong> (NVIDIA, Apache 2.0) measures generative models served by any inference solution and prints per-request and aggregate metrics.",
+      "<strong><code>llama-bench</code></strong> (llama.cpp) tests prompt processing and generation speed on a model file. By default it repeats each test five times and does warmup runs first, which are the two habits that matter most and are the ones most often skipped by hand.",
+      "<strong><code>mlx_lm.benchmark</code></strong> and <code>vllm-mlx bench-serve</code> do the same for MLX models on a Mac, with prompt length, generation length, batch size, trials and concurrency as options.",
+      "<strong>Ask of any of them:</strong> what is the default workload, how many times does it repeat, does it count failed requests, and how does it define time to first token? The defaults are the part that decides whether your result is yours.",
+    ]),
+
+    ("h2", "When to build your own"),
+    ("p", "A published tool measures a workload it can generate. Build your own when your questions are about <em>your</em> sequence of requests. Three cases came up in this course:"),
+    ("ul", [
+      "<strong>Agent-shaped requests.</strong> A loop re-sends a growing context every turn, so the next prompt extends the last. A benchmark of independent random prompts never asks whether the cache serves the extension.",
+      "<strong>Cache state as the variable.</strong> Cold, warm, evicted, and warm after a restart are different conditions. We found no restart-survival or forced-eviction test in the documentation of the tools above, so check yours before assuming one exists.",
+      "<strong>Behaviour that should be a failure.</strong> A server that rejects a second concurrent request answers quickly with nothing. A generic average can read that as a speedup.",
+    ]),
+    ("p", "That is the case for <code>scripts/bench_engines.py</code>, which is under 500 lines of standard-library Python behind an OpenAI-compatible endpoint. It is not a replacement for the tools above. It exists because of three questions they were not built to ask."),
+
+    ("h2", "What a home-made harness has to get right"),
+    ("p", "Building your own is how you learn which of these matter. Each is a mistake this repository made and then fixed while writing the engine comparison:"),
+    ("terms", [
+      ("Count failures, do not average over them", "Fast and empty is a failure", "The first batching run reported a healthy aggregate for four streams. Three of the four requests had been rejected by the server with an empty reply. The rates were computed over one real answer plus three nothings. The harness now prints how many streams returned text and computes rates only from those."),
+      ("Refuse to report when nothing was measured", "A test with no overlap measures nothing", "The staggered test was meant to show a short request arriving behind a long one. On a fast machine the long request finished before the short one was sent, and the script printed a flattering number anyway. It now starts the short requests only once the long one is generating and says NOT MEASURED when they did not overlap."),
+      ("Record the machine&#39;s state", "Load is a variable", "Decode speed for the same server went from about 308 to about 41 tokens per second between two runs, because another benchmark had started on the same Mac. The script prints the load average before it begins. Nothing in it can fix a busy machine, so the lesson that came out of it is to withhold the numbers."),
+      ("Fresh inputs for every cold run", "A cache remembers across runs", "An engine can keep cache entries between server restarts, so a prompt reused from an earlier run is already warm. Each cold run begins with a random nonce at the very front of the prompt, which guarantees nothing has seen it."),
+      ("Repeat, discard warmup, report the spread", "One run is an anecdote", "The first request to a fresh server pays one-time costs. The script sends and discards one, repeats each measurement, and reports medians. The same engine took 2.1 seconds on one cold run and 6.5 on the next on a busy machine, so a single cold number is unusable."),
+    ]),
+
+    ("h3", "A checklist before you believe your own number"),
+    ("ul", [
+      "Write the question before the run, and say what result would change your mind.",
+      "Fix the workload to match your use, and say how it differs.",
+      "Change one thing between runs.",
+      "Repeat, discard warmup, report the spread, and record the load.",
+      "Count failures, and refuse to print a number from runs that did not overlap or did not complete.",
+      "Record versions, weights, quantization and hardware. &ldquo;The same model&rdquo; is a claim to verify.",
+      "State what the result cannot tell you.",
+    ]),
+
+    ("callout", "pitfall", "Do not benchmark on a machine that is doing something else",
+     "<p>The runs behind this course&#39;s engine comparison overlapped with another benchmark on the same machine, which pushed the load average past fifty at one point and made at least one engine&#39;s numbers meaningless. The fix is boring. Run one thing at a time, check the load line, and rerun anything you cannot reproduce. Two benchmarks sharing a machine are two disturbances, and neither is a result.</p>"),
+
+    ("know",
+     "A harness is trustworthy when it can say the run failed.",
+     "Most benchmark code is written to produce a number. The valuable part is the code that refuses to: rejected requests counted, non-overlap reported, empty replies flagged, busy machines announced. Without those, every run produces something, and some of it is quietly wrong.",
+     "The throughput figure that looked healthy at four streams was computed from one working request and three rejected ones. Nothing errored and the table printed. The only reason it was caught is that the harness already counted replies, and the count said one of four."),
+
+    ("related", ["how-to-measure", "swe-bench-and-how-to-run-it", "confounds-you-cannot-see", "formats-and-engines", "latency-and-caching"]),
+    ("links", [
+      ("vLLM benchmark CLI", "https://docs.vllm.ai/en/latest/benchmarking/cli.html",
+       "The datasets it supports, and its own statement of what these benchmarks are for and when to use GuideLLM instead."),
+      ("GuideLLM", "https://github.com/vllm-project/guidellm",
+       "A benchmarking platform with reports, built under the vLLM project."),
+      ("AIPerf", "https://github.com/ai-dynamo/aiperf",
+       "NVIDIA&#39;s benchmarking tool for any OpenAI-compatible server."),
+      ("llama-bench", "https://github.com/ggml-org/llama.cpp/tree/master/tools/llama-bench",
+       "Repetitions and warmup as defaults."),
+      ("Differences in benchmarking tools and approaches (NVIDIA NIM)", "https://docs.nvidia.com/nim/benchmarking/llm/latest/overview.html",
+       "Why the same metric name can mean different things, and the benchmark-versus-load-test distinction."),
+      ("The Leaderboard Illusion", "https://arxiv.org/abs/2504.20879",
+       "How a preference leaderboard can be distorted without anyone cheating on a single vote."),
+      ("OpenAI wants to retire the AI coding benchmark that everyone has been competing on (The Decoder)", "https://the-decoder.com/openai-wants-to-retire-the-ai-coding-benchmark-that-everyone-has-been-competing-on/",
+       "A report on OpenAI&#39;s audit of SWE-bench Verified. Read OpenAI&#39;s own post for the primary account."),
+    ]),
+    ("quiz", [
+      ("A benchmark reports 4.3 times faster in its abstract and 3.7 times in its body. What should you take from that?",
+       ["The direction is probably right, one digit deserves little weight, and your own run is the check",
+        "The paper is worthless",
+        "Always use the higher number"],
+       0),
+      ("Your harness reports 800 tokens per second for four concurrent streams, but only one of the four requests returned text. What is the real situation?",
+       ["The server is very fast",
+        "Three requests failed, so the rate is computed over one real answer and means little",
+        "Concurrency is working perfectly"],
+       1),
+      ("When is writing your own benchmark harness justified?",
+       ["Always, because published tools are unreliable",
+        "When your questions concern your own request sequence or cache state, which a generic workload does not ask",
+        "Never, because published tools cover everything"],
+       1),
+      ("A model tops a public leaderboard but does not help on your repository. What is the most likely explanation?",
+       ["The leaderboard is fraudulent",
+        "The leaderboard task set is not your task set, and the number was never about your decision",
+        "Your repository is too small"],
+       1),
     ]),
   ],
 },

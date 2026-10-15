@@ -33,170 +33,182 @@
     },
     {
       "id": "lsn-1787000000003",
-      "title": "Serving Locally: Ollama, llama.cpp and tok/s",
-      "file": "lsn-1787000000003-serving-locally.html",
+      "title": "Quantization Recipes: Beyond Plain Rounding",
+      "file": "lsn-1787000000003-quantization-recipes.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000004",
-      "title": "Embeddings, Vectors and Semantic Routing",
-      "file": "lsn-1787000000004-embeddings-and-retrieval.html",
+      "title": "Serving Locally: Ollama, llama.cpp and tok/s",
+      "file": "lsn-1787000000004-serving-locally.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000005",
-      "title": "Tool Calls and MCP",
-      "file": "lsn-1787000000005-tool-calls-and-mcp.html",
+      "title": "Formats and Engines: GGUF, MLX and What NVIDIA Runs",
+      "file": "lsn-1787000000005-formats-and-engines.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000006",
-      "title": "Routing, Escalation and Sampling Controls",
-      "file": "lsn-1787000000006-routing-and-escalation.html",
+      "title": "Embeddings, Vectors and Semantic Routing",
+      "file": "lsn-1787000000006-embeddings-and-retrieval.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000007",
-      "title": "The Eval Battery",
-      "file": "lsn-1787000000007-eval-battery.html",
+      "title": "Tool Calls and MCP",
+      "file": "lsn-1787000000007-tool-calls-and-mcp.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000008",
-      "title": "Overfitting and Underfitting",
-      "file": "lsn-1787000000008-overfitting-and-underfitting.html",
+      "title": "Routing, Escalation and Sampling Controls",
+      "file": "lsn-1787000000008-routing-and-escalation.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000009",
-      "title": "Agents, Autonomy and the Danger Surface",
-      "file": "lsn-1787000000009-agents-autonomy-and-danger.html",
+      "title": "The Eval Battery",
+      "file": "lsn-1787000000009-eval-battery.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000010",
-      "title": "Reinforcement, Feedback and Humans in the Loop",
-      "file": "lsn-1787000000010-feedback-rlhf-and-humans.html",
+      "title": "Overfitting and Underfitting",
+      "file": "lsn-1787000000010-overfitting-and-underfitting.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000011",
-      "title": "Context Engineering: What Goes In Decides What Comes Out",
-      "file": "lsn-1787000000011-context-engineering.html",
+      "title": "Agents, Autonomy and the Danger Surface",
+      "file": "lsn-1787000000011-agents-autonomy-and-danger.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000012",
-      "title": "Structured Output: JSON You Can Actually Parse",
-      "file": "lsn-1787000000012-structured-output-json.html",
+      "title": "Reinforcement, Feedback and Humans in the Loop",
+      "file": "lsn-1787000000012-feedback-rlhf-and-humans.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000013",
-      "title": "Hallucination and Grounding",
-      "file": "lsn-1787000000013-hallucination-and-grounding.html",
+      "title": "Context Engineering: What Goes In Decides What Comes Out",
+      "file": "lsn-1787000000013-context-engineering.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000014",
-      "title": "Zero-shot, Few-shot and In-Context Learning",
-      "file": "lsn-1787000000014-shots-and-in-context-learning.html",
+      "title": "Structured Output: JSON You Can Actually Parse",
+      "file": "lsn-1787000000014-structured-output-json.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000015",
-      "title": "Class Imbalance and Choosing a Threshold",
-      "file": "lsn-1787000000015-class-imbalance-and-thresholds.html",
+      "title": "Hallucination and Grounding",
+      "file": "lsn-1787000000015-hallucination-and-grounding.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000016",
-      "title": "Drift: Why Deployment Isn't the End",
-      "file": "lsn-1787000000016-drift.html",
+      "title": "Zero-shot, Few-shot and In-Context Learning",
+      "file": "lsn-1787000000016-shots-and-in-context-learning.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000017",
-      "title": "Distillation",
-      "file": "lsn-1787000000017-distillation.html",
+      "title": "Class Imbalance and Choosing a Threshold",
+      "file": "lsn-1787000000017-class-imbalance-and-thresholds.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000018",
-      "title": "Chain-of-Thought and Reasoning Tokens",
-      "file": "lsn-1787000000018-chain-of-thought-and-reasoning.html",
+      "title": "Drift: Why Deployment Isn't the End",
+      "file": "lsn-1787000000018-drift.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000019",
-      "title": "Loops at Inference: Control Flow, Limits and Dangers",
-      "file": "lsn-1787000000019-loops-at-inference.html",
+      "title": "Distillation",
+      "file": "lsn-1787000000019-distillation.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000020",
-      "title": "Loops in Training: Flywheels and Model Collapse",
-      "file": "lsn-1787000000020-loops-in-training.html",
+      "title": "Chain-of-Thought and Reasoning Tokens",
+      "file": "lsn-1787000000020-chain-of-thought-and-reasoning.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000021",
-      "title": "Skills: Packaging What an Agent Should Know",
-      "file": "lsn-1787000000021-skills.html",
+      "title": "Loops at Inference: Control Flow, Limits and Dangers",
+      "file": "lsn-1787000000021-loops-at-inference.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000022",
-      "title": "Operating an Agent",
-      "file": "lsn-1787000000022-operating-an-agent.html",
+      "title": "Loops in Training: Flywheels and Model Collapse",
+      "file": "lsn-1787000000022-loops-in-training.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000023",
-      "title": "Building an Model Context Protocol (MCP) Server",
-      "file": "lsn-1787000000023-building-an-mcp-server.html",
+      "title": "Skills: Packaging What an Agent Should Know",
+      "file": "lsn-1787000000023-skills.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000024",
-      "title": "Model Context Protocol (MCP): The Danger Surface",
-      "file": "lsn-1787000000024-mcp-dangers.html",
+      "title": "Operating an Agent",
+      "file": "lsn-1787000000024-operating-an-agent.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000025",
-      "title": "Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You",
-      "file": "lsn-1787000000025-local-hardware-limits.html",
+      "title": "Building an Model Context Protocol (MCP) Server",
+      "file": "lsn-1787000000025-building-an-mcp-server.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000026",
-      "title": "Latency, Prefills and Caching",
-      "file": "lsn-1787000000026-latency-and-caching.html",
+      "title": "Model Context Protocol (MCP): The Danger Surface",
+      "file": "lsn-1787000000026-mcp-dangers.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000027",
-      "title": "Memory, Compaction and Session Decay",
-      "file": "lsn-1787000000027-session-lifecycle.html",
+      "title": "Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You",
+      "file": "lsn-1787000000027-local-hardware-limits.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000028",
-      "title": "Why the Graphics Processing Unit (GPU) Is Waiting",
-      "file": "lsn-1787000000028-why-the-gpu-is-waiting.html",
+      "title": "Latency, Prefills and Caching",
+      "file": "lsn-1787000000028-latency-and-caching.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000029",
-      "title": "Frontier and Local, and What Each Is Actually For",
-      "file": "lsn-1787000000029-frontier-and-local.html",
+      "title": "Memory, Compaction and Session Decay",
+      "file": "lsn-1787000000029-session-lifecycle.html",
       "source": "skill"
     },
     {
       "id": "lsn-1787000000030",
+      "title": "Why the Graphics Processing Unit (GPU) Is Waiting",
+      "file": "lsn-1787000000030-why-the-gpu-is-waiting.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000031",
+      "title": "Frontier and Local, and What Each Is Actually For",
+      "file": "lsn-1787000000031-frontier-and-local.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1787000000032",
       "title": "Techniques That Transfer, and the Ones That Change Value",
-      "file": "lsn-1787000000030-techniques-that-transfer.html",
+      "file": "lsn-1787000000032-techniques-that-transfer.html",
       "source": "skill"
     }
   ],
@@ -352,6 +364,16 @@
       "starred": false
     },
     "lsn-1787000000030": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000031": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787000000032": {
       "viewed": false,
       "completed": false,
       "starred": false

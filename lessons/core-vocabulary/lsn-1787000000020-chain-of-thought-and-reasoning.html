@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chain-of-Thought and Reasoning Tokens</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 21 of 33</span>
+  <h1>Chain-of-Thought and Reasoning Tokens</h1>
+  <p class="subtitle">Why letting a model think out loud works — and why its explanation isn't necessarily its reason.</p>
+
+  <p>Ask a model a multi-step question and it answers immediately, often wrongly. Ask it to work through the steps and accuracy improves markedly on the same question with the same model. That's <strong>chain-of-thought</strong>, and the mechanism behind it is more interesting than the trick.</p>
+  <h2>Why thinking out loud helps</h2>
+  <p>A model does a roughly fixed amount of computation per token generated. Demanding an immediate answer to a problem needing five steps allocates one token's worth of computation to five steps of work. Generating intermediate steps gives the model more forward passes, and — crucially — each step it writes becomes part of the context for the next, so it can build on its own partial results.</p>
+  <div class="callout insight"><span class="label">The reframing worth keeping</span>Chain-of-thought is not the model becoming smarter. It's the model being given room to compute. The generated tokens are working memory made visible — which is also why it helps far more on arithmetic, logic and multi-step planning than on recall, where there's nothing to work through.</div>
+  <h2>The variants</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Zero-shot CoT</div><div><div class="roadmap-title">&quot;Think step by step&quot;</div><div class="roadmap-desc">One line, no examples, and a real improvement on reasoning tasks. Among the highest-value prompt changes available.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Few-shot CoT</div><div><div class="roadmap-title">Examples that show the working</div><div class="roadmap-desc">Demonstrate the reasoning style you want, not just the answers.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Self-consistency</div><div><div class="roadmap-title">Sample several chains, take the majority</div><div class="roadmap-desc">Costs several times more and reliably beats a single chain. Buying accuracy with tokens.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reasoning models</div><div><div class="roadmap-title">Trained to reason before answering</div><div class="roadmap-desc">The model produces an extended internal chain, sometimes hidden, before its visible answer. Reasoning effort becomes a parameter you set.</div></div></div></div>
+  <h2>Reasoning tokens change the cost model</h2>
+  <p>With reasoning models you pay for tokens you may never see. A short answer can sit on top of thousands of hidden reasoning tokens, all billed. Cost stops tracking visible output length and starts tracking problem difficulty — which is a different budgeting exercise, and one that surprises people the first time.</p>
+  <p>It also changes when to reach for what. Simple extraction, classification and formatting don't benefit from reasoning and just cost more slowly. The gains concentrate in genuinely multi-step problems — which is a routing decision, and exactly the kind of judgement escalation logic has to encode.</p>
+  <div class="callout matters"><span class="label">Measured: the same six questions with thinking on and off</span><p>Six short arithmetic and logic questions with exact answers, on a 9-billion-parameter 8-bit model served by vllm-mlx 0.5.0, run with <code>scripts/bench_engines.py thinking</code>. Median reply length with thinking on was 1,225 tokens against 392 with it off. Two of the six thinking replies reached the 1,500-token cap before giving an answer, so a thinking budget that is too small turns a reply into no answer at all. With thinking off, all six were right. Time is the part to notice: the first token arrived in under half a second either way, because the thinking streams, but the first token of the <em>answer</em> took between 17 and 56 seconds with thinking on. Median total time was 52.0 seconds against 14.8, and that includes load from other jobs, so trust the token counts more than the seconds. Six questions show direction, not accuracy, and these were mostly easy ones where thinking has little to add. Run it on your own hard cases before deciding.</p></div>
+  <figure class="diagram"><svg viewBox="0 0 640 180" role="img" aria-label="When chain-of-thought helps and when it does not">
+<text x="12" y="18" class="d-fill-green" font-size="12" font-weight="600">CLEAR GAIN</text>
+<rect x="12" y="28" width="290" height="26" rx="4" class="d-box-good"/><text x="26" y="46" class="d-label-sm">multi-step arithmetic and logic</text>
+<rect x="12" y="60" width="290" height="26" rx="4" class="d-box-good"/><text x="26" y="78" class="d-label-sm">planning across several constraints</text>
+<rect x="12" y="92" width="290" height="26" rx="4" class="d-box-good"/><text x="26" y="110" class="d-label-sm">debugging, root-cause tracing</text>
+<text x="338" y="18" class="d-fill-red" font-size="12" font-weight="600">PAYS FOR NOTHING</text>
+<rect x="338" y="28" width="290" height="26" rx="4" class="d-box-warn"/><text x="352" y="46" class="d-label-sm">factual recall — no steps to take</text>
+<rect x="338" y="60" width="290" height="26" rx="4" class="d-box-warn"/><text x="352" y="78" class="d-label-sm">classification and extraction</text>
+<rect x="338" y="92" width="290" height="26" rx="4" class="d-box-warn"/><text x="352" y="110" class="d-label-sm">reformatting, translation</text>
+<text x="12" y="150" class="d-label-sm">Reasoning tokens are billed whether or not you see them, so the wrong mode costs money and latency</text>
+<text x="12" y="166" class="d-label-sm">without improving anything. Route by task shape.</text>
+</svg><figcaption>Extra tokens buy accuracy on multi-step problems and buy nothing on recall or formatting. Matching the mode to the task is the actual skill.</figcaption></figure>
+  <h2>The part people get wrong</h2>
+  <p>A chain-of-thought is not an explanation of how the model reached its answer. It's more text, generated by the same next-token process, that happens to look like reasoning. Models can produce a flawed chain and a correct answer, or a plausible chain that rationalises an answer they were always going to give. Research on unfaithful reasoning shows models omitting the cue that actually determined their output while presenting a tidy chain that doesn't mention it.</p>
+  <div class="callout pitfall"><span class="label">What this means for you</span>Treat a chain as a debugging aid and a verification surface, not as an audit trail. It's genuinely useful — you can check the intermediate steps, spot where a calculation went wrong, and catch a wrong premise. But do not present it to a regulator, a customer, or a colleague as the reason the system decided something. It is what the model said about its reasoning, which is not the same object.</div>
+  <h2>Where this reappears</h2>
+  <p>Block 4's agents reason before choosing tools, and a visible chain is often the only way to debug why the wrong tool was called. Block 5 measures whether the chain actually supports the conclusion, which is a distinct question from whether the conclusion is right. And rationale distillation from the previous lesson trains a small model on these chains — one of the more effective ways to move reasoning capability downward.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Chain-of-thought is not the model becoming smarter — it is the model being given room to compute.</p><p class="know-why">A model does roughly fixed work per token. Demanding an immediate answer to a five-step problem allocates one token's worth of computation to five steps. Generating the steps buys more forward passes, and each step becomes context the next one can build on.</p><p class="know-eg"><span class="know-eg-label">For example</span>Ask for the answer to a multi-step arithmetic word problem and you get a wrong number instantly. Ask the same model to work through it and it gets it right — same weights, same prompt otherwise. Now ask it to think step by step about the capital of Portugal: no gain, because there were never any steps to take.</p></blockquote>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000021-loops-at-inference.html">Loops at Inference: Control Flow, Limits and Dangers</a><span class="link-note">Running the model more than once — when that buys accuracy, and when it just buys tokens.</span></li><li><a href="../block7-training/lsn-1788000000003-supervised-versus-reinforcement-tuning.html">Supervised versus Reinforcement Fine-Tuning</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">One shows the model the answer; the other scores its attempts. The objective decides what you can teach.</span></li><li><a href="lsn-1787000000008-routing-and-escalation.html">Routing, Escalation and Sampling Controls</a><span class="link-note">Cheap-first architecture — plus temperature and top-k, which decide how a model picks words.</span></li><li><a href="lsn-1787000000001-tokens-context-and-kv-cache.html">Tokens, the Context Window, and the KV Cache</a><span class="link-note">Why a model 'forgets', why long conversations get expensive, and what's actually being cached.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener">Chain-of-Thought Prompting (Wei et al., 2022)</a><span class="link-note">The paper that established the effect and its scale dependence.</span></li><li><a href="https://arxiv.org/abs/2203.11171" target="_blank" rel="noopener">Self-Consistency (Wang et al., 2022)</a><span class="link-note">Sampling multiple chains and taking the majority — trading tokens for accuracy.</span></li><li><a href="https://arxiv.org/abs/2307.13702" target="_blank" rel="noopener">Measuring Faithfulness in Chain-of-Thought (Lanham et al., 2023)</a><span class="link-note">The evidence that stated reasoning often isn't the actual reason. Read before trusting a chain as an explanation.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Why does &#x27;think step by step&#x27; improve accuracy on multi-step problems?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">It activates a reasoning module inside the model</div>
+      <div class="quiz-opt">It gives the model more forward passes, and each written step becomes context it can build on</div>
+      <div class="quiz-opt">It reduces the temperature automatically</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. You&#x27;re extracting dates from invoices. Should you use a reasoning model?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Yes — reasoning improves all tasks</div>
+      <div class="quiz-opt">No — there are no steps to work through, so you pay for reasoning tokens and gain nothing</div>
+      <div class="quiz-opt">Yes, but only with self-consistency enabled</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Can a chain-of-thought be presented as the reason a system made a decision?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Yes — it&#x27;s a direct record of the model&#x27;s reasoning process</div>
+      <div class="quiz-opt">No — it&#x27;s text generated the same way as any other, and research shows it often omits what actually drove the answer</div>
+      <div class="quiz-opt">Only for models that expose reasoning tokens</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

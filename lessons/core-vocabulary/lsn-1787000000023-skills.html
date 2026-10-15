@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skills: Packaging What an Agent Should Know</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 24 of 33</span>
+  <h1>Skills: Packaging What an Agent Should Know</h1>
+  <p class="subtitle">Procedural knowledge as a loadable folder — and why the scripts inside it matter as much as the prose.</p>
+
+  <p>A tool gives an agent a capability. A <strong>skill</strong> gives it expertise — the procedure, the conventions, the edge cases, and often the code to do the deterministic parts properly. The useful framing is onboarding: what you would write down for a competent new hire who does not yet know how your organisation does this particular thing.</p>
+  <h2>The shape of one</h2>
+  <p>A skill is a folder. The only required file is <code>SKILL.md</code>, whose frontmatter carries a name and — critically — a description of <em>when to use it</em>. The body holds the actual instructions. Alongside it can sit reference documents, templates, and executable scripts.</p>
+  <pre><code>my-skill/
+  SKILL.md          name + description in frontmatter, instructions in the body
+  reference.md      detail loaded only when the body points at it
+  scripts/
+    extract.py      run as a tool, or read as documentation — your choice</code></pre>
+  <h2>Progressive disclosure, which is the whole design</h2>
+  <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Three levels of progressive disclosure in a skill"><defs><marker id="sa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
+<rect x="12" y="16" width="360" height="48" rx="6" class="d-box-accent"/>
+<text x="28" y="38" class="d-label-b">Level 1 · name + description</text>
+<text x="28" y="56" class="d-label-sm">always in the system prompt · tens of tokens</text>
+<text x="390" y="46" class="d-label-sm">always paid</text>
+<path d="M192 64 L192 82" class="d-arrow-accent" marker-end="url(#sa)"/>
+<rect x="12" y="82" width="360" height="48" rx="6" class="d-box"/>
+<text x="28" y="104" class="d-label-b">Level 2 · the SKILL.md body</text>
+<text x="28" y="122" class="d-label-sm">loaded when the model judges it relevant</text>
+<text x="390" y="112" class="d-label-sm">paid on trigger</text>
+<path d="M192 130 L192 148" class="d-arrow-accent" marker-end="url(#sa)"/>
+<rect x="12" y="148" width="360" height="48" rx="6" class="d-box"/>
+<text x="28" y="170" class="d-label-b">Level 3+ · bundled files and scripts</text>
+<text x="28" y="188" class="d-label-sm">loaded, or executed, only when actually needed</text>
+<text x="390" y="178" class="d-label-sm">often never paid</text>
+</svg><figcaption>Three levels, each paid for only when reached. The description is always in context; everything else arrives on demand. This is the context-budget argument applied to knowledge instead of to tools.</figcaption></figure>
+  <p>Only the name and description occupy context by default. The body loads when the model decides the skill applies. Referenced files load later still, if at all. The consequence is that a skill can be arbitrarily detailed without that detail costing anything until it is used — which is why a fifty-page procedure is a reasonable thing to package this way and an unreasonable thing to put in a system prompt.</p>
+  <div class="callout insight"><span class="label">You have met this argument twice already</span>This is the same finding as tool search — loading definitions on demand cut tokens by 85% <em>and improved selection accuracy</em> — and the same finding as context engineering, where precision beats volume. More available knowledge is only useful if it is not all resident. Progressive disclosure is how a system gets deep without getting slow.</div>
+  <h2>The scripts are not a detail</h2>
+  <p>A skill can bundle code, and that code plays two roles at once: something the agent executes, and something it reads as documentation of how the job is done.</p>
+  <p>The reason this matters is the deterministic-first argument arriving in a new place. Extracting fields from a PDF form is not a language problem — it is parsing. A bundled script does it exactly, every time, without the file entering the context window at all. The model orchestrates; the script computes. You get reliability where reliability is available and judgement where it is not.</p>
+  <div class="callout matters"><span class="label">Decide explicitly which role each script plays</span>"Run this" and "read this to understand the convention" are different instructions with different costs, and a script that is ambiguous between them gets used wrongly in both directions. Say which, in the SKILL.md body, for every script you bundle.</div>
+  <h2>Skill, tool, or Model Context Protocol (MCP) server?</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Tool</div><div><div class="roadmap-title">A single capability</div><div class="roadmap-desc">One function with a schema. "Send an email." The unit of what the agent can do.</div></div></div><div class="roadmap-item"><div class="roadmap-num">MCP server</div><div><div class="roadmap-title">An external integration</div><div class="roadmap-desc">A connection to a system that lives outside your codebase, spoken in a standard protocol so it works across clients.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Skill</div><div><div class="roadmap-title">A procedure and its knowledge</div><div class="roadmap-desc">"How we write a release note here" — the workflow, the conventions, the templates, and any code that helps. Frequently composed of calls to the tools and servers above.</div></div></div></div>
+  <p>The distinction that decides it: a tool is a <em>verb</em>, an MCP server is a <em>place</em>, and a skill is a <em>method</em>. If what you are packaging is knowledge about how to do something — rather than the ability to do it — it is a skill.</p>
+  <h2>Building one that actually triggers</h2>
+  <ul><li><strong>Start from an evaluation, not from the document.</strong> Run representative tasks, find where the agent underperforms, and write the skill against that gap. A skill written from imagination usually addresses a problem the agent did not have.</li><li><strong>The description is the trigger, so it is prompt engineering.</strong> The model decides relevance from that one line. Vague descriptions produce skills that never fire, or fire constantly. This is the same lesson as tool naming, with the same fix: write it as if explaining to someone unfamiliar.</li><li><strong>Split when it grows.</strong> An unwieldy SKILL.md defeats the point. Move detail into referenced files so it loads only when reached.</li><li><strong>Keep mutually exclusive paths apart.</strong> If half the document only applies to one case, that half should be a separate file rather than context everyone pays for.</li><li><strong>Watch it in real use and iterate.</strong> Where it failed to trigger, and where it triggered wrongly, are both fixable — and both are description problems more often than body problems.</li></ul>
+  <h2>The security question, which is the same one as MCP</h2>
+  <p>A skill can contain instructions and executable code, and both run in your environment with your agent's permissions. Installing one from an untrusted source is closer to adding a dependency than to reading a document — and unlike a dependency, its instructions are read by a model that is disposed to follow them.</p>
+  <div class="callout warning"><span class="label">Audit before installing</span>Read the SKILL.md body for instructions that direct the agent outward — fetching from a network, writing outside the working directory, contacting a service. Read the bundled scripts and their dependencies. A skill is a supply-chain surface and an injection surface at the same time, which is a combination worth being deliberate about. Block 6 treats this properly.</div>
+  <h2>Where this lands in the program</h2>
+  <p>Skills sit on top of nearly everything in Block 0: progressive disclosure is context engineering, bundled scripts are deterministic-first, the description is a tool description, and installing one is the trust question from the MCP lesson. That convergence is the point — a skill is not a new primitive so much as a container for the ones you already have.</p>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000025-building-an-mcp-server.html">Building an Model Context Protocol (MCP) Server</a><span class="link-note">The full capability set, the two transports, and the design decisions that make a server usable rather than merely working.</span></li><li><a href="lsn-1787000000007-tool-calls-and-mcp.html">Tool Calls and MCP</a><span class="link-note">How a text model comes to run your code, and what the protocol standardises.</span></li><li><a href="lsn-1787000000013-context-engineering.html">Context Engineering: What Goes In Decides What Comes Out</a><span class="link-note">For a model you've already chosen, context is the largest lever you still control.</span></li><li><a href="../engineering-practice/lsn-1787400000012-spec-driven-development.html">Vibe Coding and Spec-Driven Development</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">A spectrum, not a binary — and the question that tells you where on it a task belongs.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills" target="_blank" rel="noopener">Equipping agents for the real world with Agent Skills — Anthropic</a><span class="link-note">The design rationale, the onboarding framing, and the guidance on iterating from real usage.</span></li><li><a href="https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview" target="_blank" rel="noopener">Agent Skills documentation</a><span class="link-note">The SKILL.md format, frontmatter fields and progressive-disclosure mechanics in detail.</span></li><li><a href="https://github.com/anthropics/skills" target="_blank" rel="noopener">anthropics/skills</a><span class="link-note">Working examples. Read a few end to end before writing your own — the descriptions in particular.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. What occupies context by default when a skill is installed?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The whole SKILL.md body, so the model knows what is available</div>
+      <div class="quiz-opt">Only the name and description — the body loads when the model judges it relevant</div>
+      <div class="quiz-opt">Nothing, until the user names the skill explicitly</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Why bundle a script inside a skill rather than describing the procedure in prose?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Scripts are faster to write than documentation</div>
+      <div class="quiz-opt">Deterministic work should be computed, not generated — the script does it exactly, and the file never enters the context window</div>
+      <div class="quiz-opt">Prose instructions cannot be versioned</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Your skill never triggers, even on tasks it clearly covers. Where do you look first?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The body, which probably lacks detail</div>
+      <div class="quiz-opt">The description — it is what the model uses to judge relevance</div>
+      <div class="quiz-opt">The bundled scripts, which may be failing silently</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. What is the difference between a skill and a tool?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Skills are written in Markdown and tools in code</div>
+      <div class="quiz-opt">A tool is the ability to do something; a skill is the knowledge of how it is done here — often composed of tool calls</div>
+      <div class="quiz-opt">Skills run locally and tools run remotely</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>
