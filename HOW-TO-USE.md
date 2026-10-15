@@ -23,14 +23,15 @@ That's the whole loop. The rest of this page is detail you can come back for.
 
 | Part | What it is | How you use it |
 |---|---|---|
-| [`index.html`](index.html) | Landing page, 106 lessons by block | Open it in a browser. No server, no build |
+| [`index.html`](index.html) | Landing page, every lesson by block | Open it in a browser. No server, no build |
 | `lessons/` | Self-contained HTML - prose, diagrams, quizzes | Read in block order, or jump to one; each is written to stand alone |
 | `notebooks/` | Runnable labs, one folder per block | See [`notebooks/README.md`](notebooks/README.md) |
-| `projects/` | Four portfolio builds | At block boundaries 2, 3, 4 and 8 |
+| `projects/` | Four portfolio builds; Project 4 is also the capstone | At block boundaries 2, 3, 4 and 8 |
 | [`artifacts/sop/`](artifacts/sop/) | Checklists, aviation-style | Open before you build, tick as you go |
 | [`artifacts/engineering-foundations.md`](artifacts/engineering-foundations.md) | Optional systems-engineering reading map | Experienced developers can skip it; otherwise use it when a project exposes a representation, time, distributed-failure or maintenance assumption |
+| [`artifacts/cumulative-exam.md`](artifacts/cumulative-exam.md) and [`artifacts/design-interview-rubric.md`](artifacts/design-interview-rubric.md) | A written exam across Blocks 3, 5, 6, 7 and 8, and a scored mock design interview | After Block 8, with the [Project 4 capstone run](projects/p4-deployed-assistant/README.md#capstone) |
 | [`GLOSSARY.md`](GLOSSARY.md) | Every term, cumulative | Add to it as you go; feed into spaced repetition |
-| [`things-to-know.html`](things-to-know.html) | 158 rules harvested from the lessons | The revision sheet. Read it when you've forgotten a block |
+| [`things-to-know.html`](things-to-know.html) | Every rule harvested from the lessons | The revision sheet. Read it when you've forgotten a block |
 
 ## A block, start to finish
 
@@ -42,11 +43,29 @@ That's the whole loop. The rest of this page is detail you can come back for.
    results first, then re-run it yourself. After the guided run, close the notebook
    and rebuild one small example from memory before looking back at the answer.
 4. **Open the matching SOP** when you start building. There's one for training,
-   deep learning, fine-tuning, generative AI, LLM engineering, measurement and
+   deep learning, fine-tuning, generative AI, LLM engineering, measurement, MCP and
    security, plus a non-normal checklist for when something is already broken.
 5. **Hit the exit criterion.** Every block has one, and it's a thing that runs
    rather than a box you tick.
 6. **Commit.** Block boundaries are the save points.
+
+## Testing what you know
+
+Three tests, each asking a different question. Do them in this order after Block 8.
+
+1. **The capstone run** tests whether you can build. From `projects/p4-deployed-assistant/`,
+   `python3 capstone/run_capstone.py` runs the service's tests, a drill that fails its
+   model providers on purpose, a 29-question gold set and the memory arithmetic for a larger
+   corpus, then writes a report. Read the two questions it misses before you change anything.
+   See [its README](projects/p4-deployed-assistant/README.md#capstone) for the setup.
+2. **[The cumulative exam](artifacts/cumulative-exam.md)** tests whether you can reason across
+   lessons. Ten written scenarios, closed book, about 90 minutes, with a marking key.
+3. **[The design interview rubric](artifacts/design-interview-rubric.md)** tests whether you can
+   explain it. Two people, 45 minutes, nine questions scored 0 to 2. The lesson
+   *Designing the Whole System* in Block 8 maps each question to where the course answers it.
+
+The per-lesson quizzes check recall only. These three are the ones that tell you whether
+you can do the job.
 
 ## The three that thread through
 

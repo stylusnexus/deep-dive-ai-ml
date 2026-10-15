@@ -100,7 +100,7 @@ SECTIONS = [
     ("block2-classical-ml", "Block 2 · Predictive Modelling",
      "Classical machine learning done properly — the metrics, the models, and knowing when a neural network is the wrong answer."),
     ("block3-retrieval", "Block 3 · Retrieval and Agentic RAG",
-     "Building a retrieval system that works, measuring the part everyone skips, and the loop that answers multi-hop questions."),
+     "Building a retrieval system that works, measuring the part everyone skips, the loop that answers multi-hop questions, and what changes at millions of documents."),
     ("block4-agentic", "Block 4 · Agentic AI",
      "The loop by hand before the framework, what a graph runtime actually buys, and approval gates that halt what matters."),
     ("block5-evaluation", "Block 5 · Evaluation",
@@ -110,9 +110,9 @@ SECTIONS = [
     ("block7-training", "Block 7 · Training and Fine-Tuning",
      "When changing the weights is the right answer — rarely — and the four ways to shrink a model, including the fact that compression does not remove capability evenly."),
     ("block8-deployment", "Block 8 · Deployment and APIs",
-     "Calling an interface you do not control, serving one other people do not control, and what changes the moment either has a caller who is not you."),
+     "Calling an interface you do not control, serving one, failing over when the provider does not answer, and the design walk-through that ties the course to the questions interviewers ask."),
     ("block9-electives", "Block 9 · Electives",
-     "Three directions the spine does not cover: input that is not text, asking the database properly, and where the money actually goes."),
+     "Directions the spine does not cover: input that is not text, asking the database properly, where the money goes, convolutions, recommenders, and agents that improve themselves."),
     ("closing-future-of-work", "Closing · The Future of Work",
      "The only chapter that argues rather than instructs — what the 2026 labour evidence shows, and a thesis about which capability becomes scarce, with its counter-argument attached."),
     ("engineering-practice", "Block 0 · Engineering Practice",
@@ -143,7 +143,7 @@ doc = f"""<!DOCTYPE html>
 
 <p class="eyebrow">🎯 Self-built curriculum</p>
 <h1>Building and Measuring LLM Systems</h1>
-<p class="lede">Applied AI and machine learning as ~13 weeks of lessons, runnable notebooks and four portfolio projects — with the security, evaluation, cost and fine-tuning material the original leaves out.</p>
+<p class="lede">Applied AI and machine learning as ~13 weeks of lessons, runnable notebooks and four portfolio projects — including the security, evaluation, cost and fine-tuning material that short courses usually leave out.</p>
 
 <div class="meta">
   <span class="chip">{total} lessons built</span>
@@ -170,6 +170,12 @@ doc = f"""<!DOCTYPE html>
     <p>Ten questions to answer before writing code. Filled in before every project, reviewed after.</p></a></li>
   <li><a class="card" href="artifacts/selection-scorecard.md"><h2>Selection scorecard</h2>
     <p>For choosing a model, a vendor, or a framework — three decisions with three different failure modes.</p></a></li>
+  <li><a class="card" href="projects/p4-deployed-assistant/README.md#capstone"><h2>Capstone run</h2>
+    <p>Project 4's graded run: its tests, a provider-failure drill, a 29-question gold set and the memory arithmetic, in one report.</p></a></li>
+  <li><a class="card" href="artifacts/cumulative-exam.md"><h2>Cumulative exam</h2>
+    <p>Ten scenarios across Blocks 3 to 8, each needing two or more lessons, with a marking key.</p></a></li>
+  <li><a class="card" href="artifacts/design-interview-rubric.md"><h2>Design interview rubric</h2>
+    <p>A scored 45-minute mock interview on the nine system-design questions AI roles keep asking.</p></a></li>
   <li><a class="card" href="things-to-know.html"><h2>Things to Know</h2>
     <p>Every compressed, load-bearing line in the course, collected and linked back to the lesson that earns it.</p></a></li>
   <li><a class="card" href="artifacts/sop/README.md"><h2>SOP checklists</h2>

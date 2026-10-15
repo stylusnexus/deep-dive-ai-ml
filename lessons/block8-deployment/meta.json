@@ -48,6 +48,18 @@
       "title": "Managed Cloud Surfaces",
       "file": "lsn-1788100000005-managed-cloud-surfaces.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1788100000006",
+      "title": "When the Provider Goes Down",
+      "file": "lsn-1788100000006-when-the-provider-goes-down.html",
+      "source": "skill"
+    },
+    {
+      "id": "lsn-1788100000007",
+      "title": "Designing the Whole System: The Interview Questions",
+      "file": "lsn-1788100000007-designing-the-whole-system.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -77,6 +89,16 @@
       "starred": false
     },
     "lsn-1788100000005": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788100000006": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1788100000007": {
       "viewed": false,
       "completed": false,
       "starred": false

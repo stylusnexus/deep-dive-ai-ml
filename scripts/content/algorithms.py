@@ -780,7 +780,7 @@ LESSONS = [
       ("Mining of Massive Datasets", "Leskovec, Rajaraman & Ullman",
        "Chapter 3 on locality-sensitive hashing is the theoretical ancestor of everything in this lesson. Free online, and worth it for the intuition about why approximate methods work at all."),
     ]),
-    ("related", ["embeddings-and-retrieval", "ranking-and-hybrid-retrieval", "measuring-retrieval", "clustering-and-knn"]),
+    ("related", ["embeddings-and-retrieval", "ranking-and-hybrid-retrieval", "measuring-retrieval", "retrieval-at-scale"]),
     ("links", [
       ("pgvector indexing", "https://github.com/pgvector/pgvector",
        "HNSW and IVFFlat in Postgres, with the parameters and their recall implications."),

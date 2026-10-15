@@ -512,3 +512,31 @@ Repeat, discard warmup, report the spread
 Bedrock
 Foundry
 Vertex AI
+1 · Design a production-ready RAG system
+2 · RAG or fine-tuning?
+3 · Reduce latency without hurting quality
+4 · What if the provider goes down?
+5 · Evaluate an AI system
+6 · Where to add caching
+7 · Prevent hallucinations
+8 · What to monitor
+9 · Scale to millions of documents
+Compress
+Degraded
+Hard down
+How would I evaluate after deployment?
+How would I reduce latency?
+How would retrieval work?
+Partial
+Partition by metadata
+Shard across machines
+Slow
+Store less
+Throttled
+Two stages
+What happens if OpenAI goes down?
+Where would I store documents?
+A gateway
+A prompt per provider
+A record of who answered
+One narrow interface

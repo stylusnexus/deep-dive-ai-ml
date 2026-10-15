@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Designing the Whole System: The Interview Questions</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 8 of 8</span>
+  <h1>Designing the Whole System: The Interview Questions</h1>
+  <p class="subtitle">Nine questions that keep coming up, a drawing from query to answer, and where this course teaches each part.</p>
+
+  <p>A system-design question for an AI role is rarely about a framework. The interviewer wants to hear how you think: what you ask first, what you draw, where you expect it to fail and how you would know. The same questions recur. This lesson answers each in the shape a good answer takes, and points to the lesson that holds the detail. Nothing here is new material; it is the map from the questions to the course.</p>
+  <h2>Start with numbers, not boxes</h2>
+  <p>Before drawing anything, ask five things, because every later choice depends on them: how many documents and how often they change; how many queries a second; the latency a user will tolerate; what a wrong answer costs; and who may see which document. An answer that begins with &ldquo;it depends on these five&rdquo; is already ahead of one that begins with a vector database.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 330" role="img" aria-label="A production retrieval-augmented generation architecture from user query to final response, with ingestion and observability"><defs><marker id="ds" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>
+<rect x="8" y="14" width="86" height="46" rx="6" class="d-box"/><text x="51" y="34" class="d-label-b" text-anchor="middle">User</text><text x="51" y="50" class="d-label-sm" text-anchor="middle">query</text>
+<rect x="108" y="14" width="96" height="46" rx="6" class="d-box"/><text x="156" y="34" class="d-label-b" text-anchor="middle">Gateway</text><text x="156" y="50" class="d-label-sm" text-anchor="middle">auth, limits</text>
+<rect x="218" y="14" width="96" height="46" rx="6" class="d-box-accent"/><text x="266" y="34" class="d-label-b" text-anchor="middle">Cache</text><text x="266" y="50" class="d-label-sm" text-anchor="middle">exact, then similar</text>
+<rect x="328" y="14" width="96" height="46" rx="6" class="d-box"/><text x="376" y="34" class="d-label-b" text-anchor="middle">Rewrite</text><text x="376" y="50" class="d-label-sm" text-anchor="middle">query, route</text>
+<rect x="438" y="14" width="96" height="46" rx="6" class="d-box"/><text x="486" y="34" class="d-label-b" text-anchor="middle">Retrieve</text><text x="486" y="50" class="d-label-sm" text-anchor="middle">hybrid, filtered</text>
+<rect x="548" y="14" width="84" height="46" rx="6" class="d-box"/><text x="590" y="34" class="d-label-b" text-anchor="middle">Rerank</text><text x="590" y="50" class="d-label-sm" text-anchor="middle">top few</text>
+<path d="M94 37 L108 37" class="d-arrow" marker-end="url(#ds)"/><path d="M204 37 L218 37" class="d-arrow" marker-end="url(#ds)"/><path d="M314 37 L328 37" class="d-arrow" marker-end="url(#ds)"/><path d="M424 37 L438 37" class="d-arrow" marker-end="url(#ds)"/><path d="M534 37 L548 37" class="d-arrow" marker-end="url(#ds)"/>
+<path d="M590 60 L590 96 L486 96 L486 110" class="d-arrow" marker-end="url(#ds)"/>
+<rect x="408" y="110" width="156" height="46" rx="6" class="d-box"/><text x="486" y="130" class="d-label-b" text-anchor="middle">Assemble context</text><text x="486" y="146" class="d-label-sm" text-anchor="middle">budget, order, cite</text>
+<path d="M408 133 L370 133" class="d-arrow" marker-end="url(#ds)"/>
+<rect x="214" y="110" width="156" height="46" rx="6" class="d-box-good"/><text x="292" y="130" class="d-label-b" text-anchor="middle">Generate</text><text x="292" y="146" class="d-label-sm" text-anchor="middle">deadline, fallback ladder</text>
+<path d="M214 133 L176 133" class="d-arrow" marker-end="url(#ds)"/>
+<rect x="20" y="110" width="156" height="46" rx="6" class="d-box-warn"/><text x="98" y="130" class="d-label-b" text-anchor="middle">Check</text><text x="98" y="146" class="d-label-sm" text-anchor="middle">grounded? else refuse</text>
+<path d="M98 156 L98 176" class="d-arrow" marker-end="url(#ds)"/><text x="108" y="172" class="d-label-sm">answer with sources</text>
+<rect x="20" y="214" width="190" height="46" rx="6" class="d-box"/><text x="115" y="234" class="d-label-b" text-anchor="middle">Ingestion</text><text x="115" y="250" class="d-label-sm" text-anchor="middle">parse, chunk, embed, version</text>
+<path d="M210 237 L286 237 L286 290" class="d-arrow" marker-end="url(#ds)"/>
+<rect x="226" y="290" width="180" height="32" rx="6" class="d-box-accent"/><text x="316" y="310" class="d-label-b" text-anchor="middle">Index</text>
+<rect x="430" y="214" width="196" height="108" rx="6" class="d-box"/><text x="528" y="238" class="d-label-b" text-anchor="middle">Evidence store</text><text x="528" y="258" class="d-label-sm" text-anchor="middle">traces, scores, costs,</text><text x="528" y="274" class="d-label-sm" text-anchor="middle">cache hits, fallback rung,</text><text x="528" y="290" class="d-label-sm" text-anchor="middle">grounding failures</text>
+<text x="316" y="282" class="d-label-sm" text-anchor="middle">read by Retrieve at query time</text>
+</svg><figcaption>One query, left to right: guard it, try the cheap exits, retrieve and rerank, generate under a deadline with a fallback, check the answer against its sources. The ingestion path on the bottom feeds the index, and everything writes traces to the evidence store.</figcaption></figure>
+  <h2>The nine questions</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">1 · Design a production-ready RAG system</div><div><div class="roadmap-title">Draw the figure above, then defend each box</div><div class="roadmap-desc">State the five numbers first. Draw ingestion and query paths separately. Say what fails at each box, and name what you would measure. The build is in <em>building-a-rag-system</em>, the retrieval stages in <em>ranking-and-hybrid-retrieval</em> and <em>transforming-the-query</em>, and the serving side in <em>serving-one-yourself</em>.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2 · RAG or fine-tuning?</div><div><div class="roadmap-title">RAG for knowledge, tuning for behaviour</div><div class="roadmap-desc">Facts that change, must be cited or must be access-controlled belong in retrieval. A consistent format, tone or narrow skill belongs in tuning, and usually only after prompting and retrieval have been measured. This course ran the experiment: a tuned adapter lost to a lookup table. See <em>when-fine-tuning-is-wrong</em>.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3 · Reduce latency without hurting quality</div><div><div class="roadmap-title">Find which phase is slow before touching anything</div><div class="roadmap-desc">Time to first token is prefill and grows with what you send, so retrieve fewer, better chunks and keep the prompt prefix stable. Throughput is decode. Stream the answer, rerank a small shortlist, and measure quality on your eval set after every change. See <em>latency-and-caching</em>.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4 · What if the provider goes down?</div><div><div class="roadmap-title">A ladder, a clock and a rehearsal</div><div class="roadmap-desc">Classify the failure, fail over on a deadline with a circuit breaker, walk down tested fallbacks and end at the retrieved passages or an honest error. See <em>when-the-provider-goes-down</em> and <em>managed-cloud-surfaces</em>.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5 · Evaluate an AI system</div><div><div class="roadmap-title">Separate the numbers, on your own data</div><div class="roadmap-desc">Report index recall, retrieval quality, groundedness and correctness separately, on a private gold set, with a non-completion column and a check that a difference is bigger than noise. See <em>where-evaluation-lives</em>, <em>eval-data-you-can-trust</em>, <em>is-the-difference-real</em> and the Project 2 report.</div></div></div><div class="roadmap-item"><div class="roadmap-num">6 · Where to add caching</div><div><div class="roadmap-title">Cheapest and safest first</div><div class="roadmap-desc">An exact-match answer cache, then provider prompt caching with the stable prefix first, then a similarity cache only where a wrong match is cheap and tenants never share it. See <em>latency-and-caching</em>.</div></div></div><div class="roadmap-item"><div class="roadmap-num">7 · Prevent hallucinations</div><div><div class="roadmap-title">You cannot, so you make them detectable</div><div class="roadmap-desc">Ground the answer in retrieved text, require citations, check each claim against its source, refuse when retrieval found nothing, and measure groundedness. See <em>hallucination-and-grounding</em> and <em>measuring-retrieval</em>.</div></div></div><div class="roadmap-item"><div class="roadmap-num">8 · What to monitor</div><div><div class="roadmap-title">Is it up, and is it right?</div><div class="roadmap-desc">Latency percentiles, error and fallback rates, cost per request and cache hit rate, plus a scheduled quality measurement on a fixed set, because drift shows up there first. See <em>after-it-ships</em>, <em>drift</em> and <em>telemetry-and-instrumentation</em>.</div></div></div><div class="roadmap-item"><div class="roadmap-num">9 · Scale to millions of documents</div><div><div class="roadmap-title">Do the memory sum, then partition</div><div class="roadmap-desc">Compute bytes per vector times rows, compress and rerank, partition by tenant or source, shard only when needed, and plan the re-index for the day the embedding model changes. See <em>retrieval-at-scale</em> and <em>vector-search-algorithms</em>.</div></div></div></div>
+  <h2>The follow-ups an interviewer asks in the room</h2>
+  <p>Five follow-ups are worth rehearsing, because they come up mid-discussion. Four are the list above in the first person. One is new, and it is the one people answer worst.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Where would I store documents?</div><div><div class="roadmap-title">Three stores, because three things need keeping</div><div class="roadmap-desc">Keep the <strong>original files</strong> in immutable, versioned object storage, so you can re-parse them. Keep the <strong>chunks, their metadata and their embeddings</strong> in the index, with the embedding model's name and version on every row. Keep <strong>who may see what</strong> as metadata on the chunk, applied as a filter at query time. This course keeps the index in Postgres with pgvector because the filter and the vectors then share one planner. See <em>vector-search-algorithms</em>.</div></div></div><div class="roadmap-item"><div class="roadmap-num">How would retrieval work?</div><div><div class="roadmap-title">Rewrite, hybrid search, rerank, then cite</div><div class="roadmap-desc">Transform the query, run keyword and vector search together with the access filter, fuse by rank, rerank a short list and pass the top few chunks with their sources. See <em>transforming-the-query</em> and <em>ranking-and-hybrid-retrieval</em>.</div></div></div><div class="roadmap-item"><div class="roadmap-num">How would I reduce latency?</div><div><div class="roadmap-title">Same as question 3</div><div class="roadmap-desc">Find the slow phase, send fewer tokens, stream, rerank less, cache the safe things.</div></div></div><div class="roadmap-item"><div class="roadmap-num">What happens if OpenAI goes down?</div><div><div class="roadmap-title">Same as question 4, for any provider</div><div class="roadmap-desc">Deadline, breaker, tested fallbacks, retrieved passages as the last useful answer.</div></div></div><div class="roadmap-item"><div class="roadmap-num">How would I evaluate after deployment?</div><div><div class="roadmap-title">Questions 5 and 8 together</div><div class="roadmap-desc">A fixed gold set re-run on a schedule, plus live traces sampled and scored, because a deployed system drifts and the first sign is rarely an error.</div></div></div></div>
+  <p>One more request is worth practising: <em>draw the complete architecture from user query to final response</em>. It is the figure above. Practise it on a blank page: the order of the boxes matters less than saying aloud, for each one, what it protects against.</p>
+  <h2>How to give the answer</h2>
+  <ul><li>Ask the five numbers before drawing. If the interviewer will not give them, state your assumptions aloud and carry on.</li><li>Put the measurement next to every decision. &ldquo;I would add a reranker&rdquo; is a guess; &ldquo;I would add a reranker if recall at 20 is good and precision at 5 is not&rdquo; is a design.</li><li>Name the failure of your own design before the interviewer finds it.</li><li>Say what you would build first, and what you would leave out until a measurement asked for it.</li></ul>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A design answer is a diagram plus, for every box, what it protects against and how you would know it failed.</p><p class="know-why">Naming components shows you have read about them. Naming the failure each one prevents and the number that would reveal it shows you can operate one, which is what the question is testing.</p><p class="know-eg"><span class="know-eg-label">For example</span>Asked where to add a cache, a weak answer names a product. A strong one says: exact-match first because it cannot return a wrong answer; prompt caching with the stable prefix first; a similarity cache only for low-stakes questions and never shared across tenants; and measures the hit rate and the wrong-hit rate for each.</p></blockquote>
+  <div class="callout matters"><span class="label">Where the course is thinner</span>The course teaches each part and its failure modes against runnable projects. It does not give you practice at saying them aloud under time pressure. Projects 2 and 4 are the best raw material: explain their trade-offs out loud, and time yourself drawing the figure above from memory.</div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788100000006-when-the-provider-goes-down.html">When the Provider Goes Down</a><span class="link-note">Failing over is a design with five rungs, a clock and a test, not a second API key in an environment variable.</span></li><li><a href="../block3-retrieval/lsn-1787600000005-retrieval-at-scale.html">Retrieval at Scale: Millions of Documents</a><span class="rel-set">Block 3 · Retrieval and Agentic RAG</span><span class="link-note">What breaks first is rarely the search. It is memory, the filter, the re-index and the slowest shard.</span></li><li><a href="lsn-1788100000003-after-it-ships.html">After It Ships</a><span class="link-note">What to watch, what to wake someone for, and the difference between the service being up and the service being right.</span></li><li><a href="lsn-1788100000005-managed-cloud-surfaces.html">Managed Cloud Surfaces</a><span class="link-note">Calling a model through Amazon Bedrock, Google Vertex AI or Microsoft Foundry keeps the request in your hands and the capacity, the cache and the calendar in the provider's.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. An interviewer says &amp;ldquo;design a RAG system&amp;rdquo;. What should you do first?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Name a vector database</div>
+      <div class="quiz-opt">Ask for the corpus size, query rate, latency budget, cost of an error and access rules</div>
+      <div class="quiz-opt">Start with the prompt</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Which fact most clearly points to retrieval rather than fine-tuning?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">The answers must follow a fixed JSON format</div>
+      <div class="quiz-opt">The facts change weekly and must be cited</div>
+      <div class="quiz-opt">The tone must match the brand</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Which cache is safest to add first?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A similarity cache shared across customers</div>
+      <div class="quiz-opt">An exact-match answer cache</div>
+      <div class="quiz-opt">A cache of embeddings only</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. Why report index recall, retrieval quality, groundedness and correctness separately?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">A single score hides which stage is failing</div>
+      <div class="quiz-opt">It makes the report longer</div>
+      <div class="quiz-opt">Providers require it</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>
