@@ -76,7 +76,7 @@ LESSONS = [
 
     ("callout", "pitfall", "Streaming changes what a failure looks like",
      "<p>A streamed response can fail after you have already shown the user half an answer. There is no clean status code for that — the connection simply stops. Decide in advance whether a truncated stream is discarded, retried from the start, or kept with a marker, and make sure the answer is not \"whatever the client library happens to do\", because that is usually to leave the partial text on screen looking complete.</p>"),
-    ("related", ["after-it-ships", "where-the-money-goes", "serving-one-yourself", "routing-and-escalation"]),
+    ("related", ["after-it-ships", "where-the-money-goes", "when-the-provider-goes-down", "routing-and-escalation"]),
     ("quiz", [
       ("Which failure category most needs idempotency rather than a retry policy?",
        ["429, because the rate limit may persist across retries",
@@ -404,6 +404,193 @@ LESSONS = [
       ("A team picks the Vertex AI global endpoint to reduce 429 errors. What does it give up?", ["Access to Gemini models", "The guarantee of where machine-learning processing happens", "Prompt caching"], 1),
       ("What is the safest way to describe a provider's batch mode on Vertex AI or Foundry?", ["A 24-hour target with no hard real-time guarantee", "A guaranteed 24-hour turnaround", "Always faster than real-time inference"], 0),
       ("Why must a regression suite be re-runnable within the shortest retirement notice you depend on?", ["The provider sets the retirement date and may not extend it, so an unmeasured swap becomes forced", "Retired models are deleted from your account", "Notice periods are set by the customer"], 0),
+    ]),
+  ],
+},
+{
+  "slug": "when-the-provider-goes-down",
+  "title": "When the Provider Goes Down",
+  "subtitle": "Failing over is a design with five rungs, a clock and a test, not a second API key in an environment variable.",
+  "body": [
+    ("p", "Every project in this course depends on a model someone else runs. The first lesson in this block covered one request: classify the status code, retry what is safe, back off with jitter. This lesson covers the other question, the one an interviewer actually asks: <em>what does your system do while the provider is not answering?</em> The honest answer has more parts than &ldquo;switch to another provider&rdquo;, and the first part is that &ldquo;down&rdquo; is rarely what happens."),
+
+    ("h2", "Five ways a provider fails, and only one of them is an outage"),
+    ("terms", [
+      ("Hard down", "Connection refused, 5xx on every call", "The case everyone designs for, and the rarest. It is also the only one where switching immediately is obviously right."),
+      ("Throttled", "429, or a quota you did not know you had", "The provider is up and is refusing you. Switching providers does not fix a quota problem; it moves the same traffic somewhere that has its own quota and its own bill."),
+      ("Slow", "Answers arrive, after a timeout you set", "The most common failure and the hardest to see. Nothing errors. The p99 latency has doubled and every request waits for it."),
+      ("Partial", "One model, one region or one feature fails", "The status page says operational. Your model in your region is the part that is not. The fix is usually another model or region at the same provider, not another provider."),
+      ("Degraded", "It answers, and the answers got worse", "A silent model update, a changed safety filter, a structured-output mode that now truncates. No error code exists for this, so no failover trigger fires. Only your own evaluation notices."),
+    ]),
+    ("p", "A failover design is a table of these five against a response. If the plan only has a column for the first one, it is a plan for the failure that rarely occurs."),
+
+    ("figure", "A request walks down the ladder only as far as it has to. Each rung changes something the caller may depend on, so each one needs to be chosen, evaluated and exercised before the day it is needed.", '''<svg viewBox="0 0 640 330" role="img" aria-label="The fallback ladder: primary model, same model in another region, another provider, smaller model, cached or retrieval-only answer, honest error"><defs><marker id="fo" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>
+<rect x="14" y="12" width="250" height="40" rx="7" class="d-box-good"/><text x="28" y="37" class="d-label-b">1 · Primary model</text>
+<rect x="14" y="66" width="250" height="40" rx="7" class="d-box"/><text x="28" y="91" class="d-label-b">2 · Same model, other region</text>
+<rect x="14" y="120" width="250" height="40" rx="7" class="d-box"/><text x="28" y="145" class="d-label-b">3 · Another provider, same tier</text>
+<rect x="14" y="174" width="250" height="40" rx="7" class="d-box"/><text x="28" y="199" class="d-label-b">4 · Smaller or local model</text>
+<rect x="14" y="228" width="250" height="40" rx="7" class="d-box-warn"/><text x="28" y="253" class="d-label-b">5 · Stored answer or passages only</text>
+<rect x="14" y="282" width="250" height="40" rx="7" class="d-box-warn"/><text x="28" y="307" class="d-label-b">6 · A plain, honest error</text>
+<path d="M139 52 L139 66" class="d-arrow" marker-end="url(#fo)"/><path d="M139 106 L139 120" class="d-arrow" marker-end="url(#fo)"/><path d="M139 160 L139 174" class="d-arrow" marker-end="url(#fo)"/><path d="M139 214 L139 228" class="d-arrow" marker-end="url(#fo)"/><path d="M139 268 L139 282" class="d-arrow" marker-end="url(#fo)"/>
+<text x="290" y="36" class="d-label-sm">Behaviour you tuned the prompt against.</text>
+<text x="290" y="90" class="d-label-sm">Same behaviour; check residency and quota.</text>
+<text x="290" y="144" class="d-label-sm">Different behaviour, different tool-call and</text><text x="290" y="158" class="d-label-sm">JSON quirks, a different data agreement.</text>
+<text x="290" y="198" class="d-label-sm">Lower quality; some tasks now fail outright.</text>
+<text x="290" y="252" class="d-label-sm">No generation: reuse an earlier answer, or return</text><text x="290" y="266" class="d-label-sm">the retrieved passages with a notice.</text>
+<text x="290" y="306" class="d-label-sm">Better than a confident wrong answer.</text>
+</svg>'''),
+
+    ("h2", "Decide on a clock, not on an error"),
+    ("p", "Failing over on errors alone misses the slow case entirely, because a slow provider returns no error. The trigger that works is a deadline: every request gets a time budget, measured from the p99 you have observed, and a request that exceeds it moves down a rung. Set the deadline at the p99 you measured and about one healthy request in a hundred still moves down a rung; set it below the median and the fallback becomes your primary path. Set it far above and every user waits through the failure before anything happens."),
+    ("p", "A circuit breaker is what stops that wait repeating. After a run of consecutive failures it stops sending to the failing rung for a cool-down, then lets one probe request through, and closes again only when the probe succeeds. Without it, a provider that hangs for thirty seconds costs <em>every</em> request thirty seconds before it falls back, which is the outage nobody wrote a monitor for."),
+    ("know",
+     "Fail over on a measured deadline, and trip a breaker so later requests skip the broken rung.",
+     "An error code only exists for the failures that announce themselves. A slow or degraded provider announces nothing, and without a breaker each request pays the full timeout again before reaching the fallback.",
+     "A provider starts taking 30 seconds to respond instead of 2. With a 30-second timeout and no breaker, every user waits 30 seconds and then gets the fallback anyway. With a 6-second deadline and a breaker that opens after five consecutive timeouts, the breaker only learns of each failure when a deadline expires. If requests arrive one at a time, the first five users wait 6 seconds each. If they arrive together, everyone who arrives in those first 6 seconds waits too. Once the breaker is open, requests go straight to the fallback, apart from one probe after each cool-down."),
+    ("callout", "pitfall", "A 429 is not a reason to switch provider",
+     "A throttle means you sent more than you may. Sending the same traffic to a second provider doubles the places you can be throttled and the places you are billed, and can push the second provider over its own limit at the worst moment. Back off, shed the lowest-value traffic, or queue it. Fail over for hard-down and slow; treat throttling as a capacity problem."),
+
+    ("h2", "A fallback is a different system"),
+    ("p", "The whole risk of failover sits in a single assumption: that the next rung behaves like the one above it. A different provider's model follows a different instruction style, formats tool calls differently, and fails differently on your structured-output schema. A prompt tuned for one is not tuned for the other. The first time the fallback runs should not be during an outage."),
+    ("ul", [
+      "<strong>Evaluate every rung on your own set.</strong> Run the same private eval set through each fallback and record the score and the non-completion rate, as in the one-set-many-models lesson. Decide in advance which tasks are allowed to degrade and which must refuse instead.",
+      "<strong>Check the data agreement.</strong> A second provider may sit in another region, under other retention terms, or outside what your customers consented to. Failing over silently can be a compliance event.",
+      "<strong>Keep it alive.</strong> A fallback called rarely can be retired by its provider before anyone notices. Send it a small share of real or shadow traffic so the credentials, quota and model name are known to work.",
+      "<strong>Watch the cost.</strong> A larger fallback model can multiply the bill during exactly the hours when you are least watching it. Set a budget cap on the fallback path.",
+    ]),
+    ("know",
+     "A fallback you have never run on real traffic is a guess about how your system behaves.",
+     "Each rung differs from the one above it in tool-call format, output shape, quality, residency, quota and price. None of those differences shows up until a request is actually sent, and during an outage is the worst time to discover them.",
+     "A team keeps a second provider configured and never calls it. When the primary degrades, the fallback returns a tool call in a different shape, the parser rejects it, and every request fails twice: once at the provider and once in the code written to handle that."),
+
+    ("h2", "Switching providers is an interface problem first"),
+    ("p", "Moving from one AI provider to another fails in the plumbing before it fails in the model. Request shapes differ, and so do the way a system prompt is passed, how tools are declared, what a tool call looks like when it comes back, how a stop reason is named and how usage is counted. Code that calls one provider's client directly in forty places cannot fall back to another without editing all forty."),
+    ("terms", [
+      ("One narrow interface", "Your code calls yours, not theirs", "Define a small function of your own, such as <code>complete(messages, tools, schema, deadline)</code>, and put each provider behind an adapter that translates in both directions. The fallback ladder then becomes a list of adapters, and nothing else in the system knows which one answered."),
+      ("A gateway", "The same idea, run as a service", "A proxy that exposes one API and routes to several providers, with the retry, deadline and breaker logic in one place. It saves writing adapters and adds a service that is now itself a single point of failure, so it needs its own fallback path."),
+      ("A prompt per provider", "Portability is tested, not assumed", "Keep the prompt, the tool definitions and the output schema as data you can vary per rung. Evaluate each pairing on your own set. A prompt that scores well on one model can score noticeably lower on another with identical wording."),
+      ("A record of who answered", "Every response names its rung", "Log the provider, model and version on every request. Without it a quality drop during a failover is indistinguishable from a bug, and the cost report cannot attribute the spend."),
+    ]),
+    ("callout", "matters", "Failover is also a contract and a security question",
+     "A second provider needs its own agreement, its own key held in your secret store, its own data-retention terms and its own entry in your list of subprocessors. The key has to be live and the quota non-zero before the day you need it. An unsigned or unfunded fallback is a diagram, not a fallback."),
+
+    ("h2", "Streaming makes the choice earlier"),
+    ("p", "Once the first token has reached the user you cannot switch models without showing them two answers. Decide before streaming begins: wait for the first token under a short deadline, and if it does not arrive, fall back then. A failure after streaming has started is a different case, and the honest handling is to end the response with a visible notice rather than splice in a second model's answer."),
+
+    ("h2", "The rung people forget: do not generate"),
+    ("p", "For a RAG system the cheapest, safest fallback is not another model. It is to skip generation and return what retrieval already found: the top passages, their sources and a notice that the summary is unavailable. The user still gets the evidence. An exact-match cache of earlier answers is the same idea, and it carries none of the false-match risk of a similarity cache. Both avoid asking a second model to do a job it was never evaluated for. Label the reply, though. A <code>200</code> that carries passages looks like success to any client that checks only the status code, so make the degraded case opt-in, keep the passages out of the field a client would display as the answer, and add a flag the caller has to read. Project 4 does exactly this."),
+
+    ("h2", "What to measure"),
+    ("ul", [
+      "Time to detect: how long between the first failure and the breaker opening.",
+      "The share of traffic served by each rung, per hour. A rung that should be rare and is not is the alert.",
+      "Quality of each rung on the eval set, re-run on a schedule, because a fallback model changes under you too.",
+      "A recovery drill: switch the primary off on purpose in a test environment and read the trace.",
+    ]),
+    ("links", [
+      ("Google SRE Book: Handling Overload", "https://sre.google/sre-book/handling-overload/", "Why retrying and failing over can make an overload worse, and what load shedding is for."),
+      ("Google SRE Book: Addressing Cascading Failures", "https://sre.google/sre-book/addressing-cascading-failures/", "How one failing dependency becomes a system-wide failure, and the timeout and breaker patterns that stop it."),
+      ("Martin Fowler: Circuit Breaker", "https://martinfowler.com/bliki/CircuitBreaker.html", "The closed, open and half-open states in two screens."),
+    ]),
+    ("related", ["calling-an-api-you-do-not-control", "managed-cloud-surfaces", "after-it-ships", "routing-and-escalation"]),
+    ("quiz", [
+      ("A provider's responses start taking 30 seconds and return no errors. What detects it?",
+       ["A failover rule that triggers on 5xx status codes",
+        "A per-request deadline plus a circuit breaker",
+        "The provider's status page"], 1),
+      ("You hit repeated 429s from your primary provider. What is the best first response?",
+       ["Send the same traffic to a second provider immediately",
+        "Back off or shed the lowest-value traffic, because a throttle is a capacity problem",
+        "Raise the request timeout"], 1),
+      ("Why must a fallback model be evaluated before the outage?",
+       ["Because it differs in tool-call shape, quality and behaviour, and nothing shows that until it is run",
+        "Because fallback models are always cheaper",
+        "Because providers require it"], 0),
+      ("For a RAG system with the model unavailable, which fallback needs the least new evaluation?",
+       ["A second provider's model",
+        "Returning the retrieved passages with a notice, with no generation",
+        "A smaller local model"], 1),
+    ]),
+  ],
+},
+{
+  "slug": "designing-the-whole-system",
+  "title": "Designing the Whole System: The Interview Questions",
+  "subtitle": "Nine questions that keep coming up, a drawing from query to answer, and where this course teaches each part.",
+  "body": [
+    ("p", "A system-design question for an AI role is rarely about a framework. The interviewer wants to hear how you think: what you ask first, what you draw, where you expect it to fail and how you would know. The same questions recur. This lesson answers each in the shape a good answer takes, and points to the lesson that holds the detail. Nothing here is new material; it is the map from the questions to the course."),
+
+    ("h2", "Start with numbers, not boxes"),
+    ("p", "Before drawing anything, ask five things, because every later choice depends on them: how many documents and how often they change; how many queries a second; the latency a user will tolerate; what a wrong answer costs; and who may see which document. An answer that begins with &ldquo;it depends on these five&rdquo; is already ahead of one that begins with a vector database."),
+
+    ("figure", "One query, left to right: guard it, try the cheap exits, retrieve and rerank, generate under a deadline with a fallback, check the answer against its sources. The ingestion path on the bottom feeds the index, and everything writes traces to the evidence store.", '''<svg viewBox="0 0 640 330" role="img" aria-label="A production retrieval-augmented generation architecture from user query to final response, with ingestion and observability"><defs><marker id="ds" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>
+<rect x="8" y="14" width="86" height="46" rx="6" class="d-box"/><text x="51" y="34" class="d-label-b" text-anchor="middle">User</text><text x="51" y="50" class="d-label-sm" text-anchor="middle">query</text>
+<rect x="108" y="14" width="96" height="46" rx="6" class="d-box"/><text x="156" y="34" class="d-label-b" text-anchor="middle">Gateway</text><text x="156" y="50" class="d-label-sm" text-anchor="middle">auth, limits</text>
+<rect x="218" y="14" width="96" height="46" rx="6" class="d-box-accent"/><text x="266" y="34" class="d-label-b" text-anchor="middle">Cache</text><text x="266" y="50" class="d-label-sm" text-anchor="middle">exact, then similar</text>
+<rect x="328" y="14" width="96" height="46" rx="6" class="d-box"/><text x="376" y="34" class="d-label-b" text-anchor="middle">Rewrite</text><text x="376" y="50" class="d-label-sm" text-anchor="middle">query, route</text>
+<rect x="438" y="14" width="96" height="46" rx="6" class="d-box"/><text x="486" y="34" class="d-label-b" text-anchor="middle">Retrieve</text><text x="486" y="50" class="d-label-sm" text-anchor="middle">hybrid, filtered</text>
+<rect x="548" y="14" width="84" height="46" rx="6" class="d-box"/><text x="590" y="34" class="d-label-b" text-anchor="middle">Rerank</text><text x="590" y="50" class="d-label-sm" text-anchor="middle">top few</text>
+<path d="M94 37 L108 37" class="d-arrow" marker-end="url(#ds)"/><path d="M204 37 L218 37" class="d-arrow" marker-end="url(#ds)"/><path d="M314 37 L328 37" class="d-arrow" marker-end="url(#ds)"/><path d="M424 37 L438 37" class="d-arrow" marker-end="url(#ds)"/><path d="M534 37 L548 37" class="d-arrow" marker-end="url(#ds)"/>
+<path d="M590 60 L590 96 L486 96 L486 110" class="d-arrow" marker-end="url(#ds)"/>
+<rect x="408" y="110" width="156" height="46" rx="6" class="d-box"/><text x="486" y="130" class="d-label-b" text-anchor="middle">Assemble context</text><text x="486" y="146" class="d-label-sm" text-anchor="middle">budget, order, cite</text>
+<path d="M408 133 L370 133" class="d-arrow" marker-end="url(#ds)"/>
+<rect x="214" y="110" width="156" height="46" rx="6" class="d-box-good"/><text x="292" y="130" class="d-label-b" text-anchor="middle">Generate</text><text x="292" y="146" class="d-label-sm" text-anchor="middle">deadline, fallback ladder</text>
+<path d="M214 133 L176 133" class="d-arrow" marker-end="url(#ds)"/>
+<rect x="20" y="110" width="156" height="46" rx="6" class="d-box-warn"/><text x="98" y="130" class="d-label-b" text-anchor="middle">Check</text><text x="98" y="146" class="d-label-sm" text-anchor="middle">grounded? else refuse</text>
+<path d="M98 156 L98 176" class="d-arrow" marker-end="url(#ds)"/><text x="108" y="172" class="d-label-sm">answer with sources</text>
+<rect x="20" y="214" width="190" height="46" rx="6" class="d-box"/><text x="115" y="234" class="d-label-b" text-anchor="middle">Ingestion</text><text x="115" y="250" class="d-label-sm" text-anchor="middle">parse, chunk, embed, version</text>
+<path d="M210 237 L286 237 L286 290" class="d-arrow" marker-end="url(#ds)"/>
+<rect x="226" y="290" width="180" height="32" rx="6" class="d-box-accent"/><text x="316" y="310" class="d-label-b" text-anchor="middle">Index</text>
+<rect x="430" y="214" width="196" height="108" rx="6" class="d-box"/><text x="528" y="238" class="d-label-b" text-anchor="middle">Evidence store</text><text x="528" y="258" class="d-label-sm" text-anchor="middle">traces, scores, costs,</text><text x="528" y="274" class="d-label-sm" text-anchor="middle">cache hits, fallback rung,</text><text x="528" y="290" class="d-label-sm" text-anchor="middle">grounding failures</text>
+<text x="316" y="282" class="d-label-sm" text-anchor="middle">read by Retrieve at query time</text>
+</svg>'''),
+
+    ("h2", "The nine questions"),
+    ("terms", [
+      ("1 · Design a production-ready RAG system", "Draw the figure above, then defend each box", "State the five numbers first. Draw ingestion and query paths separately. Say what fails at each box, and name what you would measure. The build is in <em>building-a-rag-system</em>, the retrieval stages in <em>ranking-and-hybrid-retrieval</em> and <em>transforming-the-query</em>, and the serving side in <em>serving-one-yourself</em>."),
+      ("2 · RAG or fine-tuning?", "RAG for knowledge, tuning for behaviour", "Facts that change, must be cited or must be access-controlled belong in retrieval. A consistent format, tone or narrow skill belongs in tuning, and usually only after prompting and retrieval have been measured. This course ran the experiment: a tuned adapter lost to a lookup table. See <em>when-fine-tuning-is-wrong</em>."),
+      ("3 · Reduce latency without hurting quality", "Find which phase is slow before touching anything", "Time to first token is prefill and grows with what you send, so retrieve fewer, better chunks and keep the prompt prefix stable. Throughput is decode. Stream the answer, rerank a small shortlist, and measure quality on your eval set after every change. See <em>latency-and-caching</em>."),
+      ("4 · What if the provider goes down?", "A ladder, a clock and a rehearsal", "Classify the failure, fail over on a deadline with a circuit breaker, walk down tested fallbacks and end at the retrieved passages or an honest error. See <em>when-the-provider-goes-down</em> and <em>managed-cloud-surfaces</em>."),
+      ("5 · Evaluate an AI system", "Separate the numbers, on your own data", "Report index recall, retrieval quality, groundedness and correctness separately, on a private gold set, with a non-completion column and a check that a difference is bigger than noise. See <em>where-evaluation-lives</em>, <em>eval-data-you-can-trust</em>, <em>is-the-difference-real</em> and the Project 2 report."),
+      ("6 · Where to add caching", "Cheapest and safest first", "An exact-match answer cache, then provider prompt caching with the stable prefix first, then a similarity cache only where a wrong match is cheap and tenants never share it. See <em>latency-and-caching</em>."),
+      ("7 · Prevent hallucinations", "You cannot, so you make them detectable", "Ground the answer in retrieved text, require citations, check each claim against its source, refuse when retrieval found nothing, and measure groundedness. See <em>hallucination-and-grounding</em> and <em>measuring-retrieval</em>."),
+      ("8 · What to monitor", "Is it up, and is it right?", "Latency percentiles, error and fallback rates, cost per request and cache hit rate, plus a scheduled quality measurement on a fixed set, because drift shows up there first. See <em>after-it-ships</em>, <em>drift</em> and <em>telemetry-and-instrumentation</em>."),
+      ("9 · Scale to millions of documents", "Do the memory sum, then partition", "Compute bytes per vector times rows, compress and rerank, partition by tenant or source, shard only when needed, and plan the re-index for the day the embedding model changes. See <em>retrieval-at-scale</em> and <em>vector-search-algorithms</em>."),
+    ]),
+    ("h2", "The follow-ups an interviewer asks in the room"),
+    ("p", "Five follow-ups are worth rehearsing, because they come up mid-discussion. Four are the list above in the first person. One is new, and it is the one people answer worst."),
+    ("terms", [
+      ("Where would I store documents?", "Three stores, because three things need keeping", "Keep the <strong>original files</strong> in immutable, versioned object storage, so you can re-parse them. Keep the <strong>chunks, their metadata and their embeddings</strong> in the index, with the embedding model's name and version on every row. Keep <strong>who may see what</strong> as metadata on the chunk, applied as a filter at query time. This course keeps the index in Postgres with pgvector because the filter and the vectors then share one planner. See <em>vector-search-algorithms</em>."),
+      ("How would retrieval work?", "Rewrite, hybrid search, rerank, then cite", "Transform the query, run keyword and vector search together with the access filter, fuse by rank, rerank a short list and pass the top few chunks with their sources. See <em>transforming-the-query</em> and <em>ranking-and-hybrid-retrieval</em>."),
+      ("How would I reduce latency?", "Same as question 3", "Find the slow phase, send fewer tokens, stream, rerank less, cache the safe things."),
+      ("What happens if OpenAI goes down?", "Same as question 4, for any provider", "Deadline, breaker, tested fallbacks, retrieved passages as the last useful answer."),
+      ("How would I evaluate after deployment?", "Questions 5 and 8 together", "A fixed gold set re-run on a schedule, plus live traces sampled and scored, because a deployed system drifts and the first sign is rarely an error."),
+    ]),
+    ("p", "One more request is worth practising: <em>draw the complete architecture from user query to final response</em>. It is the figure above. Practise it on a blank page: the order of the boxes matters less than saying aloud, for each one, what it protects against."),
+
+    ("h2", "How to give the answer"),
+    ("ul", [
+      "Ask the five numbers before drawing. If the interviewer will not give them, state your assumptions aloud and carry on.",
+      "Put the measurement next to every decision. &ldquo;I would add a reranker&rdquo; is a guess; &ldquo;I would add a reranker if recall at 20 is good and precision at 5 is not&rdquo; is a design.",
+      "Name the failure of your own design before the interviewer finds it.",
+      "Say what you would build first, and what you would leave out until a measurement asked for it.",
+    ]),
+    ("know",
+     "A design answer is a diagram plus, for every box, what it protects against and how you would know it failed.",
+     "Naming components shows you have read about them. Naming the failure each one prevents and the number that would reveal it shows you can operate one, which is what the question is testing.",
+     "Asked where to add a cache, a weak answer names a product. A strong one says: exact-match first because it cannot return a wrong answer; prompt caching with the stable prefix first; a similarity cache only for low-stakes questions and never shared across tenants; and measures the hit rate and the wrong-hit rate for each."),
+    ("callout", "matters", "Where the course is thinner",
+     "The course teaches each part and its failure modes against runnable projects. It does not give you practice at saying them aloud under time pressure. Projects 2 and 4 are the best raw material: explain their trade-offs out loud, and time yourself drawing the figure above from memory."),
+    ("related", ["building-a-rag-system", "retrieval-at-scale", "when-the-provider-goes-down", "after-it-ships"]),
+    ("quiz", [
+      ("An interviewer says &ldquo;design a RAG system&rdquo;. What should you do first?",
+       ["Name a vector database", "Ask for the corpus size, query rate, latency budget, cost of an error and access rules", "Start with the prompt"], 1),
+      ("Which fact most clearly points to retrieval rather than fine-tuning?",
+       ["The answers must follow a fixed JSON format", "The facts change weekly and must be cited", "The tone must match the brand"], 1),
+      ("Which cache is safest to add first?",
+       ["A similarity cache shared across customers", "An exact-match answer cache", "A cache of embeddings only"], 1),
+      ("Why report index recall, retrieval quality, groundedness and correctness separately?",
+       ["A single score hides which stage is failing", "It makes the report longer", "Providers require it"], 0),
     ]),
   ],
 },

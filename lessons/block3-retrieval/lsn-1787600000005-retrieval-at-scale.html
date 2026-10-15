@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retrieval at Scale: Millions of Documents</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 6 of 6</span>
+  <h1>Retrieval at Scale: Millions of Documents</h1>
+  <p class="subtitle">What breaks first is rarely the search. It is memory, the filter, the re-index and the slowest shard.</p>
+
+  <p>&ldquo;How would you scale this to millions of documents?&rdquo; is usually answered with the name of an index. The nearest-neighbour lesson already covers that choice. This lesson covers the part around it, because at a few million chunks the search algorithm is seldom the first thing to fail. Start with arithmetic, and the shape of the problem appears.</p>
+  <h2>Do the memory sum before choosing anything</h2>
+  <p>A vector index that is fast keeps its vectors in memory. A chunk stored as a 1,024-dimension vector of 32-bit floats takes 1,024 &times; 4 = 4,096 bytes. Ten million of those take 40,960,000,000 bytes, about 41 GB, before the index adds a single link and before the text itself is stored. Half-precision halves it. An eight-bit code takes a quarter. A product-quantized code of 64 bytes per vector takes 640 MB for the same ten million, at a cost in recall that you then have to measure.</p>
+  <div class="callout warning"><span class="label">Every figure above is arithmetic, not a benchmark</span>The byte counts follow from the dimension, the number type and the row count. The 64-byte code is an assumed setting chosen to show scale. How much recall a given compression costs depends on your embeddings and your queries, and only a measurement against exact search on your own sample can say.</div>
+  <figure class="diagram"><svg viewBox="0 0 640 220" role="img" aria-label="Memory for ten million 1024-dimension vectors at four precisions"><rect x="12" y="14" width="600" height="28" rx="4" class="d-fill-red" opacity="0.55"/><text x="20" y="33" class="d-label-sm">float32 · 4,096 bytes per vector · about 41 GB</text>
+<rect x="12" y="60" width="300" height="28" rx="4" class="d-fill-accent" opacity="0.65"/><text x="20" y="79" class="d-label-sm">float16 · 2,048 bytes · about 20 GB</text>
+<rect x="12" y="106" width="150" height="28" rx="4" class="d-fill-accent" opacity="0.65"/><text x="20" y="125" class="d-label-sm">int8 · 1,024 bytes · about 10 GB</text>
+<rect x="12" y="152" width="9" height="28" rx="2" class="d-fill-green" opacity="0.8"/><text x="30" y="171" class="d-label-sm">product-quantized, 64 bytes (assumed) · 640 MB, recall now has to be measured</text>
+<text x="12" y="206" class="d-label-sm">Each row is ten million vectors of 1,024 dimensions. Bar lengths are proportional to bytes per vector.</text>
+</svg><figcaption>Memory is the first wall. The vectors dominate at ten million rows; each compression step moves the line left and moves recall with it.</figcaption></figure>
+  <h2>What each lever buys and costs</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Store less</div><div><div class="roadmap-title">Fewer, better chunks</div><div class="roadmap-desc">Deduplicate near-identical chunks, drop boilerplate such as headers, footers and licence text, and choose a chunk size on purpose. The cheapest vector is the one never stored, and it improves retrieval at the same time.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Compress</div><div><div class="roadmap-title">Smaller numbers per vector</div><div class="roadmap-desc">Lower precision or product quantization shrinks memory. Common practice is to search the compressed vectors for a wide shortlist, then re-score the shortlist with the full-precision vectors, which is meant to recover the lost recall. Measure how much it does on your own index.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Partition by metadata</div><div><div class="roadmap-title">Search one slice, not everything</div><div class="roadmap-desc">Tenant, source, year, language. A query that can only match one customer's documents should only search that customer's partition. This is also the strongest isolation boundary you have.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Shard across machines</div><div><div class="roadmap-title">Split the index, query all, merge</div><div class="roadmap-desc">Each shard returns its own top-k and a merge step picks the global top-k. It adds capacity and adds a coordination cost, and it makes tail latency a property of the slowest shard.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Two stages</div><div><div class="roadmap-title">Cheap candidates, then a better ranker</div><div class="roadmap-desc">Fetch a wide shortlist with the index, then rerank it with a slower, more accurate model, as in the hybrid-retrieval lesson. It lets the first stage run at lower recall settings and still end with a good top five.</div></div></div></div>
+  <h2>The slowest shard sets the latency</h2>
+  <p>When a query fans out to every shard it cannot return until the last one answers. If each shard is slow on one request in a hundred, then with ten shards the chance that at least one is slow on a given query is 1 &minus; 0.99<sup>10</sup>, about 9.6%. The tail you measured on one machine becomes the typical case on ten.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A fanned-out query is as slow as its slowest shard, so the tail you measured on one machine gets worse with every shard you add.</p><p class="know-why">Latency is set by the maximum across shards, not the average. The probability that at least one shard is slow grows with the shard count, even when each shard is individually healthy.</p><p class="know-eg"><span class="know-eg-label">For example</span>Each shard is slow on 1% of requests. With 1 shard, 1% of queries are slow. With 10 shards, 1 &minus; 0.99<sup>10</sup> is about 9.6% of queries slow. With 50, about 39.5%. Partitioning by tenant so most queries touch one shard avoids the multiplication entirely.</p></blockquote>
+  <h2>The filter changes the algorithm</h2>
+  <p>Real queries carry a predicate: this customer, this date range, this document type. With a graph index, filtering <em>after</em> the nearest neighbours are found can leave fewer than k results, and filtering <em>before</em> can leave a graph with holes in it. The more selective the filter, the worse both get, which is why very selective filters are best handled by partitioning, and moderately selective ones by an index that filters while it searches. Test your most selective real filter, not an average one.</p>
+  <h2>Ingestion and the day you change the model</h2>
+  <p>A corpus of millions is never loaded once. Documents arrive, change and get deleted, so the design needs an incremental path, a deletion path that actually removes the vector, and a record of which embedding model produced each one. That last field is the dangerous one. Vectors from two different embedding models are not comparable, so a half-migrated index returns neighbours that look plausible and are wrong.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Changing the embedding model means re-embedding and re-indexing the whole corpus, so build the new index beside the old one and switch when it passes evaluation.</p><p class="know-why">Vectors from different models live in different spaces. Mixing them in one index silently corrupts retrieval, and re-embedding is the one cost that scales with the entire corpus rather than with what changed.</p><p class="know-eg"><span class="know-eg-label">For example</span>A corpus of 10 million chunks averaging 400 tokens is 4 billion tokens to re-embed. The price per token for your embedding model sets the bill; it was not looked up here and is not guessed. The safe plan is a second index built and scored against the gold set, then an alias switched, with the first kept until the second is proven.</p></blockquote>
+  <h2>What to measure before and after</h2>
+  <ul><li>Recall@k against exact search on a sample of real queries, re-run at each scale step. Recall drifts down as a corpus grows, and a setting tuned at 50,000 rows is not guaranteed at 5,000,000.</li><li>Latency at p95 and p99 under your real concurrency, with the real filters applied.</li><li>Index size and memory in the system you will actually run, read from the database rather than estimated.</li><li>Retrieval quality on slices: the newest documents, the rarest sources, the most selective tenants. An aggregate hides the slice that broke.</li></ul>
+  <div class="callout matters"><span class="label">Most corpora are smaller than the question assumes</span>The honest first answer to a scale question is a number: how many chunks, how many queries a second, what latency budget. Forty thousand vectors is exact-search territory. The design above is for the day the measurement says otherwise, not the first day.</div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../algorithms/lsn-1787100000007-vector-search-algorithms.html">Nearest-Neighbour Search at Scale</a><span class="rel-set">Algorithms That Matter Here</span><span class="link-note">Exact search, HNSW, and the recall you quietly trade away for speed.</span></li><li><a href="lsn-1787600000002-measuring-retrieval.html">Measuring Retrieval</a><span class="link-note">Three numbers, measured separately, because they fail independently and have different fixes.</span></li><li><a href="../algorithms/lsn-1787100000008-ranking-and-hybrid-retrieval.html">Ranking and Hybrid Retrieval</a><span class="rel-set">Algorithms That Matter Here</span><span class="link-note">Best Matching 25 (BM25), reciprocal rank fusion and rerankers — why pure vector search is rarely the best answer.</span></li><li><a href="../core-vocabulary/lsn-1787000000002-weights-gguf-quantization.html">Weights, GGUF and Quantization</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">What Q4_K_M actually means, and the trade you're making when you pick it.</span></li></ul></div>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://github.com/pgvector/pgvector" target="_blank" rel="noopener">pgvector: indexing and filtering</a><span class="link-note">HNSW and IVFFlat in Postgres, including how filtering interacts with approximate indexes.</span></li><li><a href="https://arxiv.org/abs/1603.09320" target="_blank" rel="noopener">Efficient and robust ANN search using HNSW (Malkov &amp; Yashunin)</a><span class="link-note">The graph index the memory sum above is about.</span></li><li><a href="https://ieeexplore.ieee.org/document/5432202" target="_blank" rel="noopener">Product Quantization for Nearest Neighbor Search (Jegou et al.)</a><span class="link-note">The original compression method behind the 64-byte code.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. Ten million 1,024-dimension float32 vectors need roughly how much memory for the vectors alone?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">About 410 MB</div>
+      <div class="quiz-opt">About 41 GB</div>
+      <div class="quiz-opt">About 4 TB</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. Each of ten shards is slow on 1% of requests. About what share of fanned-out queries is slow?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">1%</div>
+      <div class="quiz-opt">About 9.6%</div>
+      <div class="quiz-opt">10% exactly</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. You switch embedding models and re-embed only the newly added documents. What happens?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Nothing, since all embeddings are comparable</div>
+      <div class="quiz-opt">Retrieval silently degrades, because the two sets of vectors live in different spaces</div>
+      <div class="quiz-opt">The index rebuilds itself</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. A query can only ever match one customer&#x27;s documents. What is the strongest scaling move?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Add more shards and query all of them</div>
+      <div class="quiz-opt">Partition by customer so the query searches one slice</div>
+      <div class="quiz-opt">Lower the index&#x27;s recall setting</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>

@@ -19,6 +19,7 @@ failure that only you see. A service may assume none of those. Everything in
 | Meaningful `/health` | Reports whether the corpus loaded and the model is reachable, and returns 503 when not |
 | Versioned path | `/v1/ask`, so the contract can change without breaking callers |
 | Refusal to start unconfigured | No `API_KEYS`, no service - better than a default that ships to production |
+| Provider fallback | A model endpoint will fail or stall. `src/resilience.py` walks a ladder of endpoints under a deadline with a circuit breaker, and the last step returns the retrieved passages instead of an error |
 | Generic error responses | An exception message is the cheapest way to leak a path or a hostname |
 
 ## Running it
@@ -55,7 +56,7 @@ The test boundary has three layers:
   authentication, validation, rate limiting, health, corpus identity and a real
   corpus load through the service entry point.
 
-Sixteen tests total, none of which check answer quality - that is Project 2's job
+Thirty-three tests total (the sixteen above, nine for the ladder and breaker in `tests/test_resilience.py`, and eight that run the real service against stub providers in `tests/test_failover.py`), none of which check answer quality - that is Project 2's job
 and it needs a model. The functionality tests check the interface contract: that an
 unauthenticated caller cannot get in, that a wrong key is indistinguishable from a
 missing one, that the rate limit is per key and actually limits, that validation
@@ -104,6 +105,77 @@ in-process rate limiter, the keyword-retrieval scoring - not a claim about model
 latency or deployed capacity. Re-run it against the Render instance with a real
 `GENERATION_ENDPOINTS` before treating the numbers as evidence for production.
 
+## Provider fallback
+
+```bash
+GENERATION_ENDPOINTS=http://primary/v1,http://secondary/v1 \
+GENERATION_DEADLINE_S=60 BREAKER_THRESHOLD=3 BREAKER_COOLDOWN_S=30 \
+  uvicorn src.app:app --port 8000
+```
+
+Each endpoint is one rung, tried in order. A request that errors or exceeds
+`GENERATION_DEADLINE_S` moves down a rung. After `BREAKER_THRESHOLD` consecutive
+failures a rung is skipped for `BREAKER_COOLDOWN_S`, then one probe request is let
+through. Throttling (`429`) counts as a failure of the rung; a real deployment would
+shed load instead, as the lesson explains.
+
+### When every rung fails: a contract callers must read
+
+By default an outage is an error, as it always was: `/v1/ask` returns `503` with a
+`Retry-After` header, and a caller that knows nothing about fallbacks sees a failure.
+
+A caller can opt in to a degraded reply by sending `"allow_degraded": true`. Then, when no
+model answers, the service returns `200` with:
+
+| Field | Value when degraded |
+|---|---|
+| `degraded` | `true` (always `false` on a normal reply) |
+| `rung` | `"retrieval-only"` |
+| `answer` | A one-line notice only. It is safe to display, and it is not an answer |
+| `passages` | The retrieved text, `[{doc_id, text}]`; empty on a normal reply |
+| `grounded` | `false`: no claim was made |
+| `model` | `"none"` |
+| `X-Degraded` header | `retrieval-only`, so a proxy or log can see it without parsing the body |
+
+**Callers that send `allow_degraded: true` must check `degraded` before presenting the
+result.** A `200` here means "the service replied", not "the question was answered".
+The passages are evidence for a person or a downstream step to read, never a summary.
+Leave the flag off if the caller cannot tell the two cases apart; it then gets a `503` it
+can retry.
+
+`/health` reports `503` and `status: "degraded"` while no model can answer, and lists each
+rung's breaker state. A rung that is down is probed with a real one-token completion, once per
+cool-down, because a provider that is overloaded still lists its models. That is one tiny call
+per cool-down per down rung, and none while every rung is healthy. It answers "can this instance serve the full path", and `/v1/ask` answers
+"can this request be served at all". They are allowed to disagree: an orchestrator should
+stop sending *new* traffic to the instance only if it wants full answers.
+
+## Capstone
+
+The graded run for Block 8 and the cumulative exam for Blocks 3, 5 and 8:
+
+```bash
+python3 capstone/run_capstone.py              # retrieval-only, no model needed
+python3 capstone/run_capstone.py --with-model # also scores refusal on unanswerable questions
+```
+
+It needs `requirements.txt` plus `pytest` and `httpx`. It writes
+`capstone/report.md` and `capstone/results.json` and exits non-zero if a test or a
+drill scenario fails. Four parts: the test suite; a failure drill with stub
+providers (healthy, erroring with the breaker open, slow past the deadline, all
+down, recovery after the cooldown); a 29-question gold set in `capstone/gold.jsonl`
+(24 answerable with a known document and fact, 5 unanswerable); and the memory
+arithmetic for a vector index at larger corpora. `bench_serving.py` supplies the
+serving numbers.
+
+The recorded run, retrieval only: the right document came back for 24 of 24
+questions, and the right *fact* for 22 of 24. The two misses (`g16`, `g19`) are the
+instructive ones: retrieval found the right document and the top chunks did not
+contain the answer, which is a chunking and ranking problem rather than a missing
+document. Improving that without breaking the 24, and without adding a dependency
+that changes the image size, is the open task. Refusal on the unanswerable questions
+is not measured without a model.
+
 ## What "done" looks like
 
 - [ ] Intake sheet completed before building
@@ -115,6 +187,7 @@ latency or deployed capacity. Re-run it against the Render instance with a real
 - [x] Serving benchmark run against the real entry point (`bench_serving.py`, not the
       notebook's fixture - see below for what it does and does not prove)
 - [x] Deploy configuration committed (`render.yaml`), secrets not committed
+- [x] Fallback ladder, breaker and retrieval-only last rung, with drill and tests (`capstone/run_capstone.py`)
 - [ ] Deployed to a public URL - a human action, see below
 - [ ] Rate limit verified against the deployed instance
 

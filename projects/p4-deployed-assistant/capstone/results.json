@@ -1,0 +1,146 @@
+{
+  "timestamp": "2026-10-15T01:24:26Z",
+  "tests": {
+    "passed": true,
+    "summary": "39 passed in 27.30s"
+  },
+  "drill": [
+    {
+      "scenario": "healthy primary",
+      "expected": "rung-1",
+      "observed": "rung-1",
+      "pass": true,
+      "ms": 8
+    },
+    {
+      "scenario": "primary erroring, breaker open",
+      "expected": "rung-2",
+      "observed": "rung-2",
+      "pass": true,
+      "primary_calls_after_open": 0
+    },
+    {
+      "scenario": "primary slow, 1s deadline",
+      "expected": "rung-2",
+      "observed": "rung-2",
+      "pass": true,
+      "ms": 1008
+    },
+    {
+      "scenario": "every provider down, default caller",
+      "expected": 503,
+      "observed": 503,
+      "pass": true,
+      "retry_after": "1"
+    },
+    {
+      "scenario": "every provider down, opted in",
+      "expected": "retrieval-only",
+      "observed": "retrieval-only",
+      "pass": true,
+      "ms": 5,
+      "degraded": true,
+      "x_degraded": "retrieval-only",
+      "answer_is_only_a_notice": true,
+      "evidence_in_passages": true
+    },
+    {
+      "scenario": "primary recovers after cooldown",
+      "expected": "rung-1",
+      "observed": "rung-1",
+      "pass": true,
+      "ms": 9
+    }
+  ],
+  "gold": {
+    "mode": "retrieval-only (no model)",
+    "answerable": 24,
+    "document_in_top_k": 24,
+    "fact_in_answer": 22,
+    "unanswerable": 5,
+    "refusal_measured": false,
+    "correct_refusals": null,
+    "misses": [
+      {
+        "id": "g16",
+        "question": "What was fleet availability in Q2 2026?",
+        "expected_doc": "perf-2026-q2",
+        "expected_fact": "94.2 percent",
+        "got": [
+          "inc-2026-014",
+          "inc-2026-021",
+          "perf-2026-q2"
+        ],
+        "kind": "fact"
+      },
+      {
+        "id": "g19",
+        "question": "What was the root cause of the Clyde vibration shutdown in incident 2026-021?",
+        "expected_doc": "inc-2026-021",
+        "expected_fact": "blade root bolt",
+        "got": [
+          "inc-2026-014",
+          "inc-2026-021"
+        ],
+        "kind": "fact"
+      }
+    ]
+  },
+  "corpus_hash": "5cf29b4172f79225943d7316318098230d10c169d68e9e213120389f9612fc70",
+  "scale": [
+    {
+      "chunks": 56,
+      "float32_1024_gb": 0.0,
+      "int8_1024_gb": 0.0,
+      "pq64_assumed_gb": 0.0
+    },
+    {
+      "chunks": 100000,
+      "float32_1024_gb": 0.41,
+      "int8_1024_gb": 0.102,
+      "pq64_assumed_gb": 0.006
+    },
+    {
+      "chunks": 1000000,
+      "float32_1024_gb": 4.096,
+      "int8_1024_gb": 1.024,
+      "pq64_assumed_gb": 0.064
+    },
+    {
+      "chunks": 10000000,
+      "float32_1024_gb": 40.96,
+      "int8_1024_gb": 10.24,
+      "pq64_assumed_gb": 0.64
+    }
+  ],
+  "bench": [
+    {
+      "concurrency": 1,
+      "requests": 32,
+      "throughput_rps": 63.1,
+      "p50_ms": 15.7,
+      "p95_ms": 17.5
+    },
+    {
+      "concurrency": 2,
+      "requests": 32,
+      "throughput_rps": 101.6,
+      "p50_ms": 18.3,
+      "p95_ms": 26.1
+    },
+    {
+      "concurrency": 4,
+      "requests": 32,
+      "throughput_rps": 194.8,
+      "p50_ms": 19.0,
+      "p95_ms": 24.0
+    },
+    {
+      "concurrency": 8,
+      "requests": 32,
+      "throughput_rps": 196.4,
+      "p50_ms": 28.3,
+      "p95_ms": 70.7
+    }
+  ]
+}

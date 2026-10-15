@@ -414,3 +414,20 @@ mlp-patterns|404135e93883|measured in this repo: notebooks/02-classical-ml/05-ml
 mlp-patterns|fb27a2cefbef|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
 mlp-patterns|1ae2ecb05387|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
 mlp-patterns|ae1d0cc3fc38|measured in this repo: notebooks/02-classical-ml/05-mlp-patterns-measured.ipynb, executed outputs
+retrieval-at-scale|4fe9df45ca57|arithmetic: dimension x 4 bytes x rows; the 64-byte code is an assumed setting stated in the lesson
+retrieval-at-scale|06cdc4954b35|arithmetic: dimension x 4 bytes x rows; the 64-byte code is an assumed setting stated in the lesson
+retrieval-at-scale|a682be00a27a|arithmetic: dimension x 4 bytes x rows; the 64-byte code is an assumed setting stated in the lesson
+retrieval-at-scale|1627a6e7405e|arithmetic: 1 - 0.99^n, checked by hand (n=10 gives 9.6%, n=50 gives 39.5%)
+retrieval-at-scale|7c4cf937b10a|hypothetical: an illustrative figure stated as an example in the lesson, not a measurement
+retrieval-at-scale|9347dc50e38b|hypothetical: an illustrative figure stated as an example in the lesson, not a measurement
+retrieval-at-scale|9834be4bfccd|arithmetic: 1 - 0.99^n, checked by hand (n=10 gives 9.6%, n=50 gives 39.5%)
+retrieval-at-scale|2c936c3352f6|arithmetic: 1 - 0.99^n, checked by hand (n=10 gives 9.6%, n=50 gives 39.5%)
+retrieval-at-scale|a468c49f61b9|hypothetical: an illustrative figure stated as an example in the lesson, not a measurement
+retrieval-at-scale|e2995722b631|hypothetical: an illustrative figure stated as an example in the lesson, not a measurement
+when-the-provider-goes-down|f388e1a60b46|standard HTTP status code for too many requests
+when-the-provider-goes-down|9fd333721a29|hypothetical: an illustrative figure stated as an example in the lesson, not a measurement
+when-the-provider-goes-down|19037a07c056|hypothetical: an illustrative figure stated as an example in the lesson, not a measurement
+when-the-provider-goes-down|767c54eae890|hypothetical: an illustrative figure stated as an example in the lesson, not a measurement
+when-the-provider-goes-down|5ac87c74fb1e|standard HTTP status code for success
+when-the-provider-goes-down|d4fb4ccc179c|reworded sentence, same figures as the lesson already cites or arithmetic on them (6 s deadline, five-failure breaker, p99 and percentages); no new measurement
+when-the-provider-goes-down|98f7b14630b0|reworded sentence, same figures as the lesson already cites or arithmetic on them (6 s deadline, five-failure breaker, p99 and percentages); no new measurement

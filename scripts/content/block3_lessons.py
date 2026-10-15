@@ -89,7 +89,7 @@ LESSONS = [
      "A grounded system stops being grounded the moment retrieval returns nothing and the model answers anyway.",
      "The grounding lives in the pipeline, not in the model. If your prompt does not explicitly handle the empty case, the model falls back to its parameters and produces a fluent, uncited, unverifiable answer that looks exactly like the grounded ones.",
      "A support assistant answers a question about a product discontinued before its training cutoff. Retrieval returned nothing, because the product is not in the knowledge base. The answer is confident, plausible, and drawn entirely from training data — indistinguishable in tone from the answers that were genuinely retrieved."),
-    ("related", ["embeddings-and-retrieval", "measuring-retrieval", "ranking-and-hybrid-retrieval", "hallucination-and-grounding"]),
+    ("related", ["embeddings-and-retrieval", "measuring-retrieval", "ranking-and-hybrid-retrieval", "designing-the-whole-system"]),
     ("links", [
       ("Retrieval-Augmented Generation (Lewis et al., 2020)", "https://arxiv.org/abs/2005.11401",
        "The original paper — grounding as an architecture rather than a prompting trick."),
@@ -547,6 +547,77 @@ LESSONS = [
         "A model variant you now maintain, which every base-model upgrade obliges you to produce again",
         "Reduced accuracy compared with recomputation"],
        1),
+    ]),
+  ],
+},
+{
+  "slug": "retrieval-at-scale",
+  "title": "Retrieval at Scale: Millions of Documents",
+  "subtitle": "What breaks first is rarely the search. It is memory, the filter, the re-index and the slowest shard.",
+  "body": [
+    ("p", "&ldquo;How would you scale this to millions of documents?&rdquo; is usually answered with the name of an index. The nearest-neighbour lesson already covers that choice. This lesson covers the part around it, because at a few million chunks the search algorithm is seldom the first thing to fail. Start with arithmetic, and the shape of the problem appears."),
+
+    ("h2", "Do the memory sum before choosing anything"),
+    ("p", "A vector index that is fast keeps its vectors in memory. A chunk stored as a 1,024-dimension vector of 32-bit floats takes 1,024 &times; 4 = 4,096 bytes. Ten million of those take 40,960,000,000 bytes, about 41 GB, before the index adds a single link and before the text itself is stored. Half-precision halves it. An eight-bit code takes a quarter. A product-quantized code of 64 bytes per vector takes 640 MB for the same ten million, at a cost in recall that you then have to measure."),
+    ("callout", "warning", "Every figure above is arithmetic, not a benchmark",
+     "The byte counts follow from the dimension, the number type and the row count. The 64-byte code is an assumed setting chosen to show scale. How much recall a given compression costs depends on your embeddings and your queries, and only a measurement against exact search on your own sample can say."),
+    ("figure", "Memory is the first wall. The vectors dominate at ten million rows; each compression step moves the line left and moves recall with it.", '''<svg viewBox="0 0 640 220" role="img" aria-label="Memory for ten million 1024-dimension vectors at four precisions"><rect x="12" y="14" width="600" height="28" rx="4" class="d-fill-red" opacity="0.55"/><text x="20" y="33" class="d-label-sm">float32 · 4,096 bytes per vector · about 41 GB</text>
+<rect x="12" y="60" width="300" height="28" rx="4" class="d-fill-accent" opacity="0.65"/><text x="20" y="79" class="d-label-sm">float16 · 2,048 bytes · about 20 GB</text>
+<rect x="12" y="106" width="150" height="28" rx="4" class="d-fill-accent" opacity="0.65"/><text x="20" y="125" class="d-label-sm">int8 · 1,024 bytes · about 10 GB</text>
+<rect x="12" y="152" width="9" height="28" rx="2" class="d-fill-green" opacity="0.8"/><text x="30" y="171" class="d-label-sm">product-quantized, 64 bytes (assumed) · 640 MB, recall now has to be measured</text>
+<text x="12" y="206" class="d-label-sm">Each row is ten million vectors of 1,024 dimensions. Bar lengths are proportional to bytes per vector.</text>
+</svg>'''),
+
+    ("h2", "What each lever buys and costs"),
+    ("terms", [
+      ("Store less", "Fewer, better chunks", "Deduplicate near-identical chunks, drop boilerplate such as headers, footers and licence text, and choose a chunk size on purpose. The cheapest vector is the one never stored, and it improves retrieval at the same time."),
+      ("Compress", "Smaller numbers per vector", "Lower precision or product quantization shrinks memory. Common practice is to search the compressed vectors for a wide shortlist, then re-score the shortlist with the full-precision vectors, which is meant to recover the lost recall. Measure how much it does on your own index."),
+      ("Partition by metadata", "Search one slice, not everything", "Tenant, source, year, language. A query that can only match one customer's documents should only search that customer's partition. This is also the strongest isolation boundary you have."),
+      ("Shard across machines", "Split the index, query all, merge", "Each shard returns its own top-k and a merge step picks the global top-k. It adds capacity and adds a coordination cost, and it makes tail latency a property of the slowest shard."),
+      ("Two stages", "Cheap candidates, then a better ranker", "Fetch a wide shortlist with the index, then rerank it with a slower, more accurate model, as in the hybrid-retrieval lesson. It lets the first stage run at lower recall settings and still end with a good top five."),
+    ]),
+
+    ("h2", "The slowest shard sets the latency"),
+    ("p", "When a query fans out to every shard it cannot return until the last one answers. If each shard is slow on one request in a hundred, then with ten shards the chance that at least one is slow on a given query is 1 &minus; 0.99<sup>10</sup>, about 9.6%. The tail you measured on one machine becomes the typical case on ten."),
+    ("know",
+     "A fanned-out query is as slow as its slowest shard, so the tail you measured on one machine gets worse with every shard you add.",
+     "Latency is set by the maximum across shards, not the average. The probability that at least one shard is slow grows with the shard count, even when each shard is individually healthy.",
+     "Each shard is slow on 1% of requests. With 1 shard, 1% of queries are slow. With 10 shards, 1 &minus; 0.99<sup>10</sup> is about 9.6% of queries slow. With 50, about 39.5%. Partitioning by tenant so most queries touch one shard avoids the multiplication entirely."),
+
+    ("h2", "The filter changes the algorithm"),
+    ("p", "Real queries carry a predicate: this customer, this date range, this document type. With a graph index, filtering <em>after</em> the nearest neighbours are found can leave fewer than k results, and filtering <em>before</em> can leave a graph with holes in it. The more selective the filter, the worse both get, which is why very selective filters are best handled by partitioning, and moderately selective ones by an index that filters while it searches. Test your most selective real filter, not an average one."),
+
+    ("h2", "Ingestion and the day you change the model"),
+    ("p", "A corpus of millions is never loaded once. Documents arrive, change and get deleted, so the design needs an incremental path, a deletion path that actually removes the vector, and a record of which embedding model produced each one. That last field is the dangerous one. Vectors from two different embedding models are not comparable, so a half-migrated index returns neighbours that look plausible and are wrong."),
+    ("know",
+     "Changing the embedding model means re-embedding and re-indexing the whole corpus, so build the new index beside the old one and switch when it passes evaluation.",
+     "Vectors from different models live in different spaces. Mixing them in one index silently corrupts retrieval, and re-embedding is the one cost that scales with the entire corpus rather than with what changed.",
+     "A corpus of 10 million chunks averaging 400 tokens is 4 billion tokens to re-embed. The price per token for your embedding model sets the bill; it was not looked up here and is not guessed. The safe plan is a second index built and scored against the gold set, then an alias switched, with the first kept until the second is proven."),
+
+    ("h2", "What to measure before and after"),
+    ("ul", [
+      "Recall@k against exact search on a sample of real queries, re-run at each scale step. Recall drifts down as a corpus grows, and a setting tuned at 50,000 rows is not guaranteed at 5,000,000.",
+      "Latency at p95 and p99 under your real concurrency, with the real filters applied.",
+      "Index size and memory in the system you will actually run, read from the database rather than estimated.",
+      "Retrieval quality on slices: the newest documents, the rarest sources, the most selective tenants. An aggregate hides the slice that broke.",
+    ]),
+    ("callout", "matters", "Most corpora are smaller than the question assumes",
+     "The honest first answer to a scale question is a number: how many chunks, how many queries a second, what latency budget. Forty thousand vectors is exact-search territory. The design above is for the day the measurement says otherwise, not the first day."),
+    ("related", ["vector-search-algorithms", "measuring-retrieval", "ranking-and-hybrid-retrieval", "weights-gguf-quantization"]),
+    ("links", [
+      ("pgvector: indexing and filtering", "https://github.com/pgvector/pgvector", "HNSW and IVFFlat in Postgres, including how filtering interacts with approximate indexes."),
+      ("Efficient and robust ANN search using HNSW (Malkov & Yashunin)", "https://arxiv.org/abs/1603.09320", "The graph index the memory sum above is about."),
+      ("Product Quantization for Nearest Neighbor Search (Jegou et al.)", "https://ieeexplore.ieee.org/document/5432202", "The original compression method behind the 64-byte code."),
+    ]),
+    ("quiz", [
+      ("Ten million 1,024-dimension float32 vectors need roughly how much memory for the vectors alone?",
+       ["About 410 MB", "About 41 GB", "About 4 TB"], 1),
+      ("Each of ten shards is slow on 1% of requests. About what share of fanned-out queries is slow?",
+       ["1%", "About 9.6%", "10% exactly"], 1),
+      ("You switch embedding models and re-embed only the newly added documents. What happens?",
+       ["Nothing, since all embeddings are comparable", "Retrieval silently degrades, because the two sets of vectors live in different spaces", "The index rebuilds itself"], 1),
+      ("A query can only ever match one customer's documents. What is the strongest scaling move?",
+       ["Add more shards and query all of them", "Partition by customer so the query searches one slice", "Lower the index's recall setting"], 1),
     ]),
   ],
 },

@@ -4,12 +4,12 @@ A self-built curriculum in applied AI and machine learning: ~13 weeks of lessons
 
 ## Where it stands
 
-Counted from the repository on 2026-10-10:
+Counted from the repository on 2026-10-14:
 
-- **113 lessons** across 14 sets
+- **116 lessons** across 14 sets
 - **26 notebooks**, every one carrying its executed outputs
 - **4 portfolio projects**
-- **711 glossary terms**, and 158 entries on the revision sheet
+- **711 glossary terms**, and 163 entries on the revision sheet
 - **12 checklists** in [`artifacts/sop/`](artifacts/sop/)
 
 These are counts, not claims about quality. `make verify` runs the glossary, link, number and notebook checks that keep them honest.
@@ -37,6 +37,10 @@ Everything here is built to deliver three things that aren't modules - they're j
 1. **What to look for when building projects** → [`artifacts/project-intake.md`](artifacts/project-intake.md), filled in before every project and lab
 2. **How to evaluate platforms, tools and models** → [`artifacts/selection-scorecard.md`](artifacts/selection-scorecard.md), used for every model, vendor and framework decision
 3. **How to speak the language** → [`GLOSSARY.md`](GLOSSARY.md), built cumulatively and fed into spaced repetition
+
+To test what you know: the [cumulative exam](artifacts/cumulative-exam.md), the scored
+[design interview rubric](artifacts/design-interview-rubric.md), and the graded
+[Project 4 capstone run](projects/p4-deployed-assistant/README.md#capstone).
 
 And when you're actually building: [`artifacts/sop/`](artifacts/sop/) - checklists in the
 aviation sense. A master run-through plus focused ones for training, deep learning,

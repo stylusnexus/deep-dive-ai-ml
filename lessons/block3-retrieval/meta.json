@@ -42,6 +42,12 @@
       "title": "Preloading Instead of Retrieving",
       "file": "lsn-1787600000004-preloading-instead-of-retrieving.html",
       "source": "skill"
+    },
+    {
+      "id": "lsn-1787600000005",
+      "title": "Retrieval at Scale: Millions of Documents",
+      "file": "lsn-1787600000005-retrieval-at-scale.html",
+      "source": "skill"
     }
   ],
   "completion": {
@@ -66,6 +72,11 @@
       "starred": false
     },
     "lsn-1787600000004": {
+      "viewed": false,
+      "completed": false,
+      "starred": false
+    },
+    "lsn-1787600000005": {
       "viewed": false,
       "completed": false,
       "starred": false

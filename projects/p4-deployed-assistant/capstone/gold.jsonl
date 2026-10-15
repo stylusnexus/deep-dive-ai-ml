@@ -1,0 +1,29 @@
+{"id": "g01", "question": "What gearbox oil temperature triggers a controlled shutdown?", "doc": "ops-std-04", "fact": "90 degrees", "answerable": true}
+{"id": "g02", "question": "What is the continuous operation limit for gearbox oil temperature?", "doc": "ops-std-04", "fact": "82 degrees", "answerable": true}
+{"id": "g03", "question": "What vibration level sustained for thirty minutes triggers a Level 2 alert?", "doc": "ops-std-04", "fact": "0.55 mm/s", "answerable": true}
+{"id": "g04", "question": "At what vibration level does a turbine shut down immediately?", "doc": "ops-std-04", "fact": "0.80 mm/s", "answerable": true}
+{"id": "g05", "question": "What is the rated rotor speed?", "doc": "ops-std-04", "fact": "14.6 rpm", "answerable": true}
+{"id": "g06", "question": "At what speed is the overspeed trip set?", "doc": "ops-std-04", "fact": "17.2 rpm", "answerable": true}
+{"id": "g07", "question": "Above what mean wind speed do turbines shut down automatically?", "doc": "ops-std-04", "fact": "25 m/s", "answerable": true}
+{"id": "g08", "question": "Below what mean wind speed do turbines resume after a wind shutdown?", "doc": "ops-std-04", "fact": "20 m/s", "answerable": true}
+{"id": "g09", "question": "How often does a turbine receive a routine inspection?", "doc": "maint-pol-11", "fact": "180 days", "answerable": true}
+{"id": "g10", "question": "What is the routine inspection interval for a turbine older than twelve years?", "doc": "maint-pol-11", "fact": "90 days", "answerable": true}
+{"id": "g11", "question": "How soon must a Level 2 vibration alert be inspected?", "doc": "maint-pol-11", "fact": "14 days", "answerable": true}
+{"id": "g12", "question": "What is the maximum length of a routine inspection deferral?", "doc": "maint-pol-11", "fact": "30 days", "answerable": true}
+{"id": "g13", "question": "Who holds release authority during working hours after a shutdown?", "doc": "proc-restart-07", "fact": "site manager", "answerable": true}
+{"id": "g14", "question": "How long is a restarted turbine monitored at reduced output?", "doc": "proc-restart-07", "fact": "two hours", "answerable": true}
+{"id": "g15", "question": "What approval is needed after two shutdowns within 30 days?", "doc": "proc-restart-07", "fact": "regional engineering approval", "answerable": true}
+{"id": "g16", "question": "What was fleet availability in Q2 2026?", "doc": "perf-2026-q2", "fact": "94.2 percent", "answerable": true}
+{"id": "g17", "question": "Which site recorded the highest failure rate in Q2 2026?", "doc": "perf-2026-q2", "fact": "Clyde", "answerable": true}
+{"id": "g18", "question": "What was total generation in Q2 2026?", "doc": "perf-2026-q2", "fact": "412 GWh", "answerable": true}
+{"id": "g19", "question": "What was the root cause of the Clyde vibration shutdown in incident 2026-021?", "doc": "inc-2026-021", "fact": "blade root bolt", "answerable": true}
+{"id": "g20", "question": "Which turbine shut down in incident 2026-014?", "doc": "inc-2026-014", "fact": "WHL-031", "answerable": true}
+{"id": "g21", "question": "How many operational turbines does Whitelee have?", "doc": "site-whl", "fact": "68", "answerable": true}
+{"id": "g22", "question": "Who is the site manager at Ardrossan?", "doc": "site-ard", "fact": "J. Okafor", "answerable": true}
+{"id": "g23", "question": "What is the hub height at Ardrossan?", "doc": "site-ard", "fact": "84 metres", "answerable": true}
+{"id": "g24", "question": "What turbine model is used at Whitelee?", "doc": "site-whl", "fact": "V90-2.0", "answerable": true}
+{"id": "u01", "question": "What is the price of electricity per megawatt hour at Whitelee?", "doc": null, "fact": null, "answerable": false}
+{"id": "u02", "question": "Who is the chief executive of the turbine operator?", "doc": null, "fact": null, "answerable": false}
+{"id": "u03", "question": "What was fleet availability in Q3 2026?", "doc": null, "fact": null, "answerable": false}
+{"id": "u04", "question": "What is the blade length of the V90-2.0 turbine?", "doc": null, "fact": null, "answerable": false}
+{"id": "u05", "question": "How many incidents were reported at Ardrossan in 2025?", "doc": null, "fact": null, "answerable": false}

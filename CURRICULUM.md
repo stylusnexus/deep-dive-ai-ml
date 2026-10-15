@@ -22,7 +22,7 @@ Environment that runs, pacing map, and the vocabulary everything else assumes.
 
 **Exit:** `make up` works, and you can define every term in the glossary without looking.
 
-**Status: 113 lessons built, 26 executed notebooks, every lesson cross-referenced.**
+**Status: 116 lessons built, 26 executed notebooks, every lesson cross-referenced.**
 
 Every planned lesson is written. What remains is not lesson content: two Block 7
 bullets that need a GPU budget and a training run, notebooks for Blocks 5 to 9,
@@ -77,8 +77,9 @@ demonstrably better, and a threshold chosen from costs.
 - **Agentic RAG** - retrieval as a loop, its failure modes, and why it should be
   routed to rather than made the default ✅
 - Structured outputs and tool calling ✅
+- Retrieval at scale - the memory sum, partitioning, the slowest shard, and the re-index when the embedding model changes ✅
 
-5 lessons in `lessons/block3-retrieval/`, 3 notebooks in `notebooks/03-retrieval/`,
+6 lessons in `lessons/block3-retrieval/`, 3 notebooks in `notebooks/03-retrieval/`,
 and Project 2 in `projects/p2-financial-rag/`.
 
 The corpus is synthetic on purpose: every fact lives in exactly one document, so
@@ -228,8 +229,10 @@ Spine: `LLMS_from_Scratch` ch05–07 (Apache 2.0) plus the installed HF training
   Vertex AI and Foundry: quota counted differently from the bill, reserved capacity,
   caching and batch, data residency, guardrails, and retirement dates. Prices and
   default quotas were not obtainable and are marked as such ✅
+- When the provider goes down - five failure modes, a deadline and breaker, a tested fallback ladder ✅
+- Designing the whole system - the nine interview questions, the query-to-answer architecture, and where the course answers each ✅
 
-6 lessons in `lessons/block8-deployment/` and 2 notebooks in `notebooks/08-deploy-apis/`:
+8 lessons in `lessons/block8-deployment/` and 2 notebooks in `notebooks/08-deploy-apis/`:
 the first runs two clients against a server that fails on a scripted schedule, the
 second measures the serving boundary (throughput, concurrency, tail latency) against
 a local fixture service. Deploying to Render or an HF Space remains a human action;
@@ -297,6 +300,13 @@ and `asking-the-database-properly` still have lessons only.
 | 4 | Deployed energy intelligence assistant | 8 |
 
 Each starts with the intake sheet and ends as a published HF Space.
+
+**Capstone and assessment.** Project 4 doubles as the capstone. `python3 capstone/run_capstone.py`
+(in `projects/p4-deployed-assistant/`) runs its tests, a provider-failure drill, a 29-question gold
+set and the memory arithmetic, and writes a report. Two further tests of knowledge sit beside it:
+[`artifacts/cumulative-exam.md`](artifacts/cumulative-exam.md), ten scenarios that each need two or
+more lessons, and [`artifacts/design-interview-rubric.md`](artifacts/design-interview-rubric.md), a
+scored 45-minute mock interview on the nine design questions.
 
 The required path ends there. Optional transfer practice is documented in
 [`projects/README.md`](projects/README.md): one small open-ended challenge after

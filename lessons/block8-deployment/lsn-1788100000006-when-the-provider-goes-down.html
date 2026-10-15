@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>When the Provider Goes Down</title>
+<style>
+  :root {
+    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+    --accent: #6c8fff; --accent2: #a78bfa;
+    --green: #34d399; --yellow: #fbbf24; --red: #f87171;
+    --text: #e2e8f0; --muted: #94a3b8; --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; }
+  body {
+    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
+    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
+    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+  }
+  h1 { font-size: 1.9em; margin: 12px 0 6px; color: var(--text); line-height: 1.25; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 44px 0 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { color: var(--accent2); font-size: 1.08em; margin: 26px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 1.05em; margin: 0 0 8px; }
+  .pill {
+    display: inline-block; background: var(--surface2); color: var(--accent2);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 14px;
+    font-size: 0.8em; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600;
+  }
+
+  /* Callouts */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--surface);
+    border-radius: 6px; padding: 14px 18px; margin: 20px 0;
+  }
+  .callout .label {
+    display: block; font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout.insight { border-left-color: var(--accent); }
+  .callout.insight .label { color: var(--accent); }
+  .callout.matters { border-left-color: var(--green); }
+  .callout.matters .label { color: var(--green); }
+  .callout.warning { border-left-color: var(--yellow); }
+  .callout.warning .label { color: var(--yellow); }
+  .callout.pitfall { border-left-color: var(--red); }
+  .callout.pitfall .label { color: var(--red); }
+  .callout p { margin: 4px 0; }
+
+  /* AI stack tour flow diagram */
+  .tour-scroll { overflow-x: auto; margin: 24px 0 8px; padding-bottom: 6px; }
+  .tour-flow { display: flex; align-items: stretch; gap: 0; min-width: 720px; }
+  .tour-stage {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; flex: 1;
+  }
+  .tour-stage .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+    color: #0f1117; font-size: 0.75em; font-weight: 700; margin-bottom: 8px;
+  }
+  .tour-stage .name { font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 0.95em; }
+  .tour-stage .desc { color: var(--muted); font-size: 0.82em; }
+  .tour-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); font-size: 1.3em; padding: 0 6px; flex: 0 0 auto;
+  }
+
+  /* Stop sections */
+  .stop {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin: 16px 0;
+  }
+  .stop .q { color: var(--yellow); font-weight: 600; font-size: 0.95em; margin: 0 0 8px; }
+  .stop .tag {
+    display: inline-block; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--accent2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 2px 8px; margin-bottom: 10px;
+  }
+
+  /* Roadmap timeline */
+  .roadmap { margin: 20px 0; }
+  .roadmap-item {
+    display: grid; grid-template-columns: 46px 1fr; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em;
+  }
+  .roadmap-item.current .roadmap-num {
+    background: var(--accent); color: #0f1117; border-color: var(--accent);
+  }
+  .roadmap-title { font-weight: 600; color: var(--text); font-size: 0.98em; }
+  .roadmap-item.current .roadmap-title { color: var(--accent); }
+  .roadmap-desc { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap-num { margin-bottom: 4px; }
+  }
+
+  /* Quiz */
+  .quiz {
+    margin-top: 40px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+  }
+  .quiz h3 { color: var(--text); margin-top: 0; }
+  .quiz-q { font-weight: 600; margin: 22px 0 8px; }
+  .quiz-q:first-of-type { margin-top: 8px; }
+  .quiz-opt {
+    cursor: pointer; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin: 6px 0; transition: background .15s;
+  }
+  .quiz-opt:hover { background: var(--surface2); }
+  .quiz-opt.correct { background: rgba(52,211,153,.15); border-color: var(--green); pointer-events: none; cursor: default; }
+  .quiz-opt.wrong { background: rgba(248,113,113,.12); border-color: var(--red); }
+  .quiz-feedback { min-height: 1.4em; margin-top: 6px; font-size: .9em; }
+  .quiz-feedback.correct { color: var(--green); }
+  .quiz-feedback.wrong { color: var(--red); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.88em;
+  }
+  footer a { color: var(--accent2); }
+  footer .teacher-note { margin-top: 12px; }
+
+  /* Diagrams */
+  figure.diagram {
+    margin: 26px 0; padding: 20px 16px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; text-align: center;
+    overflow-x: auto;
+  }
+  figure.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  figure.diagram figcaption {
+    color: var(--muted); font-size: 0.85em; margin-top: 12px;
+    text-align: left; line-height: 1.55;
+  }
+  .d-box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .d-box-accent { fill: var(--surface2); stroke: var(--accent); stroke-width: 2; }
+  .d-box-warn { fill: var(--surface2); stroke: var(--red); stroke-width: 2; }
+  .d-box-good { fill: var(--surface2); stroke: var(--green); stroke-width: 2; }
+  .d-label { fill: var(--text); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .d-label-sm { fill: var(--muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .d-label-b { fill: var(--text); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-accent { fill: var(--accent); font-size: 12px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .d-arrow { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+  .d-arrow-accent { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .d-fill-accent { fill: var(--accent); }
+  .d-fill-green { fill: var(--green); }
+  .d-fill-red { fill: var(--red); }
+  .d-fill-yellow { fill: var(--yellow); }
+  .d-fill-muted { fill: var(--muted); }
+
+  /* Further reading */
+  .further { margin: 36px 0 8px; padding: 18px 20px; background: var(--surface);
+             border: 1px solid var(--border); border-radius: 8px; }
+  .further h3 { margin: 0 0 10px; color: var(--accent2); font-size: 1em; }
+  ul.links { list-style: none; padding: 0; margin: 0; }
+  ul.links li { margin: 0 0 10px; padding-left: 16px; position: relative; line-height: 1.5; }
+  ul.links li::before { content: "\2197"; position: absolute; left: 0; color: var(--muted); font-size: 0.9em; }
+  ul.links a { font-weight: 600; }
+  .link-note { display: block; color: var(--muted); font-size: 0.86em; }
+
+  /* Word-labelled variant of .roadmap — labels are terms, not step numbers */
+  .roadmap.terms .roadmap-item { grid-template-columns: 150px 1fr; align-items: start; }
+  .roadmap.terms .roadmap-num {
+    width: auto; height: auto; min-height: 0; border-radius: 6px; padding: 4px 10px;
+    background: var(--surface2); color: var(--accent2); font-size: 0.82em;
+    font-weight: 700; justify-content: flex-start; text-align: left; line-height: 1.35;
+    white-space: normal; word-break: break-word;
+  }
+  @media (max-width: 600px) {
+    .roadmap.terms .roadmap-item { grid-template-columns: 1fr; }
+    .roadmap.terms .roadmap-num { display: inline-block; margin-bottom: 6px; }
+  }
+
+  .further.shelf { border-left: 3px solid var(--accent2); }
+  .further.related { border-left: 3px solid var(--accent); }
+  .further.related ul.links li::before { content: "\21B3"; }
+  .rel-set { display: block; color: var(--accent2); font-size: 0.78em;
+             text-transform: uppercase; letter-spacing: 0.04em; margin-top: 1px; }
+  ul.books { list-style: none; padding: 0; margin: 0; }
+  ul.books li { margin: 0 0 12px; padding-left: 18px; position: relative; line-height: 1.5; }
+  ul.books li::before { content: "\1F4D5"; position: absolute; left: 0; font-size: 0.85em; }
+  .bk-t { display: block; font-weight: 600; color: var(--text); }
+  .bk-a { display: block; color: var(--accent2); font-size: 0.84em; }
+  .bk-n { display: block; color: var(--muted); font-size: 0.86em; margin-top: 2px; }
+
+  /* Things to know — compressed, quotable, harvested into the revision sheet */
+  blockquote.know {
+    margin: 28px 0; padding: 20px 24px 20px 26px;
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
+    border-left: 4px solid var(--accent2); border-radius: 8px;
+    font-size: 1.06em; line-height: 1.6; color: var(--text);
+  }
+  blockquote.know .know-label {
+    display: block; font-size: 0.68em; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 8px;
+  }
+  blockquote.know strong { color: var(--accent2); }
+  .know-rule { margin: 0 0 10px; font-size: 1.04em; font-weight: 600; color: var(--text); }
+  .know-why { margin: 0 0 12px; font-size: 0.95em; color: var(--text); opacity: 0.92; }
+  .know-eg {
+    margin: 0; padding: 12px 14px; background: var(--code-bg); border-radius: 6px;
+    font-size: 0.92em; color: var(--muted); line-height: 1.55;
+  }
+  .know-eg-label {
+    display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+  <span class="pill">Lesson 7 of 8</span>
+  <h1>When the Provider Goes Down</h1>
+  <p class="subtitle">Failing over is a design with five rungs, a clock and a test, not a second API key in an environment variable.</p>
+
+  <p>Every project in this course depends on a model someone else runs. The first lesson in this block covered one request: classify the status code, retry what is safe, back off with jitter. This lesson covers the other question, the one an interviewer actually asks: <em>what does your system do while the provider is not answering?</em> The honest answer has more parts than &ldquo;switch to another provider&rdquo;, and the first part is that &ldquo;down&rdquo; is rarely what happens.</p>
+  <h2>Five ways a provider fails, and only one of them is an outage</h2>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Hard down</div><div><div class="roadmap-title">Connection refused, 5xx on every call</div><div class="roadmap-desc">The case everyone designs for, and the rarest. It is also the only one where switching immediately is obviously right.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Throttled</div><div><div class="roadmap-title">429, or a quota you did not know you had</div><div class="roadmap-desc">The provider is up and is refusing you. Switching providers does not fix a quota problem; it moves the same traffic somewhere that has its own quota and its own bill.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Slow</div><div><div class="roadmap-title">Answers arrive, after a timeout you set</div><div class="roadmap-desc">The most common failure and the hardest to see. Nothing errors. The p99 latency has doubled and every request waits for it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Partial</div><div><div class="roadmap-title">One model, one region or one feature fails</div><div class="roadmap-desc">The status page says operational. Your model in your region is the part that is not. The fix is usually another model or region at the same provider, not another provider.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Degraded</div><div><div class="roadmap-title">It answers, and the answers got worse</div><div class="roadmap-desc">A silent model update, a changed safety filter, a structured-output mode that now truncates. No error code exists for this, so no failover trigger fires. Only your own evaluation notices.</div></div></div></div>
+  <p>A failover design is a table of these five against a response. If the plan only has a column for the first one, it is a plan for the failure that rarely occurs.</p>
+  <figure class="diagram"><svg viewBox="0 0 640 330" role="img" aria-label="The fallback ladder: primary model, same model in another region, another provider, smaller model, cached or retrieval-only answer, honest error"><defs><marker id="fo" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>
+<rect x="14" y="12" width="250" height="40" rx="7" class="d-box-good"/><text x="28" y="37" class="d-label-b">1 · Primary model</text>
+<rect x="14" y="66" width="250" height="40" rx="7" class="d-box"/><text x="28" y="91" class="d-label-b">2 · Same model, other region</text>
+<rect x="14" y="120" width="250" height="40" rx="7" class="d-box"/><text x="28" y="145" class="d-label-b">3 · Another provider, same tier</text>
+<rect x="14" y="174" width="250" height="40" rx="7" class="d-box"/><text x="28" y="199" class="d-label-b">4 · Smaller or local model</text>
+<rect x="14" y="228" width="250" height="40" rx="7" class="d-box-warn"/><text x="28" y="253" class="d-label-b">5 · Stored answer or passages only</text>
+<rect x="14" y="282" width="250" height="40" rx="7" class="d-box-warn"/><text x="28" y="307" class="d-label-b">6 · A plain, honest error</text>
+<path d="M139 52 L139 66" class="d-arrow" marker-end="url(#fo)"/><path d="M139 106 L139 120" class="d-arrow" marker-end="url(#fo)"/><path d="M139 160 L139 174" class="d-arrow" marker-end="url(#fo)"/><path d="M139 214 L139 228" class="d-arrow" marker-end="url(#fo)"/><path d="M139 268 L139 282" class="d-arrow" marker-end="url(#fo)"/>
+<text x="290" y="36" class="d-label-sm">Behaviour you tuned the prompt against.</text>
+<text x="290" y="90" class="d-label-sm">Same behaviour; check residency and quota.</text>
+<text x="290" y="144" class="d-label-sm">Different behaviour, different tool-call and</text><text x="290" y="158" class="d-label-sm">JSON quirks, a different data agreement.</text>
+<text x="290" y="198" class="d-label-sm">Lower quality; some tasks now fail outright.</text>
+<text x="290" y="252" class="d-label-sm">No generation: reuse an earlier answer, or return</text><text x="290" y="266" class="d-label-sm">the retrieved passages with a notice.</text>
+<text x="290" y="306" class="d-label-sm">Better than a confident wrong answer.</text>
+</svg><figcaption>A request walks down the ladder only as far as it has to. Each rung changes something the caller may depend on, so each one needs to be chosen, evaluated and exercised before the day it is needed.</figcaption></figure>
+  <h2>Decide on a clock, not on an error</h2>
+  <p>Failing over on errors alone misses the slow case entirely, because a slow provider returns no error. The trigger that works is a deadline: every request gets a time budget, measured from the p99 you have observed, and a request that exceeds it moves down a rung. Set the deadline at the p99 you measured and about one healthy request in a hundred still moves down a rung; set it below the median and the fallback becomes your primary path. Set it far above and every user waits through the failure before anything happens.</p>
+  <p>A circuit breaker is what stops that wait repeating. After a run of consecutive failures it stops sending to the failing rung for a cool-down, then lets one probe request through, and closes again only when the probe succeeds. Without it, a provider that hangs for thirty seconds costs <em>every</em> request thirty seconds before it falls back, which is the outage nobody wrote a monitor for.</p>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Fail over on a measured deadline, and trip a breaker so later requests skip the broken rung.</p><p class="know-why">An error code only exists for the failures that announce themselves. A slow or degraded provider announces nothing, and without a breaker each request pays the full timeout again before reaching the fallback.</p><p class="know-eg"><span class="know-eg-label">For example</span>A provider starts taking 30 seconds to respond instead of 2. With a 30-second timeout and no breaker, every user waits 30 seconds and then gets the fallback anyway. With a 6-second deadline and a breaker that opens after five consecutive timeouts, the breaker only learns of each failure when a deadline expires. If requests arrive one at a time, the first five users wait 6 seconds each. If they arrive together, everyone who arrives in those first 6 seconds waits too. Once the breaker is open, requests go straight to the fallback, apart from one probe after each cool-down.</p></blockquote>
+  <div class="callout pitfall"><span class="label">A 429 is not a reason to switch provider</span>A throttle means you sent more than you may. Sending the same traffic to a second provider doubles the places you can be throttled and the places you are billed, and can push the second provider over its own limit at the worst moment. Back off, shed the lowest-value traffic, or queue it. Fail over for hard-down and slow; treat throttling as a capacity problem.</div>
+  <h2>A fallback is a different system</h2>
+  <p>The whole risk of failover sits in a single assumption: that the next rung behaves like the one above it. A different provider's model follows a different instruction style, formats tool calls differently, and fails differently on your structured-output schema. A prompt tuned for one is not tuned for the other. The first time the fallback runs should not be during an outage.</p>
+  <ul><li><strong>Evaluate every rung on your own set.</strong> Run the same private eval set through each fallback and record the score and the non-completion rate, as in the one-set-many-models lesson. Decide in advance which tasks are allowed to degrade and which must refuse instead.</li><li><strong>Check the data agreement.</strong> A second provider may sit in another region, under other retention terms, or outside what your customers consented to. Failing over silently can be a compliance event.</li><li><strong>Keep it alive.</strong> A fallback called rarely can be retired by its provider before anyone notices. Send it a small share of real or shadow traffic so the credentials, quota and model name are known to work.</li><li><strong>Watch the cost.</strong> A larger fallback model can multiply the bill during exactly the hours when you are least watching it. Set a budget cap on the fallback path.</li></ul>
+  <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A fallback you have never run on real traffic is a guess about how your system behaves.</p><p class="know-why">Each rung differs from the one above it in tool-call format, output shape, quality, residency, quota and price. None of those differences shows up until a request is actually sent, and during an outage is the worst time to discover them.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team keeps a second provider configured and never calls it. When the primary degrades, the fallback returns a tool call in a different shape, the parser rejects it, and every request fails twice: once at the provider and once in the code written to handle that.</p></blockquote>
+  <h2>Switching providers is an interface problem first</h2>
+  <p>Moving from one AI provider to another fails in the plumbing before it fails in the model. Request shapes differ, and so do the way a system prompt is passed, how tools are declared, what a tool call looks like when it comes back, how a stop reason is named and how usage is counted. Code that calls one provider's client directly in forty places cannot fall back to another without editing all forty.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">One narrow interface</div><div><div class="roadmap-title">Your code calls yours, not theirs</div><div class="roadmap-desc">Define a small function of your own, such as <code>complete(messages, tools, schema, deadline)</code>, and put each provider behind an adapter that translates in both directions. The fallback ladder then becomes a list of adapters, and nothing else in the system knows which one answered.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A gateway</div><div><div class="roadmap-title">The same idea, run as a service</div><div class="roadmap-desc">A proxy that exposes one API and routes to several providers, with the retry, deadline and breaker logic in one place. It saves writing adapters and adds a service that is now itself a single point of failure, so it needs its own fallback path.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A prompt per provider</div><div><div class="roadmap-title">Portability is tested, not assumed</div><div class="roadmap-desc">Keep the prompt, the tool definitions and the output schema as data you can vary per rung. Evaluate each pairing on your own set. A prompt that scores well on one model can score noticeably lower on another with identical wording.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A record of who answered</div><div><div class="roadmap-title">Every response names its rung</div><div class="roadmap-desc">Log the provider, model and version on every request. Without it a quality drop during a failover is indistinguishable from a bug, and the cost report cannot attribute the spend.</div></div></div></div>
+  <div class="callout matters"><span class="label">Failover is also a contract and a security question</span>A second provider needs its own agreement, its own key held in your secret store, its own data-retention terms and its own entry in your list of subprocessors. The key has to be live and the quota non-zero before the day you need it. An unsigned or unfunded fallback is a diagram, not a fallback.</div>
+  <h2>Streaming makes the choice earlier</h2>
+  <p>Once the first token has reached the user you cannot switch models without showing them two answers. Decide before streaming begins: wait for the first token under a short deadline, and if it does not arrive, fall back then. A failure after streaming has started is a different case, and the honest handling is to end the response with a visible notice rather than splice in a second model's answer.</p>
+  <h2>The rung people forget: do not generate</h2>
+  <p>For a RAG system the cheapest, safest fallback is not another model. It is to skip generation and return what retrieval already found: the top passages, their sources and a notice that the summary is unavailable. The user still gets the evidence. An exact-match cache of earlier answers is the same idea, and it carries none of the false-match risk of a similarity cache. Both avoid asking a second model to do a job it was never evaluated for. Label the reply, though. A <code>200</code> that carries passages looks like success to any client that checks only the status code, so make the degraded case opt-in, keep the passages out of the field a client would display as the answer, and add a flag the caller has to read. Project 4 does exactly this.</p>
+  <h2>What to measure</h2>
+  <ul><li>Time to detect: how long between the first failure and the breaker opening.</li><li>The share of traffic served by each rung, per hour. A rung that should be rare and is not is the alert.</li><li>Quality of each rung on the eval set, re-run on a schedule, because a fallback model changes under you too.</li><li>A recovery drill: switch the primary off on purpose in a test environment and read the trace.</li></ul>
+  <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://sre.google/sre-book/handling-overload/" target="_blank" rel="noopener">Google SRE Book: Handling Overload</a><span class="link-note">Why retrying and failing over can make an overload worse, and what load shedding is for.</span></li><li><a href="https://sre.google/sre-book/addressing-cascading-failures/" target="_blank" rel="noopener">Google SRE Book: Addressing Cascading Failures</a><span class="link-note">How one failing dependency becomes a system-wide failure, and the timeout and breaker patterns that stop it.</span></li><li><a href="https://martinfowler.com/bliki/CircuitBreaker.html" target="_blank" rel="noopener">Martin Fowler: Circuit Breaker</a><span class="link-note">The closed, open and half-open states in two screens.</span></li></ul></div>
+  <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788100000000-calling-an-api-you-do-not-control.html">Calling an API You Do Not Control</a><span class="link-note">It will fail, it will be slow, and it will occasionally charge you twice for the same work.</span></li><li><a href="lsn-1788100000005-managed-cloud-surfaces.html">Managed Cloud Surfaces</a><span class="link-note">Calling a model through Amazon Bedrock, Google Vertex AI or Microsoft Foundry keeps the request in your hands and the capacity, the cache and the calendar in the provider's.</span></li><li><a href="lsn-1788100000003-after-it-ships.html">After It Ships</a><span class="link-note">What to watch, what to wake someone for, and the difference between the service being up and the service being right.</span></li><li><a href="../core-vocabulary/lsn-1787000000008-routing-and-escalation.html">Routing, Escalation and Sampling Controls</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Cheap-first architecture — plus temperature and top-k, which decide how a model picks words.</span></li></ul></div>
+  <div class="quiz">
+    <h3>✅ Check Yourself</h3>
+    <p class="quiz-q">1. A provider&#x27;s responses start taking 30 seconds and return no errors. What detects it?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A failover rule that triggers on 5xx status codes</div>
+      <div class="quiz-opt">A per-request deadline plus a circuit breaker</div>
+      <div class="quiz-opt">The provider&#x27;s status page</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">2. You hit repeated 429s from your primary provider. What is the best first response?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">Send the same traffic to a second provider immediately</div>
+      <div class="quiz-opt">Back off or shed the lowest-value traffic, because a throttle is a capacity problem</div>
+      <div class="quiz-opt">Raise the request timeout</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">3. Why must a fallback model be evaluated before the outage?</p>
+    <div class="quiz-options" data-answer="0">
+      <div class="quiz-opt">Because it differs in tool-call shape, quality and behaviour, and nothing shows that until it is run</div>
+      <div class="quiz-opt">Because fallback models are always cheaper</div>
+      <div class="quiz-opt">Because providers require it</div>
+    </div>
+    <div class="quiz-feedback"></div>
+    <p class="quiz-q">4. For a RAG system with the model unavailable, which fallback needs the least new evaluation?</p>
+    <div class="quiz-options" data-answer="1">
+      <div class="quiz-opt">A second provider&#x27;s model</div>
+      <div class="quiz-opt">Returning the retrieved passages with a notice, with no generation</div>
+      <div class="quiz-opt">A smaller local model</div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+<script>
+document.querySelectorAll(".quiz-options").forEach(group => {
+  const fb = group.parentElement.querySelector(".quiz-feedback");
+  const opts = group.querySelectorAll(".quiz-opt");
+  let solved = false;
+  opts.forEach((opt, i) => {
+    opt.addEventListener("click", () => {
+      if (solved) return;
+      const ok = i === Number(group.dataset.answer);
+      opts.forEach(o => o.classList.remove("wrong"));
+      if (ok) {
+        solved = true;
+        opt.classList.add("correct");
+        fb.textContent = "\u2713 Correct \u2014 " + opt.textContent.trim() + ".";
+        fb.className = "quiz-feedback show correct";
+      } else {
+        opt.classList.add("wrong");
+        fb.textContent = "\u2717 Not quite \u2014 think about what problem that choice would actually solve, then try another option.";
+        fb.className = "quiz-feedback show wrong";
+      }
+    });
+  });
+});
+
+window.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "engram-quest-theme") {
+    document.body.classList.toggle("light", !e.data.dark);
+  }
+});
+</script>
+</body>
+</html>
