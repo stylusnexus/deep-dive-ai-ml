@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -222,7 +233,7 @@
   <p class="subtitle">Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.</p>
 
   <p>Block 0 taught quantization and distillation separately, in the places they came up. They are two members of a family of four, and seeing the family is what tells you which to reach for, because they remove different things and only some of them combine.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Quantization</div><div><div class="roadmap-title">Fewer bits per number</div><div class="roadmap-desc">The same architecture, the same parameter count, stored less precisely. Cheapest by a wide margin, needs no training, and is reversible in the sense that the original weights still exist. Usually the first and often the only thing needed.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Pruning</div><div><div class="roadmap-title">Fewer parts</div><div class="roadmap-desc">Remove structure from the trained network. Depth pruning takes whole layers; width pruning takes neurons and attention heads within layers. Unlike quantization this changes the architecture, and the model is worse immediately afterwards.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Distillation</div><div><div class="roadmap-title">A smaller model taught to imitate</div><div class="roadmap-desc">Train a student to reproduce a teacher's behaviour. The one that produces a genuinely different model rather than a modified one, and the most expensive of the four.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Low-rank factorisation</div><div><div class="roadmap-title">The same layer, expressed with fewer numbers</div><div class="roadmap-desc">A large weight matrix approximated as the product of two smaller ones. Least used of the four at inference time and conceptually the most familiar, because it is what LoRA already does — an adapter is a low-rank pair standing in for a full-rank update.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Quantization</div><div><div class="roadmap-title">Fewer bits per number</div><div class="roadmap-desc">The same architecture, the same parameter count, stored less precisely. Cheapest by a wide margin, needs no training, and is reversible in the sense that the original weights still exist. Usually the first and often the only thing needed.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Pruning</div><div><div class="roadmap-title">Fewer parts</div><div class="roadmap-desc">Remove structure from the trained network. <dfn class="gl" tabindex="0" data-gl="depth-pruning">Depth pruning</dfn> takes whole layers; <dfn class="gl" tabindex="0" data-gl="width-pruning">width pruning</dfn> takes neurons and attention heads within layers. Unlike quantization this changes the architecture, and the model is worse immediately afterwards.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Distillation</div><div><div class="roadmap-title">A smaller model taught to imitate</div><div class="roadmap-desc">Train a student to reproduce a teacher's behaviour. The one that produces a genuinely different model rather than a modified one, and the most expensive of the four.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Low-rank factorisation</div><div><div class="roadmap-title">The same layer, expressed with fewer numbers</div><div class="roadmap-desc">A large weight matrix approximated as the product of two smaller ones. Least used of the four at inference time and conceptually the most familiar, because it is what <dfn class="gl" tabindex="0" data-gl="lora-low-rank-adaptation">LoRA</dfn> already does — an adapter is a low-rank pair standing in for a full-rank update.</div></div></div></div>
   <h2>Pruning and distillation are the pair that compose</h2>
   <p>The other three are alternatives; these two are a sequence. Pruning removes structure and the model loses capability with it — the cut is blunt, and what falls out is whatever those layers or heads were contributing. Distillation is then used to <em>repair</em>, training the pruned model against the original as teacher so it recovers behaviour it just lost. Cut, then heal. This is the one place in the family where two techniques are used together rather than chosen between, and it is why a pruning pipeline is more work than the word suggests.</p>
   <figure class="diagram"><svg viewBox="0 0 640 214" role="img" aria-label="The four compression techniques and how they relate"><defs><marker id="cmp" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
@@ -269,6 +280,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"depth-pruning": {"t": "Depth pruning", "d": "Removing whole layers from a trained network."}, "width-pruning": {"t": "Width pruning", "d": "Removing neurons and attention heads from within layers, leaving the layer count unchanged."}, "lora-low-rank-adaptation": {"t": "LoRA (low-rank adaptation)", "d": "Freezing every base weight and learning a small pair of matrices whose product stands in for the update. The saving is not mainly the parameter count: a frozen weight needs no gradient and no optimiser state, and those are what dominate training memory."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -247,16 +258,16 @@
 <text x="20" y="196" class="d-label-sm">The mistake is picking a point by taste rather than by task. Both ends are right somewhere.</text>
 </svg><figcaption>The spectrum, and what you buy at each point. Cost rises left to right and so does durability. Neither end is the answer — the task decides.</figcaption></figure>
   <h2>The question that decides</h2>
-  <div class="callout matters"><span class="label">How many times will intent need to survive being forgotten?</span>That is the whole test. A script you write and run once: never — vibe it. A feature built across four sessions, by two people and an agent, that someone will modify next quarter: many times, and every one of those is an opportunity for intent to drift. The spec is not documentation overhead. It is the mechanism by which intent survives a context window ending.</div>
+  <div class="callout matters"><span class="label">How many times will intent need to survive being forgotten?</span>That is the whole test. A script you write and run once: never — vibe it. A feature built across four sessions, by two people and an agent, that someone will modify next quarter: many times, and every one of those is an opportunity for intent to drift. The spec is not documentation overhead. It is the mechanism by which intent survives a <dfn class="gl" tabindex="0" data-gl="context-window">context window</dfn> ending.</div>
   <p>Notice this is the same argument as the architecture decision record (ADR) from the artifacts lesson, applied forward instead of backward. An ADR records why a decision was made so nobody re-litigates it. A spec records what is being built so nobody re-derives it. Both exist because a model's context does not persist and a person's memory is worse than they think.</p>
   <h2>Why it works better with agents than it ever did with people</h2>
   <p>Specification-first is an old idea with a poor track record — waterfall's central failure was that specs went stale the moment implementation began, and nobody read them. Two things changed:</p>
   <ul><li><strong>Regeneration is now cheap.</strong> The reason specs went stale was that updating the spec and updating the code were two expensive efforts, so only one happened. When code generation is minutes, editing the spec and regenerating is a real workflow rather than an aspiration.</li><li><strong>The reader is tireless and literal.</strong> A human implementer skims a forty-page spec. An agent reads all of it, every time, and will faithfully implement an ambiguity you would have silently resolved. That is both the strength and the trap.</li></ul>
   <div class="callout pitfall"><span class="label">The trap in that second point</span>An agent implementing a spec cannot tell the difference between a decision you made and a sentence you wrote carelessly. Every under-specified area becomes an invented answer, delivered confidently and consistently. Waterfall's specs were ignored; these are followed exactly, which surfaces vagueness as working code rather than as questions. Expect to discover what you actually meant by reading what you got.</div>
   <h2>What a workable spec contains</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The decision, not the prose</div><div><div class="roadmap-title">What changes for whom</div><div class="roadmap-desc">A spec that reads like a brochure produces code that reads like a brochure.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Acceptance criteria</div><div><div class="roadmap-title">Checkable, not aspirational</div><div class="roadmap-desc">"Fast" is not a criterion. "p95 under 400ms on the existing fixture set" is.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Explicit non-goals</div><div><div class="roadmap-title">What this does not do</div><div class="roadmap-desc">The highest-value section, and the one most often missing. It is what stops an agent helpfully expanding scope.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Constraints and prior decisions</div><div><div class="roadmap-title">The things it may not change</div><div class="roadmap-desc">Link the ADRs. An agent that does not know a constraint exists will cheerfully violate it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Open questions</div><div><div class="roadmap-title">Named, not silently resolved</div><div class="roadmap-desc">Anything you have not decided should be marked as undecided, or it will be decided for you.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The decision, not the prose</div><div><div class="roadmap-title">What changes for whom</div><div class="roadmap-desc">A spec that reads like a brochure produces code that reads like a brochure.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Acceptance criteria</div><div><div class="roadmap-title">Checkable, not aspirational</div><div class="roadmap-desc">"Fast" is not a criterion. "p95 under 400ms on the existing <dfn class="gl" tabindex="0" data-gl="fixture">fixture</dfn> set" is.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Explicit non-goals</div><div><div class="roadmap-title">What this does not do</div><div class="roadmap-desc">The highest-value section, and the one most often missing. It is what stops an agent helpfully expanding scope.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Constraints and prior decisions</div><div><div class="roadmap-title">The things it may not change</div><div class="roadmap-desc">Link the ADRs. An agent that does not know a constraint exists will cheerfully violate it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Open questions</div><div><div class="roadmap-title">Named, not silently resolved</div><div class="roadmap-desc">Anything you have not decided should be marked as undecided, or it will be decided for you.</div></div></div></div>
   <h2>Where it fits with everything else here</h2>
-  <p>The spec is not a fifth kind of artifact so much as the fourth member of a family you already know. The harness is executed by a machine; a recipe is followed by a person; an ADR is consulted when someone wants to know why they cannot do the obvious thing; a spec is what an agent builds from. And all four share the failure mode from the artifacts lesson — <strong>true when written, still asserting itself after its truth expired</strong>. A stale spec is worse than none, because it carries authority.</p>
+  <p>The spec is not a fifth kind of artifact so much as the fourth member of a family you already know. The <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn> is executed by a machine; a recipe is followed by a person; an ADR is consulted when someone wants to know why they cannot do the obvious thing; a spec is what an agent builds from. And all four share the failure mode from the artifacts lesson — <strong>true when written, still asserting itself after its truth expired</strong>. A stale spec is worse than none, because it carries authority.</p>
   <p>It also composes with the loops material. A spec with checkable acceptance criteria is an external verifier, which is precisely what makes a build-test-fix loop work rather than spin. Spec-driven development and verifier-guided looping are the same idea meeting from opposite directions: one supplies the signal, the other consumes it.</p>
   <h2>The honest position</h2>
   <p>The methodology is young, the tooling is proliferating faster than the evidence, and much of what is written about it is advocacy. Treat claims about productivity gains the way you would treat any unmeasured claim in this course — as a hypothesis with a plausible mechanism. The mechanism here is sound, which is a reason to try it, not a reason to believe a number.</p>
@@ -296,6 +307,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"context-window": {"t": "Context window", "d": "The maximum tokens a model can consider at once, covering prompt, history, retrieved documents and the answer together. A capacity limit, not a promise of attention."}, "fixture": {"t": "Fixture", "d": "One case with an answer: a starting state, inputs, and an assertion that is false before the work and true after. The smallest unit of evidence a harness can produce. A fixture that passes at the starting commit, or fails whatever you do, measures nothing — and both look like results."}, "harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

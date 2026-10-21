@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -245,7 +256,7 @@
   <div class="callout warning"><span class="label">Exposure scores are a proxy, and they miss things</span><p>Several figures above are reported for &ldquo;highly AI-exposed occupations&rdquo;, and exposure is an estimate of how much of a job's task content a model could plausibly do. It is a reasonable instrument and it is not the thing itself. It cannot see how a particular employer actually organises the work, which parts of a role are tacit, or which tasks turn out to matter more than their share of the hours suggests — and the Shih conversation gives a section to precisely this gap. Treat exposure as a bucket label rather than a measurement of any individual job.</p></div>
   <h2>How much weight this evidence holds</h2>
   <p>Not as much as its precision suggests, and the statistics lesson in the evaluation block is the reason. Many of these figures are single studies of an early deployment, measuring an unstable target during a period of rapid change. A relative decline of 9% and one of 16% are not necessarily in conflict — they are different populations, methods and windows. Treat them as a direction with wide error bars rather than as constants.</p>
-  <div class="callout matters"><span class="label">Adoption is concentrated where the advantages already were</span><p>Adoption is heaviest among large, already-productive firms, and the complementary assets turn out to matter enormously — skilled staff, organisational process, data infrastructure. This is the least surprising and most consequential finding in the set: a technology that multiplies existing capability widens the gap between organisations that had it and those that did not, and the same logic applies to individuals.</p></div>
+  <div class="callout matters"><span class="label">Adoption is concentrated where the advantages already were</span><p>Adoption is heaviest among large, already-productive firms, and the <dfn class="gl" tabindex="0" data-gl="complementary-assets">complementary assets</dfn> turn out to matter enormously — skilled staff, organisational process, data infrastructure. This is the least surprising and most consequential finding in the set: a technology that multiplies existing capability widens the gap between organisations that had it and those that did not, and the same logic applies to individuals.</p></div>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788300000001-the-apprenticeship-problem.html">The Apprenticeship Problem</a><span class="link-note">An argument, not a finding: the scarce thing becomes knowing where the boundary is, and we are automating the work that used to teach it.</span></li><li><a href="../engineering-practice/lsn-1787400000011-what-ai-makes-worse.html">What AI Makes Worse</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">You do not need to want to be a software engineer. You do need the parts of it that generation puts under pressure.</span></li><li><a href="../engineering-practice/lsn-1787400000002-why-measurement-decides.html">Why Measurement Decides</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The only thing that corrects a harness, a recipe or a decision is a number that disagrees with it.</span></li><li><a href="../orientation/lsn-1787200000000-the-map.html">The Map: AI, ML, Deep Learning, GenAI and Agents</a><span class="rel-set">Start Here: The Map</span><span class="link-note">Read this before anything else. Every term in the program has a place on one picture.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://digitaleconomy.stanford.edu/app/uploads/2026/08/Canaries_August2026.pdf" target="_blank" rel="noopener">Canaries in the Coal Mine? (Brynjolfsson, Chandar and Chen, Stanford Digital Economy Lab)</a><span class="link-note">The early-career employment shortfall, from ADP payroll data. Read the authors' own framing: they call these early descriptive indicators rather than causal estimates, and the headline figure has moved between data vintages.</span></li><li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5425555" target="_blank" rel="noopener">Generative AI as Seniority-Biased Technological Change (Hosseini and Lichtinger)</a><span class="link-note">US resume and job-posting data on 62 million workers. The junior-versus-senior split, at 8-10 per cent depending on specification. A working paper, not peer-reviewed.</span></li><li><a href="https://www.nber.org/papers/w33777" target="_blank" rel="noopener">Large Language Models, Small Labor Market Effects (Humlum and Vestergaard, NBER 33777)</a><span class="link-note">Danish administrative data. Precise zeros on earnings and hours across eleven exposed occupations, with intervals ruling out effects above one per cent.</span></li><li><a href="https://budgetlab.yale.edu/research/tracking-impact-ai-labor-market" target="_blank" rel="noopener">Tracking the Impact of AI on the Labor Market (The Budget Lab at Yale)</a><span class="link-note">The US economy-wide picture, updated continuously. Cite the current version rather than a snapshot, because it moves.</span></li><li><a href="https://www.newyorkfed.org/research/college-labor-market" target="_blank" rel="noopener">The Labor Market for Recent College Graduates (Federal Reserve Bank of New York)</a><span class="link-note">The graduate unemployment series. Note the definition: aged 22 to 27, bachelor's or higher, not currently enrolled, US only.</span></li><li><a href="https://www.nber.org/papers/w31161" target="_blank" rel="noopener">Generative AI at Work (Brynjolfsson, Li and Raymond, NBER 31161)</a><span class="link-note">The customer-support study behind the skill gradient. 5,172 agents, a staggered rollout rather than a randomised experiment. Published in the Quarterly Journal of Economics, 2025.</span></li><li><a href="https://mitsloan.mit.edu/sites/default/files/2023-10/SSRN-id4573321.pdf" target="_blank" rel="noopener">Navigating the Jagged Technological Frontier (Dell&#x27;Acqua et al.)</a><span class="link-note">758 consultants, and the task deliberately placed outside the model's reach. The source of the 19-point figure, and of the spread behind it.</span></li><li><a href="https://www.oecd.org/content/dam/oecd/en/publications/reports/2025/06/macroeconomic-productivity-gains-from-artificial-intelligence-in-g7-economies_dcf91c3e/a5319ab5-en.pdf" target="_blank" rel="noopener">Macroeconomic productivity gains from AI in G7 economies (OECD, 2025)</a><span class="link-note">The sector projections. Cumulative over ten years and modelled rather than observed, which is the part most often dropped when these figures are repeated.</span></li><li><a href="https://www.nber.org/papers/w32487" target="_blank" rel="noopener">The Simple Macroeconomics of AI (Acemoglu, NBER 32487)</a><span class="link-note">The considerably more conservative estimate, and worth reading against the OECD's. That two credible estimates differ by an order of magnitude is itself the finding.</span></li></ul></div>
   <div class="quiz">
@@ -273,6 +284,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"complementary-assets": {"t": "Complementary assets", "d": "The skilled staff, organisational processes and data infrastructure that decide whether AI adoption produces a gain. Their importance is why adoption concentrates among firms that were already productive."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

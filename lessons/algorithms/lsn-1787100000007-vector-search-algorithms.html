@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,7 +232,7 @@
   <h1>Nearest-Neighbour Search at Scale</h1>
   <p class="subtitle">Exact search, HNSW, and the recall you quietly trade away for speed.</p>
 
-  <p>The previous lesson on k-NN described finding the nearest vectors. Doing that across ten million embeddings, in under fifty milliseconds, is a different problem — and the algorithm you choose has a failure mode most people never measure.</p>
+  <p>The previous lesson on k-NN described finding the nearest vectors. Doing that across ten million <dfn class="gl" tabindex="0" data-gl="embedding">embeddings</dfn>, in under fifty milliseconds, is a different problem — and the algorithm you choose has a failure mode most people never measure.</p>
   <h2>Exact search, and when it&#x27;s fine</h2>
   <p>Compare the query against every stored vector and keep the best matches. It's exhaustive, perfectly accurate, and linear in the number of vectors. On a small corpus that is genuinely fine, and where it stops being fine depends on your vector width, hardware and latency budget — so measure it on yours before reaching for an index. The point is that the linear option is real and frequently sufficient, not that a particular corpus size is the cut-off.</p>
   <div class="callout matters"><span class="label">Don&#x27;t optimise this early</span>Most retrieval-augmented generation (RAG) corpora are far smaller than people assume. A few thousand documents chunked into tens of thousands of vectors is comfortably exact-search territory. Reach for approximate indexing when you've measured that you need it, not because the tutorial used it.</div>
@@ -249,8 +260,8 @@
 <path d="M120 44 L120 96" class="d-arrow-accent"/><path d="M330 106 L376 166" class="d-arrow-accent"/>
 </svg><figcaption>HNSW navigates a layered graph: coarse hops at the top cover distance fast, finer layers refine. Speed comes from never examining most of the data — which is also where recall is lost.</figcaption></figure>
   <h2>The number nobody measures</h2>
-  <p><strong>Recall@k</strong> is the fraction of true nearest neighbours your index actually returned. An HNSW index at 95% recall silently misses one in twenty of the results it should have found — and because the results it does return look perfectly reasonable, nothing appears broken.</p>
-  <div class="callout pitfall"><span class="label">How this fails in production</span>RAG quality drops and everyone investigates the prompt, the chunking, the model. The actual cause is an index tuned for speed that never retrieves the right chunk in the first place. Measure recall against exact search on a sample before blaming anything downstream — it takes an hour and rules out an entire category of problem.</div>
+  <p><strong><dfn class="gl" tabindex="0" data-gl="recall-k">Recall@k</dfn></strong> is the fraction of true nearest neighbours your index actually returned. An HNSW index at 95% recall silently misses one in twenty of the results it should have found — and because the results it does return look perfectly reasonable, nothing appears broken.</p>
+  <div class="callout pitfall"><span class="label">How this fails in production</span>RAG quality drops and everyone investigates the prompt, the <dfn class="gl" tabindex="0" data-gl="chunking">chunking</dfn>, the model. The actual cause is an index tuned for speed that never retrieves the right chunk in the first place. Measure recall against exact search on a sample before blaming anything downstream — it takes an hour and rules out an entire category of problem.</div>
   <p>The tuning knobs trade directly: HNSW's <code>ef_search</code> and <code>M</code> raise recall and cost latency and memory. There is no setting that gives you both.</p>
   <h2>The two knobs, and what each costs</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">M</div><div><div class="roadmap-title">Connections per node, set at build time</div><div class="roadmap-desc">Higher means a denser graph: better recall, more memory, slower to build. Changing it means rebuilding the index.</div></div></div><div class="roadmap-item"><div class="roadmap-num">ef_construction</div><div><div class="roadmap-title">Effort spent while building</div><div class="roadmap-desc">Higher builds a better graph, once, for a longer build. Cheap to be generous with — you pay it only at index time.</div></div></div><div class="roadmap-item"><div class="roadmap-num">ef_search</div><div><div class="roadmap-title">Candidates examined per query</div><div class="roadmap-desc">The one you tune live. Raise it for recall, pay in latency. This is the dial to move first when recall is low.</div></div></div></div>
@@ -289,6 +300,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "recall-k": {"t": "Recall@k", "d": "The fraction of true nearest neighbours an index actually returned. The number nobody measures, and a common hidden cause of poor RAG."}, "chunking": {"t": "Chunking", "d": "Cutting documents into retrievable pieces before embedding them. Split on structure — headings, sections, functions — because a chunk that ends mid-sentence embeds badly and reads worse."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

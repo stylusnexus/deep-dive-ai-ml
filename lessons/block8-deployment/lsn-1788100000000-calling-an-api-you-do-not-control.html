@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -224,7 +235,7 @@
   <p>Every project in this course has called a model over HTTP and every one of them has done it naively, because the endpoint was on the same machine. That is a fair simplification for learning and a poor one for anything else. A remote interface fails in ways a local one does not, and the failures are boring rather than dramatic, which is why they get skipped.</p>
   <h2>Read the status code before deciding what to do</h2>
   <p>The single most useful habit is to stop treating errors as one category. What the caller should do next is almost entirely determined by which failure it was, and code that catches everything and retries treats a malformed request as a transient outage.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">400 and 422 — you sent something wrong</div><div><div class="roadmap-title">Never retry</div><div class="roadmap-desc">The request is malformed or fails validation. Retrying sends the same wrong thing again, and does so as fast as the loop allows. These belong in a log with the payload, not in a retry.</div></div></div><div class="roadmap-item"><div class="roadmap-num">401 and 403 — you are not allowed</div><div><div class="roadmap-title">Never retry</div><div class="roadmap-desc">A credential problem does not resolve itself. Retrying a 401 in a loop is how a key gets rate-limited or revoked.</div></div></div><div class="roadmap-item"><div class="roadmap-num">429 — slow down</div><div><div class="roadmap-title">Retry, but only when told</div><div class="roadmap-desc">The response usually carries a Retry-After header. Honour it. Backing off on your own schedule while ignoring the one you were handed is how a client makes an overload worse.</div></div></div><div class="roadmap-item"><div class="roadmap-num">500 and 502 to 504 — their problem</div><div><div class="roadmap-title">Retry with backoff</div><div class="roadmap-desc">Genuinely transient much of the time. This is the category exponential backoff exists for, and the only one where blind retrying is defensible.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Timeouts — you do not know</div><div><div class="roadmap-title">The dangerous one</div><div class="roadmap-desc">You have no idea whether the work happened. The request may have completed and the response been lost, which is why this is the case that needs idempotency rather than a retry policy.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">400 and 422 — you sent something wrong</div><div><div class="roadmap-title">Never retry</div><div class="roadmap-desc">The request is malformed or fails validation. Retrying sends the same wrong thing again, and does so as fast as the loop allows. These belong in a log with the payload, not in a retry.</div></div></div><div class="roadmap-item"><div class="roadmap-num">401 and 403 — you are not allowed</div><div><div class="roadmap-title">Never retry</div><div class="roadmap-desc">A credential problem does not resolve itself. Retrying a 401 in a loop is how a key gets rate-limited or revoked.</div></div></div><div class="roadmap-item"><div class="roadmap-num">429 — slow down</div><div><div class="roadmap-title">Retry, but only when told</div><div class="roadmap-desc">The response usually carries a <dfn class="gl" tabindex="0" data-gl="retry-after">Retry-After</dfn> header. Honour it. Backing off on your own schedule while ignoring the one you were handed is how a client makes an overload worse.</div></div></div><div class="roadmap-item"><div class="roadmap-num">500 and 502 to 504 — their problem</div><div><div class="roadmap-title">Retry with backoff</div><div class="roadmap-desc">Genuinely transient much of the time. This is the category exponential backoff exists for, and the only one where blind retrying is defensible.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Timeouts — you do not know</div><div><div class="roadmap-title">The dangerous one</div><div class="roadmap-desc">You have no idea whether the work happened. The request may have completed and the response been lost, which is why this is the case that needs idempotency rather than a retry policy.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A timeout is not a failure. It is an absence of information.</p><p class="know-why">Every other error tells you something definite. A timeout tells you only that you stopped waiting, and the operation on the other side may have succeeded, failed, or still be running. Retrying is therefore a decision to possibly do the thing twice — which is free for a read, expensive for a paid generation, and unacceptable for anything that sends, charges or writes.</p><p class="know-eg"><span class="know-eg-label">For example</span>A model call that times out at thirty seconds and is retried has plausibly been billed twice for one answer. The same pattern on an endpoint that emails a customer has sent two emails, and no amount of logging on your side will tell you which happened.</p></blockquote>
   <h2>Hyrum&#x27;s law, and why your output format is now a contract</h2>
   <p><strong>Hyrum&#39;s law</strong>: with a sufficient number of users, every observable behaviour of your system will be depended on by somebody, regardless of what you promised. Not the documented interface &mdash; the <em>observable</em> one. Field ordering, whitespace, how long a list usually is, the fact that an optional field is always present in practice.</p>
@@ -273,6 +284,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"retry-after": {"t": "Retry-After", "d": "The header a 429 or 503 uses to tell a client when to try again. Honouring it beats backing off on your own schedule, which makes an overload worse."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

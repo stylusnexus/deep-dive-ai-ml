@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,7 +232,7 @@
   <h1>When the Provider Goes Down</h1>
   <p class="subtitle">Failing over is a design with five rungs, a clock and a test, not a second API key in an environment variable.</p>
 
-  <p>Every project in this course depends on a model someone else runs. The first lesson in this block covered one request: classify the status code, retry what is safe, back off with jitter. This lesson covers the other question, the one an interviewer actually asks: <em>what does your system do while the provider is not answering?</em> The honest answer has more parts than &ldquo;switch to another provider&rdquo;, and the first part is that &ldquo;down&rdquo; is rarely what happens.</p>
+  <p>Every project in this course depends on a model someone else runs. The first lesson in this block covered one request: classify the status code, retry what is safe, back off with <dfn class="gl" tabindex="0" data-gl="jitter">jitter</dfn>. This lesson covers the other question, the one an interviewer actually asks: <em>what does your system do while the provider is not answering?</em> The honest answer has more parts than &ldquo;switch to another provider&rdquo;, and the first part is that &ldquo;down&rdquo; is rarely what happens.</p>
   <h2>Five ways a provider fails, and only one of them is an outage</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Hard down</div><div><div class="roadmap-title">Connection refused, 5xx on every call</div><div class="roadmap-desc">The case everyone designs for, and the rarest. It is also the only one where switching immediately is obviously right.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Throttled</div><div><div class="roadmap-title">429, or a quota you did not know you had</div><div class="roadmap-desc">The provider is up and is refusing you. Switching providers does not fix a quota problem; it moves the same traffic somewhere that has its own quota and its own bill.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Slow</div><div><div class="roadmap-title">Answers arrive, after a timeout you set</div><div class="roadmap-desc">The most common failure and the hardest to see. Nothing errors. The p99 latency has doubled and every request waits for it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Partial</div><div><div class="roadmap-title">One model, one region or one feature fails</div><div class="roadmap-desc">The status page says operational. Your model in your region is the part that is not. The fix is usually another model or region at the same provider, not another provider.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Degraded</div><div><div class="roadmap-title">It answers, and the answers got worse</div><div class="roadmap-desc">A silent model update, a changed safety filter, a structured-output mode that now truncates. No error code exists for this, so no failover trigger fires. Only your own evaluation notices.</div></div></div></div>
   <p>A failover design is a table of these five against a response. If the plan only has a column for the first one, it is a plan for the failure that rarely occurs.</p>
@@ -246,15 +257,15 @@
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Fail over on a measured deadline, and trip a breaker so later requests skip the broken rung.</p><p class="know-why">An error code only exists for the failures that announce themselves. A slow or degraded provider announces nothing, and without a breaker each request pays the full timeout again before reaching the fallback.</p><p class="know-eg"><span class="know-eg-label">For example</span>A provider starts taking 30 seconds to respond instead of 2. With a 30-second timeout and no breaker, every user waits 30 seconds and then gets the fallback anyway. With a 6-second deadline and a breaker that opens after five consecutive timeouts, the breaker only learns of each failure when a deadline expires. If requests arrive one at a time, the first five users wait 6 seconds each. If they arrive together, everyone who arrives in those first 6 seconds waits too. Once the breaker is open, requests go straight to the fallback, apart from one probe after each cool-down.</p></blockquote>
   <div class="callout pitfall"><span class="label">A 429 is not a reason to switch provider</span>A throttle means you sent more than you may. Sending the same traffic to a second provider doubles the places you can be throttled and the places you are billed, and can push the second provider over its own limit at the worst moment. Back off, shed the lowest-value traffic, or queue it. Fail over for hard-down and slow; treat throttling as a capacity problem.</div>
   <h2>A fallback is a different system</h2>
-  <p>The whole risk of failover sits in a single assumption: that the next rung behaves like the one above it. A different provider's model follows a different instruction style, formats tool calls differently, and fails differently on your structured-output schema. A prompt tuned for one is not tuned for the other. The first time the fallback runs should not be during an outage.</p>
-  <ul><li><strong>Evaluate every rung on your own set.</strong> Run the same private eval set through each fallback and record the score and the non-completion rate, as in the one-set-many-models lesson. Decide in advance which tasks are allowed to degrade and which must refuse instead.</li><li><strong>Check the data agreement.</strong> A second provider may sit in another region, under other retention terms, or outside what your customers consented to. Failing over silently can be a compliance event.</li><li><strong>Keep it alive.</strong> A fallback called rarely can be retired by its provider before anyone notices. Send it a small share of real or shadow traffic so the credentials, quota and model name are known to work.</li><li><strong>Watch the cost.</strong> A larger fallback model can multiply the bill during exactly the hours when you are least watching it. Set a budget cap on the fallback path.</li></ul>
+  <p>The whole risk of failover sits in a single assumption: that the next rung behaves like the one above it. A different provider's model follows a different instruction style, formats <dfn class="gl" tabindex="0" data-gl="tool-call">tool calls</dfn> differently, and fails differently on your structured-output schema. A prompt tuned for one is not tuned for the other. The first time the fallback runs should not be during an outage.</p>
+  <ul><li><strong>Evaluate every rung on your own set.</strong> Run the same private eval set through each fallback and record the score and the <dfn class="gl" tabindex="0" data-gl="non-completion">non-completion</dfn> rate, as in the one-set-many-models lesson. Decide in advance which tasks are allowed to degrade and which must refuse instead.</li><li><strong>Check the data agreement.</strong> A second provider may sit in another region, under other retention terms, or outside what your customers consented to. Failing over silently can be a compliance event.</li><li><strong>Keep it alive.</strong> A fallback called rarely can be retired by its provider before anyone notices. Send it a small share of real or shadow traffic so the credentials, quota and model name are known to work.</li><li><strong>Watch the cost.</strong> A larger fallback model can multiply the bill during exactly the hours when you are least watching it. Set a budget cap on the fallback path.</li></ul>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A fallback you have never run on real traffic is a guess about how your system behaves.</p><p class="know-why">Each rung differs from the one above it in tool-call format, output shape, quality, residency, quota and price. None of those differences shows up until a request is actually sent, and during an outage is the worst time to discover them.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team keeps a second provider configured and never calls it. When the primary degrades, the fallback returns a tool call in a different shape, the parser rejects it, and every request fails twice: once at the provider and once in the code written to handle that.</p></blockquote>
   <h2>Switching providers is an interface problem first</h2>
   <p>Moving from one AI provider to another fails in the plumbing before it fails in the model. Request shapes differ, and so do the way a system prompt is passed, how tools are declared, what a tool call looks like when it comes back, how a stop reason is named and how usage is counted. Code that calls one provider's client directly in forty places cannot fall back to another without editing all forty.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">One narrow interface</div><div><div class="roadmap-title">Your code calls yours, not theirs</div><div class="roadmap-desc">Define a small function of your own, such as <code>complete(messages, tools, schema, deadline)</code>, and put each provider behind an adapter that translates in both directions. The fallback ladder then becomes a list of adapters, and nothing else in the system knows which one answered.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A gateway</div><div><div class="roadmap-title">The same idea, run as a service</div><div class="roadmap-desc">A proxy that exposes one API and routes to several providers, with the retry, deadline and breaker logic in one place. It saves writing adapters and adds a service that is now itself a single point of failure, so it needs its own fallback path.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A prompt per provider</div><div><div class="roadmap-title">Portability is tested, not assumed</div><div class="roadmap-desc">Keep the prompt, the tool definitions and the output schema as data you can vary per rung. Evaluate each pairing on your own set. A prompt that scores well on one model can score noticeably lower on another with identical wording.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A record of who answered</div><div><div class="roadmap-title">Every response names its rung</div><div class="roadmap-desc">Log the provider, model and version on every request. Without it a quality drop during a failover is indistinguishable from a bug, and the cost report cannot attribute the spend.</div></div></div></div>
   <div class="callout matters"><span class="label">Failover is also a contract and a security question</span>A second provider needs its own agreement, its own key held in your secret store, its own data-retention terms and its own entry in your list of subprocessors. The key has to be live and the quota non-zero before the day you need it. An unsigned or unfunded fallback is a diagram, not a fallback.</div>
   <h2>Streaming makes the choice earlier</h2>
-  <p>Once the first token has reached the user you cannot switch models without showing them two answers. Decide before streaming begins: wait for the first token under a short deadline, and if it does not arrive, fall back then. A failure after streaming has started is a different case, and the honest handling is to end the response with a visible notice rather than splice in a second model's answer.</p>
+  <p>Once the first <dfn class="gl" tabindex="0" data-gl="token">token</dfn> has reached the user you cannot switch models without showing them two answers. Decide before streaming begins: wait for the first token under a short deadline, and if it does not arrive, fall back then. A failure after streaming has started is a different case, and the honest handling is to end the response with a visible notice rather than splice in a second model's answer.</p>
   <h2>The rung people forget: do not generate</h2>
   <p>For a RAG system the cheapest, safest fallback is not another model. It is to skip generation and return what retrieval already found: the top passages, their sources and a notice that the summary is unavailable. The user still gets the evidence. An exact-match cache of earlier answers is the same idea, and it carries none of the false-match risk of a similarity cache. Both avoid asking a second model to do a job it was never evaluated for. Label the reply, though. A <code>200</code> that carries passages looks like success to any client that checks only the status code, so make the degraded case opt-in, keep the passages out of the field a client would display as the answer, and add a flag the caller has to read. Project 4 does exactly this.</p>
   <h2>What to measure</h2>
@@ -293,6 +304,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"jitter": {"t": "Jitter", "d": "Randomisation added to backoff intervals so clients that failed together do not retry together. Without it, a retry storm is a second outage arriving on a schedule."}, "tool-call": {"t": "Tool call", "d": "Structured text the model emits requesting a function. The harness parses and executes it; the model never touches the tool."}, "non-completion": {"t": "Non-completion", "d": "A run that failed for infrastructure reasons — a timeout, a rate limit, a truncation — rather than because the model was wrong. Classify these out of capability scores, or a provider's bad afternoon becomes a permanent verdict about the model."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

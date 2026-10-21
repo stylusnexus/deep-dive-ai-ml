@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -223,7 +234,7 @@
 
   <p>Every supervised model in this course learns from labels, and almost every discussion of model quality skips where those labels came from. That is the wrong way round: <strong>label quality is a ceiling</strong>. A model cannot be more consistent than the labels it was trained on, and no algorithm recovers from a target that means different things on different rows.</p>
   <h2>Where labels actually come from</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Recorded outcomes</div><div><div class="roadmap-title">The event happened</div><div class="roadmap-desc">The turbine failed, the customer churned, the invoice was paid late. Usually the best labels available, and check the recording process — a field populated by a workflow can be a leak rather than a label.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Human annotation</div><div><div class="roadmap-title">Someone judged it</div><div class="roadmap-desc">Accurate, expensive, and only as consistent as the guidelines. This is where most quality problems originate.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Programmatic / weak supervision</div><div><div class="roadmap-title">Rules generate labels</div><div class="roadmap-desc">Fast and cheap over large volumes. Encodes the rule's blind spots into the training data, permanently.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Implicit / behavioural</div><div><div class="roadmap-title">Inferred from what people did</div><div class="roadmap-desc">A click as relevance, a return as dissatisfaction. Abundant and biased by the interface — you only observe behaviour on what was shown.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Model-generated</div><div><div class="roadmap-title">Another model labelled it</div><div class="roadmap-desc">Cheap at scale, and it inherits the teacher's errors confidently. The distillation lesson's caution applies: filter with something external or you are training on an opinion.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Recorded outcomes</div><div><div class="roadmap-title">The event happened</div><div class="roadmap-desc">The turbine failed, the customer churned, the invoice was paid late. Usually the best labels available, and check the recording process — a field populated by a workflow can be a leak rather than a label.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Human annotation</div><div><div class="roadmap-title">Someone judged it</div><div class="roadmap-desc">Accurate, expensive, and only as consistent as the guidelines. This is where most quality problems originate.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Programmatic / weak supervision</div><div><div class="roadmap-title">Rules generate labels</div><div class="roadmap-desc">Fast and cheap over large volumes. Encodes the rule's blind spots into the training data, permanently.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Implicit / behavioural</div><div><div class="roadmap-title">Inferred from what people did</div><div class="roadmap-desc">A click as relevance, a return as dissatisfaction. Abundant and biased by the interface — you only observe behaviour on what was shown.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Model-generated</div><div><div class="roadmap-title">Another model labelled it</div><div class="roadmap-desc">Cheap at scale, and it inherits the teacher's errors confidently. The <dfn class="gl" tabindex="0" data-gl="distillation">distillation</dfn> lesson's caution applies: filter with something external or you are training on an opinion.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A model cannot be more consistent than its labels.</p><p class="know-why">If two annotators disagree on a fifth of cases, roughly a fifth of your training signal is noise, and the ceiling on any model is set there. Tuning architecture against a noisy target is optimising below a limit you have not measured.</p><p class="know-eg"><span class="know-eg-label">For example</span>A support-ticket classifier plateaus at 78% accuracy across four model families. Measuring annotator agreement on a sample of 200 tickets gives 0.79 — the two annotators disagreed on a fifth of them. The model was already at the ceiling, and the fix was a clearer guideline, not a better model.</p></blockquote>
   <h2>Measuring label quality, which takes an afternoon</h2>
   <ul><li><strong>Double-label a sample.</strong> Two hundred items, two annotators, independently. Compute agreement — Cohen's kappa if you want the standard measure, raw agreement if you want something everyone understands.</li><li><strong>Read the disagreements.</strong> They are not noise; they are the cases your guideline does not cover. Each one is either an ambiguous class definition or a genuinely hard example, and the two need different fixes.</li><li><strong>Label a few yourself.</strong> Nothing exposes a vague guideline faster than trying to follow it.</li><li><strong>Re-label a sample later.</strong> If the same annotator disagrees with their own earlier judgement, the guideline is underspecified rather than the annotator being careless.</li></ul>
@@ -253,7 +264,7 @@
 </svg><figcaption>Three roles, and the discipline is entirely about the third. Every look at the test set converts a little of it into validation data, and the conversion is irreversible.</figcaption></figure>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">The test set is spent by looking at it, and it cannot be refilled.</p><p class="know-why">Each decision made after seeing the test score leaks a little of it into your choices. The set does not become invalid at any single point, it degrades continuously — which is why the discipline is to look once, at the end, rather than to look sparingly.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team checks the test score after each of thirty tuning rounds, choosing what to try next based on it. The final reported figure is 4 points above what the model achieves in production. Nothing was cheated; the test set had quietly become a validation set thirty decisions earlier.</p></blockquote>
   <h2>Where the same discipline applies, and is usually skipped</h2>
-  <ul><li><strong>Prompt examples.</strong> Tuning few-shot examples against the same cases you evaluate on is leakage by hand. Hold examples back.</li><li><strong>Eval sets for generative systems.</strong> The twenty-item rule needs a twenty-first item you have never looked at, or you will fit the twenty.</li><li><strong>Benchmark tasks.</strong> Tuning a scaffold against every task in a suite is the same failure at project scale.</li><li><strong>Label guidelines.</strong> If you refine the guideline by examining the cases the model gets wrong, your evaluation is now partly a measure of the guideline you fitted to it.</li></ul>
+  <ul><li><strong>Prompt examples.</strong> Tuning <dfn class="gl" tabindex="0" data-gl="zero-shot-few-shot-many-shot">few-shot</dfn> examples against the same cases you evaluate on is leakage by hand. Hold examples back.</li><li><strong>Eval sets for generative systems.</strong> The twenty-item rule needs a twenty-first item you have never looked at, or you will fit the twenty.</li><li><strong>Benchmark tasks.</strong> Tuning a scaffold against every task in a suite is the same failure at project scale.</li><li><strong>Label guidelines.</strong> If you refine the guideline by examining the cases the model gets wrong, your evaluation is now partly a measure of the guideline you fitted to it.</li></ul>
   <div class="callout pitfall"><span class="label">Nested cross-validation, for when you must tune and estimate</span>If you use cross-validation to choose hyperparameters, the resulting score is optimistic — the folds informed the choice. Nested cross-validation puts a tuning loop inside each outer fold, so the outer estimate never saw the choices. It costs many times more compute and it is the honest answer when the number will be reported to someone who will act on it.</div>
   <h2>The connection worth carrying forward</h2>
   <p>Label quality sets the ceiling. Holdouts tell you where you are against it. Neither is a modelling technique, both are cheap, and skipping either produces confident numbers that do not survive contact with production — which is the failure this entire course is arranged around preventing.</p>
@@ -292,6 +303,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"distillation": {"t": "Distillation", "d": "Training a small student model to reproduce a large teacher's behaviour. The teacher's full probability distribution (\"dark knowledge\") carries more signal than hard labels."}, "zero-shot-few-shot-many-shot": {"t": "Zero-shot / few-shot / many-shot", "d": "How many examples you put in the prompt. Few-shot (2–10) is the workhorse."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

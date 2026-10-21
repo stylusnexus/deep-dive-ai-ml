@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -224,7 +235,7 @@
   <p>Build an LLM system for more than a few weeks and you will accumulate three kinds of writing that are not code. They get confused constantly, including by people who write all three, because they overlap in subject matter. They do not overlap in <em>purpose</em>, and keeping them apart is what makes each one useful.</p>
   <h2>The three, and the question each answers</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The harness</div><div><div class="roadmap-title">What the system does</div><div class="roadmap-desc">Prompts, tool definitions, loop control, budgets, the evaluation rig. Everything around the model. It is <em>executed</em>, so it is true by construction — whatever it says is what happens.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A recipe</div><div><div class="roadmap-title">How you work</div><div class="roadmap-desc">A reusable method: the trigger that tells you it applies, the procedure, and a worked example. A runbook, a debugging protocol, an eval procedure. It is <em>followed</em>, so it is only as good as its first step.</div></div></div><div class="roadmap-item"><div class="roadmap-num">An ADR</div><div><div class="roadmap-title">Why it is this way</div><div class="roadmap-desc">An architecture decision record: the context that forced a choice, the choice, and the consequences accepted. It is <em>consulted</em>, so its value decays with the evidence that produced it.</div></div></div></div>
-  <p>The test for which one you are writing is simple. If a machine executes it, it is harness. If a person follows it step by step, it is a recipe. If someone reads it to understand why they can't do the obvious thing, it is an ADR.</p>
+  <p>The test for which one you are writing is simple. If a machine executes it, it is <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn>. If a person follows it step by step, it is a recipe. If someone reads it to understand why they can't do the obvious thing, it is an ADR.</p>
   <h2>The harness is also the instrument, and that is the problem</h2>
   <p>The definition above says the harness is executed and therefore true by construction &mdash; whatever it says is what happens. That is right about the <em>system</em>, and it hides something. The harness is not only the thing that does the work; it is also the thing that reports on the work. Those are two jobs, they are usually built by the same person in the same afternoon, and only the first one fails loudly.</p>
   <p>The consequence is uncomfortable and specific: when the harness is wrong, the evidence about the harness comes from the harness. A rig that cannot tell success from inaction will say so in no way whatsoever. It will produce numbers, they will move when you change things, and every one of them will be noise &mdash; and the next lesson opens with two cases from this project where exactly that happened for months.</p>
@@ -250,7 +261,7 @@
 <text x="176" y="152" class="d-label-sm">each fixture must fail before the work and pass after it &#8212; or it is not evidence</text>
 </svg><figcaption>One harness, many fixtures. The harness supplies the starting state and collects what happened; each fixture carries the claim that a specific thing became true.</figcaption></figure>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A harness you cannot measure is one you can only change, not improve.</p><p class="know-why">Every harness decision &mdash; a prompt line, a turn limit, a tool description, a retry &mdash; is a claim that behaviour will get better. Without fixtures the claim is untestable, so changes get made on plausibility and kept on attachment, and the rig accumulates modifications nobody can justify or safely remove. With fixtures the same changes become reversible: you can revert one and see the number move, which is the difference between engineering the harness and decorating it.</p><p class="know-eg"><span class="know-eg-label">For example</span>The worked example below is a harness change that was a <em>deletion</em>. It was defensible only because a fixture existed that the deletion moved &mdash; without that, removing a line from a system prompt is indistinguishable from superstition, and nobody would have dared.</p></blockquote>
-  <div class="callout matters"><span class="label">Build the fixture before the harness change, not after</span><p>A fixture written after a change tends to encode the change. You already know what the new behaviour is, so the assertion gets shaped to fit it, and it will pass forever afterwards without ever having been at risk. Write it first, watch it fail for the reason you expect, and only then make the change &mdash; at which point passing means something.</p><p>The other half is that the harness has to record <em>what happened</em>, not only the verdict. A pass/fail bit cannot distinguish a model that never understood the task from one that understood it and declined, and those two need opposite fixes. That distinction is what the next lesson calls process honesty, and it is a property of the harness rather than of the fixture.</p></div>
+  <div class="callout matters"><span class="label">Build the fixture before the harness change, not after</span><p>A fixture written after a change tends to encode the change. You already know what the new behaviour is, so the assertion gets shaped to fit it, and it will pass forever afterwards without ever having been at risk. Write it first, watch it fail for the reason you expect, and only then make the change &mdash; at which point passing means something.</p><p>The other half is that the harness has to record <em>what happened</em>, not only the verdict. A pass/fail bit cannot distinguish a model that never understood the task from one that understood it and declined, and those two need opposite fixes. That distinction is what the next lesson calls <dfn class="gl" tabindex="0" data-gl="process-honesty">process honesty</dfn>, and it is a property of the harness rather than of the fixture.</p></div>
   <h2>They form a cycle, not a hierarchy</h2>
   <figure class="diagram"><svg viewBox="0 0 660 320" role="img" aria-label="Cycle diagram: harness produces evidence, recipes interpret it, ADRs constrain the harness"><defs><marker id="ep1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="250" y="20" width="170" height="66" rx="10" class="d-box-accent"/>
@@ -308,6 +319,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "process-honesty": {"t": "Process honesty", "d": "Whether the harness recorded what actually happened: the model's reasoning, its tool arguments, and why the run stopped. Without it you cannot tell \"never attempted\" from \"attempted and failed\"."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

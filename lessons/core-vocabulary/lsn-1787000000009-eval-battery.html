@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -225,7 +236,7 @@
   <h2>A battery is a fixed set of tasks with checkable outcomes</h2>
   <p>Each task has an input, a way to run it, and a way to decide pass or fail <em>without a human</em>. Run the battery against a configuration and you get a score. Change one thing, re-run, compare. That's the entire method, and its value comes from the set staying fixed.</p>
   <p>A recorded result — say 11 of 24 on multi-file editing as of a particular change — is only meaningful because the 24 did not move. A benchmark you edit between runs measures nothing.</p>
-  <div class="callout insight"><span class="label">Battery, eval harness, agent harness — three things</span>A <strong>battery</strong> is the set of tasks. An <strong>eval harness</strong> is the machinery that runs them and produces a score. An <strong>agent harness</strong> is the scaffolding around a single agent run — prompt assembly, tools, turn limits — which is the sense the loop lesson uses. The exam analogy: the battery is the question paper and the mark scheme; the eval harness is the invigilator and the process that totals the marks; the agent harness is how one candidate sits the exam. Context disambiguates, and the field genuinely uses the word both ways.</div>
+  <div class="callout insight"><span class="label">Battery, eval harness, agent harness — three things</span>A <strong>battery</strong> is the set of tasks. An <strong>eval <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn></strong> is the machinery that runs them and produces a score. An <strong>agent harness</strong> is the scaffolding around a single agent run — prompt assembly, tools, turn limits — which is the sense the loop lesson uses. The exam analogy: the battery is the question paper and the mark scheme; the eval harness is the invigilator and the process that totals the marks; the agent harness is how one candidate sits the exam. Context disambiguates, and the field genuinely uses the word both ways.</div>
   <div class="callout pitfall"><span class="label">The battery is not the product</span>An eval harness frequently builds its own configuration rather than the one your real system runs — a different system prompt, different budgets, sometimes no whole-run clock at all. When that is true, a result from the battery is evidence about the harness that ran it, not about the thing you ship. Check whether the two configurations actually match before treating a board of numbers as a statement about your product.</div>
   <h2>Why public benchmarks won&#x27;t answer your question</h2>
   <ul><li><strong>Contamination.</strong> Popular benchmarks are in the training data. High scores may be recall, not capability.</li><li><strong>Optimisation pressure.</strong> Vendors tune for benchmarks that decide purchases. The measure stops being a measure.</li><li><strong>Task mismatch.</strong> A model's competitive-programming score says little about editing four files in your Go codebase without breaking the build.</li></ul>
@@ -248,9 +259,9 @@
 </svg><figcaption>Grade as far up this ladder as the task allows. Every step down costs you certainty, and the bottom rung can be circular.</figcaption></figure>
   <div class="callout pitfall"><span class="label">The trap the harness is named for</span>An agent asked whether it succeeded will frequently say yes. The strongest eval harnesses are built on exactly this premise — replay real closed pull requests, so the outcome is established in advance and the agent's self-report is irrelevant. Never let the thing being evaluated report its own score.</div>
   <h2>What to record on every run</h2>
-  <p>A score alone is nearly useless six weeks later. Record the model and quantization, the harness version or commit, the sampling settings, the date, and the per-task outcomes rather than only the total. Without those, a changed number tells you something moved but not what.</p>
+  <p>A score alone is nearly useless six weeks later. Record the model and <dfn class="gl" tabindex="0" data-gl="quantization">quantization</dfn>, the harness version or commit, the sampling settings, the date, and the per-task outcomes rather than only the total. Without those, a changed number tells you something moved but not what.</p>
   <h2>Where this goes next</h2>
-  <p>You now have the vocabulary the rest of the program assumes: the loop and the harness around it, tokens and context, weights and quantization, local serving, embeddings and retrieval, tool calls and Model Context Protocol (MCP), routing and sampling, and evaluation. Block 1 starts on data. Every block from here re-uses these terms rather than introducing parallel ones.</p>
+  <p>You now have the vocabulary the rest of the program assumes: the loop and the harness around it, <dfn class="gl" tabindex="0" data-gl="token">tokens</dfn> and context, weights and quantization, local serving, <dfn class="gl" tabindex="0" data-gl="embedding">embeddings</dfn> and retrieval, <dfn class="gl" tabindex="0" data-gl="tool-call">tool calls</dfn> and Model Context Protocol (MCP), routing and sampling, and evaluation. Block 1 starts on data. Every block from here re-uses these terms rather than introducing parallel ones.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Twenty real tasks from your own work, with known-good outcomes, is the most valuable evaluation asset you can own.</p><p class="know-why">It is small enough to build in an afternoon and specific enough that no vendor has optimised against it. Public benchmarks are contaminated, gamed, and usually measuring a different problem from yours.</p><p class="know-eg"><span class="know-eg-label">For example</span>A model tops the leaderboard on a coding benchmark and performs poorly on your Go service. Both facts are true. The benchmark is Python, drawn from public repositories that were in the training data. Your twenty tasks are your codebase, your conventions, and your idea of a correct answer — which is the thing you actually need to predict.</p></blockquote>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block5-evaluation/lsn-1787800000000-where-evaluation-lives.html">Where Evaluation Lives</a><span class="rel-set">Block 5 · Evaluation</span><span class="link-note">The map. Which artefact answers which question, and the order that stops you wasting a week.</span></li><li><a href="../block6-security/lsn-1787900000003-red-teaming-your-own-agent.html">Red-Teaming Your Own Agent</a><span class="rel-set">Block 6 · Security</span><span class="link-note">The exit criterion for this block: break the system you built, then prove you fixed it.</span></li><li><a href="../block5-evaluation/lsn-1787800000001-eval-data-you-can-trust.html">Eval Data You Can Trust</a><span class="rel-set">Block 5 · Evaluation</span><span class="link-note">A gold label is only correct if you can name the rule that produces it.</span></li><li><a href="../engineering-practice/lsn-1787400000015-tracking-runs-and-automating-evals.html">Tracking Runs, and Running the Evals Automatically</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The measurement discipline this course teaches does not survive contact with fifty experiments unless something records them for you.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://developers.google.com/machine-learning/crash-course/overfitting/overfitting" target="_blank" rel="noopener">Google ML Crash Course: overfitting</a><span class="link-note">Short, visual treatment of held-out evaluation if you want a second angle.</span></li></ul></div>
@@ -279,6 +290,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "quantization": {"t": "Quantization", "d": "Storing each weight in fewer bits (4, 5, 8) instead of 16. Shrinks and speeds up the model at a small cost in precision."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "tool-call": {"t": "Tool call", "d": "Structured text the model emits requesting a function. The harness parses and executes it; the model never touches the tool."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,7 +232,7 @@
   <h1>Gradient Descent and Backpropagation</h1>
   <p class="subtitle">The one algorithm underneath every trained model you will ever use.</p>
 
-  <p>Your statistics course covers <em>why</em> a loss function measures wrongness. This one covers <em>how</em> a model uses that measurement to change itself. Every model in this program — linear regression, a neural network, a fine-tuned LLM — is trained by the same two-step algorithm.</p>
+  <p>Your statistics course covers <em>why</em> a loss function measures wrongness. This one covers <em>how</em> a model uses that measurement to change itself. Every model in this program — <dfn class="gl" tabindex="0" data-gl="linear-regression">linear regression</dfn>, a neural network, a fine-tuned LLM — is trained by the same two-step algorithm.</p>
   <h2>Gradient descent: walking downhill in fog</h2>
   <p>You have a loss — a number saying how wrong the model currently is — and millions of parameters you could adjust. The <strong>gradient</strong> is the slope of the loss with respect to each parameter: for every knob, which direction makes things worse, and how steeply. Move each parameter a small step the other way. Recompute. Repeat.</p>
   <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Effect of learning rate on gradient descent">
@@ -250,19 +261,19 @@
 </svg><figcaption>Learning rate is the step size. Too small and training crawls; too large and you overshoot the minimum repeatedly and never settle. Most training instability is this one hyperparameter — set by you, unlike the parameters the training is adjusting.</figcaption></figure>
   <h2>The three flavours you will see named</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Batch</div><div><div class="roadmap-title">Whole dataset per step</div><div class="roadmap-desc">Accurate gradient, impossibly slow at scale. Rarely used as-is.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Stochastic (SGD)</div><div><div class="roadmap-title">One example per step</div><div class="roadmap-desc">Fast and noisy. The noise sometimes helps escape bad minima.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Mini-batch</div><div><div class="roadmap-title">32–512 examples per step</div><div class="roadmap-desc">What everyone actually uses. Batch size is a memory-versus-stability trade.</div></div></div></div>
-  <p>An <strong>epoch</strong> is one full pass through the training data. Modern optimisers — <strong>Adam</strong> most commonly — adapt the step size per parameter rather than using one global learning rate, which is why they're the default in nearly every framework you'll touch.</p>
+  <p>An <strong>epoch</strong> is one full pass through the training data. Modern optimisers — <strong><dfn class="gl" tabindex="0" data-gl="adam">Adam</dfn></strong> most commonly — adapt the step size per parameter rather than using one global learning rate, which is why they're the default in nearly every framework you'll touch.</p>
   <h2>Backpropagation: getting the gradient cheaply</h2>
-  <p>In a network with many layers, a parameter in layer one affects the loss only through everything that comes after it. <strong>Backpropagation</strong> computes all those gradients efficiently by applying the chain rule backwards from the loss, reusing intermediate results rather than recomputing them per parameter.</p>
-  <p>That efficiency is the whole reason deep learning is feasible. Computing gradients naively — nudging each parameter and re-measuring — would take a forward pass per parameter. For a 7-billion-parameter model that is not a slow approach; it is an impossible one.</p>
-  <div class="callout insight"><span class="label">What this explains</span>Backprop's cost is why training needs so much more memory than inference: the intermediate activations from the forward pass must be kept so the backward pass can use them. It's also why LoRA is cheap — freeze most parameters and you neither store nor compute their gradients.</div>
+  <p>In a network with many layers, a parameter in layer one affects the loss only through everything that comes after it. <strong><dfn class="gl" tabindex="0" data-gl="backpropagation">Backpropagation</dfn></strong> computes all those gradients efficiently by applying the chain rule backwards from the loss, reusing intermediate results rather than recomputing them per parameter.</p>
+  <p>That efficiency is the whole reason <dfn class="gl" tabindex="0" data-gl="deep-learning">deep learning</dfn> is feasible. Computing gradients naively — nudging each parameter and re-measuring — would take a forward pass per parameter. For a 7-billion-parameter model that is not a slow approach; it is an impossible one.</p>
+  <div class="callout insight"><span class="label">What this explains</span>Backprop's cost is why training needs so much more memory than inference: the intermediate activations from the forward pass must be kept so the backward pass can use them. It's also why <dfn class="gl" tabindex="0" data-gl="lora-low-rank-adaptation">LoRA</dfn> is cheap — freeze most parameters and you neither store nor compute their gradients.</div>
   <h2>Where it goes wrong</h2>
-  <ul><li><strong>Diverging loss.</strong> Loss climbs or becomes NaN. Learning rate too high, almost always. Lower it by 10× first.</li><li><strong>Plateau.</strong> Loss stops moving early. Learning rate too low, or gradients vanishing through many layers.</li><li><strong>Loss falls, validation doesn't.</strong> Not an optimisation problem — that's overfitting, and more training makes it worse.</li></ul>
+  <ul><li><strong>Diverging loss.</strong> Loss climbs or becomes NaN. Learning rate too high, almost always. Lower it by 10× first.</li><li><strong>Plateau.</strong> Loss stops moving early. Learning rate too low, or gradients vanishing through many layers.</li><li><strong>Loss falls, validation doesn't.</strong> Not an optimisation problem — that's <dfn class="gl" tabindex="0" data-gl="overfitting">overfitting</dfn>, and more training makes it worse.</li></ul>
   <h2>The numbers that make it concrete</h2>
   <p>Abstractly this is downhill walking. Concretely, here is what a training run costs. A 7-billion-parameter model at 16-bit precision is about 14GB of weights. Training it needs roughly three times that again: gradients (one per parameter), plus the optimiser's own state — Adam keeps two running averages per parameter, which is where most of the surprise comes from. Weights included, that is about four times the weights in total.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Weights</div><div><div class="roadmap-title">~14 GB</div><div class="roadmap-desc">The model itself, at 16-bit.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Gradients</div><div><div class="roadmap-title">~14 GB</div><div class="roadmap-desc">One per parameter, alive during the backward pass.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Optimiser state</div><div><div class="roadmap-title">~28 GB</div><div class="roadmap-desc">Adam's two moments per parameter. Frequently the largest single item.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Activations</div><div><div class="roadmap-title">Varies with batch and sequence</div><div class="roadmap-desc">Kept from the forward pass so backprop can use them. The knob you actually tune when you run out of memory.</div></div></div></div>
-  <div class="callout insight"><span class="label">Why LoRA is not a small optimisation</span>Freeze the base weights and train small adapter matrices instead, and you eliminate gradients and optimiser state for almost every parameter. The 56GB above collapses toward the 14GB of frozen weights plus a rounding error. That is the difference between fine-tuning needing a datacentre and needing your laptop, and it is pure bookkeeping rather than a cleverer algorithm.</div>
+  <div class="callout insight"><span class="label">Why LoRA is not a small optimisation</span>Freeze the base weights and train small adapter matrices instead, and you eliminate gradients and optimiser state for almost every parameter. The 56GB above collapses toward the 14GB of frozen weights plus a rounding error. That is the difference between <dfn class="gl" tabindex="0" data-gl="fine-tuning">fine-tuning</dfn> needing a datacentre and needing your laptop, and it is pure bookkeeping rather than a cleverer algorithm.</div>
   <h2>Reading a loss curve</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Falls then flattens</div><div><div class="roadmap-title">Healthy</div><div class="roadmap-desc">The flattening is where early stopping earns its place.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Spikes then recovers</div><div><div class="roadmap-title">Usually fine</div><div class="roadmap-desc">A hard batch. Persistent spiking means the learning rate is too high or gradients need clipping.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Goes to NaN</div><div><div class="roadmap-title">Broken</div><div class="roadmap-desc">Learning rate first, always. Then check for division by zero or a log of zero in a custom loss.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Flat from step one</div><div><div class="roadmap-title">Wiring bug</div><div class="roadmap-desc">Not a learning-rate problem. Labels not connected, loss computed on the wrong tensor, or gradients not flowing. Overfit one batch to find out.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Falls, validation rises</div><div><div class="roadmap-title">Not optimisation</div><div class="roadmap-desc">That is overfitting. More training makes it worse, not better.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Falls then flattens</div><div><div class="roadmap-title">Healthy</div><div class="roadmap-desc">The flattening is where <dfn class="gl" tabindex="0" data-gl="early-stopping">early stopping</dfn> earns its place.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Spikes then recovers</div><div><div class="roadmap-title">Usually fine</div><div class="roadmap-desc">A hard batch. Persistent spiking means the learning rate is too high or gradients need clipping.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Goes to NaN</div><div><div class="roadmap-title">Broken</div><div class="roadmap-desc">Learning rate first, always. Then check for division by zero or a log of zero in a custom loss.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Flat from step one</div><div><div class="roadmap-title">Wiring bug</div><div class="roadmap-desc">Not a learning-rate problem. Labels not connected, loss computed on the wrong tensor, or gradients not flowing. <dfn class="gl" tabindex="0" data-gl="overfit-one-batch">Overfit one batch</dfn> to find out.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Falls, validation rises</div><div><div class="roadmap-title">Not optimisation</div><div class="roadmap-desc">That is overfitting. More training makes it worse, not better.</div></div></div></div>
   <div class="callout matters"><span class="label">The debugging move worth doing first, every time</span>Take one batch of about eight examples and train on it repeatedly with everything else held constant. A correctly-wired network will drive that loss to nearly zero — it can memorise eight things trivially. If it cannot, the bug is in the loop, the data pipeline or the loss, and no amount of hyperparameter tuning will find it. This takes two minutes and it separates 'the model cannot learn this' from 'the code does not work'.</div>
   <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">The Principles of Deep Learning Theory</span><span class="bk-a">Roberts, Yaida &amp; Hanin</span><span class="bk-n">For when the intuition stops being enough. Rigorous, and the treatment of initialisation and why depth is hard is the real thing rather than an analogy.</span></li><li><span class="bk-t">Hands-On Machine Learning with Scikit-Learn and PyTorch</span><span class="bk-a">Aurelien Geron</span><span class="bk-n">The practical counterpart — training loops, optimisers and schedules with code you can run.</span></li></ul></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Overfit a single batch before anything else.</p><p class="know-why">A correctly-wired network can memorise eight examples trivially, driving loss to near zero. If it cannot, the bug is in the loop, the data pipeline or the loss function — and no amount of hyperparameter tuning will find it.</p><p class="know-eg"><span class="know-eg-label">For example</span>Your loss sits flat at 2.3 from the first step and you spend an afternoon sweeping learning rates. Training on one batch would have shown the same flat line in ninety seconds and told you it was not a learning-rate problem. The labels were being passed in the wrong argument position.</p></blockquote>
@@ -293,6 +304,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"linear-regression": {"t": "Linear regression", "d": "Fits a line minimising squared error. Interpretable coefficients. The baseline for numeric prediction."}, "adam": {"t": "Adam", "d": "The default optimiser. Adapts step size per parameter rather than using one global learning rate."}, "backpropagation": {"t": "Backpropagation", "d": "Computing all those gradients efficiently by applying the chain rule backwards from the loss. Why training needs more memory than inference: forward-pass activations must be kept."}, "deep-learning": {"t": "Deep learning", "d": "Neural networks with many layers, which learn their own features instead of being handed them. Needs more data and more compute, and wins decisively when both are available."}, "lora-low-rank-adaptation": {"t": "LoRA (low-rank adaptation)", "d": "Freezing every base weight and learning a small pair of matrices whose product stands in for the update. The saving is not mainly the parameter count: a frozen weight needs no gradient and no optimiser state, and those are what dominate training memory."}, "overfitting": {"t": "Overfitting", "d": "The model memorised the training data including its noise. Excellent on seen data, poor on new data. The dangerous failure, because it looks like success."}, "fine-tuning": {"t": "Fine-tuning", "d": "Changing a model's weights so it responds differently: tone, structure, schema adherence, a domain's conventions. Good at installing behaviour and poor at installing facts, which is the distinction that decides whether it is the right tool or whether you needed retrieval."}, "early-stopping": {"t": "Early stopping", "d": "Halting training when validation loss stops improving. The cheapest defence against overfitting."}, "overfit-one-batch": {"t": "Overfit one batch", "d": "Deliberately training on a single batch until the loss collapses, to prove the training loop is wired correctly. Ninety seconds, before tuning anything."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

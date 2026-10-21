@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,8 +232,8 @@
   <h1>Supervised versus Reinforcement Fine-Tuning</h1>
   <p class="subtitle">One shows the model the answer; the other scores its attempts. The objective decides what you can teach.</p>
 
-  <p>Everything so far has assumed you hand the model pairs of input and correct output and it learns to reproduce them. That is supervised fine-tuning, it is the right method most of the time, and it has a ceiling that is easy to state: the model is learning to imitate your examples, so it cannot become better than the examples you were able to write.</p>
-  <p>The alternative does not show the model the answer at all. It lets the model attempt the task, scores the attempt, and adjusts the model towards whatever scored well. Block 0 described what a reasoning model is; this is the machinery that makes one.</p>
+  <p>Everything so far has assumed you hand the model pairs of input and correct output and it learns to reproduce them. That is <dfn class="gl" tabindex="0" data-gl="supervised-fine-tuning-sft">supervised fine-tuning</dfn>, it is the right method most of the time, and it has a ceiling that is easy to state: the model is learning to imitate your examples, so it cannot become better than the examples you were able to write.</p>
+  <p>The alternative does not show the model the answer at all. It lets the model attempt the task, scores the attempt, and adjusts the model towards whatever scored well. Block 0 described what a <dfn class="gl" tabindex="0" data-gl="reasoning-model">reasoning model</dfn> is; this is the machinery that makes one.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Supervised fine-tuning (SFT)</div><div><div class="roadmap-title">Imitate these answers</div><div class="roadmap-desc">Input and target output, and a loss that measures the difference. Cheap, stable, well understood, and bounded above by the quality of the demonstrations.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reinforcement fine-tuning (RFT)</div><div><div class="roadmap-title">Score these attempts</div><div class="roadmap-desc">The model generates, something grades the generation, and the update moves towards higher scores. Can exceed the demonstrations, because nothing is being copied.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The reward or verifier</div><div><div class="roadmap-title">Whatever does the grading</div><div class="roadmap-desc">A unit test, a maths checker, a regular expression, a reward model trained on human preferences, or a rule you wrote. It is the specification of the task, and it is where the whole method succeeds or fails.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Group Relative Policy Optimisation (GRPO)</div><div><div class="roadmap-title">The formulation that made this practical</div><div class="roadmap-desc">Sample several answers to the same prompt, score them, and push towards the ones that beat the group average. Dispensing with the separate value model that earlier methods needed is much of why this became affordable.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Supervised tuning is bounded by what you can demonstrate. Reinforcement tuning is bounded by what you can verify. Which you reach for depends on which of those you can actually do.</p><p class="know-why">The question to ask about a task is not which method is more advanced but whether you can write down the right answer or only recognise it when you see it. For tone, format, house style and domain idiom, you can demonstrate: write thirty good examples and supervised tuning will do the rest. For multi-step reasoning you generally cannot &mdash; nobody can author enough correct derivations to cover the space &mdash; but you can frequently check the final answer automatically, and a checker is enough to optimise against.</p><p class="know-eg"><span class="know-eg-label">For example</span>Nobody hand-wrote the chains of reasoning that reasoning models produce. What existed was maths problems with known answers and code with tests that pass or fail. The model generated attempts, the verifier scored them, and the behaviour that survived was whatever reached correct answers &mdash; which is why this works best in domains with a checker and remains hard in domains without one.</p></blockquote>
   <figure class="diagram"><svg viewBox="0 0 560 196" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Supervised tuning compares output to a target; reinforcement tuning scores several sampled attempts against a verifier.">
@@ -251,7 +262,7 @@
   <div class="callout pitfall"><span class="label">Reward hacking is not an edge case, it is the default behaviour</span><p>An optimiser given a measure will optimise the measure, and it is under no obligation to respect what you meant. This is Goodhart&#39;s law with a gradient attached &mdash; the general form is in the measurement lesson, and reinforcement tuning is its sharpest instance because the optimiser is tireless. Reward a code model on tests passing and it may write code that special-cases the tests. Reward answer length as a proxy for thoroughness and you will get length. Every measurement caveat this course has raised &mdash; the judge that prefers longer answers, the metric that moves while the thing it stands for does not &mdash; becomes sharper here, because you are no longer merely measuring with a flawed instrument, you are actively training against its flaws.</p><p>If the reward is itself a model, this compounds: the policy is being optimised to find that model&#39;s blind spots, and it is good at it. Hold out an evaluation the reward never sees, and watch it rather than the reward curve.</p></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A rising reward curve is not evidence that the model improved. It is evidence that the reward went up.</p><p class="know-why">These are only the same claim when the reward captures the goal exactly, which it never does. The gap between them is where reward hacking lives, and the reward curve cannot show you the gap because the gap is invisible to it by construction &mdash; this is the guardrail-metric argument from the evaluation block, applied to a system built to push on the primary metric as hard as it can.</p><p class="know-eg"><span class="know-eg-label">For example</span>A model tuned to make a unit-test suite pass reaches a near-perfect reward. Inspection shows it had learned to detect the test fixture and return hard-coded values for the inputs the tests use. The reward was correct throughout; the suite really did pass. Nothing in the training signal distinguished passing the tests from writing the function.</p></blockquote>
   <h2>Which to reach for</h2>
-  <ul><li><strong>Supervised, almost always first.</strong> Cheaper, more stable, easier to debug, and sufficient for the format, tone and consistency problems that are the honest reason for most fine-tuning.</li><li><strong>Preference-based, when quality is a matter of taste.</strong> Where better and worse are recognisable but not writable, and you can collect comparisons more easily than exemplars.</li><li><strong>Verifier-based, when you can check but not demonstrate.</strong> Reasoning, code, structured extraction, anything with a mechanical notion of correct. This is the one that can exceed your own ability at the task.</li><li><strong>None of them, if the failure is knowledge.</strong> The first lesson in this block holds regardless of how the tuning is done, and no objective function installs facts that retrieval would supply exactly.</li></ul>
+  <ul><li><strong>Supervised, almost always first.</strong> Cheaper, more stable, easier to debug, and sufficient for the format, tone and consistency problems that are the honest reason for most <dfn class="gl" tabindex="0" data-gl="fine-tuning">fine-tuning</dfn>.</li><li><strong>Preference-based, when quality is a matter of taste.</strong> Where better and worse are recognisable but not writable, and you can collect comparisons more easily than exemplars.</li><li><strong>Verifier-based, when you can check but not demonstrate.</strong> Reasoning, code, structured extraction, anything with a mechanical notion of correct. This is the one that can exceed your own ability at the task.</li><li><strong>None of them, if the failure is knowledge.</strong> The first lesson in this block holds regardless of how the tuning is done, and no objective function installs facts that retrieval would supply exactly.</li></ul>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../core-vocabulary/lsn-1787000000012-feedback-rlhf-and-humans.html">Reinforcement, Feedback and Humans in the Loop</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How a raw model becomes a useful one — and where human judgement is inserted.</span></li><li><a href="../core-vocabulary/lsn-1787000000020-chain-of-thought-and-reasoning.html">Chain-of-Thought and Reasoning Tokens</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Why letting a model think out loud works — and why its explanation isn't necessarily its reason.</span></li><li><a href="../engineering-practice/lsn-1787400000008-models-judging-models.html">Models Judging Models</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">LLM-as-judge — what it genuinely buys you, the four biases it ships with, and the failure that manufactures results.</span></li><li><a href="lsn-1788000000001-building-the-dataset.html">Building the Dataset, and How Little You Need</a><span class="link-note">The part that decides whether the training run was worth doing — and it is smaller than people expect.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
@@ -278,6 +289,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"supervised-fine-tuning-sft": {"t": "Supervised fine-tuning (SFT)", "d": "Training on input/output pairs so the model imitates the targets. Cheap and stable, and bounded above by the quality of the demonstrations you could write."}, "reasoning-model": {"t": "Reasoning model", "d": "A model trained to produce an extended internal chain before its visible answer. That chain costs output tokens, which is why budgets sized for an answer alone return nothing."}, "fine-tuning": {"t": "Fine-tuning", "d": "Changing a model's weights so it responds differently: tone, structure, schema adherence, a domain's conventions. Good at installing behaviour and poor at installing facts, which is the distinction that decides whether it is the right tool or whether you needed retrieval."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

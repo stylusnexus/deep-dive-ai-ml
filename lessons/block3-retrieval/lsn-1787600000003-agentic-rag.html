@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -224,9 +235,9 @@
   <p>Single-shot retrieval answers a question in one hop: embed, retrieve, generate. It works well and it has a hard limit. Some questions cannot be answered by any single retrieval, however good, because the answer does not exist in one place.</p>
   <h2>The questions single-shot cannot reach</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Multi-hop</div><div><div class="roadmap-title">The answer needs two facts that live apart</div><div class="roadmap-desc">"Which site has the turbine with the highest failure rate?" needs per-turbine rates, then a site lookup. Neither chunk contains both.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Comparative</div><div><div class="roadmap-title">Requires assembling several sources</div><div class="roadmap-desc">"How does this year's policy differ from last year's?" needs both policies retrieved and contrasted.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Under-specified</div><div><div class="roadmap-title">The real question emerges from a first look</div><div class="roadmap-desc">"Why did output drop?" cannot be embedded usefully until you know which site and which period.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Aggregative</div><div><div class="roadmap-title">Needs many chunks, not the top five</div><div class="roadmap-desc">"How many incidents mentioned gearbox temperature?" is a counting problem wearing a retrieval costume.</div></div></div></div>
-  <div class="callout matters"><span class="label">The last one is a warning, not a use case</span>Aggregative questions are usually the wrong shape for retrieval entirely. Counting, filtering and grouping are what a database does exactly and cheaply, and what a retrieval loop does approximately and expensively. If the question is really SQL, write SQL — the deterministic-first argument applies here as much as anywhere.</div>
+  <div class="callout matters"><span class="label">The last one is a warning, not a use case</span><dfn class="gl" tabindex="0" data-gl="aggregative-question">Aggregative questions</dfn> are usually the wrong shape for retrieval entirely. Counting, filtering and grouping are what a database does exactly and cheaply, and what a retrieval loop does approximately and expensively. If the question is really SQL, write SQL — the <dfn class="gl" tabindex="0" data-gl="deterministic-first">deterministic-first</dfn> argument applies here as much as anywhere.</div>
   <h2>The other answer to the same question</h2>
-  <p>The loop is one way to reach a fact that lives in two places. The other is to stop searching for the relationship each time and store it: extract the entities and the connections between them from the corpus ahead of time, and the multi-hop question becomes a traversal instead of a search. This is what people mean by a knowledge graph, and by <strong>GraphRAG</strong> when it is wired into retrieval.</p>
+  <p>The loop is one way to reach a fact that lives in two places. The other is to stop searching for the relationship each time and store it: extract the entities and the connections between them from the corpus ahead of time, and the <dfn class="gl" tabindex="0" data-gl="multi-hop-question">multi-hop question</dfn> becomes a traversal instead of a search. This is what people mean by a <dfn class="gl" tabindex="0" data-gl="knowledge-graph">knowledge graph</dfn>, and by <strong><dfn class="gl" tabindex="0" data-gl="graphrag">GraphRAG</dfn></strong> when it is wired into retrieval.</p>
   <p>Take the question above. Under retrieval it is two searches and a model holding the intermediate result in its head. Under a graph, <em>turbine</em> and <em>site</em> are nodes, <em>installed at</em> is an edge, the failure rate is a property, and the answer is a query that walks from one to the other &mdash; no iteration, no intermediate context, and the same answer every time.</p>
   <figure class="diagram"><svg viewBox="0 0 520 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Agentic retrieval loops at query time; a knowledge graph extracts relationships at build time and traverses them.">
 <text x="8" y="16" class="d-label-sm">agentic loop &#8212; pays at query time</text>
@@ -279,7 +290,7 @@
 <text x="12" y="208" class="d-label-sm">More capable, several times the cost and latency, and it needs a termination condition that is not the model's own opinion.</text>
 </svg><figcaption>The loop can reformulate, decompose and follow up. What it cannot do is know when to stop — that has to come from outside, exactly as with every other loop in this course.</figcaption></figure>
   <h2>The failure modes the loop brings with it</h2>
-  <ul><li><strong>Repetitive retrieval.</strong> The commonest and most expensive. The model reformulates slightly, gets near-identical results, and goes round again — burning turns and tokens without adding information.</li><li><strong>Weak contextualisation.</strong> Results arrive but are not integrated into the reasoning, so the next query is no better informed than the first.</li><li><strong>Context saturation.</strong> Every hop appends more retrieved text. By hop four the window holds a great deal of material, most of it already used, and attention thins across all of it.</li><li><strong>Drift.</strong> Each reformulation moves slightly away from the original question. By the fourth, the system is answering something adjacent.</li><li><strong>Cost you did not budget.</strong> Four hops is four retrievals and four generations, on a growing context. Several times the cost of single-shot, for a question that may not have needed it.</li></ul>
+  <ul><li><strong>Repetitive retrieval.</strong> The commonest and most expensive. The model reformulates slightly, gets near-identical results, and goes round again — burning turns and <dfn class="gl" tabindex="0" data-gl="token">tokens</dfn> without adding information.</li><li><strong>Weak contextualisation.</strong> Results arrive but are not integrated into the reasoning, so the next query is no better informed than the first.</li><li><strong>Context saturation.</strong> Every hop appends more retrieved text. By hop four the window holds a great deal of material, most of it already used, and attention thins across all of it.</li><li><strong>Drift.</strong> Each reformulation moves slightly away from the original question. By the fourth, the system is answering something adjacent.</li><li><strong>Cost you did not budget.</strong> Four hops is four retrievals and four generations, on a growing context. Several times the cost of single-shot, for a question that may not have needed it.</li></ul>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A retrieval loop with no de-duplication will re-retrieve what it already has.</p><p class="know-why">Slight query reformulations return substantially overlapping results. Without tracking what has already been seen, the loop mistakes repetition for progress, and its context fills with the same passages under different rankings.</p><p class="know-eg"><span class="know-eg-label">For example</span>An agent asked a multi-hop question runs six retrievals. Passages two and three appear in five of the six result sets. The final context holds forty chunks of which fourteen are distinct, and the answer is no better than hop two would have produced at a sixth of the cost.</p></blockquote>
   <h2>What makes it work</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">De-duplicate against what you have</div><div><div class="roadmap-title">Non-negotiable</div><div class="roadmap-desc">Track retrieved chunk ids and exclude them, or explicitly down-weight them, on subsequent hops.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Contextualise before reasoning</div><div><div class="roadmap-title">Summarise what came back</div><div class="roadmap-desc">Turn raw chunks into a short statement of what is now known and what is still missing, then query on that.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Hard hop limit</div><div><div class="roadmap-title">Three or four</div><div class="roadmap-desc">Plus a token budget. The gains flatten fast and the costs do not.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decompose explicitly</div><div><div class="roadmap-title">Where the structure is known</div><div class="roadmap-desc">"Find the rate, then look up the site" as two planned retrievals beats hoping a loop discovers the same decomposition.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Route by question shape</div><div><div class="roadmap-title">Not everything needs the loop</div><div class="roadmap-desc">Most questions are single-hop. Detect the ones that are not, rather than paying loop cost on everything.</div></div></div></div>
@@ -321,6 +332,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"aggregative-question": {"t": "Aggregative question", "d": "One that needs many chunks rather than the best five, such as how many incidents mentioned a term. A counting problem wearing a retrieval costume."}, "deterministic-first": {"t": "Deterministic-first", "d": "A model is the most expensive, slowest, least testable component available. The judgement is knowing when it earns that: is there a bounded, checkable mechanism that does this job well?"}, "multi-hop-question": {"t": "Multi-hop question", "d": "One whose answer needs two facts that live in different documents. Single-shot retrieval embeds the question, lands near one of them, and misses the other."}, "knowledge-graph": {"t": "Knowledge graph", "d": "Entities stored as nodes and their relationships as edges, extracted from a corpus ahead of time. Turns a multi-hop question from a search into a traversal: deterministic, repeatable, and answerable without the model holding intermediate results."}, "graphrag": {"t": "GraphRAG", "d": "Retrieval that queries a knowledge graph rather than, or alongside, a vector index. It moves the work from query time to build time, which is the entire trade — cheap per question, expensive to build and to keep current."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

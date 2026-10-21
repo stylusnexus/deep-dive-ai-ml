@@ -15,6 +15,7 @@ import xml.dom.minidom
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from lesson_map import slug_map
+from glossary_links import Linker
 
 # Cyrillic and CJK never appear intentionally in this course; Greek (Σ, √) does.
 STRAY_SCRIPT = re.compile(r"[\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF]")
@@ -54,6 +55,7 @@ window.addEventListener("message", (e) => {
 </script>"""
 
 E = html.escape
+LINKER = Linker()
 
 # variants with a CSS rule in _lesson_style.html; anything else renders unstyled
 CALLOUT_VARIANTS = set(re.findall(r"\.callout\.([a-z]+)", STYLE))
@@ -181,7 +183,10 @@ def build(mod):
     for idx, lsn in enumerate(mod.LESSONS):
         lid = f"lsn-{mod.ID_BASE}{idx:03d}"
         fname = f"{lid}-{lsn['slug']}.html"
-        body = "\n".join(render_block(b, mod.TOPIC, lsn["slug"]) for b in lsn["body"])
+        labels = [e[0] for b in lsn["body"] if b[0] == "terms" for e in b[1]]
+        lk = LINKER.for_lesson(labels, lsn["slug"])
+        body = "\n".join(lk.link(b[0], render_block(b, mod.TOPIC, lsn["slug"]))
+                         for b in lsn["body"])
         doc = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -198,7 +203,7 @@ def build(mod):
 
 {body}
 
-{QUIZ_JS}
+{lk.assets()}{QUIZ_JS}
 </body>
 </html>
 """

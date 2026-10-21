@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -231,7 +242,7 @@
   <p>These tests are complementary. A pipeline can finish successfully while training on the wrong split; a model can clear the aggregate score while losing a critical slice; an API can answer the right cases offline while failing to load its corpus in the container. The test suite should make each failure legible rather than calling all of them 'the model failed'.</p>
   <div class="callout pitfall"><span class="label">A green test suite that never reached the model is not evidence</span>Keep one readiness check that proves the real dependency path: the artefact loads, the data identity matches the run record, and one prediction travels through the same entry point production uses. Mock the expensive call where appropriate, but do not let every test mock away the thing it claims to protect.</div>
   <h2>Measure the serving boundary</h2>
-  <p>The prediction function and the HTTP service have different failure modes. Measure both: correctness belongs to the prediction path; throughput, queueing, p95 latency, memory and error handling belong to the service. Run a small local load sweep and record the concurrency, payload, model revision and machine state with the results. A single fast request is not a capacity estimate.</p>
+  <p>The prediction function and the HTTP service have different failure modes. Measure both: correctness belongs to the prediction path; throughput, <dfn class="gl" tabindex="0" data-gl="queueing">queueing</dfn>, p95 latency, memory and error handling belong to the service. Run a small local load sweep and record the concurrency, payload, model revision and machine state with the results. A single fast request is not a capacity estimate.</p>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://github.com/alirezadir/Production-Level-Deep-Learning" target="_blank" rel="noopener">Production-Level Deep Learning</a><span class="link-note">Source for the production-system framing; this lesson is independently written and measured here.</span></li><li><a href="https://fullstackdeeplearning.com/" target="_blank" rel="noopener">Full Stack Deep Learning</a><span class="link-note">Upstream source credited by the repository for the code-plus-data and production lifecycle ideas.</span></li></ul></div>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788100000002-the-image-is-the-unit.html">The Image Is the Unit</a><span class="link-note">What goes inside, what stays configuration, and why the size is a design decision rather than an outcome.</span></li><li><a href="lsn-1788100000003-after-it-ships.html">After It Ships</a><span class="link-note">What to watch, what to wake someone for, and the difference between the service being up and the service being right.</span></li><li><a href="../block5-evaluation/lsn-1787800000000-where-evaluation-lives.html">Where Evaluation Lives</a><span class="rel-set">Block 5 · Evaluation</span><span class="link-note">The map. Which artefact answers which question, and the order that stops you wasting a week.</span></li><li><a href="../engineering-practice/lsn-1787400000016-the-artifact-and-when-to-retrain.html">The Artifact, and When to Retrain</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">What actually ships is not the code — and the drift lesson tells you something moved without telling you what to do about it.</span></li></ul></div>
   <div class="quiz">
@@ -259,6 +270,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"queueing": {"t": "Queueing", "d": "Time spent waiting for a slot rather than doing work. Invisible until you measure it, and past saturation it dominates latency entirely."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

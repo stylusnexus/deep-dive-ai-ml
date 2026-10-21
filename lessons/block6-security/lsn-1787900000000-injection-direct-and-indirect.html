@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -225,6 +236,9 @@
   <h2>One mechanism, two delivery routes</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Direct injection</div><div><div class="roadmap-title">The user types it</div><div class="roadmap-desc">Someone in the chat box tries to override the system prompt — ignore your instructions, reveal your configuration, act as something else. This is the version everyone pictures, it is the easier one to reason about, and it is bounded by what that user is already allowed to do.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Indirect injection</div><div><div class="roadmap-title">The content carries it</div><div class="roadmap-desc">The instruction arrives inside a document, a web page, a tool result, a code comment, an email. Nobody typed it at your system. Your retrieval pipeline fetched it, or your agent's tool returned it, and it entered the context looking exactly like data.</div></div></div></div>
   <p>The asymmetry is what matters. A direct injection is limited to the attacker's own privileges, because they are the one talking. An indirect injection borrows <em>your agent's</em> privileges — its tools, its credentials, its trust — and the person who planted it may never interact with your system at all. They only need to control something your system will read.</p>
+  <h2>A jailbreak is a different target</h2>
+  <p>A <strong><dfn class="gl" tabindex="0" data-gl="jailbreak">jailbreak</dfn></strong> is a prompt written to get a model past its own refusal behaviour: a role-play frame, an invented authorisation, a request split into harmless-looking pieces. It looks like direct injection and is easy to confuse with it, but the target differs. A jailbreak goes after what the model will <em>say</em>. Injection goes after what an agent will <em>do</em> with content it reads. A jailbreak that works on a chatbot is an embarrassment. The same one on an agent holding tools is an incident, because the refusal was the only thing between the request and the action.</p>
+  <p>That is the reason this block never treats a refusal as a control. Whatever must hold, such as which tools may run, which data may leave and which actions need approval, is enforced outside the model, in the parts of the system the prompt cannot reach.</p>
   <figure class="diagram"><svg viewBox="0 0 640 226" role="img" aria-label="Direct and indirect injection routes into one context"><defs><marker id="inj" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="12" y="16" width="150" height="40" rx="6" class="d-box"/><text x="24" y="34" class="d-label-b">your system prompt</text><text x="24" y="50" class="d-label-sm">trusted, written by you</text>
 <rect x="12" y="70" width="150" height="40" rx="6" class="d-box"/><text x="24" y="88" class="d-label-b">user turn</text><text x="24" y="104" class="d-label-sm">direct injection lands here</text>
@@ -289,6 +303,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"jailbreak": {"t": "Jailbreak", "d": "A prompt written to get a model past its own refusal behaviour: a role-play frame, an invented authorisation, a request split into harmless-looking pieces. It targets what the model will <em>say<\/em>, which separates it from injection, which targets what an agent will <em>do<\/em> with content it reads. A jailbreak that works on a chatbot is an embarrassment; the same one on an agent holding tools is an incident."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

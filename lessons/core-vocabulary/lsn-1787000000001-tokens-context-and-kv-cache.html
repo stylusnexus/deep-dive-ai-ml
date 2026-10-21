@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,10 +232,10 @@
   <h1>Tokens, the Context Window, and the KV Cache</h1>
   <p class="subtitle">Why a model 'forgets', why long conversations get expensive, and what's actually being cached.</p>
 
-  <p>A model does not read characters or words. It reads <strong>tokens</strong> — chunks of text produced by a tokenizer, roughly ¾ of a word in English. "unbelievable" might be three tokens; a rare surname might be six. Every cost, limit and speed figure in this field is denominated in tokens, which is why the unit matters.</p>
+  <p>A model does not read characters or words. It reads <strong><dfn class="gl" tabindex="0" data-gl="token">tokens</dfn></strong> — chunks of text produced by a tokenizer, roughly ¾ of a word in English. "unbelievable" might be three tokens; a rare surname might be six. Every cost, limit and speed figure in this field is denominated in tokens, which is why the unit matters.</p>
   <h2>The context window is a hard wall</h2>
-  <p>The <strong>context window</strong> is the maximum number of tokens the model can consider at once — system prompt, conversation history, retrieved documents, tool definitions, tool results, and the answer being generated, all counted together.</p>
-  <p>It is not memory in any human sense. Nothing is remembered between calls. Each time the loop runs, the <em>entire</em> conversation is re-sent. What looks like a model remembering what you said ten turns ago is the harness re-sending those ten turns every single time.</p>
+  <p>The <strong><dfn class="gl" tabindex="0" data-gl="context-window">context window</dfn></strong> is the maximum number of tokens the model can consider at once — system prompt, <dfn class="gl" tabindex="0" data-gl="conversation-history">conversation history</dfn>, retrieved documents, tool definitions, tool results, and the answer being generated, all counted together.</p>
+  <p>It is not memory in any human sense. Nothing is remembered between calls. Each time the loop runs, the <em>entire</em> conversation is re-sent. What looks like a model remembering what you said ten turns ago is the <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn> re-sending those ten turns every single time.</p>
   <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="Context window composition and cost growth">
 <text x="12" y="20" class="d-label-b">One context window</text>
 <rect x="12" y="32" width="616" height="38" rx="5" class="d-box"/>
@@ -250,14 +261,14 @@
 <text x="380" y="130" class="d-label-sm">the whole conversation is</text>
 <text x="380" y="146" class="d-label-sm">re-sent every single turn</text>
 </svg><figcaption>Everything competes for the same window. As history grows, the room left for retrieved context and the answer shrinks — and the whole bar is re-sent every turn.</figcaption></figure>
-  <div class="callout pitfall"><span class="label">The mistake this causes</span>People assume a longer context window means the model 'pays attention' to everything in it. It doesn't. Retrieval quality degrades toward the middle of a long context — the well-documented 'lost in the middle' effect. A 200k window is a capacity limit, not a promise of comprehension.</div>
+  <div class="callout pitfall"><span class="label">The mistake this causes</span>People assume a longer context window means the model 'pays attention' to everything in it. It doesn't. Retrieval quality degrades toward the middle of a long context — the well-documented '<dfn class="gl" tabindex="0" data-gl="lost-in-the-middle">lost in the middle</dfn>' effect. A 200k window is a capacity limit, not a promise of comprehension.</div>
   <h2>Why long sessions get expensive fast</h2>
   <p>Because the whole conversation is re-sent each turn, cost grows quadratically with conversation length, not linearly. Turn 20 sends roughly twenty times the tokens of turn 1. This is the single biggest driver of surprise LLM bills, and it is why serious agents persist and prune their sessions rather than letting them grow without limit.</p>
   <h2>The KV cache</h2>
-  <p>When a model processes tokens, each layer computes <em>key</em> and <em>value</em> vectors for every token. Generating the next token requires those vectors for all previous tokens. Recomputing them every step would be enormously wasteful, so they're kept in the <strong>KV cache</strong>.</p>
+  <p>When a model processes tokens, each layer computes <em>key</em> and <em>value</em> vectors for every token. Generating the next token requires those vectors for all previous tokens. Recomputing them every step would be enormously wasteful, so they're kept in the <strong><dfn class="gl" tabindex="0" data-gl="kv-cache">KV cache</dfn></strong>.</p>
   <p>Two consequences you can feel:</p>
   <ul><li><strong>Memory.</strong> The KV cache grows with context length and is often what actually exhausts RAM when running a model locally — not the weights. This is why a model that loads fine can still die on a long prompt.</li><li><strong>Speed.</strong> The first token is slow (the whole prompt must be processed — 'prefill'); subsequent tokens are fast (only one new token to process — 'decode'). That's why time-to-first-token and tokens-per-second are reported separately.</li></ul>
-  <div class="callout insight"><span class="label">Prompt caching is this, sold</span>When a provider offers 'prompt caching' at a discount, they are keeping the KV cache for your unchanging prefix instead of recomputing it. That's why the advice is always to put the stable content — system prompt, long documents — at the <em>front</em> and the variable content at the end. Reorder and the cache misses.</div>
+  <div class="callout insight"><span class="label">Prompt caching is this, sold</span>When a provider offers '<dfn class="gl" tabindex="0" data-gl="prompt-caching">prompt caching</dfn>' at a discount, they are keeping the KV cache for your unchanging prefix instead of recomputing it. That's why the advice is always to put the stable content — system prompt, long documents — at the <em>front</em> and the variable content at the end. Reorder and the cache misses.</div>
   <h2>Sizing the KV cache</h2>
   <p>The cache holds one key and one value vector per token, per layer, per key-value head. That arithmetic is worth doing once, because it explains a class of failure that looks like a memory leak and is not.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Grows with context</div><div><div class="roadmap-title">Linearly</div><div class="roadmap-desc">Double the conversation and you double the cache.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Grows with batch</div><div><div class="roadmap-title">Linearly again</div><div class="roadmap-desc">Serving four users concurrently means four caches resident at once.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Independent of the weights</div><div><div class="roadmap-title">A separate budget</div><div class="roadmap-desc">A model that loads with room to spare can still die on a long prompt, and nothing about the weights explains why.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Shrunk by grouped-query attention (GQA)</div><div><div class="roadmap-title">By the ratio of query heads to key-value heads</div><div class="roadmap-desc">Read it off the model config rather than assuming a factor: thirty-two query heads over eight key-value heads is four. Sharing these projections is why long context became affordable.</div></div></div></div>
@@ -289,6 +300,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "context-window": {"t": "Context window", "d": "The maximum tokens a model can consider at once, covering prompt, history, retrieved documents and the answer together. A capacity limit, not a promise of attention."}, "conversation-history": {"t": "Conversation history", "d": "The default form of agent memory: everything re-sent every turn. Simple, and it grows without limit until something manages it."}, "harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "lost-in-the-middle": {"t": "Lost in the middle", "d": "Retrieval accuracy following a U-shape in position: material at the start and end of a long context is used reliably, material in the middle much less. Reproduced across model families, so a sound default — but a property of how current models were built and trained rather than a law. It has a known cause (causal masking pulling towards early positions, positional encodings towards nearby ones, and position bias in the training data) and a known remedy (calibrating the attention bias away, worth up to fifteen points on retrieval tasks). Measure it on your own model rather than inheriting the curve."}, "kv-cache": {"t": "KV cache", "d": "Stored key/value vectors for tokens already processed, so they aren't recomputed each step. Grows with context length, and is usually what exhausts memory locally. Prompt caching is this, sold as a feature."}, "prompt-caching": {"t": "Prompt caching", "d": "Prefix caching exposed as a billable feature: you mark where the stable part of the prompt ends, entries expire, and writes and reads are priced differently. Reads cost about a tenth of normal input; writes cost 1.25× at the five-minute lifetime and 2× at the one-hour one, so break-even arrives at roughly the second use: a prefix read twice already costs about a third less than not caching, and one reused fifty times is a large win. The losing case is a prefix written and never read."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

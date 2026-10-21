@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,10 +232,10 @@
   <h1>When the Input Is Not Text</h1>
   <p class="subtitle">Images and documents enter the same context window, cost tokens, and break the assumptions the rest of this course made about both.</p>
 
-  <p>Everything so far assumed text in and text out. A multimodal model takes an image and the interesting part is not that it can — it is that the image becomes tokens in the same window everything else lives in, and every cost, limit and failure mode this course has taught applies to it unchanged.</p>
+  <p>Everything so far assumed text in and text out. A multimodal model takes an image and the interesting part is not that it can — it is that the image becomes <dfn class="gl" tabindex="0" data-gl="token">tokens</dfn> in the same window everything else lives in, and every cost, limit and failure mode this course has taught applies to it unchanged.</p>
   <h2>An image is a number of tokens</h2>
   <p>The model does not see pixels. An encoder turns the image into a sequence of vectors occupying positions in the context, exactly like words. That single fact carries most of the practical consequences, because it means an image is priced, budgeted and truncated like text.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Resolution is a token count</div><div><div class="roadmap-title">The dial nobody realises they are turning</div><div class="roadmap-desc">Larger images become more tokens, usually by tiling — the image is cut into patches and each contributes. Sending a screenshot at full resolution when a downscaled one would do is the same mistake as retrieving twenty chunks when four would do, and it is less visible because nobody thinks of an image as a length.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Documents are often images</div><div><div class="roadmap-title">The expensive surprise</div><div class="roadmap-desc">A scanned PDF is pictures of pages. Processing it multimodally costs image tokens per page, where extracting the text first costs a fraction. Which is correct depends on whether the layout carries meaning.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Position still applies</div><div><div class="roadmap-title">So caching still applies</div><div class="roadmap-desc">Images sit in the prefix like anything else. An image early in a stable prompt caches; an image that changes per request invalidates everything after it, which is the rule from the caching lesson with a different payload.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Detail settings</div><div><div class="roadmap-title">A quality-cost dial, chosen once and forgotten</div><div class="roadmap-desc">Providers expose a low or high detail mode that changes how finely the image is tiled. It is a real quality-cost trade and it is usually left at the default by people who would agonise over a chunk size.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Resolution is a token count</div><div><div class="roadmap-title">The dial nobody realises they are turning</div><div class="roadmap-desc">Larger images become more tokens, usually by tiling — the image is cut into patches and each contributes. Sending a screenshot at full resolution when a downscaled one would do is the same mistake as retrieving twenty chunks when four would do, and it is less visible because nobody thinks of an image as a length.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Documents are often images</div><div><div class="roadmap-title">The expensive surprise</div><div class="roadmap-desc">A scanned PDF is pictures of pages. Processing it multimodally costs <dfn class="gl" tabindex="0" data-gl="image-tokens">image tokens</dfn> per page, where extracting the text first costs a fraction. Which is correct depends on whether the layout carries meaning.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Position still applies</div><div><div class="roadmap-title">So caching still applies</div><div class="roadmap-desc">Images sit in the prefix like anything else. An image early in a stable prompt caches; an image that changes per request invalidates everything after it, which is the rule from the caching lesson with a different payload.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Detail settings</div><div><div class="roadmap-title">A quality-cost dial, chosen once and forgotten</div><div class="roadmap-desc">Providers expose a low or high detail mode that changes how finely the image is tiled. It is a real quality-cost trade and it is usually left at the default by people who would agonise over a chunk size.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Everything this course taught about context cost applies to images, and people apply almost none of it.</p><p class="know-why">Teams that carefully count tokens, cap retrieved chunks and worry about prompt caching will attach a full-resolution screenshot to every request without measuring what it costs. The habits do not transfer, because an image does not look like a length — but the context window does not care what the tokens were made of, and neither does the bill.</p><p class="know-eg"><span class="know-eg-label">For example</span>Measure it once. Send the same request with and without the image, read the input token count, and you have the price of that image in the units everything else in this course is denominated in.</p></blockquote>
   <figure class="diagram"><svg viewBox="0 0 640 176" role="img" aria-label="How an image enters the same context as text"><defs><marker id="mm" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="14" y="20" width="120" height="40" rx="6" class="d-box-accent"/><text x="26" y="45" class="d-label-sm">image</text>
@@ -238,7 +249,7 @@
 <rect x="408" y="52" width="218" height="44" rx="6" class="d-box"/><text x="420" y="72" class="d-label-b">one context window</text><text x="420" y="89" class="d-label-sm">priced, budgeted, truncated alike</text>
 <text x="14" y="160" class="d-label-sm">Prefix caching, context cost and the prefill curve all apply unchanged — the tokens simply came from a picture.</text>
 </svg><figcaption>The encoder is the only new component. Everything downstream is the pipeline this course already built, which is why its rules still apply.</figcaption></figure>
-  <div class="callout pitfall"><span class="label">Extraction is often the better tool, and it is less interesting</span><p>Before sending a document to a multimodal model, ask whether the layout carries meaning. A form, a chart, a diagram or a signed page needs to be seen. A text report does not, and extracting its text costs a fraction of processing pictures of its pages. The multimodal route is more impressive and frequently the wrong answer, which is the same shape as the fine-tuning argument in Block 7.</p></div>
+  <div class="callout pitfall"><span class="label">Extraction is often the better tool, and it is less interesting</span><p>Before sending a document to a multimodal model, ask whether the layout carries meaning. A form, a chart, a diagram or a signed page needs to be seen. A text report does not, and extracting its text costs a fraction of processing pictures of its pages. The multimodal route is more impressive and frequently the wrong answer, which is the same shape as the <dfn class="gl" tabindex="0" data-gl="fine-tuning">fine-tuning</dfn> argument in Block 7.</p></div>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788200000003-convolutions-and-computer-vision.html">Convolutions, and What a CNN Assumes</a><span class="link-note">A grid is not a list, and building that in rather than learning it is the whole idea.</span></li><li><a href="../core-vocabulary/lsn-1787000000006-embeddings-and-retrieval.html">Embeddings, Vectors and Semantic Routing</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How a machine decides two things 'mean' something similar — and where that fails.</span></li><li><a href="../orientation/lsn-1787200000001-inside-an-llm.html">Inside an LLM: The Parts and What Each Does</a><span class="rel-set">Start Here: The Map</span><span class="link-note">Follow one sentence all the way through — from text, to numbers, to the next word.</span></li><li><a href="../block3-retrieval/lsn-1787600000000-building-a-rag-system.html">Building a Retrieval System That Works</a><span class="rel-set">Block 3 · Retrieval and Agentic RAG</span><span class="link-note">Five stages, and the two that decide whether the other three matter.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
@@ -258,6 +269,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "image-tokens": {"t": "Image tokens", "d": "What a multimodal encoder turns a picture into: vectors occupying context positions, priced and truncated like text. Resolution is therefore a context-cost dial, not only a quality one."}, "fine-tuning": {"t": "Fine-tuning", "d": "Changing a model's weights so it responds differently: tone, structure, schema adherence, a domain's conventions. Good at installing behaviour and poor at installing facts, which is the distinction that decides whether it is the right tool or whether you needed retrieval."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

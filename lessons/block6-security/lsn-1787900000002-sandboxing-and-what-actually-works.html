@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -225,7 +236,7 @@
   <h2>The ladder, weakest first</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Instruction hardening</div><div><div class="roadmap-title">Weakest</div><div class="roadmap-desc">Telling the model in its system prompt to ignore instructions found in documents. Free, worth doing, and it fails to a sufficiently determined payload because it is asking the model to police a boundary it cannot see. Never the only layer.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Input filtering</div><div><div class="roadmap-title">Weak, and it flatters you</div><div class="roadmap-desc">Scanning incoming text for attack patterns. Catches the obvious, misses the quiet, and raises confidence faster than it raises safety. Useful as telemetry — a filter that logs rather than blocks tells you that you are being probed.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Output constraints</div><div><div class="roadmap-title">Moderate, and structural</div><div class="roadmap-desc">Constrain what the model may emit: a closed set of actions, a schema, an enumerated tool list. This one is real, because it stops depending on the input and starts depending on the shape of what you accept.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Least privilege and scoping</div><div><div class="roadmap-title">Strong</div><div class="roadmap-desc">The agent cannot exfiltrate through a credential it does not hold or a tool it was not given. This is the control that survives the model being fully persuaded, which is the only test that matters.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Sandboxing with egress control</div><div><div class="roadmap-title">Strongest, and the most work</div><div class="roadmap-desc">Run the agent where its network, filesystem and process access are enumerated rather than assumed. Containers are the usual shape; the part people skip is egress — a container that can reach the whole internet has isolated your filesystem and nothing else.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Human approval on the irreversible</div><div><div class="roadmap-title">The backstop</div><div class="roadmap-desc">Not a substitute for the above, and the thing that holds when the above fails. Block 4's interrupt is this, and it only counts if the run genuinely stops.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A mitigation the model can be talked out of is not a mitigation. It is a preference.</p><p class="know-why">Instruction hardening, input filtering and output tone all live inside the thing being attacked, so a sufficiently good payload defeats them by construction. Scoping, sandboxing and approval gates live outside it, and no argument the attacker makes to the model changes what credential it holds or what the network permits. The first group is worth having and worth never counting on; the second group is what you count on.</p><p class="know-eg"><span class="know-eg-label">For example</span>Ask of every control: if the model were fully persuaded and cooperating with the attacker, would this still hold? A system prompt would not. A missing credential would.</p></blockquote>
-  <div class="callout matters"><span class="label">Egress is the half that gets forgotten</span><p>Containerising an agent is often described as sandboxing it, and it addresses only inbound isolation. The interesting direction is outbound: what can this process reach? Default container networking allows arbitrary outbound connections, so an agent that cannot touch your filesystem can still post anywhere. If the agent needs three hosts, allow three.</p></div>
+  <div class="callout matters"><span class="label">Egress is the half that gets forgotten</span><p>Containerising an agent is often described as <dfn class="gl" tabindex="0" data-gl="sandboxing">sandboxing</dfn> it, and it addresses only inbound isolation. The interesting direction is outbound: what can this process reach? Default container networking allows arbitrary outbound connections, so an agent that cannot touch your filesystem can still post anywhere. If the agent needs three hosts, allow three.</p></div>
   <figure class="diagram"><svg viewBox="0 0 640 236" role="img" aria-label="Mitigations ranked by whether the model can defeat them"><rect x="14" y="16" width="612" height="34" rx="6" class="d-box"/><text x="26" y="38" class="d-label-sm">instruction hardening — asks the model to police a boundary it cannot see</text>
 <rect x="14" y="56" width="612" height="34" rx="6" class="d-box"/><text x="26" y="78" class="d-label-sm">input filtering — catches the obvious, flatters you about the rest</text>
 <path d="M14 104 L626 104" class="d-arrow-accent"/>
@@ -236,7 +247,7 @@
 <rect x="14" y="210" width="612" height="24" rx="6" class="d-box-accent"/><text x="26" y="227" class="d-label-sm">human approval on the irreversible — the backstop</text>
 </svg><figcaption>The line is whether the control lives inside the thing being attacked. Everything above it can be argued with; everything below it holds even when the model is fully cooperating with the attacker.</figcaption></figure>
   <h2>Where this course already built the pieces</h2>
-  <p>Almost nothing here is new machinery. Block 0 taught scoping and least privilege for connected tooling. Block 4 built the approval gate that halts and persists, and the trace that records what happened. Block 3's project constrains the answer to retrieved context. What this block adds is the ordering, and the discipline of asking which layer would survive the model being on the attacker's side.</p>
+  <p>Almost nothing here is new machinery. Block 0 taught scoping and <dfn class="gl" tabindex="0" data-gl="least-privilege">least privilege</dfn> for connected tooling. Block 4 built the <dfn class="gl" tabindex="0" data-gl="approval-gate">approval gate</dfn> that halts and persists, and the trace that records what happened. Block 3's project constrains the answer to retrieved context. What this block adds is the ordering, and the discipline of asking which layer would survive the model being on the attacker's side.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787900000001-exfiltration-and-tool-abuse.html">Exfiltration and Tool Abuse</a><span class="link-note">An injected instruction is worth nothing on its own. It needs a way out, and your agent is holding several.</span></li><li><a href="../block8-deployment/lsn-1788100000002-the-image-is-the-unit.html">The Image Is the Unit</a><span class="rel-set">Block 8 · Deployment and APIs</span><span class="link-note">What goes inside, what stays configuration, and why the size is a design decision rather than an outcome.</span></li><li><a href="../core-vocabulary/lsn-1787000000011-agents-autonomy-and-danger.html">Agents, Autonomy and the Danger Surface</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">What actually makes something an agent, and every way it can hurt you.</span></li><li><a href="lsn-1787900000003-red-teaming-your-own-agent.html">Red-Teaming Your Own Agent</a><span class="link-note">The exit criterion for this block: break the system you built, then prove you fixed it.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
@@ -256,6 +267,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"sandboxing": {"t": "Sandboxing", "d": "Running agent-executed code somewhere it cannot reach anything that matters. Containers, not promises."}, "least-privilege": {"t": "Least privilege", "d": "Starting an integration read-only and widening only for the task in hand, then narrowing again. Production is the last thing you connect, never the first."}, "approval-gate": {"t": "Approval gate", "d": "A point where work stops until a human decides. It only counts if the run persists while it waits; a gate that lets the work continue is decoration."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -223,7 +234,7 @@
 
   <p>Most production agents are improved by hand: a user complaint arrives, an engineer rewrites a prompt, redeploys, and waits for the next complaint. This course's own CI-gated evaluation (<em>Tracking Runs, and Running the Evals Automatically</em>) already fixes the slowest part of that — the battery runs itself and a human decides whether to ship. What it still does not do is <em>generate the next candidate</em>. A self-improving loop closes that last gap: it proposes its own variants, scores them against the same signal, and only then hands a human the winner to approve.</p>
   <h2>The loop, named</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Act</div><div><div class="roadmap-title">The agent runs, unjudged</div><div class="roadmap-desc">A task completes. Left alone, the agent has no way of knowing whether the result was any good — that question is answered by the next step, not this one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Signal</div><div><div class="roadmap-title">A measurement of the gap</div><div class="roadmap-desc">Ground truth, an LLM-as-judge, or a reflection that critiques the trace in words rather than a score. This is exactly the signal family this course already teaches — see <em>Models Judging Models</em> and <em>Eval Data You Can Trust</em> — reused here as input to a search rather than as a report.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Search</div><div><div class="roadmap-title">Generate-and-test</div><div class="roadmap-desc">Propose variants of the artifact, score each with the signal, keep what wins. The three ways to do this are the rest of this lesson.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Apply</div><div><div class="roadmap-title">The winner replaces the artifact</div><div class="roadmap-desc">Versioned, roll-back-able, and for anything reaching production, gated by a human — the loop proposes, it does not unilaterally ship.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Act</div><div><div class="roadmap-title">The agent runs, unjudged</div><div class="roadmap-desc">A task completes. Left alone, the agent has no way of knowing whether the result was any good — that question is answered by the next step, not this one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Signal</div><div><div class="roadmap-title">A measurement of the gap</div><div class="roadmap-desc">Ground truth, an <dfn class="gl" tabindex="0" data-gl="llm-as-judge">LLM-as-judge</dfn>, or a reflection that critiques the trace in words rather than a score. This is exactly the signal family this course already teaches — see <em>Models Judging Models</em> and <em>Eval Data You Can Trust</em> — reused here as input to a search rather than as a report.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Search</div><div><div class="roadmap-title">Generate-and-test</div><div class="roadmap-desc">Propose variants of the artifact, score each with the signal, keep what wins. The three ways to do this are the rest of this lesson.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Apply</div><div><div class="roadmap-title">The winner replaces the artifact</div><div class="roadmap-desc">Versioned, roll-back-able, and for anything reaching production, gated by a human — the loop proposes, it does not unilaterally ship.</div></div></div></div>
   <figure class="diagram"><svg viewBox="0 0 640 230" role="img" aria-label="The self-improvement loop: act, signal, search, apply, repeat">
 <defs><marker id="si1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="20" y="20" width="140" height="56" rx="7" class="d-box-accent"/>
@@ -282,6 +293,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"llm-as-judge": {"t": "LLM-as-judge", "d": "Using a model to grade output. Ships with position, verbosity, self-preference and score-compression biases. The fatal case is a grader whose error correlates with the treatment — that manufactures an effect sampling cannot remove."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

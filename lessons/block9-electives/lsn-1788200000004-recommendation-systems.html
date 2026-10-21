@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,9 +232,9 @@
   <h1>Recommendation Systems, and the Loop They Sit In</h1>
   <p class="subtitle">The one system in this course whose training data is its own past output.</p>
 
-  <p>Recommenders are the most widely deployed machine learning systems in existence and the ones whose published accuracy numbers correspond least well to whether they work. Both facts have the same cause, and it is not the algorithm. A recommender is trained on data that a recommender produced, evaluated against behaviour it shaped, and judged on a metric that stops meaning what it meant the moment anyone optimises it.</p>
+  <p>Recommenders are the most widely deployed <dfn class="gl" tabindex="0" data-gl="machine-learning">machine learning</dfn> systems in existence and the ones whose published accuracy numbers correspond least well to whether they work. Both facts have the same cause, and it is not the algorithm. A recommender is trained on data that a recommender produced, evaluated against behaviour it shaped, and judged on a metric that stops meaning what it meant the moment anyone optimises it.</p>
   <h2>The two families, and why every real system is both</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Collaborative filtering</div><div><div class="roadmap-title">People like you liked this</div><div class="roadmap-desc">Uses only the interaction matrix &mdash; who engaged with what. It knows nothing about the items themselves, which is its strength: it finds affinities nobody could have described in advance.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Content-based recommendation</div><div><div class="roadmap-title">This is like what you liked</div><div class="roadmap-desc">Uses features of the items &mdash; text, tags, an embedding. It can recommend something nobody has touched yet, which is precisely where collaborative filtering has nothing to say.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The hybrid</div><div><div class="roadmap-title">Content for the cold, collaborative for the warm</div><div class="roadmap-desc">Almost every production system. Content-based handles new items and new users; collaborative takes over once there is enough interaction to be worth using.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The matrix</div><div><div class="roadmap-title">Overwhelmingly empty</div><div class="roadmap-desc">A million users and a hundred thousand items is 100 billion cells, of which perhaps 0.01% are filled. Sparsity is not an inconvenience here, it is the defining property of the problem.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Collaborative filtering</div><div><div class="roadmap-title">People like you liked this</div><div class="roadmap-desc">Uses only the interaction matrix &mdash; who engaged with what. It knows nothing about the items themselves, which is its strength: it finds affinities nobody could have described in advance.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Content-based recommendation</div><div><div class="roadmap-title">This is like what you liked</div><div class="roadmap-desc">Uses features of the items &mdash; text, tags, an <dfn class="gl" tabindex="0" data-gl="embedding">embedding</dfn>. It can recommend something nobody has touched yet, which is precisely where collaborative filtering has nothing to say.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The hybrid</div><div><div class="roadmap-title">Content for the cold, collaborative for the warm</div><div class="roadmap-desc">Almost every production system. Content-based handles new items and new users; collaborative takes over once there is enough interaction to be worth using.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The matrix</div><div><div class="roadmap-title">Overwhelmingly empty</div><div class="roadmap-desc">A million users and a hundred thousand items is 100 billion cells, of which perhaps 0.01% are filled. Sparsity is not an inconvenience here, it is the defining property of the problem.</div></div></div></div>
   <h2>What the data is actually telling you</h2>
   <p>Explicit feedback &mdash; a rating, a star, a thumbs down &mdash; is unambiguous and almost absent, because most people never rate anything. Implicit feedback &mdash; a click, a watch, a purchase &mdash; is abundant and means considerably less than it appears to.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A click is not a like, and a non-click is not a dislike. Most of the empty cells mean &ldquo;never shown&rdquo;.</p><p class="know-why">Treating unobserved interactions as negative examples is the standard shortcut and it is wrong in a specific direction: the items a user did not interact with are overwhelmingly items they were never offered, and what they were offered was decided by the previous version of the recommender. The zeros in your matrix are a record of a past policy&#39;s choices, not of user preference &mdash; which makes this the Block 1 missing-data problem in its most consequential form. The data is missing not at random, and the mechanism generating the missingness is your own system.</p><p class="know-eg"><span class="know-eg-label">For example</span>A user has never watched a documentary. Two explanations: they dislike documentaries, or the homepage has never shown them one because an early model decided they were a comedy viewer and every subsequent model trained on the resulting history. The matrix looks identical in both cases and the correct action is opposite.</p></blockquote>
@@ -244,11 +255,11 @@
 <text x="150" y="146" class="d-label-sm">nothing outside the loop ever enters it</text>
 </svg><figcaption>The recommender chooses what is shown, what is shown determines what is engaged with, and engagement becomes the next training set. The loop closes with no adversary in it.</figcaption></figure>
   <h2>Why the offline number does not predict the online one</h2>
-  <p>This is the part that surprises people arriving from ordinary supervised learning. You hold out interactions, train, and measure error against them &mdash; and the resulting figure is a famously poor predictor of what happens when the system is deployed. Three reasons, each sufficient on its own.</p>
+  <p>This is the part that surprises people arriving from ordinary <dfn class="gl" tabindex="0" data-gl="supervised-learning">supervised learning</dfn>. You hold out interactions, train, and measure error against them &mdash; and the resulting figure is a famously poor predictor of what happens when the system is deployed. Three reasons, each sufficient on its own.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">You are ranking, not predicting</div><div><div class="roadmap-title">The metric is the wrong shape</div><div class="roadmap-desc">Nobody sees a predicted rating. They see the top ten. Error averaged over all held-out interactions is dominated by items that will never be shown, so it can improve while the top of the list gets worse. Ranking metrics &mdash; precision at k, normalised discounted cumulative gain &mdash; at least measure the part anyone experiences.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The held-out data came from the old policy</div><div><div class="roadmap-title">You cannot observe the counterfactual</div><div class="roadmap-desc">Your test set records what users did when shown the previous model&#39;s choices. A new model that would have recommended something better has no evidence for it in that data, because nobody was ever shown it. Offline evaluation systematically favours models that agree with the one already running.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Position and presentation dominate</div><div><div class="roadmap-title">The slot is doing the work</div><div class="roadmap-desc">The top slot gets clicked far more than the fifth regardless of what is in it. Without correcting for it you measure position, and conclude that the model improved when the layout changed.</div></div></div></div>
-  <div class="callout pitfall"><span class="label">The clearest Goodhart case in the whole course</span><p>Engagement is chosen as the objective because it correlates with value: people spend time on things they like. Optimise it hard and the correlation is what breaks first. What reliably increases engagement is not what people value most, it is what is hardest to stop doing &mdash; and a system with enough capacity finds that distinction long before anyone reviewing a dashboard does.</p><p>The measurement lesson&#39;s remedy applies directly and is unglamorous: pair the target with guardrails chosen in advance and permitted to veto. Catalogue coverage, repeat-visit rate at a week, explicit negative feedback, the share of engagement concentrated in the top one per cent of items. A recommender improving on engagement while every one of those degrades is not improving, and only the guardrails can say so.</p></div>
+  <div class="callout pitfall"><span class="label">The clearest Goodhart case in the whole course</span><p>Engagement is chosen as the objective because it correlates with value: people spend time on things they like. Optimise it hard and the correlation is what breaks first. What reliably increases engagement is not what people value most, it is what is hardest to stop doing &mdash; and a system with enough capacity finds that distinction long before anyone reviewing a dashboard does.</p><p>The measurement lesson&#39;s remedy applies directly and is unglamorous: pair the target with guardrails chosen in advance and permitted to veto. <dfn class="gl" tabindex="0" data-gl="catalogue-coverage">Catalogue coverage</dfn>, repeat-visit rate at a week, explicit negative feedback, the share of engagement concentrated in the top one per cent of items. A recommender improving on engagement while every one of those degrades is not improving, and only the guardrails can say so.</p></div>
   <h2>What to do about the loop</h2>
-  <ul><li><strong>Log what was shown, not only what was clicked.</strong> Without the slate, you cannot tell an item that was rejected from one that was never offered, and every analysis afterwards is guesswork.</li><li><strong>Reserve a fraction of traffic for exploration.</strong> A small share of randomised or deliberately diverse recommendations is the only source of evidence about items the current policy would never show. It costs measurable engagement and it is what keeps the training data from being purely self-generated.</li><li><strong>Measure coverage as a first-class metric.</strong> What share of the catalogue was recommended to anyone this week? A number that falls steadily is the loop closing, visible before the engagement number turns.</li><li><strong>Test online.</strong> The offline number is for filtering obviously bad candidates. The decision belongs to an experiment with real traffic, and the deployment lesson&#39;s interleaved comparison is unusually well suited here, since each user acts as their own control.</li></ul>
+  <ul><li><strong>Log what was shown, not only what was clicked.</strong> Without the slate, you cannot tell an item that was rejected from one that was never offered, and every analysis afterwards is guesswork.</li><li><strong>Reserve a fraction of traffic for exploration.</strong> A small share of randomised or deliberately diverse recommendations is the only source of evidence about items the current policy would never show. It costs measurable engagement and it is what keeps the training data from being purely self-generated.</li><li><strong>Measure coverage as a first-class metric.</strong> What share of the catalogue was recommended to anyone this week? A number that falls steadily is the loop closing, visible before the engagement number turns.</li><li><strong>Test online.</strong> The offline number is for filtering obviously bad candidates. The decision belongs to an experiment with real traffic, and the deployment lesson&#39;s <dfn class="gl" tabindex="0" data-gl="interleaved-comparison">interleaved comparison</dfn> is unusually well suited here, since each user acts as their own control.</li></ul>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../core-vocabulary/lsn-1787000000022-loops-in-training.html">Loops in Training: Flywheels and Model Collapse</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How a model improves itself across generations — and the way that process eats itself.</span></li><li><a href="../core-vocabulary/lsn-1787000000018-drift.html">Drift: Why Deployment Isn&#x27;t the End</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">The model didn't change. The world did.</span></li><li><a href="../engineering-practice/lsn-1787400000002-why-measurement-decides.html">Why Measurement Decides</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The only thing that corrects a harness, a recipe or a decision is a number that disagrees with it.</span></li><li><a href="../core-vocabulary/lsn-1787000000006-embeddings-and-retrieval.html">Embeddings, Vectors and Semantic Routing</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How a machine decides two things 'mean' something similar — and where that fails.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
@@ -275,6 +286,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"machine-learning": {"t": "Machine learning", "d": "Systems given examples rather than rules, which infer the rules themselves. Everything in Block 2 lives here."}, "embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "supervised-learning": {"t": "Supervised learning", "d": "Learning from labelled examples: here is an input, here is the right answer. Most of classical machine learning."}, "catalogue-coverage": {"t": "Catalogue coverage", "d": "What share of the catalogue was recommended to anyone in a period. A guardrail metric that detects the feedback loop closing before the engagement number turns."}, "interleaved-comparison": {"t": "Interleaved comparison", "d": "Mixing results from both versions into one ranked response so each user acts as their own comparison. Far more sensitive than splitting users — the pairing argument applied to deployment."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

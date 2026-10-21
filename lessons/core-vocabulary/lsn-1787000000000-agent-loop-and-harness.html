@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,7 +232,7 @@
   <h1>The Agent Loop and the Harness</h1>
   <p class="subtitle">The two words that appear most often in your own docs — and the difference between them.</p>
 
-  <p><strong>Agent loop</strong> and <strong>harness</strong> are the two most-used words in any agent codebase, and two of the most routinely confused. Separating them is worth doing first, because almost every diagnosis later in this course depends on the distinction.</p>
+  <p><strong><dfn class="gl" tabindex="0" data-gl="agent-loop">Agent loop</dfn></strong> and <strong><dfn class="gl" tabindex="0" data-gl="harness">harness</dfn></strong> are the two most-used words in any agent codebase, and two of the most routinely confused. Separating them is worth doing first, because almost every diagnosis later in this course depends on the distinction.</p>
   <h2>The agent loop is a while-loop</h2>
   <p>Strip away the branding and an AI agent is a loop that runs until something says stop:</p>
   <pre><code>while not done:
@@ -265,7 +276,7 @@
   <div class="roadmap"><div class="roadmap-item"><div class="roadmap-num">1</div><div><div class="roadmap-title">A request arrives</div><div class="roadmap-desc">The interface hands it to the harness.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2</div><div><div class="roadmap-title">The harness assembles context</div><div class="roadmap-desc">System prompt, session history, retrieved repo context, available tool definitions.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3</div><div><div class="roadmap-title">The loop starts</div><div class="roadmap-desc">Model responds. Wants a tool? Run it, append the result, go again.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4</div><div><div class="roadmap-title">The loop ends</div><div class="roadmap-desc">Model answers without requesting a tool, or hits the turn limit, or escalates.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5</div><div><div class="roadmap-title">The harness persists</div><div class="roadmap-desc">Session and memory are written down so the next turn has history.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">If a bigger model would fix it, it is a model problem. If better prompting, better tool results or more turns would fix it, it is a harness problem.</p><p class="know-why">The distinction matters because it decides where you spend. Model problems are expensive and often out of your hands; harness problems are cheap and entirely yours. Most of the time it is the harness, which is good news.</p><p class="know-eg"><span class="know-eg-label">For example</span>An agent reads the failing tests, derives the correct fix, names the insertion point — then asks to read one more file. Every run. Nine scaffolding changes moved nothing. The prompt said to inspect before editing, which has no exit criterion, so a compliant model complied forever. The fix was one sentence, not a bigger model.</p></blockquote>
   <h2>The word you&#x27;ll see elsewhere</h2>
-  <p>The loop above has a name you will meet constantly in the literature and almost never in a codebase: <strong>ReAct</strong>, for reason and act. It describes interleaving a reasoning step with an action &mdash; think, call a tool, read the result, think again &mdash; rather than planning everything up front or acting without deliberating. It is worth naming because of how the vocabulary settled: when the paper appeared this was a technique you chose, and it has since become simply what an agent is. If you have followed this lesson you have built a ReAct agent, and the papers describing one are describing the while-loop you already understand.</p>
+  <p>The loop above has a name you will meet constantly in the literature and almost never in a codebase: <strong><dfn class="gl" tabindex="0" data-gl="react-reason-and-act">ReAct</dfn></strong>, for reason and act. It describes interleaving a reasoning step with an action &mdash; think, call a tool, read the result, think again &mdash; rather than planning everything up front or acting without deliberating. It is worth naming because of how the vocabulary settled: when the paper appeared this was a technique you chose, and it has since become simply what an agent is. If you have followed this lesson you have built a ReAct agent, and the papers describing one are describing the while-loop you already understand.</p>
   <p><strong>Harness</strong> is also used for an <em>evaluation</em> harness — the rig that runs a model against a test set. Most projects use it in both senses, which is a real ambiguity in the field rather than a misunderstanding on your part. Context disambiguates: an agent harness runs one task for a user, an eval harness runs many tasks for a score.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block4-agentic/lsn-1787700000000-the-loop-by-hand.html">The Agent Loop, By Hand</a><span class="rel-set">Block 4 · Agentic AI</span><span class="link-note">Forty lines. Build it once and every framework afterwards is legible.</span></li><li><a href="lsn-1787000000032-techniques-that-transfer.html">Techniques That Transfer, and the Ones That Change Value</a><span class="link-note">Most of what makes a frontier harness good is not the model. It is portable — and several techniques are worth more locally than they are where they were invented.</span></li><li><a href="lsn-1787000000011-agents-autonomy-and-danger.html">Agents, Autonomy and the Danger Surface</a><span class="link-note">What actually makes something an agent, and every way it can hurt you.</span></li><li><a href="lsn-1787000000007-tool-calls-and-mcp.html">Tool Calls and MCP</a><span class="link-note">How a text model comes to run your code, and what the protocol standardises.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener">ReAct (Yao et al., 2022)</a><span class="link-note">The paper that named reason-and-act interleaving, back when it was a technique you chose rather than the default.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents</a><span class="link-note">Anthropic's engineering write-up on when a loop is warranted and when a fixed workflow is better.</span></li></ul></div>
@@ -294,6 +305,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"agent-loop": {"t": "Agent loop", "d": "The while-loop that runs a model repeatedly, executing any tool it asks for and feeding the result back, until the model answers without needing a tool."}, "harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "react-reason-and-act": {"t": "ReAct (reason and act)", "d": "Interleaving a reasoning step with an action: think, call a tool, read the result, think again. Named when it was a technique you chose; it is now simply what an agent loop is, which is why you meet the term in papers and not in code."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

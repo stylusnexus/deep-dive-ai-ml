@@ -1429,6 +1429,9 @@ python3 scripts/bench_engines.py --base-url http://127.0.0.1:PORT/v1 --model NAM
     ("h2", "reinforcement learning from AI feedback (RLAIF) and Constitutional AI"),
     ("p", "Human ranking is slow and expensive. <strong>RLAIF</strong> replaces the human rater with a model. <strong>Constitutional AI</strong> is a specific form: the model critiques and revises its own outputs against a written set of principles — a constitution — and that self-critique produces the preference data. It's how Claude is trained, and it turns alignment into something partly legible: you can read the principles."),
 
+    ("h2", "What &ldquo;alignment&rdquo; means"),
+    ("p", "<strong>Alignment</strong> is how closely a model's behaviour matches what its builders and users intended, including declining what they would not want done. Everything in this lesson is a way of pushing a model toward it. It is a property you measure for a given model and task, not a switch that is on or off, and measuring it is what jailbreaks and red-teaming are for: a jailbreak is a test of how far the alignment holds under pressure. Do not confuse it with the <em>cross-modal alignment</em> from the embeddings lesson, which is about matching images to their captions."),
+
     ("h2", "Where feedback goes wrong"),
     ("ul", [
       "<strong>Reward hacking.</strong> The model optimises the measure rather than the goal. If raters prefer longer answers, you get longer answers, not better ones.",

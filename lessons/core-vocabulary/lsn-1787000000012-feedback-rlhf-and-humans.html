@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -223,7 +234,7 @@
 
   <p>A freshly pretrained model predicts plausible text. It isn't helpful, isn't safe, and doesn't follow instructions. Everything that makes it usable comes from a second stage of training driven by <strong>feedback</strong> — and understanding that stage explains a great deal of model behaviour that otherwise looks arbitrary.</p>
   <h2>The three learning paradigms</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Supervised</div><div><div class="roadmap-title">Learn from labelled examples</div><div class="roadmap-desc">Here's an input, here's the right answer. Most classical ML in Block 2.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Unsupervised</div><div><div class="roadmap-title">Find structure without labels</div><div class="roadmap-desc">Clustering, embeddings. Nobody said what the groups are.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reinforcement</div><div><div class="roadmap-title">Learn from consequences</div><div class="roadmap-desc">No right answer given — just a signal about whether an outcome was good. The paradigm behind everything in this lesson.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Supervised</div><div><div class="roadmap-title">Learn from labelled examples</div><div class="roadmap-desc">Here's an input, here's the right answer. Most classical ML in Block 2.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Unsupervised</div><div><div class="roadmap-title">Find structure without labels</div><div class="roadmap-desc">Clustering, <dfn class="gl" tabindex="0" data-gl="embedding">embeddings</dfn>. Nobody said what the groups are.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reinforcement</div><div><div class="roadmap-title">Learn from consequences</div><div class="roadmap-desc">No right answer given — just a signal about whether an outcome was good. The paradigm behind everything in this lesson.</div></div></div></div>
   <h2>RLHF, in the order it happens</h2>
   <figure class="diagram"><svg viewBox="0 0 640 220" role="img" aria-label="The RLHF pipeline in four stages"><defs><marker id="ra" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="10" y="70" width="130" height="58" rx="7" class="d-box"/>
@@ -249,20 +260,22 @@
 <text x="10" y="176" class="d-label-sm">Stage 4 never sees a human. It optimises against the reward model's opinion of what a human would think —</text>
 <text x="10" y="194" class="d-label-sm">which is why a flawed reward model produces confidently wrong behaviour at scale.</text>
 </svg><figcaption>Human judgement enters at two points: writing demonstrations, and ranking outputs. Everything after that is the reward model standing in for people at a scale people can't reach.</figcaption></figure>
-  <p><strong>RLHF</strong> — reinforcement learning from human feedback — is the four stages above. Two are worth dwelling on. In stage 3 humans rank model outputs against each other, and a <em>reward model</em> is trained to predict those rankings. In stage 4 the language model is optimised to score highly against that reward model. Humans are no longer in the loop; a learned approximation of them is.</p>
+  <p><strong><dfn class="gl" tabindex="0" data-gl="rlhf-reinforcement-learning-from-human-feedback">RLHF</dfn></strong> — <dfn class="gl" tabindex="0" data-gl="reinforcement-learning">reinforcement learning</dfn> from human feedback — is the four stages above. Two are worth dwelling on. In stage 3 humans rank model outputs against each other, and a <em>reward model</em> is trained to predict those rankings. In stage 4 the language model is optimised to score highly against that reward model. Humans are no longer in the loop; a learned approximation of them is.</p>
   <h2>DPO: the same goal, less machinery</h2>
   <p><strong>Direct Preference Optimization</strong> skips the separate reward model and RL stage, training directly on preference pairs — this answer was preferred to that one. Simpler, cheaper, more stable, and now the common default for smaller-scale alignment work. Your <code>LLMS_from_Scratch</code> copy covers it in ch07, so Block 7 uses it in practice.</p>
   <h2>reinforcement learning from AI feedback (RLAIF) and Constitutional AI</h2>
   <p>Human ranking is slow and expensive. <strong>RLAIF</strong> replaces the human rater with a model. <strong>Constitutional AI</strong> is a specific form: the model critiques and revises its own outputs against a written set of principles — a constitution — and that self-critique produces the preference data. It's how Claude is trained, and it turns alignment into something partly legible: you can read the principles.</p>
+  <h2>What &amp;ldquo;alignment&amp;rdquo; means</h2>
+  <p><strong>Alignment</strong> is how closely a model's behaviour matches what its builders and users intended, including declining what they would not want done. Everything in this lesson is a way of pushing a model toward it. It is a property you measure for a given model and task, not a switch that is on or off, and measuring it is what <dfn class="gl" tabindex="0" data-gl="jailbreak">jailbreaks</dfn> and red-teaming are for: a jailbreak is a test of how far the alignment holds under pressure. Do not confuse it with the <em><dfn class="gl" tabindex="0" data-gl="cross-modal-alignment">cross-modal alignment</dfn></em> from the embeddings lesson, which is about matching images to their captions.</p>
   <h2>Where feedback goes wrong</h2>
-  <ul><li><strong>Reward hacking.</strong> The model optimises the measure rather than the goal. If raters prefer longer answers, you get longer answers, not better ones.</li><li><strong>Sycophancy.</strong> Raters prefer agreement, so models learn to agree. This is a trained-in behaviour, not a personality quirk, and it's why a model telling you your idea is excellent is weak evidence.</li><li><strong>Distribution narrowing.</strong> Heavy preference tuning makes outputs safer and more uniform, and less useful at the edges.</li><li><strong>Feedback on your own outputs.</strong> Training on data your own model generated compounds its errors. The same trap as evaluating a model with itself as judge.</li></ul>
-  <div class="callout pitfall"><span class="label">The connection to overfitting</span>Reward hacking is overfitting wearing different clothes. The model fits the measurement — rater preference — rather than the thing being measured. Same failure, same defence: hold something back that the optimiser can't see.</div>
+  <ul><li><strong><dfn class="gl" tabindex="0" data-gl="reward-hacking">Reward hacking</dfn>.</strong> The model optimises the measure rather than the goal. If raters prefer longer answers, you get longer answers, not better ones.</li><li><strong>Sycophancy.</strong> Raters prefer agreement, so models learn to agree. This is a trained-in behaviour, not a personality quirk, and it's why a model telling you your idea is excellent is weak evidence.</li><li><strong>Distribution narrowing.</strong> Heavy preference tuning makes outputs safer and more uniform, and less useful at the edges.</li><li><strong>Feedback on your own outputs.</strong> Training on data your own model generated compounds its errors. The same trap as evaluating a model with itself as judge.</li></ul>
+  <div class="callout pitfall"><span class="label">The connection to overfitting</span>Reward hacking is <dfn class="gl" tabindex="0" data-gl="overfitting">overfitting</dfn> wearing different clothes. The model fits the measurement — rater preference — rather than the thing being measured. Same failure, same defence: hold something back that the optimiser can't see.</div>
   <h2>Human-in-the-loop, and its neighbours</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">In the loop</div><div><div class="roadmap-title">Human approves before it happens</div><div class="roadmap-desc">The action waits. Slowest, safest. Correct for anything irreversible or outward-facing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">On the loop</div><div><div class="roadmap-title">Human watches, can intervene</div><div class="roadmap-desc">The action proceeds; a person monitors and can stop it. Needs real observability to mean anything.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Out of the loop</div><div><div class="roadmap-title">Nobody watching</div><div class="roadmap-desc">Appropriate only where actions are reversible, bounded and logged.</div></div></div></div>
   <p>The word people use loosely is "human-in-the-loop" for what is really human-on-the-loop. The distinction is whether the action waits. If a person can only find out afterwards, they are not in the loop, and the system needs to be safe without them.</p>
   <div class="callout matters"><span class="label">The rule that follows</span>Match the position to reversibility, not to how much you trust the model. Reversible and cheap: out of the loop is fine. Irreversible or outward-facing — sending, publishing, deleting, paying, merging — a human approves first, however good the model has been so far.</div>
   <h2>Where this reappears</h2>
-  <p>Block 4 places approval gates in a multi-agent system. Block 5 confronts model-as-judge, which is RLAIF's evaluation twin and carries the same circularity risk. Block 7 runs DPO on a real preference set. The vocabulary is the same throughout.</p>
+  <p>Block 4 places approval gates in a multi-agent system. Block 5 confronts <dfn class="gl" tabindex="0" data-gl="model-as-judge">model-as-judge</dfn>, which is RLAIF's evaluation twin and carries the same circularity risk. Block 7 runs <dfn class="gl" tabindex="0" data-gl="direct-preference-optimisation-dpo">DPO</dfn> on a real preference set. The vocabulary is the same throughout.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Match the human's position to reversibility, not to how much you trust the model.</p><p class="know-why">Trust accumulated over a thousand good runs tells you nothing about the thousand-and-first, and the cost of being wrong is set by the action, not by the track record. Reversible and cheap: out of the loop is fine. Irreversible or outward-facing: a human approves first.</p><p class="know-eg"><span class="know-eg-label">For example</span>An agent that drafts replies and saves them for review needs no gate — a bad draft costs someone thirty seconds. The same agent, sending directly, needs one every time, because a wrong email to a customer cannot be recalled and the agent's excellent record last quarter does not change that.</p></blockquote>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block7-training/lsn-1788000000003-supervised-versus-reinforcement-tuning.html">Supervised versus Reinforcement Fine-Tuning</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">One shows the model the answer; the other scores its attempts. The objective decides what you can teach.</span></li><li><a href="../engineering-practice/lsn-1787400000008-models-judging-models.html">Models Judging Models</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">LLM-as-judge — what it genuinely buys you, the four biases it ships with, and the failure that manufactures results.</span></li><li><a href="../block5-evaluation/lsn-1787800000003-rubrics-and-blind-reads.html">Rubrics and Blind Reads</a><span class="rel-set">Block 5 · Evaluation</span><span class="link-note">A rubric makes a judgement checkable. Blinding makes it honest. Neither works without the other.</span></li><li><a href="lsn-1787000000020-chain-of-thought-and-reasoning.html">Chain-of-Thought and Reasoning Tokens</a><span class="link-note">Why letting a model think out loud works — and why its explanation isn't necessarily its reason.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noopener">InstructGPT (Ouyang et al., 2022)</a><span class="link-note">The RLHF pipeline paper. Figure 2 is the diagram in this lesson, done properly.</span></li><li><a href="https://arxiv.org/abs/2305.18290" target="_blank" rel="noopener">Direct Preference Optimization (Rafailov et al., 2023)</a><span class="link-note">Why the reward model and RL stage can be collapsed into one step.</span></li><li><a href="https://arxiv.org/abs/2212.08073" target="_blank" rel="noopener">Constitutional AI (Bai et al., 2022)</a><span class="link-note">Self-critique against written principles, and how Claude is trained.</span></li><li><a href="https://huggingface.co/docs/trl" target="_blank" rel="noopener">TRL documentation</a><span class="link-note">The library you'll actually run DPO with in Block 7.</span></li></ul></div>
@@ -298,6 +311,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "rlhf-reinforcement-learning-from-human-feedback": {"t": "RLHF (reinforcement learning from human feedback)", "d": "Humans rank outputs, a reward model learns to predict those rankings, and the policy is optimised against it. The original recipe for turning a base model into an assistant."}, "reinforcement-learning": {"t": "Reinforcement learning", "d": "Learning from consequences rather than answers. No correct output is given, only a signal about whether an outcome was good."}, "jailbreak": {"t": "Jailbreak", "d": "A prompt written to get a model past its own refusal behaviour: a role-play frame, an invented authorisation, a request split into harmless-looking pieces. It targets what the model will <em>say<\/em>, which separates it from injection, which targets what an agent will <em>do<\/em> with content it reads. A jailbreak that works on a chatbot is an embarrassment; the same one on an agent holding tools is an incident."}, "cross-modal-alignment": {"t": "Cross-modal alignment", "d": "Contrastive training where the two halves of a pair are different kinds of thing, most often an image and its caption. Produces one space holding both, which is what allows searching images with text. Only as good as the captions it learned from, so it is weak on what captions rarely mention: counting, spatial relations, text inside an image."}, "reward-hacking": {"t": "Reward hacking", "d": "A policy optimising the measure rather than the goal: passing the tests by detecting the fixture, producing length when length was a proxy for thoroughness. The default behaviour of an optimiser, not an edge case — and it is invisible in the reward curve by construction."}, "overfitting": {"t": "Overfitting", "d": "The model memorised the training data including its noise. Excellent on seen data, poor on new data. The dangerous failure, because it looks like success."}, "model-as-judge": {"t": "Model-as-judge", "d": "Using a model to grade another model's output. Flexible, biased, and circular if the judge is the model under test."}, "direct-preference-optimisation-dpo": {"t": "Direct Preference Optimisation (DPO)", "d": "Optimising directly on preferred/rejected response pairs without training a separate reward model. Simpler and cheaper than RLHF, and needs preference pairs rather than a verifier."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

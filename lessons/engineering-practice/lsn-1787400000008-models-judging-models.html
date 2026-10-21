@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,16 +232,16 @@
   <h1>Models Judging Models</h1>
   <p class="subtitle">LLM-as-judge — what it genuinely buys you, the four biases it ships with, and the failure that manufactures results.</p>
 
-  <p>Deterministic grading is the top of the ladder and most interesting outputs don't have it. Summaries, explanations, tone, helpfulness, whether an answer is <em>grounded</em> in its sources — none compiles, none has a test suite. The pragmatic answer is to have another model grade it, and that answer is genuinely useful and genuinely dangerous in ways worth knowing precisely.</p>
+  <p><dfn class="gl" tabindex="0" data-gl="deterministic-grading">Deterministic grading</dfn> is the top of the ladder and most interesting outputs don't have it. Summaries, explanations, tone, helpfulness, whether an answer is <em>grounded</em> in its sources — none compiles, none has a test suite. The pragmatic answer is to have another model grade it, and that answer is genuinely useful and genuinely dangerous in ways worth knowing precisely.</p>
   <h2>What it buys you</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Coverage</div><div><div class="roadmap-title">Grades what nothing else can</div><div class="roadmap-desc">Open-ended text, where the alternative is no measurement at all rather than a better one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Scale</div><div><div class="roadmap-title">Hundreds of items, minutes, pennies</div><div class="roadmap-desc">Human labelling of the same set is days and real money.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Consistency</div><div><div class="roadmap-title">Same rubric every time</div><div class="roadmap-desc">Human raters drift across a long session; a judge at temperature 0 does not.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Structure</div><div><div class="roadmap-title">Rubric dimensions, not one score</div><div class="roadmap-desc">Groundedness, completeness and tone as separate numbers, which a single human score usually blurs.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Iteration speed</div><div><div class="roadmap-title">The real win</div><div class="roadmap-desc">A judge you can run in ninety seconds changes how often you measure, and frequency of measurement matters more than precision of any single run.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Coverage</div><div><div class="roadmap-title">Grades what nothing else can</div><div class="roadmap-desc">Open-ended text, where the alternative is no measurement at all rather than a better one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Scale</div><div><div class="roadmap-title">Hundreds of items, minutes, pennies</div><div class="roadmap-desc">Human labelling of the same set is days and real money.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Consistency</div><div><div class="roadmap-title">Same rubric every time</div><div class="roadmap-desc">Human raters drift across a long session; a judge at temperature 0 does not.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Structure</div><div><div class="roadmap-title">Rubric dimensions, not one score</div><div class="roadmap-desc"><dfn class="gl" tabindex="0" data-gl="groundedness">Groundedness</dfn>, completeness and tone as separate numbers, which a single human score usually blurs.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Iteration speed</div><div><div class="roadmap-title">The real win</div><div class="roadmap-desc">A judge you can run in ninety seconds changes how often you measure, and frequency of measurement matters more than precision of any single run.</div></div></div></div>
   <h2>The four biases it ships with</h2>
   <p>These are documented, reproducible, and present by default. Treat them as properties of the instrument rather than as bugs to be prompted away.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Position bias</div><div><div class="roadmap-title">Order changes the verdict</div><div class="roadmap-desc">Present the same two answers in the opposite order and judges flip a substantial fraction of their decisions. Mitigate by running both orders and discarding disagreements — or counting them as ties.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Verbosity bias</div><div><div class="roadmap-title">Longer reads as better</div><div class="roadmap-desc">A judge rewards length beyond the point where length helps. If one of your variants is chattier, you will measure that.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Self-preference</div><div><div class="roadmap-title">Models favour their own output</div><div class="roadmap-desc">Evaluators recognise and prefer their own generations. A judge from the same family as the system under test is not neutral.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Score compression</div><div><div class="roadmap-title">Everything is a 7 or 8</div><div class="roadmap-desc">Absolute 1–10 scoring clusters hard. Pairwise comparison discriminates far better than asking for a number.</div></div></div></div>
   <div class="callout pitfall"><span class="label">Circularity is the version that voids the result entirely</span>If the judge is the model under test, you are asking a system to score itself and the number carries no information about capability. The softer version is subtler and far more common: judging with a model from the same family, trained on overlapping data, sharing the same blind spots. It will not notice the errors it would have made itself — which are exactly the errors you most need to catch.</div>
   <h2>The failure that manufactures results</h2>
   <p>The biases above add noise, and noise is survivable. There is a worse case, and it is easy to walk into.</p>
-  <p>On one project an automated flag called <code>edit_attempted</code> was used as a measurement. It had been built as a safety classifier, and it counted certain shell commands as evidence of an edit attempt. About 15% of the recorded attempts had no edit tool call behind them at all.</p>
+  <p>On one project an automated flag called <code>edit_attempted</code> was used as a measurement. It had been built as a safety classifier, and it counted certain shell commands as evidence of an edit attempt. About 15% of the recorded attempts had no edit <dfn class="gl" tabindex="0" data-gl="tool-call">tool call</dfn> behind them at all.</p>
   <p>That alone is tolerable — a known error rate can be corrected for. The problem was that <strong>the error was not uniform across conditions.</strong> The experimental condition relaxed budgets, which meant it ran more shell commands, which meant it accumulated more phantom credits. The difference between conditions was partly a measurement of shell activity rather than of editing.</p>
   <figure class="diagram"><svg viewBox="0 0 640 190" role="img" aria-label="Uniform judge error versus condition-correlated judge error">
 <text x="12" y="18" class="d-fill-green" font-size="12" font-weight="600">ERROR EVEN ACROSS CONDITIONS — survivable</text>
@@ -253,7 +264,7 @@
   <p>On the same project, one configuration default meant the verifier was nil. That single value disabled turn-end verification, the fix-attempt loop and per-edit feedback simultaneously — and nothing said so. The system continued producing results that looked like verified results.</p>
   <p>No judge at all is an obvious gap. A judge that has quietly stopped running is a number that carries authority it has not earned. Assert that your grader ran, on every run, and fail loudly when it did not.</p>
   <h2>How to use one properly</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Last resort on the ladder</div><div><div class="roadmap-title">Not first reach</div><div class="roadmap-desc">Deterministic, then reference-match, then judge. Every rung down costs certainty.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Different family from the system</div><div><div class="roadmap-title">Avoid self-preference</div><div class="roadmap-desc">And never the model under test.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Pairwise, not absolute</div><div><div class="roadmap-title">Discriminates far better</div><div class="roadmap-desc">"Which is better" beats "score this 1-10", which clusters.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Both orders, every time</div><div><div class="roadmap-title">Neutralises position bias</div><div class="roadmap-desc">Disagreement between orders is a tie, and its rate is a health metric for your judge.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Calibrate against humans</div><div><div class="roadmap-title">The step nobody does</div><div class="roadmap-desc">Label 30-50 items by hand once. Measure agreement. If the judge disagrees with you on the cases you care about, it is not measuring what you think.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Report agreement alongside scores</div><div><div class="roadmap-title">Honesty about the instrument</div><div class="roadmap-desc">A judge score without a known agreement rate is an opinion with a decimal point.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Last resort on the ladder</div><div><div class="roadmap-title">Not first reach</div><div class="roadmap-desc">Deterministic, then reference-match, then judge. Every rung down costs certainty.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Different family from the system</div><div><div class="roadmap-title">Avoid self-preference</div><div class="roadmap-desc">And never the model under test.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Pairwise, not absolute</div><div><div class="roadmap-title">Discriminates far better</div><div class="roadmap-desc">"Which is better" beats "score this 1-10", which clusters.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Both orders, every time</div><div><div class="roadmap-title">Neutralises position bias</div><div class="roadmap-desc">Disagreement between orders is a tie, and its rate is a health metric for your judge.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Calibrate against humans</div><div><div class="roadmap-title">The step nobody does</div><div class="roadmap-desc">Label 30-50 items by hand once. Measure agreement. If the judge disagrees with you on the cases you care about, it is not measuring what you think.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Report agreement alongside scores</div><div><div class="roadmap-title">Honesty about the instrument</div><div class="roadmap-desc">A judge score without a known <dfn class="gl" tabindex="0" data-gl="agreement-rate">agreement rate</dfn> is an opinion with a decimal point.</div></div></div></div>
   <div class="callout matters"><span class="label">When you can buy a deterministic verifier, buy it</span>One agent project verifies its edits with typecheckers and a language server rather than a model judge. That is narrower than a judge and it is not an opinion, which is what a loop needs when the verdict decides whether to escalate. Reach for a judge where nothing checkable exists — not because it was quicker to build than a real check.</div>
   <h2>Where this connects</h2>
   <p>This is the same principle as the loops lesson, one level up: a loop or a score improves things only when signal enters from outside. A judge from the same family as the system under test is not outside. A grader whose error tracks your treatment is not outside. Human labels, a compiler, a test suite and a held-out answer key are.</p>
@@ -291,6 +302,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"deterministic-grading": {"t": "Deterministic grading", "d": "Scoring by something that cannot be argued with: it compiles, the tests pass, the schema validates. Cheap and trustworthy, so use it wherever the task allows."}, "groundedness": {"t": "Groundedness", "d": "Whether an answer is actually supported by what was retrieved. Measured separately from whether the answer is correct."}, "tool-call": {"t": "Tool call", "d": "Structured text the model emits requesting a function. The harness parses and executes it; the model never touches the tool."}, "agreement-rate": {"t": "Agreement rate", "d": "How often a judge matches a blind human label on a calibration set. A judge score published without one is an opinion with a decimal point."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

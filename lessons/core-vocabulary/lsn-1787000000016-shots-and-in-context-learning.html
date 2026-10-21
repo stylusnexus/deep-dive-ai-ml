@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,9 +232,9 @@
   <h1>Zero-shot, Few-shot and In-Context Learning</h1>
   <p class="subtitle">Teaching a model a task in the prompt — what it is, and where it stops working.</p>
 
-  <p>You can change what a model does without changing a single weight, by putting examples in the prompt. This is <strong>in-context learning</strong>, and it's the reason prompt engineering became a discipline rather than a footnote.</p>
+  <p>You can change what a model does without changing a single weight, by putting examples in the prompt. This is <strong><dfn class="gl" tabindex="0" data-gl="in-context-learning">in-context learning</dfn></strong>, and it's the reason prompt engineering became a discipline rather than a footnote.</p>
   <h2>Counting shots</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Zero-shot</div><div><div class="roadmap-title">Instruction, no examples</div><div class="roadmap-desc">"Classify the sentiment of this review." Works well for tasks the model has seen many times in training.</div></div></div><div class="roadmap-item"><div class="roadmap-num">One-shot</div><div><div class="roadmap-title">A single example</div><div class="roadmap-desc">Often enough to pin down output format, which is frequently the actual problem.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Few-shot</div><div><div class="roadmap-title">Typically 2–10 examples</div><div class="roadmap-desc">The workhorse. Demonstrates format, edge-case handling, and tone in one move.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Many-shot</div><div><div class="roadmap-title">Dozens to hundreds</div><div class="roadmap-desc">Now viable with long contexts. Closes some of the gap to fine-tuning, at the cost of paying for those tokens on every single call.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Zero-shot</div><div><div class="roadmap-title">Instruction, no examples</div><div class="roadmap-desc">"Classify the sentiment of this review." Works well for tasks the model has seen many times in training.</div></div></div><div class="roadmap-item"><div class="roadmap-num">One-shot</div><div><div class="roadmap-title">A single example</div><div class="roadmap-desc">Often enough to pin down output format, which is frequently the actual problem.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Few-shot</div><div><div class="roadmap-title">Typically 2–10 examples</div><div class="roadmap-desc">The workhorse. Demonstrates format, edge-case handling, and tone in one move.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Many-shot</div><div><div class="roadmap-title">Dozens to hundreds</div><div class="roadmap-desc">Now viable with long contexts. Closes some of the gap to <dfn class="gl" tabindex="0" data-gl="fine-tuning">fine-tuning</dfn>, at the cost of paying for those <dfn class="gl" tabindex="0" data-gl="token">tokens</dfn> on every single call.</div></div></div></div>
   <h2>The word &#x27;learning&#x27; is doing something unusual here</h2>
   <p>Nothing is learned in the training sense. No weight changes, and the model retains nothing after the call. The examples condition the model's next-token distribution for that request only — closer to demonstration than instruction, and completely forgotten the moment the context is gone.</p>
   <div class="callout insight"><span class="label">Why this matters practically</span>Few-shot examples cost tokens on every request, forever. Ten good examples might be 800 tokens. At a million calls that's 800 million tokens you pay for repeatedly — the point at which fine-tuning stops looking expensive. This is the calculation Block 7 opens with.</div>
@@ -276,6 +287,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"in-context-learning": {"t": "In-context learning", "d": "Changing behaviour via prompt examples without changing weights. Nothing persists after the call. Good at format and label space, weak at new knowledge and hard reasoning."}, "fine-tuning": {"t": "Fine-tuning", "d": "Changing a model's weights so it responds differently: tone, structure, schema adherence, a domain's conventions. Good at installing behaviour and poor at installing facts, which is the distinction that decides whether it is the right tool or whether you needed retrieval."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

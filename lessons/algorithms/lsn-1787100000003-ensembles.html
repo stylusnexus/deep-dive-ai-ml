@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -247,21 +258,21 @@
 <text x="300" y="162" class="d-label-sm">higher ceiling · will overfit if unchecked</text>
 </svg><figcaption>Bagging trains many independent models in parallel and averages away their variance. Boosting trains models in sequence, each one correcting what the last got wrong.</figcaption></figure>
   <h2>Bagging and random forests</h2>
-  <p><strong>Bagging</strong> (bootstrap aggregating) trains each tree on a random sample of the rows, drawn with replacement, then averages their predictions. Because the trees see different data, their errors are partly independent, and averaging cancels them.</p>
+  <p><strong><dfn class="gl" tabindex="0" data-gl="bagging">Bagging</dfn></strong> (bootstrap aggregating) trains each tree on a random sample of the rows, drawn with replacement, then averages their predictions. Because the trees see different data, their errors are partly independent, and averaging cancels them.</p>
   <p>A <strong>random forest</strong> adds a second source of randomness: at each split, only a random subset of features is considered. This stops every tree from picking the same dominant feature at the root, decorrelating them further. More decorrelation, more variance cancelled.</p>
   <div class="callout matters"><span class="label">Why forests are the safe default</span>A random forest is remarkably hard to overfit by adding trees — more trees converge toward a stable answer rather than degrading. It needs almost no tuning, handles mixed data types, and gives usable feature importances. When you need a strong tabular baseline in ten minutes, this is it.</div>
   <p>Bagging gives you a validation set for nothing, which is worth knowing about. Each tree is trained on a bootstrap sample, so roughly a third of the rows were not used to build any given tree &mdash; those are its <strong>out-of-bag</strong> rows. Score every row using only the trees that never saw it and you have an honest held-out estimate without ever splitting the data. It is free, it is available during training, and for a forest it is usually close enough to cross-validation to skip running one.</p>
   <h2>Boosting</h2>
   <p><strong>Boosting</strong> works sequentially. Train a weak, shallow tree. Look at what it got wrong. Train the next tree specifically to fix those errors. Repeat, adding each new tree's contribution scaled by a learning rate.</p>
-  <p><strong>Gradient boosting</strong> formalises this: each new tree is fitted to the gradient of the loss — the residual errors — which is the same gradient descent idea from lesson 1, applied by adding models instead of adjusting weights. XGBoost, LightGBM and CatBoost are optimised implementations, and they win a great many tabular competitions.</p>
-  <div class="callout pitfall"><span class="label">Boosting will overfit if you let it</span>Unlike forests, adding boosting rounds past the optimum makes the model worse. You need early stopping against a validation set, plus a low learning rate and shallow trees. More rounds is not more better.</div>
+  <p><strong>Gradient boosting</strong> formalises this: each new tree is fitted to the gradient of the loss — the residual errors — which is the same <dfn class="gl" tabindex="0" data-gl="gradient-descent">gradient descent</dfn> idea from lesson 1, applied by adding models instead of adjusting weights. XGBoost, LightGBM and CatBoost are optimised implementations, and they win a great many tabular competitions.</p>
+  <div class="callout pitfall"><span class="label">Boosting will overfit if you let it</span>Unlike forests, adding boosting rounds past the optimum makes the model worse. You need <dfn class="gl" tabindex="0" data-gl="early-stopping">early stopping</dfn> against a validation set, plus a low learning rate and shallow trees. More rounds is not more better.</div>
   <h2>Choosing between them</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Random forest</div><div><div class="roadmap-title">Fast to a good answer</div><div class="roadmap-desc">Little tuning, resistant to overfitting, strong default. Start here.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Gradient boosting</div><div><div class="roadmap-title">Higher ceiling, more care</div><div class="roadmap-desc">Usually wins on tuned performance. Needs early stopping and learning-rate tuning.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Single tree</div><div><div class="roadmap-title">When you must explain it</div><div class="roadmap-desc">Occasionally the right answer purely because a human has to read the logic.</div></div></div></div>
-  <p>For the turbine project in Block 2, run a random forest before the neural network. If the forest wins — which happens more often than the marketing around deep learning suggests — that is a real result, not a failure.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Random forest</div><div><div class="roadmap-title">Fast to a good answer</div><div class="roadmap-desc">Little tuning, resistant to <dfn class="gl" tabindex="0" data-gl="overfitting">overfitting</dfn>, strong default. Start here.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Gradient boosting</div><div><div class="roadmap-title">Higher ceiling, more care</div><div class="roadmap-desc">Usually wins on tuned performance. Needs early stopping and learning-rate tuning.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Single tree</div><div><div class="roadmap-title">When you must explain it</div><div class="roadmap-desc">Occasionally the right answer purely because a human has to read the logic.</div></div></div></div>
+  <p>For the turbine project in Block 2, run a random forest before the neural network. If the forest wins — which happens more often than the marketing around <dfn class="gl" tabindex="0" data-gl="deep-learning">deep learning</dfn> suggests — that is a real result, not a failure.</p>
   <h2>Why averaging works, in one line of intuition</h2>
   <p>Every model's error splits into three parts: bias (wrong on average), variance (jumpy from sample to sample), and noise you cannot touch. Averaging many independent models leaves bias where it was and shrinks variance — roughly by the number of models, if their errors were truly independent.</p>
   <p>They never are. Trees trained on overlapping data make correlated mistakes, and that correlation is the ceiling on what averaging can buy you. Which is exactly why a random forest samples features at each split: not to be clever, but to drive correlation down so the averaging has more to cancel.</p>
-  <div class="callout insight"><span class="label">Boosting attacks the other term</span>Bagging reduces variance and leaves bias alone. Boosting reduces bias by fitting each new model to what the ensemble still gets wrong — which is why it reaches higher and why it will happily fit noise once the real signal is exhausted. Two methods, two different terms of the same decomposition. That is the whole distinction, and it tells you which to reach for: unstable model, use bagging; underfitting model, use boosting.</div>
+  <div class="callout insight"><span class="label">Boosting attacks the other term</span>Bagging reduces variance and leaves bias alone. Boosting reduces bias by fitting each new model to what the ensemble still gets wrong — which is why it reaches higher and why it will happily fit noise once the real signal is exhausted. Two methods, two different terms of the same decomposition. That is the whole distinction, and it tells you which to reach for: unstable model, use bagging; <dfn class="gl" tabindex="0" data-gl="underfitting">underfitting</dfn> model, use boosting.</div>
   <h2>The parameters that actually matter</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">n_estimators (forest)</div><div><div class="roadmap-title">More is safe</div><div class="roadmap-desc">Converges to a stable answer. Set it as high as you can afford and stop thinking about it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">n_estimators (boosting)</div><div><div class="roadmap-title">More is dangerous</div><div class="roadmap-desc">Past the optimum it degrades. This is why early stopping is mandatory here and optional there.</div></div></div><div class="roadmap-item"><div class="roadmap-num">learning_rate (boosting)</div><div><div class="roadmap-title">The main dial</div><div class="roadmap-desc">Lower means each tree contributes less, so you need more of them and generalise better. 0.05 with early stopping is a sane default.</div></div></div><div class="roadmap-item"><div class="roadmap-num">max_depth (boosting)</div><div><div class="roadmap-title">Keep it shallow</div><div class="roadmap-desc">3 to 6. Deep trees in a boosted ensemble overfit fast — the ensemble supplies the complexity, not the individual tree.</div></div></div><div class="roadmap-item"><div class="roadmap-num">subsample / colsample</div><div><div class="roadmap-title">Randomness helps here too</div><div class="roadmap-desc">Sampling rows and columns per tree regularises boosting for the same reason it helps forests.</div></div></div></div>
   <div class="callout pitfall"><span class="label">The tuning trap</span>Grid-searching a boosted model against your validation set for hours is a very efficient way to overfit the validation set. Tune a handful of parameters, keep the test set untouched, and remember that a forest at defaults is usually within a couple of points of a boosted model tuned for a day.</div>
@@ -293,6 +304,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"bagging": {"t": "Bagging", "d": "Train many models on random samples of rows, average them. Cancels variance."}, "gradient-descent": {"t": "Gradient descent", "d": "Compute the slope of the loss with respect to each parameter, step the other way, repeat. The learning rate is the step size and the cause of most training instability."}, "early-stopping": {"t": "Early stopping", "d": "Halting training when validation loss stops improving. The cheapest defence against overfitting."}, "overfitting": {"t": "Overfitting", "d": "The model memorised the training data including its noise. Excellent on seen data, poor on new data. The dangerous failure, because it looks like success."}, "deep-learning": {"t": "Deep learning", "d": "Neural networks with many layers, which learn their own features instead of being handed them. Needs more data and more compute, and wins decisively when both are available."}, "underfitting": {"t": "Underfitting", "d": "The model is too simple to capture the real pattern. Poor on both training and new data. The obvious failure."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -245,7 +256,7 @@
   <h2>Read the gap between mean and median</h2>
   <p>Draw both on a histogram. Where the mean sits noticeably to the right of the median, the variable is right-skewed — a long tail pulling the average up. It follows that "the average turbine" is a misleading summary, and that a linear model may do better on the log of the variable than on the variable.</p>
   <h2>Two correlations, measuring different things</h2>
-  <p>The default correlation everyone reaches for is Pearson&#39;s, and it measures <em>linear</em> association specifically. Spearman&#39;s measures <em>monotonic</em> association &mdash; it ranks the values first and correlates the ranks &mdash; so it sees any relationship that consistently goes one way, curved or not. A feature with a strong curved relationship to the target can show a Pearson correlation near zero and a Spearman correlation near one, and dropping it on the first number is a real way to throw away your best feature.</p>
+  <p>The default correlation everyone reaches for is Pearson&#39;s, and it measures <em>linear</em> association specifically. Spearman&#39;s measures <em>monotonic</em> association &mdash; it ranks the values first and correlates the ranks &mdash; so it sees any relationship that consistently goes one way, curved or not. A feature with a strong curved relationship to the target can show a Pearson correlation near zero and a <dfn class="gl" tabindex="0" data-gl="spearman-correlation">Spearman correlation</dfn> near one, and dropping it on the first number is a real way to throw away your best feature.</p>
   <p>The rank step also makes Spearman&#39;s far less sensitive to outliers, since a single extreme value becomes just the highest rank rather than a number that drags the whole calculation. Compute both. Where they disagree substantially, that disagreement is itself the finding: it means the relationship is either non-linear or being driven by a few extreme points, and the plot will tell you which.</p>
   <h2>The two mistakes that recur</h2>
   <div class="callout pitfall"><span class="label">Correlation only sees straight lines</span>Pearson correlation measures linear association. A strong curved relationship — performance rising then falling with temperature, say — can show a correlation near zero. Never conclude 'no relationship' from a low correlation without looking at the scatter plot.</div>
@@ -282,6 +293,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"spearman-correlation": {"t": "Spearman correlation", "d": "Correlation computed on ranks, so it detects any monotonic relationship rather than only a linear one, and is far less sensitive to outliers. Where it disagrees with Pearson, the disagreement is the finding."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

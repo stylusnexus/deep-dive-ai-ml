@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,11 +232,11 @@
   <h1>Weights, GGUF and Quantization</h1>
   <p class="subtitle">What Q4_K_M actually means, and the trade you're making when you pick it.</p>
 
-  <p><strong>GGUF</strong> and <strong>Q4_K_M</strong> describe how a model is stored on disk. That choice affects the day-to-day experience of local inference more than almost anything else, and the notation looks impenetrable until you realise it is four separate facts stuck together.</p>
+  <p><strong><dfn class="gl" tabindex="0" data-gl="gguf-gguf">GGUF</dfn></strong> and <strong><dfn class="gl" tabindex="0" data-gl="q4-k-m">Q4_K_M</dfn></strong> describe how a model is stored on disk. That choice affects the day-to-day experience of local inference more than almost anything else, and the notation looks impenetrable until you realise it is four separate facts stuck together.</p>
   <h2>Weights, briefly</h2>
   <p>A trained model is a large pile of numbers — the <strong>weights</strong> or <em>parameters</em>. "7B" means seven billion of them. Stored unquantised at 16 bits each &mdash; half precision, which is what most weights ship as &mdash; seven billion numbers is about 14GB. A 70B model is about 140GB, which is why it won't fit on most machines at full precision.</p>
   <h2>Quantization is lossy compression for weights</h2>
-  <p><strong>Quantization</strong> stores each weight in fewer bits — 8, 5, 4, sometimes 2 — instead of 16. Four-bit quantization cuts the file roughly to a quarter: that 70B model drops from ~140GB to ~40GB and becomes something your 128GB machine runs comfortably.</p>
+  <p><strong><dfn class="gl" tabindex="0" data-gl="quantization">Quantization</dfn></strong> stores each weight in fewer bits — 8, 5, 4, sometimes 2 — instead of 16. Four-bit quantization cuts the file roughly to a quarter: that 70B model drops from ~140GB to ~40GB and becomes something your 128GB machine runs comfortably.</p>
   <p>The cost is precision. Each weight is stored approximately. In practice, 4-bit quantization of a large model degrades quality surprisingly little — usually far less than dropping to a smaller model of the same file size. That trade is the entire reason local inference is practical.</p>
   <div class="callout matters"><span class="label">The rule of thumb worth memorising</span>A 4-bit quantized 70B model almost always beats a 16-bit 13B model, despite similar file sizes. Prefer the bigger model, more heavily quantized.</div>
   <h2>Reading Q4_K_M</h2>
@@ -248,8 +259,8 @@
 <text x="12" y="190" class="d-label-sm">Q = quantized · 4 = roughly 4 to 5 bits per weight · K = k-quant method · M = medium size within that family</text>
 </svg><figcaption>Same 70B model at four precisions. Four-bit is the usual default because the quality loss is small and the size reduction is what makes the model runnable at all.</figcaption></figure>
   <h2>GGUF is the container</h2>
-  <p><strong>GGUF</strong> (GPT-Generated Unified Format) is the file format that holds quantized weights plus the metadata needed to run them — tokenizer, architecture, prompt template. It's the format <code>llama.cpp</code> and Ollama consume. One file, self-describing, no Python environment required.</p>
-  <p>This is distinct from Hugging Face's <code>safetensors</code>, which stores full-precision weights for training and fine-tuning. The usual pipeline: fine-tune in safetensors, convert to GGUF, quantize, serve.</p>
+  <p><strong>GGUF</strong> (GPT-Generated Unified Format) is the file format that holds quantized weights plus the metadata needed to run them — tokenizer, architecture, prompt template. It's the format <code>llama.cpp</code> and <dfn class="gl" tabindex="0" data-gl="ollama">Ollama</dfn> consume. One file, self-describing, no Python environment required.</p>
+  <p>This is distinct from Hugging Face's <code>safetensors</code>, which stores full-precision weights for training and <dfn class="gl" tabindex="0" data-gl="fine-tuning">fine-tuning</dfn>. The usual pipeline: fine-tune in safetensors, convert to GGUF, quantize, serve.</p>
   <div class="callout pitfall"><span class="label">Your orphaned 95GB</span>Your own audit found roughly 95GB of local weights that nothing actually serves — a very common outcome. Quantized models are cheap to download and easy to forget. Before pulling another, check what's already on disk.</div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Prefer the bigger model, more heavily quantized.</p><p class="know-why">Quantization stores each weight approximately, and large models tolerate that surprisingly well. Cutting parameters, by contrast, removes capability outright. Given a fixed memory budget, spend it on parameters and economise on precision.</p><p class="know-eg"><span class="know-eg-label">For example</span>You have 48GB. A 13B model at full 16-bit precision is about 26GB and fits, and so does a 70B at Q4_K_M, about 43GB on disk (llama.cpp lists 4.89 bits per weight for that type). The 4-bit 70B will win on nearly every task, despite storing each of its weights far less precisely.</p></blockquote>
   <h2>Do it yourself: the one-liners</h2>
@@ -263,7 +274,7 @@ llama-quantize m-f16.gguf m-q4_k_m.gguf Q4_K_M
 
 # What did it cost? Size, perplexity, and how far the answers moved from the 16-bit model
 python3 scripts/measure_quantization.py --reference Qwen/Qwen2.5-0.5B-Instruct --model q4-g64</code></pre>
-  <p>What came out: the MLX command printed <em>Quantized model with 4.502 bits per weight</em> and turned a 988 MB model into 278 MB. The GGUF Q4_K_M file was 398 MB, which is 6.35 bits per weight rather than 4.9, because for a small model most of the file is not stored at 4 bits. Both surprises are examined in the notebook <em>Quantize It Yourself</em> (<code>notebooks/09-electives/05-quantize-it-yourself.ipynb</code>), which also measures seven settings side by side. When plain 4-bit rounding costs more than you can accept, the <em>Quantization Recipes</em> lesson covers what to do about it.</p>
+  <p>What came out: the <dfn class="gl" tabindex="0" data-gl="mlx">MLX</dfn> command printed <em>Quantized model with 4.502 <dfn class="gl" tabindex="0" data-gl="bits-per-weight">bits per weight</dfn></em> and turned a 988 MB model into 278 MB. The GGUF Q4_K_M file was 398 MB, which is 6.35 bits per weight rather than 4.9, because for a small model most of the file is not stored at 4 bits. Both surprises are examined in the notebook <em>Quantize It Yourself</em> (<code>notebooks/09-electives/05-quantize-it-yourself.ipynb</code>), which also measures seven settings side by side. When plain 4-bit rounding costs more than you can accept, the <em>Quantization Recipes</em> lesson covers what to do about it.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000003-quantization-recipes.html">Quantization Recipes: Beyond Plain Rounding</a><span class="link-note">The same number of bits, chosen better. What the recipes are, what they cost, how to make your own, and where to get them already made.</span></li><li><a href="../block7-training/lsn-1788000000005-the-four-ways-to-shrink-a-model.html">The Four Ways to Shrink a Model</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.</span></li><li><a href="lsn-1787000000027-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li><li><a href="lsn-1787000000004-serving-locally.html">Serving Locally: Ollama, llama.cpp and tok/s</a><span class="link-note">The most-mentioned tool in your codebase, and how to read a speed number.</span></li><li><a href="lsn-1787000000030-why-the-gpu-is-waiting.html">Why the Graphics Processing Unit (GPU) Is Waiting</a><span class="link-note">One number — work done per byte fetched — explains quantization, batching, and why a chip rated for a quadrillion operations a second gives you thirty tokens a second.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://huggingface.co/docs/hub/gguf" target="_blank" rel="noopener">GGUF on the Hugging Face Hub</a><span class="link-note">Format reference, and the quantization table naming every Q-variant.</span></li><li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a><span class="link-note">The engine. The README's quantization section is the primary source for the trade-offs here.</span></li></ul></div>
   <div class="quiz">
@@ -291,6 +302,48 @@ python3 scripts/measure_quantization.py --reference Qwen/Qwen2.5-0.5B-Instruct -
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"gguf-gguf": {"t": "GGUF (*.gguf)", "d": "The self-contained file format holding quantized weights plus tokenizer and metadata. What llama.cpp and Ollama consume."}, "q4-k-m": {"t": "Q4_K_M", "d": "Four-bit K-quant, medium size. The usual local default. Q = quantized, 4 = bits, K = k-quant method, M = medium."}, "quantization": {"t": "Quantization", "d": "Storing each weight in fewer bits (4, 5, 8) instead of 16. Shrinks and speeds up the model at a small cost in precision."}, "ollama": {"t": "Ollama", "d": "A wrapper over llama.cpp: model registry, local HTTP server with an OpenAI-shaped API, memory management. Optimised for one developer on one machine."}, "fine-tuning": {"t": "Fine-tuning", "d": "Changing a model's weights so it responds differently: tone, structure, schema adherence, a domain's conventions. Good at installing behaviour and poor at installing facts, which is the distinction that decides whether it is the right tool or whether you needed retrieval."}, "mlx": {"t": "MLX", "d": "Apple's array framework for the Metal GPU and unified memory, and by extension the weights and engines built on it (mlx-lm, vllm-mlx). An MLX model is safetensors plus a quantization setting such as 4 bits at a group size of 64. Has a CUDA backend for Linux, with no published LLM benchmark found."}, "bits-per-weight": {"t": "Bits per weight", "d": "What a quantized file really costs per weight, scales and any higher-precision tensors included. The label hides it: a MLX 4-bit file is about 4.5, and a Q4_K_M file for a small model came out at 6.35. Compare quantizations at equal bits per weight."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

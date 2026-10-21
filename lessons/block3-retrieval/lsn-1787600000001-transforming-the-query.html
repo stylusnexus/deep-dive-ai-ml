@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -224,7 +235,7 @@
   <p>The pipeline lesson tuned the index side: chunk well, retrieve wide, fuse, rerank, send few. All of it takes the user's question exactly as typed and works on everything downstream of it. That is a choice, and it is worth noticing, because the question is often the weakest part of the request.</p>
   <h2>The asymmetry underneath all of this</h2>
   <p>You embed a question and match it against documents that are <em>answers</em>. Those are different kinds of text. A question is short, interrogative, and phrased in the words of someone who does not yet know; the passage that answers it is declarative, longer, and phrased in the words of someone who does. Similarity search assumes the two live near each other in the vector space, and they often do not.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Hypothetical document embedding</div><div><div class="roadmap-title">Retrieve with a fake answer, not the question</div><div class="roadmap-desc">Ask the model to write the answer it would expect, then embed that draft and search with it. The draft is discarded — only its vector is used. You are matching answer against answer instead of question against answer, which is the shape the space is better at.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Query rewriting</div><div><div class="roadmap-title">Make a dependent question standalone</div><div class="roadmap-desc">A follow-up carries meaning from the turn before it and none of that meaning is in the embedding. Rewriting resolves the reference before retrieval happens.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Query expansion</div><div><div class="roadmap-title">Several phrasings instead of one</div><div class="roadmap-desc">Generate a handful of alternative wordings, retrieve for each, and fuse the ranked lists — the same reciprocal rank fusion the pipeline lesson already uses for combining keyword and vector results, applied to combining queries instead.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decomposition</div><div><div class="roadmap-title">Covered already, in the agentic lesson</div><div class="roadmap-desc">Splitting a question into planned sub-questions is the same family, and this course teaches it as part of the loop rather than here.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Hypothetical document embedding</div><div><div class="roadmap-title">Retrieve with a fake answer, not the question</div><div class="roadmap-desc">Ask the model to write the answer it would expect, then embed that draft and search with it. The draft is discarded — only its vector is used. You are matching answer against answer instead of question against answer, which is the shape the space is better at.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Query rewriting</div><div><div class="roadmap-title">Make a dependent question standalone</div><div class="roadmap-desc">A follow-up carries meaning from the turn before it and none of that meaning is in the <dfn class="gl" tabindex="0" data-gl="embedding">embedding</dfn>. Rewriting resolves the reference before retrieval happens.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Query expansion</div><div><div class="roadmap-title">Several phrasings instead of one</div><div class="roadmap-desc">Generate a handful of alternative wordings, retrieve for each, and fuse the ranked lists — the same <dfn class="gl" tabindex="0" data-gl="reciprocal-rank-fusion">reciprocal rank fusion</dfn> the pipeline lesson already uses for combining keyword and vector results, applied to combining queries instead.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decomposition</div><div><div class="roadmap-title">Covered already, in the agentic lesson</div><div class="roadmap-desc">Splitting a question into planned sub-questions is the same family, and this course teaches it as part of the loop rather than here.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A follow-up question carries almost none of its meaning in its own words.</p><p class="know-why">This course has measured it. Running &ldquo;What is the failure rate at Clyde?&rdquo; against the follow-up &ldquo;And at Whitelee?&rdquo; through the same encoder the retrieval notebooks use gives a cosine similarity of 0.149 — near the floor, barely above two unrelated sentences. The second question is perfectly clear to a human reading the transcript and nearly meaningless to an embedding, because everything that makes it a question about failure rates is in the previous turn.</p><p class="know-eg"><span class="know-eg-label">For example</span>Retrieval on a conversational interface fails on follow-ups long before it fails on hard questions, and it fails silently: the search runs, returns something, and nobody sees that the query never contained the subject. Rewriting is not an optimisation here, it is the difference between working and not.</p></blockquote>
   <figure class="diagram"><svg viewBox="0 0 640 232" role="img" aria-label="Query transformation before retrieval"><defs><marker id="qt" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="12" y="94" width="104" height="44" rx="6" class="d-box"/><text x="24" y="112" class="d-label-b">question</text><text x="24" y="130" class="d-label-sm">as typed</text>
@@ -243,7 +254,7 @@
   <div class="callout pitfall"><span class="label">A drafted answer can be confidently wrong and still steer retrieval</span><p>The draft in a hypothetical-document approach is never shown to anyone, which makes it easy to forget it can be nonsense. A model that drafts a plausible wrong answer produces a vector pointing at the wrong region of the corpus, and retrieval then faithfully returns documents supporting the wrong thing. The failure is invisible: recall looks fine against the drafted answer and terrible against the actual question.</p></div>
   <div class="callout matters"><span class="label">Do not transform a query that was already good</span><p>These techniques repair a mismatch between how questions and answers are phrased. Where users type keyword-shaped queries, or where the corpus is itself full of questions — a support knowledge base of FAQ entries, say — the mismatch is small and the transformation adds latency, cost and a new failure mode for very little. Measure the block's existing three numbers before and after; if they do not move, do not keep it.</p></div>
   <h2>Where this sits in the block</h2>
-  <p>Chunking decides what can be found. Retrieval and reranking decide what is found. Transformation decides what is looked for, and it is the only stage that touches the request rather than the corpus — which is why it is the first thing to reach for on a conversational interface and among the last on a search box.</p>
+  <p><dfn class="gl" tabindex="0" data-gl="chunking">Chunking</dfn> decides what can be found. Retrieval and reranking decide what is found. Transformation decides what is looked for, and it is the only stage that touches the request rather than the corpus — which is why it is the first thing to reach for on a conversational interface and among the last on a search box.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../algorithms/lsn-1787100000008-ranking-and-hybrid-retrieval.html">Ranking and Hybrid Retrieval</a><span class="rel-set">Algorithms That Matter Here</span><span class="link-note">Best Matching 25 (BM25), reciprocal rank fusion and rerankers — why pure vector search is rarely the best answer.</span></li><li><a href="lsn-1787600000003-agentic-rag.html">Agentic RAG: Retrieval as a Loop</a><span class="link-note">When one retrieval cannot answer the question — and the failure modes that arrive with the loop.</span></li><li><a href="lsn-1787600000000-building-a-rag-system.html">Building a Retrieval System That Works</a><span class="link-note">Five stages, and the two that decide whether the other three matter.</span></li><li><a href="lsn-1787600000002-measuring-retrieval.html">Measuring Retrieval</a><span class="link-note">Three numbers, measured separately, because they fail independently and have different fixes.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
@@ -270,6 +281,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "reciprocal-rank-fusion": {"t": "Reciprocal rank fusion", "d": "Combine ranked lists using positions rather than scores: sum of 1/(k + rank), k≈60. No normalisation needed."}, "chunking": {"t": "Chunking", "d": "Cutting documents into retrievable pieces before embedding them. Split on structure — headings, sections, functions — because a chunk that ends mid-sentence embeds badly and reads worse."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

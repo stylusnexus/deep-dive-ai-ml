@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -243,8 +254,8 @@
 </svg><figcaption>Each step trades more work done before the question for less work done after it, and keeps a different artefact. It is a spectrum rather than a ranking, and one system can sit at several points at once.</figcaption></figure>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Preloading and retrieval are not competitors. They apply to different parts of the same system.</p><p class="know-why">Everything on this spectrum assumes the knowledge is the same for every query. A product manual, a legal contract, a policy document and a codebase all qualify. A customer's current balance does not, and no amount of offline work will make it. The question is never which approach wins — it is which parts of your corpus are stable enough to read in advance.</p><p class="know-eg"><span class="know-eg-label">For example</span>A support system might serve a trained cache for its product documentation, which changes quarterly, and ordinary retrieval for ticket history, which changes continuously. Both in the same request.</p></blockquote>
   <h2>Why the obvious repair does not work</h2>
-  <p>Modular preloading sounds like it should be easy: read each passage on its own, store its cache, and glue the pieces together in whatever order retrieval returns them. It fails, and for three separate reasons that are worth knowing because they explain the shape of every real fix.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Positions restart</div><div><div class="roadmap-title">Every block thinks it begins the sequence</div><div class="roadmap-desc">Position is encoded into the keys by rotation, and an attention score depends on the distance between a query and a key. A key computed at position zero, replayed at position five hundred, measures the wrong distance and produces a wrong score. It has to be re-rotated to where it now sits.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Cross-attention is missing</div><div><div class="roadmap-title">No block ever saw the others</div><div class="roadmap-desc">A passage read alone never attended to the passages before it, so the relationships between them were never computed and are not in the stored cache.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Several attention sinks</div><div><div class="roadmap-title">Each block anchors its own first token</div><div class="roadmap-desc">Models place disproportionate attention on the first token of a sequence. Glue three blocks together and the model gets three starts instead of one.</div></div></div></div>
+  <p>Modular <dfn class="gl" tabindex="0" data-gl="preloading">preloading</dfn> sounds like it should be easy: read each passage on its own, store its cache, and glue the pieces together in whatever order retrieval returns them. It fails, and for three separate reasons that are worth knowing because they explain the shape of every real fix.</p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Positions restart</div><div><div class="roadmap-title">Every block thinks it begins the sequence</div><div class="roadmap-desc">Position is encoded into the keys by rotation, and an attention score depends on the distance between a query and a key. A key computed at position zero, replayed at position five hundred, measures the wrong distance and produces a wrong score. It has to be re-rotated to where it now sits.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Cross-attention is missing</div><div><div class="roadmap-title">No block ever saw the others</div><div class="roadmap-desc">A passage read alone never attended to the passages before it, so the relationships between them were never computed and are not in the stored cache.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Several attention sinks</div><div><div class="roadmap-title">Each block anchors its own first token</div><div class="roadmap-desc">Models place disproportionate attention on the first <dfn class="gl" tabindex="0" data-gl="token">token</dfn> of a sequence. Glue three blocks together and the model gets three starts instead of one.</div></div></div></div>
   <div class="callout pitfall"><span class="label">Precomputing blocks and hoping is measurably worse</span><p>This is not theoretical caution. When researchers re-implemented the training-free version of this idea and tested it on retrieval, its accuracy landed at or below their weakest baselines. Something has to give: either you recompute a slice of tokens at request time, or you change the model so the blocks are genuinely independent by design. There is no free version.</p></div>
   <div class="callout matters"><span class="label">The trade is ownership, not just accuracy</span><p>Recomputing a slice at request time works with any model you can download. Training the model to treat blocks as independent removes that cost permanently — and hands you a model variant to maintain, which every base-model upgrade obliges you to produce again. That is an architecture decision with a long tail, and it belongs in a decision record rather than in someone's head.</p></div>
   <h2>Where this leaves the block</h2>
@@ -275,6 +286,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"preloading": {"t": "Preloading", "d": "Reading a corpus before any query arrives and keeping the result, so requests skip straight to answering. Only valid for knowledge that is stable across queries; anything changing per request is still fetched at request time."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

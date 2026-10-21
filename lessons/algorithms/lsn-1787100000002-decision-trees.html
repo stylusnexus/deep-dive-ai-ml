@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -248,7 +259,7 @@
 <text x="12" y="196" class="d-label-sm">Keep going and every leaf ends up holding one training row. Depth is the overfitting dial — limit it, or prune after.</text>
 </svg><figcaption>Each split partitions the data further. Left unchecked, the tree keeps splitting until every leaf holds a single training example — which is memorisation, not learning.</figcaption></figure>
   <h2>Why trees overfit so readily</h2>
-  <p>Nothing in the algorithm says stop. Given enough depth a tree can isolate every training example in its own leaf, achieving perfect training accuracy and learning nothing generalisable. This is the overfitting lesson made concrete — and it's why the controls all constrain growth:</p>
+  <p>Nothing in the algorithm says stop. Given enough depth a tree can isolate every training example in its own leaf, achieving perfect training accuracy and learning nothing generalisable. This is the <dfn class="gl" tabindex="0" data-gl="overfitting">overfitting</dfn> lesson made concrete — and it's why the controls all constrain growth:</p>
   <ul><li><code>max_depth</code> — how many questions deep the tree may go</li><li><code>min_samples_leaf</code> — refuse splits that would create tiny leaves</li><li><code>min_samples_split</code> — don't split a node with too few examples</li><li><strong>Pruning</strong> — grow fully, then cut back branches that don't help validation performance</li></ul>
   <div class="callout pitfall"><span class="label">The instability nobody warns you about</span>Change a handful of training rows and a decision tree can restructure completely — a different feature wins at the root and everything below changes. That variance is exactly what ensembles exist to cancel out, which is the next lesson.</div>
   <h2>What they&#x27;re good and bad at</h2>
@@ -257,10 +268,10 @@
   <p>Worth doing once by hand, because it demystifies the whole family. Take 100 turbines, 20 of which failed. Before any split, Gini impurity is 1 minus the sum of squared class proportions: 1 − (0.8² + 0.2²) = 0.32.</p>
   <p>Now try splitting on vibration above 0.5. Suppose that puts 30 turbines on one side, 15 of them failures, and 70 on the other, 5 of them failures:</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">High-vibration group</div><div><div class="roadmap-title">30 rows, 15 failures</div><div class="roadmap-desc">Gini = 1 − (0.5² + 0.5²) = 0.50. Worse than the parent — a coin flip.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Low-vibration group</div><div><div class="roadmap-title">70 rows, 5 failures</div><div class="roadmap-desc">Gini = 1 − (0.93² + 0.07²) = 0.13. Much purer.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Weighted result</div><div><div class="roadmap-title">0.3 × 0.50 + 0.7 × 0.13 = 0.24</div><div class="roadmap-desc">Down from 0.32. That reduction of 0.08 is the split's score.</div></div></div></div>
-  <p>The algorithm computes that number for every feature at every candidate threshold and keeps the best. Then it recurses. Everything else — random forests, gradient boosting, the whole tabular-ML establishment — is built on top of that one greedy calculation.</p>
+  <p>The algorithm computes that number for every feature at every candidate threshold and keeps the best. Then it recurses. Everything else — <dfn class="gl" tabindex="0" data-gl="random-forest">random forests</dfn>, <dfn class="gl" tabindex="0" data-gl="gradient-boosting">gradient boosting</dfn>, the whole tabular-ML establishment — is built on top of that one greedy calculation.</p>
   <div class="callout insight"><span class="label">Why the split can look like it makes things worse</span>The high-vibration group came out at 0.50, above the parent's 0.32, and the split is still excellent. Purity is judged on the weighted average of the children, not on each child, because you have isolated 70 rows you can now be confident about. A group that is uncertain but small costs little.</div>
   <h2>Feature importance, and why it misleads</h2>
-  <p>Trees report which features drove the splits, and this is one of the most trusted and most misread outputs in machine learning. The default measure — total impurity reduction attributed to each feature — is biased toward high-cardinality features. A continuous variable offers hundreds of candidate thresholds; a binary flag offers one. The continuous variable wins more splits partly on opportunity rather than on merit.</p>
+  <p>Trees report which features drove the splits, and this is one of the most trusted and most misread outputs in <dfn class="gl" tabindex="0" data-gl="machine-learning">machine learning</dfn>. The default measure — total impurity reduction attributed to each feature — is biased toward high-cardinality features. A continuous variable offers hundreds of candidate thresholds; a binary flag offers one. The continuous variable wins more splits partly on opportunity rather than on merit.</p>
   <div class="callout pitfall"><span class="label">Use permutation importance when the answer matters</span>Shuffle one feature's values and measure how much performance drops. That directly answers the question people think they are asking — does the model actually rely on this? — and it is computed on held-out data, so it reflects generalisation rather than how the tree happened to be built. Slower, and worth it whenever the importance ranking will be shown to anyone who might act on it.</div>
   <div class="further shelf"><h3>On your shelf</h3><ul class="books"><li><span class="bk-t">Grokking AI Algorithms</span><span class="bk-a">Rishal Hurbans</span><span class="bk-n">Visual, patient treatment of tree construction if the split calculation above went past too quickly.</span></li><li><span class="bk-t">Hands-On Machine Learning with Scikit-Learn and PyTorch</span><span class="bk-a">Aurelien Geron</span><span class="bk-n">Chapter 6 on trees, including exporting one as readable text — worth doing once on a real model.</span></li></ul></div>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787100000003-ensembles.html">Ensembles: Bagging, Forests and Boosting</a><span class="link-note">Why many mediocre models beat one good one — and which kind to reach for.</span></li><li><a href="../block2-classical-ml/lsn-1787500000001-baseline-to-model.html">From Baseline to Model</a><span class="rel-set">Block 2 · Predictive Modelling</span><span class="link-note">A ladder of increasing complexity, climbed only as far as the evidence justifies.</span></li><li><a href="../core-vocabulary/lsn-1787000000010-overfitting-and-underfitting.html">Overfitting and Underfitting</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">The single most important pair of words in machine learning — and the reason you always hold data back.</span></li><li><a href="lsn-1787100000001-regression-algorithms.html">Linear and Logistic Regression</a><span class="link-note">The two algorithms you should try before anything clever — and the baseline everything else must beat.</span></li></ul></div>
@@ -290,6 +301,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"overfitting": {"t": "Overfitting", "d": "The model memorised the training data including its noise. Excellent on seen data, poor on new data. The dangerous failure, because it looks like success."}, "random-forest": {"t": "Random forest", "d": "Bagging plus random feature selection at each split, decorrelating the trees further. The strong, low-tuning tabular default."}, "gradient-boosting": {"t": "Gradient boosting", "d": "Sequential trees, each fitted to the previous ensemble's errors. Higher ceiling than a forest, and will overfit without early stopping. XGBoost, LightGBM, CatBoost."}, "machine-learning": {"t": "Machine learning", "d": "Systems given examples rather than rules, which infer the rules themselves. Everything in Block 2 lives here."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -223,7 +234,7 @@
 
   <p>"The RAG system is not very good" is not a measurement. It could be retrieval missing the right chunk, ranking burying it, the index quietly losing candidates, or the model failing to use what it was given. Each has a different fix, and one aggregate score cannot distinguish them.</p>
   <h2>Measure three things, separately</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Index recall</div><div><div class="roadmap-title">Is the index returning what exact search would?</div><div class="roadmap-desc">A property of your approximate index, measured against brute force. Nobody checks this.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Retrieval quality</div><div><div class="roadmap-title">Is the right chunk in the top k?</div><div class="roadmap-desc">A property of embeddings, chunking and ranking. Measured against a labelled set.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Groundedness</div><div><div class="roadmap-title">Is the answer supported by what was retrieved?</div><div class="roadmap-desc">A property of generation. Distinct from whether the answer is correct.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Index recall</div><div><div class="roadmap-title">Is the index returning what exact search would?</div><div class="roadmap-desc">A property of your approximate index, measured against brute force. Nobody checks this.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Retrieval quality</div><div><div class="roadmap-title">Is the right chunk in the top k?</div><div class="roadmap-desc">A property of <dfn class="gl" tabindex="0" data-gl="embedding">embeddings</dfn>, <dfn class="gl" tabindex="0" data-gl="chunking">chunking</dfn> and ranking. Measured against a labelled set.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Groundedness</div><div><div class="roadmap-title">Is the answer supported by what was retrieved?</div><div class="roadmap-desc">A property of generation. Distinct from whether the answer is correct.</div></div></div></div>
   <p>A system can have perfect index recall, poor retrieval quality and high groundedness — faithfully summarising the wrong document. Only measuring the three apart tells you that.</p>
   <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Three independently measurable stages of a retrieval system"><defs><marker id="m3" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>
 <rect x="12" y="34" width="180" height="54" rx="6" class="d-box"/>
@@ -262,7 +273,7 @@
   <h2>The fourth number, which this lesson used to omit</h2>
   <p>Everything above measures whether retrieval found the right thing. None of it measures how long the request took, and the two are not distributed the way people assume. Break a retrieval request into stages and time each: embedding the query, the approximate nearest-neighbour search, and any reranking pass. The ordering is what matters and it is stable — embedding is cheapest, search grows with corpus size, and a cross-encoder rerank is typically the most expensive of the three because it runs a model over every shortlisted pair. Measure yours; the absolute figures depend on your index, hardware and shortlist width. Then the model reads what came back, and on a long context that step alone runs into <em>seconds</em>.</p>
   <p>Retrieval is a small fraction of the clock. Tuning it for speed is optimising the part that was already cheap, while the expensive stage sits immediately downstream and is fed by exactly how much you chose to retrieve.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Retrieval time</div><div><div class="roadmap-title">Milliseconds</div><div class="roadmap-desc">Embedding, search and reranking together. Worth measuring, and rarely worth optimising first.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Read time (prefill)</div><div><div class="roadmap-title">Often seconds</div><div class="roadmap-desc">The model processing everything retrieval handed it, before a single output token appears. This is what the user experiences as the delay.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The lever</div><div><div class="roadmap-title">Send fewer chunks, not find them faster</div><div class="roadmap-desc">Read time grows with how much you send. Attention's own cost grows with the <em>square</em> of the context, but that term does not dominate until the context approaches the model's hidden dimension — at retrieval-sized contexts the read is close to linear in tokens. Either way, precision beats volume on the clock for the same reason it beats volume on the answer.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Retrieval time</div><div><div class="roadmap-title">Milliseconds</div><div class="roadmap-desc">Embedding, search and reranking together. Worth measuring, and rarely worth optimising first.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Read time (prefill)</div><div><div class="roadmap-title">Often seconds</div><div class="roadmap-desc">The model processing everything retrieval handed it, before a single output <dfn class="gl" tabindex="0" data-gl="token">token</dfn> appears. This is what the user experiences as the delay.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The lever</div><div><div class="roadmap-title">Send fewer chunks, not find them faster</div><div class="roadmap-desc"><dfn class="gl" tabindex="0" data-gl="read-time-prefill">Read time</dfn> grows with how much you send. Attention's own cost grows with the <em>square</em> of the context, but that term does not dominate until the context approaches the model's hidden dimension — at retrieval-sized contexts the read is close to linear in tokens. Either way, precision beats volume on the clock for the same reason it beats volume on the answer.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">&ldquo;Prefill is quadratic&rdquo; is true about attention and misleading about the read.</p><p class="know-why">Attention does compare every token against every other, so its cost carries a squared term. But attention is only part of prefill: the projections and the feed-forward layers cost roughly tokens times the hidden dimension squared, which is linear in context. The squared term does not overtake the linear one until the context is on the order of the model's hidden dimension — thousands of tokens — so at retrieval-sized contexts the read grows roughly in proportion to what you send.</p><p class="know-eg"><span class="know-eg-label">For example</span>Project 2 measures this on its own corpus by sweeping how many chunks it retrieves. Going from 288 to 1,073 words of context — 3.7 times the context — multiplied the read by 3.6. Quadratic scaling would have predicted about fourteen. The lever is still sending less, but the reason is proportion rather than explosion.</p></blockquote>
   <div class="callout insight"><span class="label">One value of k cannot separate reading from writing</span><p>A single measurement of read time bundles two things: prefill, which grows with the context you sent, and decode, which grows with the answer the model writes. Neither is visible on its own. Project 2 separates them by sweeping how many chunks it retrieves — the answers stay roughly the same length while the context grows, so the <em>slope</em> of read time against context is prefill and the intercept is the decode floor.</p><p>On its corpus that floor is around three and a half seconds before a single retrieved word is read. If you are optimising context size against a read time dominated by an unchanging decode cost, you are tuning the smaller half and the numbers will barely move.</p></div>
   <h2>Running the evaluation</h2>
@@ -294,6 +305,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "chunking": {"t": "Chunking", "d": "Cutting documents into retrievable pieces before embedding them. Split on structure — headings, sections, functions — because a chunk that ends mid-sentence embeds badly and reads worse."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "read-time-prefill": {"t": "Read time (prefill)", "d": "How long the model takes to process everything retrieval handed it, before the first output token appears. Usually seconds where retrieval is milliseconds, and it is what the user experiences as the delay."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

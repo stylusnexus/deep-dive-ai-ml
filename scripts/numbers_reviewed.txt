@@ -431,3 +431,4 @@ when-the-provider-goes-down|767c54eae890|hypothetical: an illustrative figure st
 when-the-provider-goes-down|5ac87c74fb1e|standard HTTP status code for success
 when-the-provider-goes-down|d4fb4ccc179c|reworded sentence, same figures as the lesson already cites or arithmetic on them (6 s deadline, five-failure breaker, p99 and percentages); no new measurement
 when-the-provider-goes-down|98f7b14630b0|reworded sentence, same figures as the lesson already cites or arithmetic on them (6 s deadline, five-failure breaker, p99 and percentages); no new measurement
+red-teaming-your-own-agent|bd099ac93900|cited: publication year of Arditi et al., arXiv 2406.11717, fetched and confirmed

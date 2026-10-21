@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,11 +232,11 @@
   <h1>Building the Dataset, and How Little You Need</h1>
   <p class="subtitle">The part that decides whether the training run was worth doing — and it is smaller than people expect.</p>
 
-  <p>Assume the previous lesson went badly for you and fine-tuning really is the answer. The dataset is now the whole project. Everything downstream &mdash; the method, the rank, the hardware, the hours &mdash; is mechanical by comparison, and none of it recovers from examples that disagree with each other.</p>
+  <p>Assume the previous lesson went badly for you and <dfn class="gl" tabindex="0" data-gl="fine-tuning">fine-tuning</dfn> really is the answer. The dataset is now the whole project. Everything downstream &mdash; the method, the rank, the hardware, the hours &mdash; is mechanical by comparison, and none of it recovers from examples that disagree with each other.</p>
   <h2>The number is smaller than you think</h2>
-  <p>The intuition people bring from classical machine learning is that more rows are better, and it is wrong here. A base model already speaks the language, knows the domain vocabulary and can follow a format; you are not teaching it to write, you are showing it which of the things it can already do you want. Low-rank adaptation on a narrow, consistent task frequently works on several hundred examples, and a few thousand is a large dataset rather than a small one.</p>
+  <p>The intuition people bring from classical <dfn class="gl" tabindex="0" data-gl="machine-learning">machine learning</dfn> is that more rows are better, and it is wrong here. A base model already speaks the language, knows the domain vocabulary and can follow a format; you are not teaching it to write, you are showing it which of the things it can already do you want. Low-rank adaptation on a narrow, consistent task frequently works on several hundred examples, and a few thousand is a large dataset rather than a small one.</p>
   <p>What replaces volume is consistency and coverage. Five hundred examples that all handle the same situation the same way will teach a behaviour. Fifty thousand that disagree with each other will teach the disagreement, and will do it very thoroughly.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Consistency</div><div><div class="roadmap-title">The property that actually matters</div><div class="roadmap-desc">Two examples handling the same case differently do not average out. They teach the model that both are acceptable, which is exactly what you were fine-tuning to stop.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Coverage</div><div><div class="roadmap-title">Span the cases, not the volume</div><div class="roadmap-desc">Better to have twenty examples across ten situations than two hundred across two. The model generalises from the shape of what it saw, and it cannot generalise to a case that has no representative.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Format fidelity</div><div><div class="roadmap-title">Train the way you will serve</div><div class="roadmap-desc">The chat template, the system prompt, the field names and the whitespace all have to match what production sends. A model tuned on a slightly different envelope is being asked to generalise across the one difference you controlled and got wrong.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The held-out split</div><div><div class="roadmap-title">Made first, opened last</div><div class="roadmap-desc">Split before you look at anything, and do not iterate against it. A split carved out after you have been reading the data has already been contaminated by your own judgement.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Consistency</div><div><div class="roadmap-title">The property that actually matters</div><div class="roadmap-desc">Two examples handling the same case differently do not average out. They teach the model that both are acceptable, which is exactly what you were fine-tuning to stop.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Coverage</div><div><div class="roadmap-title">Span the cases, not the volume</div><div class="roadmap-desc">Better to have twenty examples across ten situations than two hundred across two. The model generalises from the shape of what it saw, and it cannot generalise to a case that has no representative.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Format fidelity</div><div><div class="roadmap-title">Train the way you will serve</div><div class="roadmap-desc">The <dfn class="gl" tabindex="0" data-gl="chat-template">chat template</dfn>, the system prompt, the field names and the whitespace all have to match what production sends. A model tuned on a slightly different envelope is being asked to generalise across the one difference you controlled and got wrong.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The held-out split</div><div><div class="roadmap-title">Made first, opened last</div><div class="roadmap-desc">Split before you look at anything, and do not iterate against it. A split carved out after you have been reading the data has already been contaminated by your own judgement.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A dataset teaches the whole distribution it contains, including the parts you did not intend to teach.</p><p class="know-why">The model has no way to know which properties of your examples were the point. If ninety-five per cent of them are one category, you have taught a prior on that category. If every single one is a confident, complete answer, you have taught it that confident and complete is always available &mdash; and quietly removed its willingness to say the thing is not in the document, which is the behaviour the retrieval and structured-output lessons both spent their time protecting.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team fine-tunes a support classifier on eight hundred resolved tickets. Resolved tickets, by definition, are the ones that had an answer. The tuned model stops routing anything to a human, because in eight hundred examples it never once saw that outcome, and its accuracy on the eval set &mdash; also drawn from resolved tickets &mdash; looks excellent.</p></blockquote>
   <figure class="diagram"><svg viewBox="0 0 560 176" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three dataset sources compared: production logs, hand-written examples, and model-generated data.">
 <rect x="10" y="16" width="164" height="52" rx="6" class="d-box-good"/>
@@ -279,6 +290,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"fine-tuning": {"t": "Fine-tuning", "d": "Changing a model's weights so it responds differently: tone, structure, schema adherence, a domain's conventions. Good at installing behaviour and poor at installing facts, which is the distinction that decides whether it is the right tool or whether you needed retrieval."}, "machine-learning": {"t": "Machine learning", "d": "Systems given examples rather than rules, which infer the rules themselves. Everything in Block 2 lives here."}, "chat-template": {"t": "chat template", "d": "How system, user and assistant turns get formatted into the single string a model actually sees. Get it wrong and quality drops for reasons that look like the model being bad."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

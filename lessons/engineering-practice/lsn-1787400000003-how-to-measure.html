@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -224,7 +235,7 @@
   <p>This is deliberately a sequence rather than a checklist. Each step assumes the previous one passed, and running them out of order is how you get numbers that look rigorous and mean nothing.</p>
   <h2>0 · Prove the instrument before you trust it</h2>
   <p>Both honesty invariants, checked <em>before</em> the experiment, not after the results confuse you.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Outcome honesty</div><div><div class="roadmap-title">Can it tell success from inaction?</div><div class="roadmap-desc">At the starting state the check must FAIL. With the known-good change applied it must PASS. Run both directions explicitly — a vacuous pass is invisible otherwise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Process honesty</div><div><div class="roadmap-title">Did it record what happened?</div><div class="roadmap-desc">Confirm the harness logs the model’s reasoning and its tool arguments, then read one full trace end to end. Absence of an explanation in the log is not evidence there was none.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Outcome honesty</div><div><div class="roadmap-title">Can it tell success from inaction?</div><div class="roadmap-desc">At the starting state the check must FAIL. With the known-good change applied it must PASS. Run both directions explicitly — a vacuous pass is invisible otherwise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Process honesty</div><div><div class="roadmap-title">Did it record what happened?</div><div class="roadmap-desc">Confirm the <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn> logs the model’s reasoning and its tool arguments, then read one full trace end to end. Absence of an explanation in the log is not evidence there was none.</div></div></div></div>
   <div class="callout matters"><span class="label">Instrumentation is free; treatments are not</span>Adding logging leaves the request to the model byte-identical, so it cannot change the result and needs no flag or A/B. Anything that changes what the model <em>sees</em> is a treatment and must be measured. Keeping this line sharp is what lets you fix your observability mid-investigation without invalidating it.</div>
   <figure class="diagram"><svg viewBox="0 0 640 235" role="img" aria-label="The measurement procedure in dependency order"><defs><marker id="hm" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="12" y="14" width="450" height="34" rx="5" class="d-box-warn"/>
@@ -269,7 +280,7 @@
 <text x="361" y="114" class="d-label-sm" text-anchor="middle">40 runs, now worth running</text>
 <text x="10" y="146" class="d-label-sm">the gate tests the instrument, not the hypothesis &#8212; which is why aborting on it is not peeking</text>
 </svg><figcaption>Forty runs after an unproven instrument can return nothing. Three runs first either buy the forty or save them.</figcaption></figure>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Your gate may already be an arm</div><div><div class="roadmap-title">Do not always add a run</div><div class="roadmap-desc">If one of the arms is a known-good baseline you expect to score well, that arm <em>is</em> the positive control and you only need to run it first. A separate control is needed when every arm is genuinely unknown, which is rarer than it sounds.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Gate, then interleave</div><div><div class="roadmap-title">Not gate, then block</div><div class="roadmap-desc">Running all of arm one, then all of arm two, exposes you to drift &mdash; a warming server, thermal throttling, memory pressure accumulating across a long session. Round-robin across arms spreads that evenly. So the shape is a small blocked gate first, then an interleaved battery, rather than blocking throughout.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Aborting on a gate is not peeking</div><div><div class="roadmap-title">Different object entirely</div><div class="roadmap-desc">Peeking inflates the error rate because you keep testing the <em>hypothesis</em> and stop when noise favours you. A control tests the <em>instrument</em>. Stopping because the rig cannot detect anything says nothing about the treatment and costs you nothing statistically, which is why this exception is real rather than a convenient one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A gate is not a weak battery</div><div><div class="roadmap-title">Sized to detect, not to conclude</div><div class="roadmap-desc">Two or three runs cannot establish an effect and are not being asked to. The gate asks a binary question &mdash; can this rig move at all &mdash; and a question that crude is answerable with far fewer runs than the one you actually care about.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Your gate may already be an arm</div><div><div class="roadmap-title">Do not always add a run</div><div class="roadmap-desc">If one of the arms is a known-good baseline you expect to score well, that arm <em>is</em> the positive control and you only need to run it first. A separate control is needed when every arm is genuinely unknown, which is rarer than it sounds.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Gate, then interleave</div><div><div class="roadmap-title">Not gate, then block</div><div class="roadmap-desc">Running all of arm one, then all of arm two, exposes you to drift &mdash; a warming server, thermal throttling, memory pressure accumulating across a long session. Round-robin across arms spreads that evenly. So the shape is a small blocked gate first, then an interleaved battery, rather than blocking throughout.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Aborting on a gate is not peeking</div><div><div class="roadmap-title">Different object entirely</div><div class="roadmap-desc"><dfn class="gl" tabindex="0" data-gl="peeking">Peeking</dfn> inflates the error rate because you keep testing the <em>hypothesis</em> and stop when noise favours you. A control tests the <em>instrument</em>. Stopping because the rig cannot detect anything says nothing about the treatment and costs you nothing statistically, which is why this exception is real rather than a convenient one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A gate is not a weak battery</div><div><div class="roadmap-title">Sized to detect, not to conclude</div><div class="roadmap-desc">Two or three runs cannot establish an effect and are not being asked to. The gate asks a binary question &mdash; can this rig move at all &mdash; and a question that crude is answerable with far fewer runs than the one you actually care about.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A null result from an unvalidated instrument is not a weak finding. It is not a finding.</p><p class="know-why">This is what makes the ordering non-negotiable rather than merely tidy. A positive result at least prompts the question of whether the rig was honest; a null invites the conclusion that the treatment does nothing, which is the same output a broken instrument produces and is far more comfortable to believe. The failure mode is therefore biased towards being accepted, and the only defence is having proved detection before the numbers existed to be interpreted.</p><p class="know-eg"><span class="know-eg-label">For example</span>A red-team battery in this course ran thirty attacks against an agent and found nothing, which read as a robust system. A control added afterwards &mdash; a change that <em>should</em> have moved the decision &mdash; moved it in one case out of six, meaning the rig was mostly blind and the clean sweep meant nothing. Two full runs were spent before the ordering was corrected, and the corrected control then passed at four out of six.</p></blockquote>
   <h2>Gate on the outcome; report the shape as a diagnostic</h2>
   <p>When a reference solution exists, it is tempting to score against its shape &mdash; which files were touched, which steps were taken, how closely the trace matches. Shape is cheap to compute and it feels like a stricter test. As a <em>gate</em> it is worse than useless, because it marks a better answer wrong.</p>
@@ -317,6 +328,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "peeking": {"t": "Peeking", "d": "Repeatedly testing a running experiment and stopping when it crosses the threshold. Every look is another chance for noise to cross, which inflates the false-positive rate far past the nominal one."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

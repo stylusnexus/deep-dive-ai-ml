@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"name": "deep-dive-ai-ml",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/__pycache__": true,
+			"**/.ipynb_checkpoints": true
+		},
+		"search.exclude": {
+			"**/.venv-train": true,
+			"lessons": true,
+			"data": true
+		}
+	}
+}

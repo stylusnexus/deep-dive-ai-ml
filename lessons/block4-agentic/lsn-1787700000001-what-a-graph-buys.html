@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -254,7 +265,7 @@ agent = g.compile(checkpointer=saver)</code></pre>
 <text x="28" y="192" class="d-label-sm">Checkpointer saves state after every node — which is what makes pausing, resuming and inspecting possible.</text>
 </svg><figcaption>The same loop, with control flow lifted out of a for-statement and made data. That is what lets something else — a checkpointer, a human, a debugger — get between the steps.</figcaption></figure>
   <h2>The five things it buys</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Resumption</div><div><div class="roadmap-title">State is saved after every node</div><div class="roadmap-desc">A crash on turn nine resumes at turn nine rather than replaying eight turns of model calls. On a long run this is the difference between an annoyance and a lost afternoon.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Interrupts</div><div><div class="roadmap-title">Pause before a node, resume later</div><div class="roadmap-desc">The approval gate that actually halts. Covered properly in the next lesson, and it is the strongest single argument for the framework.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Branching</div><div><div class="roadmap-title">Conditional edges</div><div class="roadmap-desc">Route by task type without a growing thicket of if-statements inside one function.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Parallelism</div><div><div class="roadmap-title">Independent nodes run together</div><div class="roadmap-desc">Two retrievals that do not depend on each other take one node's worth of wall clock rather than two.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Inspectability</div><div><div class="roadmap-title">The state history is a record</div><div class="roadmap-desc">What the state was at every step of a run that finished yesterday. This is the trajectory log from the operating lesson, produced by construction rather than by discipline.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Resumption</div><div><div class="roadmap-title">State is saved after every node</div><div class="roadmap-desc">A crash on turn nine resumes at turn nine rather than replaying eight turns of model calls. On a long run this is the difference between an annoyance and a lost afternoon.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Interrupts</div><div><div class="roadmap-title">Pause before a node, resume later</div><div class="roadmap-desc">The <dfn class="gl" tabindex="0" data-gl="approval-gate">approval gate</dfn> that actually halts. Covered properly in the next lesson, and it is the strongest single argument for the framework.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Branching</div><div><div class="roadmap-title">Conditional edges</div><div class="roadmap-desc">Route by task type without a growing thicket of if-statements inside one function.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Parallelism</div><div><div class="roadmap-title">Independent nodes run together</div><div class="roadmap-desc">Two retrievals that do not depend on each other take one node's worth of wall clock rather than two.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Inspectability</div><div><div class="roadmap-title">The state history is a record</div><div class="roadmap-desc">What the state was at every step of a run that finished yesterday. This is the <dfn class="gl" tabindex="0" data-gl="trajectory-log">trajectory log</dfn> from the operating lesson, produced by construction rather than by discipline.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Checkpointing is the feature; everything else is convenience.</p><p class="know-why">Branching, parallelism and typed state are all things you could write yourself in an afternoon. Persisting state after every node — so a run can be interrupted, inspected, resumed on another machine, or paused for a human — is genuinely hard to retrofit, and it is what makes approval gates and long-running agents possible at all.</p><p class="know-eg"><span class="know-eg-label">For example</span>A three-hour agent run crashes at hour two on a transient API error. Without checkpointing you re-run from the start and pay for every model call again. With it you resume from the last completed node. The same mechanism is what lets the run stop and wait for a human overnight.</p></blockquote>
   <h2>What it costs</h2>
   <ul><li><strong>Indirection.</strong> A stack trace now runs through framework code. When something misbehaves you are debugging your logic and its runtime at once.</li><li><strong>A version surface.</strong> The API has moved repeatedly and will again. That is a maintenance cost you have signed up for.</li><li><strong>Conceptual overhead for simple cases.</strong> A two-node graph is more code and more concepts than a <code>while</code> loop, and no better.</li><li><strong>Easy over-modelling.</strong> Graphs invite nodes. A twelve-node graph where three would do is harder to reason about than the loop it replaced.</li></ul>
@@ -273,7 +284,7 @@ class AgentState(TypedDict):
   <p>The annotation decides how two updates to the same key combine. <code>add</code> concatenates, which is what you want for anything accumulating. No annotation means replacement, which is what you want for a current value. Getting this wrong produces a bug that looks like the agent forgetting things — because it is.</p>
   <h2>Where it fits with everything else</h2>
   <p>The graph does not change what an agent is. The loop is the same loop, the model still only emits text, and <code>execute</code> is still the entire blast radius. What changes is that the control flow is now data rather than code, which is what lets something else — a checkpointer, a human, a debugger — get between the steps.</p>
-  <div class="callout pitfall"><span class="label">The framework does not supply judgement</span>Nothing here decides your termination conditions, your tool permissions, your approval gates or your budget caps. A graph with no turn limit spins exactly as a <code>while True</code> does. Every discipline from the operating and danger lessons still applies, and the framework will happily let you skip all of it.</div>
+  <div class="callout pitfall"><span class="label">The framework does not supply judgement</span>Nothing here decides your <dfn class="gl" tabindex="0" data-gl="termination-condition">termination conditions</dfn>, your tool permissions, your approval gates or your budget caps. A graph with no turn limit spins exactly as a <code>while True</code> does. Every discipline from the operating and danger lessons still applies, and the framework will happily let you skip all of it.</div>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787700000000-the-loop-by-hand.html">The Agent Loop, By Hand</a><span class="link-note">Forty lines. Build it once and every framework afterwards is legible.</span></li><li><a href="lsn-1787700000002-multi-agent-and-approval.html">Multi-Agent Systems and Gates That Actually Halt</a><span class="link-note">When to split an agent, what it costs, and why most approval gates do not stop what matters.</span></li><li><a href="lsn-1787700000004-loop-tradeoffs.html">Four Levers, and What Each Costs</a><span class="link-note">Prefix caching, read accumulation, per-edit verification and reasoning effort — every one trades tokens against reliability.</span></li><li><a href="../core-vocabulary/lsn-1787000000024-operating-an-agent.html">Operating an Agent</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Monitoring, controlling and maintaining one after it ships — the part nobody plans for.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://langchain-ai.github.io/langgraph/" target="_blank" rel="noopener">LangGraph documentation</a><span class="link-note">State, nodes, edges and the checkpointer, with the concepts in the order this lesson uses them.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">Worth re-reading here: the argument that most tasks need a workflow rather than an agent applies to graphs too.</span></li></ul></div>
   <div class="quiz">
@@ -308,6 +319,48 @@ class AgentState(TypedDict):
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"approval-gate": {"t": "Approval gate", "d": "A point where work stops until a human decides. It only counts if the run persists while it waits; a gate that lets the work continue is decoration."}, "trajectory-log": {"t": "Trajectory log", "d": "Every turn, every tool call, and a named termination reason. The only artefact that survives an agent run, since runs cannot be reproduced."}, "termination-condition": {"t": "Termination condition", "d": "What stops a loop. \"Until the model says it's done\" hands the decision to the component least able to judge success. Terminate on an external check, a turn cap and a spend cap."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -272,7 +283,7 @@
   <div class="callout insight"><span class="label">The organisational version, which is speculation and marked as such</span><p>A harder possibility raised in the same conversation: that the way a person conceives of what a job should entail may not be the optimal way to construct a job, and that this could apply at the level of a whole organisation. Marketing, sales, customer service, finance, HR are human-designed constructs of fairly recent vintage. If general methods with enough compute tend to beat hand-crafted structure — the argument this course already accepts about hand-engineered features in a model — the same reasoning might apply to hand-engineered departments in a company.</p><p>There is no evidence for this whatsoever, which is why it sits in a callout rather than in the argument. Hold it as a possibility, not a forecast.</p></div>
   <h2>What follows for someone who has read this far</h2>
   <p>This course has an implicit answer to the question and it is worth making explicit, because it shaped what was taught. Almost nothing here was about producing output faster. It was about knowing what to measure, noticing when a measurement is lying, telling a real difference from a wobble, checking whether the model was needed at all, and recognising the failures that arrive looking like successes.</p>
-  <p>That was a bet: that the durable skill is judgement about systems rather than fluency at producing them, and that judgement is built by being wrong on purpose in cheap places. Every fixture that failed before the work, every baseline written down before the run, every measurement that turned out to be measuring the instrument — those were rehearsals for being wrong somewhere expensive. If the argument in this chapter is right, that is the correct bet. If the historical prior is right, it is still not a bad one.</p>
+  <p>That was a bet: that the durable skill is judgement about systems rather than fluency at producing them, and that judgement is built by being wrong on purpose in cheap places. Every <dfn class="gl" tabindex="0" data-gl="fixture">fixture</dfn> that failed before the work, every baseline written down before the run, every measurement that turned out to be measuring the instrument — those were rehearsals for being wrong somewhere expensive. If the argument in this chapter is right, that is the correct bet. If the historical prior is right, it is still not a bad one.</p>
   <div class="callout matters"><span class="label">Be wrong on purpose, in cheap places, on a schedule</span><p>If the corrected-mistake loop is no longer supplied by the job, it has to be arranged deliberately. Build the thing before reading how. Predict the number before running the eval. Write down what you expect and check. This course is full of moments where a check disagreed with a confident expectation, and every one of those was worth more than a lesson that went smoothly — which is the whole argument in miniature.</p></div>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1788300000000-what-the-evidence-shows.html">What the Evidence Actually Shows</a><span class="link-note">Before anyone's thesis, including mine: the measured numbers, and how much weight they hold.</span></li><li><a href="../engineering-practice/lsn-1787400000011-what-ai-makes-worse.html">What AI Makes Worse</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">You do not need to want to be a software engineer. You do need the parts of it that generation puts under pressure.</span></li><li><a href="../engineering-practice/lsn-1787400000010-code-nobody-decided.html">Code Nobody Decided</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The previous lesson asked whether to use a model. This one asks who chose the behaviour when you did.</span></li><li><a href="../engineering-practice/lsn-1787400000001-when-scaffolding-turns.html">When the Scaffolding Turns on You</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">Each of the three artifacts has a characteristic way of becoming actively harmful.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://digitaleconomy.stanford.edu/app/uploads/2026/08/Canaries_August2026.pdf" target="_blank" rel="noopener">Canaries in the Coal Mine? (Brynjolfsson, Chandar and Chen, Stanford Digital Economy Lab)</a><span class="link-note">The early-career employment shortfall, from ADP payroll data. Read the authors' own framing: they call these early descriptive indicators rather than causal estimates, and the headline figure has moved between data vintages.</span></li><li><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5425555" target="_blank" rel="noopener">Generative AI as Seniority-Biased Technological Change (Hosseini and Lichtinger)</a><span class="link-note">US resume and job-posting data on 62 million workers. The junior-versus-senior split, at 8-10 per cent depending on specification. A working paper, not peer-reviewed.</span></li><li><a href="https://www.nber.org/papers/w33777" target="_blank" rel="noopener">Large Language Models, Small Labor Market Effects (Humlum and Vestergaard, NBER 33777)</a><span class="link-note">Danish administrative data. Precise zeros on earnings and hours across eleven exposed occupations, with intervals ruling out effects above one per cent.</span></li><li><a href="https://budgetlab.yale.edu/research/tracking-impact-ai-labor-market" target="_blank" rel="noopener">Tracking the Impact of AI on the Labor Market (The Budget Lab at Yale)</a><span class="link-note">The US economy-wide picture, updated continuously. Cite the current version rather than a snapshot, because it moves.</span></li><li><a href="https://www.newyorkfed.org/research/college-labor-market" target="_blank" rel="noopener">The Labor Market for Recent College Graduates (Federal Reserve Bank of New York)</a><span class="link-note">The graduate unemployment series. Note the definition: aged 22 to 27, bachelor's or higher, not currently enrolled, US only.</span></li><li><a href="https://www.nber.org/papers/w31161" target="_blank" rel="noopener">Generative AI at Work (Brynjolfsson, Li and Raymond, NBER 31161)</a><span class="link-note">The customer-support study behind the skill gradient. 5,172 agents, a staggered rollout rather than a randomised experiment. Published in the Quarterly Journal of Economics, 2025.</span></li><li><a href="https://mitsloan.mit.edu/sites/default/files/2023-10/SSRN-id4573321.pdf" target="_blank" rel="noopener">Navigating the Jagged Technological Frontier (Dell&#x27;Acqua et al.)</a><span class="link-note">758 consultants, and the task deliberately placed outside the model's reach. The source of the 19-point figure, and of the spread behind it.</span></li><li><a href="https://www.oecd.org/content/dam/oecd/en/publications/reports/2025/06/macroeconomic-productivity-gains-from-artificial-intelligence-in-g7-economies_dcf91c3e/a5319ab5-en.pdf" target="_blank" rel="noopener">Macroeconomic productivity gains from AI in G7 economies (OECD, 2025)</a><span class="link-note">The sector projections. Cumulative over ten years and modelled rather than observed, which is the part most often dropped when these figures are repeated.</span></li><li><a href="https://www.nber.org/papers/w32487" target="_blank" rel="noopener">The Simple Macroeconomics of AI (Acemoglu, NBER 32487)</a><span class="link-note">The considerably more conservative estimate, and worth reading against the OECD's. That two credible estimates differ by an order of magnitude is itself the finding.</span></li></ul></div>
@@ -301,6 +312,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"fixture": {"t": "Fixture", "d": "One case with an answer: a starting state, inputs, and an assertion that is false before the work and true after. The smallest unit of evidence a harness can produce. A fixture that passes at the starting commit, or fails whatever you do, measures nothing — and both look like results."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

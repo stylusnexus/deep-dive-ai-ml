@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -223,7 +234,7 @@
 
   <p>All three artifacts are usually presented as unambiguous goods: write more docs, record more decisions, build more tooling. Each has a specific failure mode, and in each case the harmful version is <em>indistinguishable from the useful version at a glance</em>. That is what makes them worth teaching.</p>
   <h2>The harness talks to the model, and can lie to it</h2>
-  <p>A harness is usually debugged as though it were ordinary software: does it crash, does it return the right value. But an agent harness has a second output almost nobody audits — <strong>everything it says to the model</strong>. Tool results, error messages, injected guidance, the prompt itself. All of it is text the model reasons from, and none of it is covered by your tests.</p>
+  <p>A <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn> is usually debugged as though it were ordinary software: does it crash, does it return the right value. But an agent harness has a second output almost nobody audits — <strong>everything it says to the model</strong>. Tool results, error messages, injected guidance, the prompt itself. All of it is text the model reasons from, and none of it is covered by your tests.</p>
   <p>Five defects found in one afternoon in a single production agent harness, none of which failed a test, threw an exception, or appeared in any metric:</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">“You already read this file”</div><div><div class="roadmap-title">False</div><div class="roadmap-desc">The dedup key was the file path and ignored the requested line range. The model was paging a long file — the only way to read it — and every page after the first was reported as a repeat. It fired 21 times in one run, against 3 firings for every other message combined.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“Before changing code, inspect”</div><div><div class="roadmap-title">Unsatisfiable</div><div class="roadmap-desc">No exit criterion. A compliant model obeys it indefinitely.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“[clipped: original bytes 68671]”</div><div><div class="roadmap-title">True but unactionable</div><div class="roadmap-desc">Tool results were clipped to a character budget, head-only. The read tool put “read again from line N” at the end of its output, so the one actionable sentence was always the first thing cut.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“Its edits are already on disk”</div><div><div class="roadmap-title">False</div><div class="roadmap-desc">Said to the second attempt regardless of whether the first had written anything. When the first wrote nothing, the second opened by hunting for work that never happened — and said so in its reasoning.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“…use search to explore”</div><div><div class="roadmap-title">True, wrongly placed</div><div class="roadmap-desc">Appended last, in the highest-recency position, directly after a message demanding an immediate edit.</div></div></div></div>
   <div class="callout warning"><span class="label">The general form</span>Not one of these was a logic bug. Every one was <em>speech</em> — the harness saying something to the model that was false, unsatisfiable, or true-but-useless. If your harness generates text the model reads, that text is part of your system and needs the same scrutiny as a return value.</div>
@@ -240,7 +251,7 @@
   <p>All three failures share a shape: <strong>an artifact that was true when written, still asserting itself after its truth expired.</strong> The harness message that was accurate before the file grew. The recipe step that was right before the lever was exhausted. The ADR that was correct before the measurement came back.</p>
   <p>Which is why none of the three is self-correcting, and why the next lesson is about the only thing that corrects them.</p>
   <h2>The size of the harness effect, measured</h2>
-  <p>This is usually asserted and rarely quantified, so here it is with numbers. SWE-bench Verified is 500 real GitHub issues. These five submissions all run <strong>the same model</strong> — <code>claude-3-5-sonnet-20241022</code> — and differ only in the scaffolding around it:</p>
+  <p>This is usually asserted and rarely quantified, so here it is with numbers. <dfn class="gl" tabindex="0" data-gl="swe-bench-verified">SWE-bench Verified</dfn> is 500 real GitHub issues. These five submissions all run <strong>the same model</strong> — <code>claude-3-5-sonnet-20241022</code> — and differ only in the scaffolding around it:</p>
   <figure class="diagram"><svg viewBox="0 0 640 210" role="img" aria-label="SWE-bench Verified scores for one model across five scaffolds">
 <text x="12" y="18" class="d-label-sm">claude-3-5-sonnet-20241022 on SWE-bench Verified (500 tasks), by scaffold</text>
 <line x1="228" y1="32" x2="228" y2="182" stroke="var(--border)" stroke-width="1"/>
@@ -259,7 +270,7 @@
 <text x="480" y="114" class="d-fill-yellow" font-size="11" font-weight="600">pure harness</text>
 </svg><figcaption>Same model, same 500 tasks, five harnesses. The spread is 80 tasks — 16 percentage points — and none of it is model capability.</figcaption></figure>
   <div class="callout matters"><span class="label">What this licenses you to say</span>A sixteen-point spread on identical model weights. If you swapped models and saw a gain that size you would call it a generational leap — here it is entirely scaffolding. Note also AutoCodeRover v2.0 to v2.1: the same team, the same model, 231 tasks to 258, from harness work alone. When something underperforms, the harness is the higher-yield place to look, and this is the evidence for it rather than the intuition.</div>
-  <div class="callout pitfall"><span class="label">Read it carefully, though</span>These submissions differ in many parts of the scaffold at once — prompts, retrieval, retry budgets and token spend all vary together. The spread is an upper bound on what harness work can buy, not a controlled experiment. It tells you the harness matters enormously; it does not tell you which harness change is responsible. That distinction is the whole of the next two lessons.</div>
+  <div class="callout pitfall"><span class="label">Read it carefully, though</span>These submissions differ in many parts of the scaffold at once — prompts, retrieval, retry budgets and <dfn class="gl" tabindex="0" data-gl="token">token</dfn> spend all vary together. The spread is an upper bound on what harness work can buy, not a controlled experiment. It tells you the harness matters enormously; it does not tell you which harness change is responsible. That distinction is the whole of the next two lessons.</div>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000011-what-ai-makes-worse.html">What AI Makes Worse</a><span class="link-note">You do not need to want to be a software engineer. You do need the parts of it that generation puts under pressure.</span></li><li><a href="lsn-1787400000010-code-nobody-decided.html">Code Nobody Decided</a><span class="link-note">The previous lesson asked whether to use a model. This one asks who chose the behaviour when you did.</span></li><li><a href="../closing-future-of-work/lsn-1788300000001-the-apprenticeship-problem.html">The Apprenticeship Problem</a><span class="rel-set">Closing · The Future of Work</span><span class="link-note">An argument, not a finding: the scarce thing becomes knowing where the boundary is, and we are automating the work that used to teach it.</span></li><li><a href="lsn-1787400000009-deterministic-first.html">Deterministic First</a><span class="link-note">The best AI engineering decision is frequently to use less of it.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.swebench.com/" target="_blank" rel="noopener">SWE-bench</a><span class="link-note">Agentic coding benchmark. Compare leaderboard entries that share a model but differ in scaffold — the spread is the harness effect.</span></li><li><a href="https://github.com/swe-bench/experiments" target="_blank" rel="noopener">SWE-bench experiments — raw submissions</a><span class="link-note">Where the numbers above come from: every submission's resolved-task list under evaluation/verified/. Recompute them yourself rather than trusting this lesson.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents — Anthropic</a><span class="link-note">Argues for the simplest scaffold that works, partly because scaffolding is where these failures hide.</span></li></ul></div>
   <div class="quiz">
@@ -287,6 +298,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "swe-bench-verified": {"t": "SWE-bench Verified", "d": "A 500-instance subset human-validated to remove tasks that were underspecified or impossible. The variant most quoted, and the fairest."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

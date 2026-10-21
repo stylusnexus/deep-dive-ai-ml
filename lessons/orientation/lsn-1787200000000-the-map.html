@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -261,7 +272,7 @@
   <h2>The distinction that actually matters day to day</h2>
   <p><strong>Predictive versus generative.</strong> A predictive model answers a closed question — which category, what number, how likely. Its output can be checked against a known right answer, which makes evaluation straightforward and the statistics well-established.</p>
   <p>A generative model produces open-ended content. There is usually no single right answer, which is why evaluating generative systems is a research problem rather than a formula, and why this program gives evaluation its own week.</p>
-  <div class="callout insight"><span class="label">Why the older material still matters</span>It is tempting to skip Block 2's regression and decision trees to get to the LLM material. Don't. Overfitting, train/test splits, leakage, precision and recall, the bias–variance trade — these were all discovered in the predictive world and they apply unchanged to everything after it. Benchmark contamination is a test-set leak. Reward hacking is overfitting. The vocabulary transfers wholesale.</div>
+  <div class="callout insight"><span class="label">Why the older material still matters</span>It is tempting to skip Block 2's regression and decision trees to get to the LLM material. Don't. <dfn class="gl" tabindex="0" data-gl="overfitting">Overfitting</dfn>, train/test splits, leakage, precision and recall, the bias–variance trade — these were all discovered in the predictive world and they apply unchanged to everything after it. Benchmark contamination is a test-set leak. <dfn class="gl" tabindex="0" data-gl="reward-hacking">Reward hacking</dfn> is overfitting. The vocabulary transfers wholesale.</div>
   <h2>Where each block of this program sits</h2>
   <figure class="diagram"><svg viewBox="0 0 640 260" role="img" aria-label="Program blocks mapped onto the field"><defs><marker id="ma" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="12" y="16" width="180" height="52" rx="7" class="d-box-accent"/>
@@ -290,7 +301,7 @@
 <text x="12" y="244" class="d-label-sm">Statistical learning and responsible AI are already built, and slot in alongside Blocks 2 and 6.</text>
 </svg><figcaption>The program runs roughly outside-in and then upward: foundations first, then the generative layer, then the architecture that puts a model in charge of actions, then everything needed to run it in production.</figcaption></figure>
   <h2>One honest caveat about the picture</h2>
-  <p>Neat diagrams like the one above are simplifications, and this one has a visible seam: reinforcement learning doesn't sit tidily inside any ring — it's a third learning paradigm alongside supervised and unsupervised, and it shows up both in classical ML and in how LLMs are aligned. Treat the rings as a map for orientation rather than a taxonomy to defend.</p>
+  <p>Neat diagrams like the one above are simplifications, and this one has a visible seam: <dfn class="gl" tabindex="0" data-gl="reinforcement-learning">reinforcement learning</dfn> doesn't sit tidily inside any ring — it's a third learning paradigm alongside supervised and unsupervised, and it shows up both in classical ML and in how LLMs are aligned. Treat the rings as a map for orientation rather than a taxonomy to defend.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787200000001-inside-an-llm.html">Inside an LLM: The Parts and What Each Does</a><span class="link-note">Follow one sentence all the way through — from text, to numbers, to the next word.</span></li><li><a href="../engineering-practice/lsn-1787400000009-deterministic-first.html">Deterministic First</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The best AI engineering decision is frequently to use less of it.</span></li><li><a href="../engineering-practice/lsn-1787400000002-why-measurement-decides.html">Why Measurement Decides</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The only thing that corrects a harness, a recipe or a decision is a number that disagrees with it.</span></li><li><a href="../core-vocabulary/lsn-1787000000011-agents-autonomy-and-danger.html">Agents, Autonomy and the Danger Surface</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">What actually makes something an agent, and every way it can hurt you.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://developers.google.com/machine-learning/intro-to-ml/supervised" target="_blank" rel="noopener">Google ML Crash Course: framing</a><span class="link-note">The supervised/unsupervised framing that the middle ring rests on.</span></li><li><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">Building effective agents</a><span class="link-note">Why the outer box is an architecture rather than a model class — and when you don't need it.</span></li></ul></div>
   <div class="quiz">
@@ -325,6 +336,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"overfitting": {"t": "Overfitting", "d": "The model memorised the training data including its noise. Excellent on seen data, poor on new data. The dangerous failure, because it looks like success."}, "reward-hacking": {"t": "Reward hacking", "d": "A policy optimising the measure rather than the goal: passing the tests by detecting the fixture, producing length when length was a proxy for thoroughness. The default behaviour of an optimiser, not an edge case — and it is invisible in the reward curve by construction."}, "reinforcement-learning": {"t": "Reinforcement learning", "d": "Learning from consequences rather than answers. No correct output is given, only a signal about whether an outcome was good."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

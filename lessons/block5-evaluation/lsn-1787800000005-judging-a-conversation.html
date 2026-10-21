@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -224,7 +235,7 @@
   <p>Everything this block has measured is a single response to a single question: was it grounded, was it correct, did it refuse when it should. Block 4 builds systems that do not work that way. An agent takes a sequence of turns, each one conditioned on everything before it, and grading the last message tells you almost nothing about what happened.</p>
   <h2>Why the last turn is the wrong unit</h2>
   <p>A final answer can be right after a run that was expensive, circular and lucky, or wrong after a run that reasoned correctly and hit a tool that was down. Scoring only the ending scores the outcome and not the behaviour, and the behaviour is the thing you can improve.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The failure has a location</div><div><div class="roadmap-title">And it is rarely the last turn</div><div class="roadmap-desc">A wrong final answer usually traces to a specific earlier step: a retrieval that returned nothing useful, a tool result misread, a plan abandoned. Grading the ending records that something went wrong and discards where.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Right for the wrong reasons</div><div><div class="roadmap-title">The score a single turn cannot catch</div><div class="roadmap-desc">An agent that guessed, or that recovered from its own mistake by luck, produces the same final answer as one that worked correctly. On a single-turn metric they are indistinguishable, and only one of them will keep working.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Recovery is a property worth scoring</div><div><div class="roadmap-title">Not just success</div><div class="roadmap-desc">Agents will hit failures. What separates a usable one is whether it notices and adapts. A trajectory that failed a tool call, read the error and tried something sensible is better than one that succeeded first time by luck, and a final-answer score ranks them the other way round.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Cost is part of the outcome</div><div><div class="roadmap-title">Turns, tokens and calls</div><div class="roadmap-desc">Two runs reaching the same answer in three turns and in eleven are not equally good. This is the one dimension people do remember to record and then leave out of the judgement.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The failure has a location</div><div><div class="roadmap-title">And it is rarely the last turn</div><div class="roadmap-desc">A wrong final answer usually traces to a specific earlier step: a retrieval that returned nothing useful, a tool result misread, a plan abandoned. Grading the ending records that something went wrong and discards where.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Right for the wrong reasons</div><div><div class="roadmap-title">The score a single turn cannot catch</div><div class="roadmap-desc">An agent that guessed, or that recovered from its own mistake by luck, produces the same final answer as one that worked correctly. On a single-turn metric they are indistinguishable, and only one of them will keep working.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Recovery is a property worth scoring</div><div><div class="roadmap-title">Not just success</div><div class="roadmap-desc">Agents will hit failures. What separates a usable one is whether it notices and adapts. A trajectory that failed a <dfn class="gl" tabindex="0" data-gl="tool-call">tool call</dfn>, read the error and tried something sensible is better than one that succeeded first time by luck, and a final-answer score ranks them the other way round.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Cost is part of the outcome</div><div><div class="roadmap-title">Turns, tokens and calls</div><div class="roadmap-desc">Two runs reaching the same answer in three turns and in eleven are not equally good. This is the one dimension people do remember to record and then leave out of the judgement.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Score the trajectory, and the final answer is one dimension of it rather than the whole grade.</p><p class="know-why">The trace from Block 4 already contains what you need — every turn, every tool call, every result, the termination reason. Judging it as a sequence turns a pass or fail into a diagnosis, and the diagnosis is what tells you which of the loop, the tools, the prompt or the retrieval to fix. A single-turn score gives you a number that moves without telling you why, which is the position this course spent Block 5 arguing against.</p><p class="know-eg"><span class="know-eg-label">For example</span>This is the same argument as measuring index recall, retrieval quality and groundedness separately rather than as one accuracy number. Separate the dimensions that fail independently, because they have different fixes.</p></blockquote>
   <figure class="diagram"><svg viewBox="0 0 640 194" role="img" aria-label="Grading a trajectory rather than a final answer"><defs><marker id="mt" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="14" y="42" width="104" height="42" rx="6" class="d-box"/><text x="26" y="62" class="d-label-sm">turn 1</text><text x="26" y="78" class="d-label-sm">retrieve</text>
@@ -243,11 +254,11 @@
 <text x="14" y="172" class="d-label-sm">the wrong retrieval, or the recovery — which is the only part that predicts the next run.</text>
 </svg><figcaption>The final answer is the last box. Everything that decides whether the run was any good happened before it, and a single-turn grade sees none of it.</figcaption></figure>
   <h2>What to score, and by what</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Deterministically, wherever possible</div><div><div class="roadmap-title">Turn count, tool calls, cost, termination reason, guards fired</div><div class="roadmap-desc">None of this needs a judge. It is in the trace already, it is exact, and it catches a large share of what goes wrong. Exhaust it before reaching for a model, exactly as the grading ladder says.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Per-step, against the step&#x27;s own job</div><div><div class="roadmap-title">Did this retrieval return the right document?</div><div class="roadmap-desc">Each step has a checkable purpose. Scoring steps individually localises the failure, which is the whole point of doing this rather than grading the ending.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The trajectory as a whole</div><div><div class="roadmap-title">Where a judge earns its place</div><div class="roadmap-desc">Was the sequence sensible, did it recover, did it go in circles? This is the genuinely open-ended part and the one worth a rubric — and the rubric lesson's rules apply unchanged, including blinding.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Deterministically, wherever possible</div><div><div class="roadmap-title">Turn count, tool calls, cost, termination reason, guards fired</div><div class="roadmap-desc">None of this needs a judge. It is in the trace already, it is exact, and it catches a large share of what goes wrong. Exhaust it before reaching for a model, exactly as the grading ladder says.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Per-step, against the step&#x27;s own job</div><div><div class="roadmap-title">Did this retrieval return the right document?</div><div class="roadmap-desc">Each step has a checkable purpose. Scoring steps individually localises the failure, which is the whole point of doing this rather than grading the ending.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The trajectory as a whole</div><div><div class="roadmap-title">Where a judge earns its place</div><div class="roadmap-desc">Was the sequence sensible, did it recover, did it go in circles? This is the genuinely open-ended part and the one worth a <dfn class="gl" tabindex="0" data-gl="rubric">rubric</dfn> — and the rubric lesson's rules apply unchanged, including blinding.</div></div></div></div>
   <div class="callout pitfall"><span class="label">A judge shown a whole trajectory will grade the ending</span><p>Hand a model a full transcript and ask how the run went, and it anchors on the final answer — a good ending makes the path look purposeful in hindsight. If you want the path judged, ask about the path specifically and separately: was any turn wasted, was the tool result read correctly, was the plan abandoned without reason. One question per property, or you get a summary of the outcome wearing a rubric.</p></div>
   <div class="callout matters"><span class="label">Multi-turn state is where the eval set gets expensive</span><p>A single-turn set is a list of questions. A multi-turn set is a list of <em>situations</em> — a starting state, the turns so far, and often a scripted counterpart to play the other side. That is considerably more work to build and to keep correct, which is why most teams claim to test agents and actually test the last message. Start with a handful of realistic trajectories rather than a large set of shallow ones.</p></div>
   <h2>Where this connects</h2>
-  <p>Block 4's telemetry lesson insisted the trace falls out of the loop for a few lines of code, and this is what it was for. The trace is not only for debugging an incident — it is the object you evaluate. A system with traces and no trajectory evaluation is recording the evidence and never reading it.</p>
+  <p>Block 4's telemetry lesson insisted the trace falls out of the loop for a few lines of code, and this is what it was for. The trace is not only for debugging an incident — it is the object you evaluate. A system with traces and no <dfn class="gl" tabindex="0" data-gl="trajectory-evaluation">trajectory evaluation</dfn> is recording the evidence and never reading it.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787800000003-rubrics-and-blind-reads.html">Rubrics and Blind Reads</a><span class="link-note">A rubric makes a judgement checkable. Blinding makes it honest. Neither works without the other.</span></li><li><a href="../engineering-practice/lsn-1787400000008-models-judging-models.html">Models Judging Models</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">LLM-as-judge — what it genuinely buys you, the four biases it ships with, and the failure that manufactures results.</span></li><li><a href="../core-vocabulary/lsn-1787000000029-session-lifecycle.html">Memory, Compaction and Session Decay</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">A model has no memory. Everything that looks like memory is something you built — and all of it degrades.</span></li><li><a href="../block4-agentic/lsn-1787700000004-loop-tradeoffs.html">Four Levers, and What Each Costs</a><span class="rel-set">Block 4 · Agentic AI</span><span class="link-note">Prefix caching, read accumulation, per-edit verification and reasoning effort — every one trades tokens against reliability.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
@@ -274,6 +285,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"tool-call": {"t": "Tool call", "d": "Structured text the model emits requesting a function. The harness parses and executes it; the model never touches the tool."}, "rubric": {"t": "Rubric", "d": "A set of scoring dimensions, each with observable criteria per level and an anchor example, replacing a single score. The test of one is that two careful readers apply it to the same output and agree; if they do not, it describes nothing."}, "trajectory-evaluation": {"t": "Trajectory evaluation", "d": "Scoring an agent's whole sequence of turns rather than its final answer. A correct ending can follow a wasteful or lucky run, and a wrong one can follow sound reasoning that hit a broken tool; only the sequence distinguishes them."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

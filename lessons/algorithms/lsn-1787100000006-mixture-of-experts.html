@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,7 +232,7 @@
   <h1>Mixture of Experts</h1>
   <p class="subtitle">How a model gets larger without getting slower — and why that trade lands badly on the machine under your desk.</p>
 
-  <p>The previous lesson built the transformer block: attention, then a feed-forward network applied to every position. Scaling that block means making both parts bigger, and the cost of running it rises in step. Mixture of experts breaks that link. It keeps the parameter count large and activates only a fraction of it per token, so capacity grows without compute growing with it.</p>
+  <p>The previous lesson built the transformer block: attention, then a <dfn class="gl" tabindex="0" data-gl="feed-forward-network">feed-forward network</dfn> applied to every position. Scaling that block means making both parts bigger, and the cost of running it rises in step. <dfn class="gl" tabindex="0" data-gl="mixture-of-experts-moe">Mixture of experts</dfn> breaks that link. It keeps the parameter count large and activates only a fraction of it per <dfn class="gl" tabindex="0" data-gl="token">token</dfn>, so capacity grows without compute growing with it.</p>
   <h2>What actually changes</h2>
   <p>Attention is untouched. The change is confined to the feed-forward part of each block, which is replaced by several smaller feed-forward networks — the experts — and a router that decides which of them a given token goes through.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Experts</div><div><div class="roadmap-title">Several small feed-forward networks in place of one large one</div><div class="roadmap-desc">Each is an ordinary feed-forward network. There is no specialisation designed in: what each expert becomes good at emerges during training and is generally not interpretable.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Router</div><div><div class="roadmap-title">A classifier over experts, trained with the network</div><div class="roadmap-desc">It produces a score for every expert and the top K are selected. It is learned rather than configured, which means routing quality is a property the model can get wrong.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Per token, per layer</div><div><div class="roadmap-title">The choice is made again everywhere</div><div class="roadmap-desc">Different tokens in the same sentence take different experts, and the same token takes different experts at each layer. A sequence does not travel one path through the model.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Active versus total parameters</div><div><div class="roadmap-title">The number that gets quoted is not the number you load</div><div class="roadmap-desc">A model described as eight experts of seven billion holds roughly forty-seven billion parameters and activates around thirteen billion per token. Both figures are real and they answer different questions.</div></div></div></div>
@@ -249,7 +260,7 @@
   <div class="callout matters"><span class="label">Read both parameter counts, and know which question each answers</span><p>Total parameters tell you whether the model fits. Active parameters tell you roughly how fast a token will be. A specification quoting only one of them is answering only half of the question you have, and the half usually quoted is the flattering one.</p></div>
   <div class="callout pitfall"><span class="label">Serving one is a routing problem, not just a bigger model</span><p>At scale the experts are split across devices while attention is replicated, so each device holds only some experts. The router then decides not merely which expert but effectively which machine a token is sent to, and that flow changes token by token. This is why mixture-of-experts models depend on a capable inference engine rather than running acceptably on a naive one.</p></div>
   <h2>Where it sits against the other levers</h2>
-  <p>This course has now met three ways of making a large model cheaper to run, and they act on different quantities. Grouped-query attention shrinks the key-value cache, which is bytes. Quantization shrinks the weights, which is also bytes. A mixture of experts shrinks the arithmetic per token and leaves the bytes alone. Only the first two help a memory-bound decode directly; the third buys capacity at fixed compute, which is a training and quality argument more than a serving one.</p>
+  <p>This course has now met three ways of making a large model cheaper to run, and they act on different quantities. <dfn class="gl" tabindex="0" data-gl="grouped-query-attention-gqa">Grouped-query attention</dfn> shrinks the key-value cache, which is bytes. <dfn class="gl" tabindex="0" data-gl="quantization">Quantization</dfn> shrinks the weights, which is also bytes. A mixture of experts shrinks the arithmetic per token and leaves the bytes alone. Only the first two help a memory-bound decode directly; the third buys capacity at fixed compute, which is a training and quality argument more than a serving one.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787100000005-attention-and-transformers.html">Attention and the Transformer</a><span class="link-note">The algorithm every model in this program is built from.</span></li><li><a href="../block7-training/lsn-1788000000005-the-four-ways-to-shrink-a-model.html">The Four Ways to Shrink a Model</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.</span></li><li><a href="../core-vocabulary/lsn-1787000000027-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li><li><a href="../core-vocabulary/lsn-1787000000030-why-the-gpu-is-waiting.html">Why the Graphics Processing Unit (GPU) Is Waiting</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">One number — work done per byte fetched — explains quantization, batching, and why a chip rated for a quadrillion operations a second gives you thirty tokens a second.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
@@ -276,6 +287,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"feed-forward-network": {"t": "Feed-forward network", "d": "The part of a transformer layer that processes each token on its own, with no reference to its neighbours. Typically two-thirds of all parameters, so most of a model's size is here rather than in attention."}, "mixture-of-experts-moe": {"t": "Mixture of experts (MoE)", "d": "An architecture that replaces each block's feed-forward network with several smaller ones and activates only a few per token. Capacity grows without arithmetic growing with it — but every expert stays resident in memory, so the saving lands on compute rather than on the bytes that limit generation."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "grouped-query-attention-gqa": {"t": "Grouped-query attention (GQA)", "d": "Heads sharing key and value projections in groups. The current default, because it cuts the KV cache substantially at little cost in quality."}, "quantization": {"t": "Quantization", "d": "Storing each weight in fewer bits (4, 5, 8) instead of 16. Shrinks and speeds up the model at a small cost in precision."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

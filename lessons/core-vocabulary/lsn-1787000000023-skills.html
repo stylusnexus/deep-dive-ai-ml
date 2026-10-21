@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -247,10 +258,10 @@
 <text x="390" y="178" class="d-label-sm">often never paid</text>
 </svg><figcaption>Three levels, each paid for only when reached. The description is always in context; everything else arrives on demand. This is the context-budget argument applied to knowledge instead of to tools.</figcaption></figure>
   <p>Only the name and description occupy context by default. The body loads when the model decides the skill applies. Referenced files load later still, if at all. The consequence is that a skill can be arbitrarily detailed without that detail costing anything until it is used — which is why a fifty-page procedure is a reasonable thing to package this way and an unreasonable thing to put in a system prompt.</p>
-  <div class="callout insight"><span class="label">You have met this argument twice already</span>This is the same finding as tool search — loading definitions on demand cut tokens by 85% <em>and improved selection accuracy</em> — and the same finding as context engineering, where precision beats volume. More available knowledge is only useful if it is not all resident. Progressive disclosure is how a system gets deep without getting slow.</div>
+  <div class="callout insight"><span class="label">You have met this argument twice already</span>This is the same finding as <dfn class="gl" tabindex="0" data-gl="tool-search-programmatic-tool-calling">tool search</dfn> — loading definitions on demand cut <dfn class="gl" tabindex="0" data-gl="token">tokens</dfn> by 85% <em>and improved selection accuracy</em> — and the same finding as context engineering, where precision beats volume. More available knowledge is only useful if it is not all resident. Progressive disclosure is how a system gets deep without getting slow.</div>
   <h2>The scripts are not a detail</h2>
   <p>A skill can bundle code, and that code plays two roles at once: something the agent executes, and something it reads as documentation of how the job is done.</p>
-  <p>The reason this matters is the deterministic-first argument arriving in a new place. Extracting fields from a PDF form is not a language problem — it is parsing. A bundled script does it exactly, every time, without the file entering the context window at all. The model orchestrates; the script computes. You get reliability where reliability is available and judgement where it is not.</p>
+  <p>The reason this matters is the <dfn class="gl" tabindex="0" data-gl="deterministic-first">deterministic-first</dfn> argument arriving in a new place. Extracting fields from a PDF form is not a language problem — it is parsing. A bundled script does it exactly, every time, without the file entering the <dfn class="gl" tabindex="0" data-gl="context-window">context window</dfn> at all. The model orchestrates; the script computes. You get reliability where reliability is available and judgement where it is not.</p>
   <div class="callout matters"><span class="label">Decide explicitly which role each script plays</span>"Run this" and "read this to understand the convention" are different instructions with different costs, and a script that is ambiguous between them gets used wrongly in both directions. Say which, in the SKILL.md body, for every script you bundle.</div>
   <h2>Skill, tool, or Model Context Protocol (MCP) server?</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Tool</div><div><div class="roadmap-title">A single capability</div><div class="roadmap-desc">One function with a schema. "Send an email." The unit of what the agent can do.</div></div></div><div class="roadmap-item"><div class="roadmap-num">MCP server</div><div><div class="roadmap-title">An external integration</div><div class="roadmap-desc">A connection to a system that lives outside your codebase, spoken in a standard protocol so it works across clients.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Skill</div><div><div class="roadmap-title">A procedure and its knowledge</div><div class="roadmap-desc">"How we write a release note here" — the workflow, the conventions, the templates, and any code that helps. Frequently composed of calls to the tools and servers above.</div></div></div></div>
@@ -296,6 +307,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"tool-search-programmatic-tool-calling": {"t": "Tool search / programmatic tool calling", "d": "Loading tool definitions on demand, and orchestrating tools in sandboxed code so intermediate results never enter context. Both reduce tokens <em>and<\/em> improve accuracy."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "deterministic-first": {"t": "Deterministic-first", "d": "A model is the most expensive, slowest, least testable component available. The judgement is knowing when it earns that: is there a bounded, checkable mechanism that does this job well?"}, "context-window": {"t": "Context window", "d": "The maximum tokens a model can consider at once, covering prompt, history, retrieved documents and the answer together. A capacity limit, not a promise of attention."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

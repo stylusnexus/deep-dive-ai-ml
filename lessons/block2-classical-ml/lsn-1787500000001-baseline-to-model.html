@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -223,7 +234,7 @@
 
   <p>The temptation on a new problem is to reach for the strongest thing you know. The disciplined approach is a ladder, and it is faster in practice because most rungs take minutes and each one tells you something the next cannot.</p>
   <h2>The ladder</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">0 · Majority class</div><div><div class="roadmap-title">Seconds</div><div class="roadmap-desc">Predict the most common answer for everything. This is the number every later result is judged against.</div></div></div><div class="roadmap-item"><div class="roadmap-num">1 · One rule</div><div><div class="roadmap-title">Minutes</div><div class="roadmap-desc">Threshold the single most predictive feature. Surprisingly often within a point or two of everything above it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2 · Logistic regression</div><div><div class="roadmap-title">Minutes</div><div class="roadmap-desc">Interpretable coefficients, fast, deployable anywhere. The real baseline for tabular problems.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3 · Random forest</div><div><div class="roadmap-title">Minutes</div><div class="roadmap-desc">Strong, needs almost no tuning, resistant to overfitting. Usually your first genuinely competitive score.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4 · Gradient boosting</div><div><div class="roadmap-title">Hours, with care</div><div class="roadmap-desc">Higher ceiling, requires early stopping and a learning rate you chose deliberately.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5 · Neural network</div><div><div class="roadmap-title">Days</div><div class="roadmap-desc">For tabular data this is rarely the answer, and the next lesson explains why.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">0 · Majority class</div><div><div class="roadmap-title">Seconds</div><div class="roadmap-desc">Predict the most common answer for everything. This is the number every later result is judged against.</div></div></div><div class="roadmap-item"><div class="roadmap-num">1 · One rule</div><div><div class="roadmap-title">Minutes</div><div class="roadmap-desc">Threshold the single most predictive feature. Surprisingly often within a point or two of everything above it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2 · Logistic regression</div><div><div class="roadmap-title">Minutes</div><div class="roadmap-desc">Interpretable coefficients, fast, deployable anywhere. The real baseline for tabular problems.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3 · Random forest</div><div><div class="roadmap-title">Minutes</div><div class="roadmap-desc">Strong, needs almost no tuning, resistant to <dfn class="gl" tabindex="0" data-gl="overfitting">overfitting</dfn>. Usually your first genuinely competitive score.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4 · Gradient boosting</div><div><div class="roadmap-title">Hours, with care</div><div class="roadmap-desc">Higher ceiling, requires <dfn class="gl" tabindex="0" data-gl="early-stopping">early stopping</dfn> and a learning rate you chose deliberately.</div></div></div><div class="roadmap-item"><div class="roadmap-num">5 · Neural network</div><div><div class="roadmap-title">Days</div><div class="roadmap-desc">For tabular data this is rarely the answer, and the next lesson explains why.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Climb the ladder until the gain stops justifying the cost, then stop.</p><p class="know-why">Each rung costs more to build, tune, explain and operate than the one below it. A two-point gain that turns an interpretable model into an opaque one is frequently a bad trade, and it is a trade nobody makes explicitly if the ladder is skipped.</p><p class="know-eg"><span class="know-eg-label">For example</span>On the turbine data, logistic regression reaches 71% recall cross-validated. A tuned boosted model reaches 74%. Three points, in exchange for a model you cannot explain to a maintenance manager, that needs a serving runtime, and that will need retuning when the data drifts. Sometimes worth it. Not automatically.</p></blockquote>
   <h2>Comparing honestly</h2>
   <p>Most model comparisons are quietly unfair, in ways that all favour the newer model. Four rules make them fair:</p>
@@ -289,6 +300,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"overfitting": {"t": "Overfitting", "d": "The model memorised the training data including its noise. Excellent on seen data, poor on new data. The dangerous failure, because it looks like success."}, "early-stopping": {"t": "Early stopping", "d": "Halting training when validation loss stops improving. The cheapest defence against overfitting."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

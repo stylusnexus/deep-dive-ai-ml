@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -258,7 +269,7 @@
   <p>Add a binary column recording that the value was missing, before filling anything. It costs one column and preserves the signal that the imputation is about to destroy. In the Block 1 pipeline, that flag ends up among the more predictive features — the absence of data <em>is</em> data.</p>
   <div class="callout matters"><span class="label">The order that matters</span>Record the flag, then impute — and impute inside a pipeline, after the split. Fitting an imputer on the full dataset means the training data has seen the test set's statistics. It's one of the most common leaks in practice precisely because it doesn't feel like model fitting.</div>
   <h2>Choosing a fill</h2>
-  <ul><li><strong>Median</strong> — robust to skew and outliers. The sensible default for numeric columns.</li><li><strong>Mean</strong> — only for roughly symmetric distributions. Skew drags it.</li><li><strong>Most frequent</strong> — for categoricals, though a literal <code>"missing"</code> category is often more honest.</li><li><strong>Model-based (KNN, iterative)</strong> — predicts the gap from other columns. Genuinely better under MAR, and slower and easier to leak with.</li><li><strong>Leave it</strong> — gradient boosting implementations handle missing values natively and often do better than any fill you'd choose.</li></ul>
+  <ul><li><strong>Median</strong> — robust to skew and outliers. The sensible default for numeric columns.</li><li><strong>Mean</strong> — only for roughly symmetric distributions. Skew drags it.</li><li><strong>Most frequent</strong> — for categoricals, though a literal <code>"missing"</code> category is often more honest.</li><li><strong>Model-based (KNN, iterative)</strong> — predicts the gap from other columns. Genuinely better under MAR, and slower and easier to leak with.</li><li><strong>Leave it</strong> — <dfn class="gl" tabindex="0" data-gl="gradient-boosting">gradient boosting</dfn> implementations handle missing values natively and often do better than any fill you'd choose.</li></ul>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787300000001-first-fifteen-minutes.html">The First Fifteen Minutes</a><span class="link-note">A survey, not a clean-up — and the four things you must find before touching anything.</span></li><li><a href="lsn-1787300000000-tabular-data-and-dtypes.html">Tabular Data and the Lies dtypes Tell</a><span class="link-note">Rows, columns, types — and why the type a column loaded as is your first diagnostic.</span></li><li><a href="lsn-1787300000003-what-a-plot-is-for.html">What a Plot Is Actually For</a><span class="link-note">Exploration with intent — five questions worth asking, and the charts that answer them.</span></li><li><a href="lsn-1787300000005-labels-and-holdouts.html">Labels, and What You Hold Back</a><span class="link-note">Label quality caps model quality — and the data you refuse to look at is what makes any number believable.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://scikit-learn.org/stable/modules/impute.html" target="_blank" rel="noopener">Imputation of missing values (scikit-learn)</a><span class="link-note">Simple, iterative and KNN imputers, and the missing-indicator feature discussed above.</span></li><li><a href="https://stefvanbuuren.name/fimd/" target="_blank" rel="noopener">Statistical Analysis with Missing Data — overview</a><span class="link-note">Van Buuren's open book on multiple imputation. Chapter 1 covers the three mechanisms properly.</span></li></ul></div>
   <div class="quiz">
@@ -286,6 +297,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"gradient-boosting": {"t": "Gradient boosting", "d": "Sequential trees, each fitted to the previous ensemble's errors. Higher ceiling than a forest, and will overfit without early stopping. XGBoost, LightGBM, CatBoost."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

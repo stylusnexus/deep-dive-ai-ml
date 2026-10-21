@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -226,7 +237,7 @@
   <p>Doing arithmetic is cheap. Fetching the numbers to do arithmetic on is expensive. That gap is not a temporary engineering problem — arithmetic capability has grown faster than memory bandwidth for years, so every generation of hardware makes data movement relatively <em>more</em> of the bottleneck, not less.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Registers</div><div><div class="roadmap-title">Per-thread, effectively instant</div><div class="roadmap-desc">Where a value lives while it is being worked on.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Shared memory and L1</div><div><div class="roadmap-title">On-chip scratchpad, around 100KB per unit</div><div class="roadmap-desc">Programmable — you decide what sits here. This is the lever the clever kernels pull.</div></div></div><div class="roadmap-item"><div class="roadmap-num">L2 cache</div><div><div class="roadmap-title">Shared across the chip, tens of megabytes</div><div class="roadmap-desc">Hardware-managed; you influence it only through access patterns.</div></div></div><div class="roadmap-item"><div class="roadmap-num">High-bandwidth memory (HBM)</div><div><div class="roadmap-title">Off-die, and orders of magnitude slower to reach than a register</div><div class="roadmap-desc">Where the weights live. Every byte the arithmetic units consume has to cross this gap.</div></div></div></div>
   <h2>Arithmetic intensity, and the line it has to cross</h2>
-  <p>Arithmetic intensity is operations performed divided by bytes fetched from main memory. It is a property of the <em>work</em>, not of the chip. The chip supplies a break-even value: its peak arithmetic rate divided by its memory bandwidth. Above that line the arithmetic units are the constraint; below it, they are idle and waiting on memory.</p>
+  <p><dfn class="gl" tabindex="0" data-gl="arithmetic-intensity">Arithmetic intensity</dfn> is operations performed divided by bytes fetched from main memory. It is a property of the <em>work</em>, not of the chip. The chip supplies a break-even value: its peak arithmetic rate divided by its memory bandwidth. Above that line the arithmetic units are the constraint; below it, they are idle and waiting on memory.</p>
   <pre><code>break-even (operations per byte) = peak arithmetic rate / memory bandwidth
 
 # One token from a 70-billion-parameter model at 16-bit precision:
@@ -236,7 +247,7 @@ intensity      = 140e9 / 140e9                = 1 operation per byte
 
 # On a card with 3.35 TB/s of bandwidth:
 time per token = 140 GB / 3.35 TB/s           = 42 ms   -&gt; about 24 tokens/second</code></pre>
-  <p>One operation per byte, against a break-even in the hundreds. Generating a token is roughly two orders of magnitude below the line, which is the whole explanation for why a chip advertised in the hundreds of trillions of operations per second hands you a few dozen tokens a second. The work simply does not contain enough arithmetic per byte to keep the arithmetic units busy.</p>
+  <p>One operation per byte, against a break-even in the hundreds. Generating a <dfn class="gl" tabindex="0" data-gl="token">token</dfn> is roughly two orders of magnitude below the line, which is the whole explanation for why a chip advertised in the hundreds of trillions of operations per second hands you a few dozen tokens a second. The work simply does not contain enough arithmetic per byte to keep the arithmetic units busy.</p>
   <figure class="diagram"><svg viewBox="0 0 640 250" role="img" aria-label="Memory hierarchy and arithmetic intensity"><defs><marker id="gpu1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <text x="14" y="20" class="d-label-b">The gap, top to bottom</text>
 <rect x="14" y="30" width="150" height="26" rx="5" class="d-box"/><text x="26" y="47" class="d-label-sm">registers — instant</text>
@@ -255,11 +266,11 @@ time per token = 140 GB / 3.35 TB/s           = 42 ms   -&gt; about 24 tokens/se
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">The same chip is compute-bound during prefill and memory-bound during decode.</p><p class="know-why">Prefill reads each weight once and uses it across every token in the prompt, so the arithmetic per byte is high. Decode reads every weight again to produce one single token, so it is as low as it gets. These are opposite bottlenecks in the same request, which is why one number never describes a system's performance and why the two phases have to be measured separately.</p><p class="know-eg"><span class="know-eg-label">For example</span>Time to first token and tokens per second do not improve together, and a change that helps one can hurt the other. A larger batch raises throughput during decode and can raise the latency any individual request sees.</p></blockquote>
   <h2>Every optimisation in this course is the same move</h2>
   <p>Once the number is in view, the techniques stop looking like a list of tricks and start looking like one idea applied in different places. Each either raises the work done per byte or lowers the bytes that must be moved.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Batching</div><div><div class="roadmap-title">Reuse each weight across many requests</div><div class="roadmap-desc">The weight is fetched once and does arithmetic for every sequence in the batch, so intensity rises with batch size. This is why throughput and latency pull against each other.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Quantization</div><div><div class="roadmap-title">Halve the bytes per weight</div><div class="roadmap-desc">Sixteen-bit to eight-bit halves what must be moved and roughly doubles generation throughput. The accuracy cost is the price of the bandwidth saved — that is the whole trade.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Grouped-query attention</div><div><div class="roadmap-title">Shrink the cache that must be re-read</div><div class="roadmap-desc">Fewer key and value heads means fewer bytes streamed per decode step. The same lever as quantization, applied to the cache rather than the weights.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Kernel fusion</div><div><div class="roadmap-title">Keep intermediates on-chip</div><div class="roadmap-desc">Three chained elementwise operations become one trip to main memory instead of three, because the intermediate values never leave the fast memory.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Shared-memory tiling</div><div><div class="roadmap-title">Do many operations per fetch</div><div class="roadmap-desc">FlashAttention is the well-known case: it keeps the attention matrix in on-chip memory instead of writing it out to main memory and reading it back.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Batching</div><div><div class="roadmap-title">Reuse each weight across many requests</div><div class="roadmap-desc">The weight is fetched once and does arithmetic for every sequence in the batch, so intensity rises with batch size. This is why throughput and latency pull against each other.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Quantization</div><div><div class="roadmap-title">Halve the bytes per weight</div><div class="roadmap-desc">Sixteen-bit to eight-bit halves what must be moved and roughly doubles generation throughput. The accuracy cost is the price of the bandwidth saved — that is the whole trade.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Grouped-query attention</div><div><div class="roadmap-title">Shrink the cache that must be re-read</div><div class="roadmap-desc">Fewer key and value heads means fewer bytes streamed per decode step. The same lever as quantization, applied to the cache rather than the weights.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Kernel fusion</div><div><div class="roadmap-title">Keep intermediates on-chip</div><div class="roadmap-desc">Three chained elementwise operations become one trip to main memory instead of three, because the intermediate values never leave the fast memory.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Shared-memory tiling</div><div><div class="roadmap-title">Do many operations per fetch</div><div class="roadmap-desc"><dfn class="gl" tabindex="0" data-gl="flashattention">FlashAttention</dfn> is the well-known case: it keeps the attention matrix in on-chip memory instead of writing it out to main memory and reading it back.</div></div></div></div>
   <h2>Where the waiting is hidden</h2>
   <p>The hardware does not try to avoid the wait — it arranges to always have other work available during it. Threads run in fixed groups of thirty-two, and a unit keeps many more of these groups resident than it can execute at once. When one stalls on memory, the scheduler switches to another in a single clock cycle. That is what keeps the arithmetic units fed, and it is why a workload with too few resident groups performs badly even when nothing about it looks slow.</p>
   <div class="callout pitfall"><span class="label">The same figure means two things in the same datasheet</span><p>The break-even line is peak arithmetic rate over bandwidth, so which arithmetic rate you pick up decides the answer. Vendor tables list every precision twice, dense and with structured sparsity, and lead with the sparsity number. On the H100 SXM, 16-bit tensor throughput is 1,979 TFLOPS with sparsity and 989 dense: over 3.35 TB/s of bandwidth that is 591 operations per byte against the correct 295, so grabbing the headline doubles your threshold.</p><p>Worse, 989 appears twice in that same table — as 16-bit dense, and as 32-bit tensor throughput <em>with</em> sparsity. Read the column heading and the footnote, not the number.</p></div>
-  <div class="callout matters"><span class="label">Small operations have a third bottleneck</span><p>Neither memory nor arithmetic. Every operation dispatched to the device carries a fixed launch cost paid by the processor driving it, so a workload made of very many tiny operations can be limited by dispatch overhead alone. The fix is the same as everywhere else — fewer, larger units of work.</p></div>
+  <div class="callout matters"><span class="label">Small operations have a third bottleneck</span><p>Neither memory nor arithmetic. Every operation dispatched to the device carries a fixed launch cost paid by the processor driving it, so a workload made of very many tiny operations can be limited by <dfn class="gl" tabindex="0" data-gl="dispatch-overhead">dispatch overhead</dfn> alone. The fix is the same as everywhere else — fewer, larger units of work.</p></div>
   <h2>What will change and what will not</h2>
   <p>Capacities, bandwidths, precision formats and every specific threshold in this lesson will move. The asymmetry will not: arithmetic keeps getting cheaper faster than data movement does, which means the techniques that trade computation for bytes moved get <em>more</em> valuable each generation rather than less.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000028-latency-and-caching.html">Latency, Prefills and Caching</a><span class="link-note">Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.</span></li><li><a href="../algorithms/lsn-1787100000005-attention-and-transformers.html">Attention and the Transformer</a><span class="rel-set">Algorithms That Matter Here</span><span class="link-note">The algorithm every model in this program is built from.</span></li><li><a href="lsn-1787000000002-weights-gguf-quantization.html">Weights, GGUF and Quantization</a><span class="link-note">What Q4_K_M actually means, and the trade you're making when you pick it.</span></li><li><a href="lsn-1787000000027-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a><span class="link-note">Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.</span></li></ul></div>
@@ -288,6 +299,48 @@ time per token = 140 GB / 3.35 TB/s           = 42 ms   -&gt; about 24 tokens/se
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"arithmetic-intensity": {"t": "Arithmetic intensity", "d": "Operations performed per byte fetched from main memory. A property of the work rather than the chip, and the number that decides whether the arithmetic units are the constraint or are sitting idle waiting on memory."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "flashattention": {"t": "FlashAttention", "d": "An exact attention algorithm that never materialises the n-by-n score matrix in main memory, working in tiles inside fast on-chip memory and recomputing rather than storing. Same numbers as standard attention; the speed is entirely from moving fewer bytes, which is why it needs no quality re-check when the other variants do."}, "dispatch-overhead": {"t": "Dispatch overhead", "d": "The fixed cost of launching each operation on the device. A workload of very many tiny operations can be limited by this alone, rather than by memory or arithmetic."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

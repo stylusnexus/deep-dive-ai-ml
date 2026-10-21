@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -222,7 +233,7 @@
   <p class="subtitle">What low-rank adaptation actually changes, what rank buys you, and the one case where updating every weight is still right.</p>
 
   <p>A full fine-tune updates every parameter in the model. That is expensive for a reason worth stating precisely, because it is the reason the alternative exists: training needs the weights, the gradients and the optimiser state all resident at once, which is several times the memory of the weights alone. It also produces a complete copy of the model per task, so ten tuned variants is ten models to store, serve and re-derive the next time the base improves.</p>
-  <p>Low-rank adaptation (LoRA) is the observation that the <em>update</em> does not need to be as expressive as the model. Freeze every original weight, and learn a small pair of matrices alongside them whose product stands in for the change you would have made. Train those instead.</p>
+  <p>Low-rank adaptation (<dfn class="gl" tabindex="0" data-gl="lora-low-rank-adaptation">LoRA</dfn>) is the observation that the <em>update</em> does not need to be as expressive as the model. Freeze every original weight, and learn a small pair of matrices alongside them whose product stands in for the change you would have made. Train those instead.</p>
   <figure class="diagram"><svg viewBox="0 0 540 168" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A frozen weight matrix with a small low-rank pair added alongside it.">
 <rect x="18" y="24" width="112" height="112" rx="6" class="d-box"/>
 <text x="74" y="76" class="d-label-b" text-anchor="middle">W</text>
@@ -246,7 +257,7 @@
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">LoRA rank</div><div><div class="roadmap-title">How much the adaptation can express</div><div class="roadmap-desc">The shared narrow dimension of the two matrices. A rank of 8 or 16 is a common starting point and is enough for most format-and-tone work; 64 and above is a large adaptation. It is capacity, not quality.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Alpha</div><div><div class="roadmap-title">How loudly the adaptation speaks</div><div class="roadmap-desc">A scaling factor applied to the low-rank product before it is added. Conventionally set at one or two times the rank, and worth changing deliberately rather than by folklore.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Target modules</div><div><div class="roadmap-title">Where the adaptation is allowed to act</div><div class="roadmap-desc">Which weight matrices get an adapter &mdash; the attention projections by default, sometimes the feed-forward layers too. More targets means more capacity and more to train, and it is a bigger lever than rank on many tasks.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The adapter</div><div><div class="roadmap-title">A few megabytes, not a few gigabytes</div><div class="roadmap-desc">What you actually ship. Small enough to version in a repository, swap at serve time, and throw away when the base model improves.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Raising the rank does not make a small dataset train better. It makes it overfit faster.</p><p class="know-why">Rank is capacity, and capacity is only useful if there is signal to fill it. On a few hundred examples a high rank gives the model enough freedom to memorise them, which shows up as a training loss that keeps falling while held-out performance stops improving or reverses &mdash; the same overfitting curve from Block 2, with a different knob attached to it. The instinct that a poor result means turn the dial up is exactly backwards here.</p><p class="know-eg"><span class="know-eg-label">For example</span>A tuning run on six hundred examples at rank 8 reaches its best held-out score at epoch two. The same data at rank 64 reaches a far lower <em>training</em> loss by epoch two, and a held-out score two points worse, because the extra capacity went into reproducing the training set rather than learning the behaviour it exemplified.</p></blockquote>
   <h2>QLoRA, and the idea behind it</h2>
-  <p>Quantized low-rank adaptation (QLoRA) adds one move to the above: quantise the frozen base to four bits and keep the trainable adapters at higher precision. The reasoning is clean &mdash; precision matters most for the weights you are updating, and the base is not being updated at all. What it buys is a size class: models that would not otherwise fit on one machine become trainable on it, which is the difference between renting a cluster and not.</p>
+  <p>Quantized low-rank adaptation (<dfn class="gl" tabindex="0" data-gl="qlora">QLoRA</dfn>) adds one move to the above: quantise the frozen base to four bits and keep the trainable adapters at higher precision. The reasoning is clean &mdash; precision matters most for the weights you are updating, and the base is not being updated at all. What it buys is a size class: models that would not otherwise fit on one machine become trainable on it, which is the difference between renting a cluster and not.</p>
   <div class="callout matters"><span class="label">What this makes possible on the hardware in front of you</span><p>On a high-memory Apple Silicon machine, adaptation of a seven- to thirteen-billion-parameter model is comfortable and the data never leaves the desk &mdash; which for regulated or confidential material is not a convenience but the entire reason the option exists. Quantising the base extends the reach further up the size ladder. The hardware checklist still applies before any of it: capacity is a hard wall and library support is what actually blocks people, and neither of those is changed by the training method being clever.</p></div>
   <h2>Adapters compose, and that changes the economics</h2>
   <p>Because an adapter is a small separate artefact rather than a modified model, one base model can serve many of them, selected per request. That turns per-customer or per-task tuning from an infrastructure problem into a file-loading problem, and it makes a tuned behaviour something you can withdraw by deleting a file rather than by retraining. It also means a base-model upgrade costs you a re-run of the adapters rather than a rebuild of everything downstream &mdash; still work, but bounded work.</p>
@@ -280,6 +291,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"lora-low-rank-adaptation": {"t": "LoRA (low-rank adaptation)", "d": "Freezing every base weight and learning a small pair of matrices whose product stands in for the update. The saving is not mainly the parameter count: a frozen weight needs no gradient and no optimiser state, and those are what dominate training memory."}, "qlora": {"t": "QLoRA", "d": "Low-rank adaptation over a base quantised to four bits. Precision matters most for weights being updated and the base is frozen, so storing it coarsely brings larger models within reach of a single machine."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

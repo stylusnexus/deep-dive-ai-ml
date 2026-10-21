@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,10 +232,10 @@
   <h1>Serving Locally: Ollama, llama.cpp and tok/s</h1>
   <p class="subtitle">The most-mentioned tool in your codebase, and how to read a speed number.</p>
 
-  <p><strong>Ollama</strong> is how most people run a model locally for the first time, and it is what any cheap-first architecture rests on. It is also a stack of three things that get conflated.</p>
+  <p><strong><dfn class="gl" tabindex="0" data-gl="ollama">Ollama</dfn></strong> is how most people run a model locally for the first time, and it is what any cheap-first architecture rests on. It is also a stack of three things that get conflated.</p>
   <h2>llama.cpp is the engine; Ollama is the car</h2>
-  <p><code>llama.cpp</code> is a C++ inference engine that runs GPT-Generated Unified Format (GGUF) models efficiently on consumer hardware, including Apple Silicon via Metal. It's the thing doing the actual arithmetic.</p>
-  <p><strong>Ollama</strong> wraps it in something usable: a model registry (<code>ollama pull</code>), a local HTTP server with an OpenAI-compatible API, automatic memory management, and model switching. Your code talks HTTP to Ollama; Ollama talks to llama.cpp; llama.cpp talks to the GPU.</p>
+  <p><code>llama.cpp</code> is a C++ inference engine that runs GPT-Generated Unified Format (<dfn class="gl" tabindex="0" data-gl="gguf-gguf">GGUF</dfn>) models efficiently on consumer hardware, including Apple Silicon via Metal. It's the thing doing the actual arithmetic.</p>
+  <p><strong>Ollama</strong> wraps it in something usable: a model registry (<code>ollama pull</code>), a local HTTP server with an OpenAI-compatible API, automatic memory management, and model switching. Your code talks HTTP to Ollama; Ollama talks to <dfn class="gl" tabindex="0" data-gl="llama-cpp">llama.cpp</dfn>; llama.cpp talks to the GPU.</p>
   <div class="callout insight"><span class="label">Why the API compatibility matters</span>Because Ollama speaks an OpenAI-shaped API, the same client code can point at a local 7B model or a hosted frontier model by changing a base URL. That interchangeability is precisely what makes cheap-first routing implementable at all.</div>
   <figure class="diagram"><svg viewBox="0 0 640 250" role="img" aria-label="Local serving stack"><defs><marker id="a" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker><marker id="aa" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="160" y="12" width="320" height="40" rx="6" class="d-box-accent"/>
@@ -249,20 +260,20 @@
 </svg><figcaption>Your code never talks to the model directly. Each layer down is closer to the metal — and the OpenAI-shaped API at the top is what makes the local and hosted lanes interchangeable.</figcaption></figure>
   <h2>Reading tokens per second</h2>
   <p><strong>tok/s</strong> is the throughput measure, but a single number hides two very different things:</p>
-  <ul><li><strong>Prefill</strong> — processing your prompt. Parallel, fast, often hundreds or thousands of tok/s.</li><li><strong>Decode</strong> — generating the answer, one token at a time. Sequential, slower, and what you actually feel while waiting.</li></ul>
+  <ul><li><strong>Prefill</strong> — processing your prompt. Parallel, fast, often hundreds or thousands of tok/s.</li><li><strong>Decode</strong> — generating the answer, one <dfn class="gl" tabindex="0" data-gl="token">token</dfn> at a time. Sequential, slower, and what you actually feel while waiting.</li></ul>
   <p>Quoted tok/s almost always means decode. Useful reference points: below ~10 tok/s feels sluggish; 20–30 tok/s reads at about conversational speed; above 50 the text arrives faster than you read it.</p>
   <div class="callout matters"><span class="label">The other number</span>Time-to-first-token is often what determines whether something feels responsive, and it's dominated by prefill — so it scales with prompt length. A long retrieved context makes the model feel slow before it has generated anything at all.</div>
   <h2>What decides your speed</h2>
   <p>Local inference is usually <em>memory-bandwidth bound</em>, not compute bound. Every generated token requires reading the entire set of active weights from memory. This is why Apple Silicon performs well: unified memory has high bandwidth, and there's no copying between system and GPU memory.</p>
-  <p>It's also why quantization speeds things up as well as shrinking them — fewer bits per weight means less memory traffic per token. A Q4 model isn't just smaller than Q8, it's meaningfully faster.</p>
+  <p>It's also why <dfn class="gl" tabindex="0" data-gl="quantization">quantization</dfn> speeds things up as well as shrinking them — fewer <dfn class="gl" tabindex="0" data-gl="bits-per-weight">bits per weight</dfn> means less memory traffic per token. A Q4 model isn't just smaller than Q8, it's meaningfully faster.</p>
   <h2>A worked correction: when the headline number is the wrong number</h2>
   <p>A widely-repeated claim held that one serving runtime was several times faster than another for the same model. Take the claim at face value for a moment: the figure it rests on is a <em>decode</em> throughput comparison — tokens emitted per second once generation is under way, measured on a short prompt.</p>
-  <p>Measured on an actual agent loop, the end-to-end gain was nothing like 3×. A coding agent re-sends a growing context every turn, so per-iteration time is dominated by prefill, not decode. Real decode on that loop was 20–25 tok/s, and each iteration spent 40–130 seconds re-processing the prompt. The benchmark measured the half of the work that wasn't the bottleneck.</p>
-  <div class="callout insight"><span class="label">What actually moved it</span>Not the runtime and not the quantization — <strong>prefix-KV reuse</strong>, so each turn only processes the tokens that are genuinely new. On the same fixture that took 7–17 minutes, a serving engine with true prefix matching brought it to about 1.3 minutes, roughly tenfold, with cache hit rate at 1.00 and no loss of quality. Same weights throughout. The lever was in the serving layer's caching, which no tokens-per-second figure would ever have surfaced.</div>
+  <p>Measured on an actual <dfn class="gl" tabindex="0" data-gl="agent-loop">agent loop</dfn>, the end-to-end gain was nothing like 3×. A coding agent re-sends a growing context every turn, so per-iteration time is dominated by prefill, not decode. Real decode on that loop was 20–25 tok/s, and each iteration spent 40–130 seconds re-processing the prompt. The benchmark measured the half of the work that wasn't the bottleneck.</p>
+  <div class="callout insight"><span class="label">What actually moved it</span>Not the runtime and not the quantization — <strong>prefix-KV reuse</strong>, so each turn only processes the tokens that are genuinely new. On the same <dfn class="gl" tabindex="0" data-gl="fixture">fixture</dfn> that took 7–17 minutes, a serving engine with true prefix matching brought it to about 1.3 minutes, roughly tenfold, with <dfn class="gl" tabindex="0" data-gl="cache-hit-rate">cache hit rate</dfn> at 1.00 and no loss of quality. Same weights throughout. The lever was in the serving layer's caching, which no tokens-per-second figure would ever have surfaced.</div>
   <div class="callout pitfall"><span class="label">The habit this should build</span>When a performance number is quoted, ask which phase it measures and whether that phase is your bottleneck. Two premature speed claims were made on that project from partial data before the real one was confirmed by cache-hit telemetry. A number measured on the wrong phase is not a small error — it points your optimisation work at the wrong layer entirely.</div>
   <h2>Three defaults that quietly break a local agent</h2>
   <p>The lessons above are about speed. These are about whether the thing works at all, and each is a default rather than a bug &mdash; which is why they are found late and by accident.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The context window you get is not the one advertised</div><div><div class="roadmap-title">It is chosen from your memory</div><div class="roadmap-desc">A convenience runtime will pick a context length based on available video memory, and the smallest tier is far below what an agent needs &mdash; a few thousand tokens where the model supports vastly more. Its own documentation tells agent users to raise it explicitly. A loop that mysteriously forgets its instructions on long tasks is usually this, not the model.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Concurrency is one by default</div><div><div class="roadmap-title">One request at a time</div><div class="roadmap-desc">The parallel-request setting on the common local runtime defaults to a single request, and memory scales with parallelism times context length, so raising it is not free. An agent issuing concurrent tool calls against a local endpoint may be queueing them without anyone noticing, which shows up as latency rather than as an error.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Tool calling needs flags, not just a model</div><div><div class="roadmap-title">OpenAI-compatible is not drop-in</div><div class="roadmap-desc">Local servers require explicit configuration before function calling works &mdash; a template flag in one engine, an auto-tool-choice flag plus a <em>model-specific</em> parser in another. The endpoints speak the same shape as a hosted API and one engine states plainly that it makes no strong claim of compatibility. Assume the differences are where your agent will break.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The context window you get is not the one advertised</div><div><div class="roadmap-title">It is chosen from your memory</div><div class="roadmap-desc">A convenience runtime will pick a context length based on available video memory, and the smallest tier is far below what an agent needs &mdash; a few thousand tokens where the model supports vastly more. Its own documentation tells agent users to raise it explicitly. A loop that mysteriously forgets its instructions on long tasks is usually this, not the model.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Concurrency is one by default</div><div><div class="roadmap-title">One request at a time</div><div class="roadmap-desc">The parallel-request setting on the common local runtime defaults to a single request, and memory scales with parallelism times context length, so raising it is not free. An agent issuing concurrent <dfn class="gl" tabindex="0" data-gl="tool-call">tool calls</dfn> against a local endpoint may be <dfn class="gl" tabindex="0" data-gl="queueing">queueing</dfn> them without anyone noticing, which shows up as latency rather than as an error.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Tool calling needs flags, not just a model</div><div><div class="roadmap-title">OpenAI-compatible is not drop-in</div><div class="roadmap-desc">Local servers require explicit configuration before function calling works &mdash; a template flag in one engine, an auto-tool-choice flag plus a <em>model-specific</em> parser in another. The endpoints speak the same shape as a hosted API and one engine states plainly that it makes no strong claim of compatibility. Assume the differences are where your agent will break.</div></div></div></div>
   <div class="callout pitfall"><span class="label">And prompt caching locally is not guaranteed to be lossless</span><p>Reusing a cached prefix is a large win locally and one engine documents a caveat worth carrying: because logits are not guaranteed bit-for-bit identical across different batch sizes, enabling prompt reuse <em>can produce nondeterministic results</em>. The hosted equivalent makes no such warning.</p><p>That matters for anything trying to be reproducible. The determinism lesson already says temperature zero does not guarantee identical output; this is a second, separate source of the same problem, and it is one you switched on deliberately to go faster.</p></div>
   <h2>The thing to keep straight</h2>
   <p>Ollama is a convenience layer, not a requirement. <code>llama.cpp</code> serves models directly; vLLM and Text Generation Inference (TGI) are production-grade alternatives with better batching for concurrent users. Ollama optimises for one developer on one machine, and is a poor fit for serving many users at once. Block 8 covers what changes when you need the latter.</p>
@@ -294,6 +305,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"ollama": {"t": "Ollama", "d": "A wrapper over llama.cpp: model registry, local HTTP server with an OpenAI-shaped API, memory management. Optimised for one developer on one machine."}, "gguf-gguf": {"t": "GGUF (*.gguf)", "d": "The self-contained file format holding quantized weights plus tokenizer and metadata. What llama.cpp and Ollama consume."}, "llama-cpp": {"t": "llama.cpp", "d": "The C++ inference engine doing the actual arithmetic, including on Apple Silicon via Metal."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "quantization": {"t": "Quantization", "d": "Storing each weight in fewer bits (4, 5, 8) instead of 16. Shrinks and speeds up the model at a small cost in precision."}, "bits-per-weight": {"t": "Bits per weight", "d": "What a quantized file really costs per weight, scales and any higher-precision tensors included. The label hides it: a MLX 4-bit file is about 4.5, and a Q4_K_M file for a small model came out at 6.35. Compare quantizations at equal bits per weight."}, "agent-loop": {"t": "Agent loop", "d": "The while-loop that runs a model repeatedly, executing any tool it asks for and feeding the result back, until the model answers without needing a tool."}, "fixture": {"t": "Fixture", "d": "One case with an answer: a starting state, inputs, and an assertion that is false before the work and true after. The smallest unit of evidence a harness can produce. A fixture that passes at the starting commit, or fails whatever you do, measures nothing — and both look like results."}, "cache-hit-rate": {"t": "Cache hit rate", "d": "The fraction of calls that actually reused a cached prefix. Nothing errors on a miss, so a cache that quietly stopped working looks exactly like never having had one, except on the bill."}, "tool-call": {"t": "Tool call", "d": "Structured text the model emits requesting a function. The harness parses and executes it; the model never touches the tool."}, "queueing": {"t": "Queueing", "d": "Time spent waiting for a slot rather than doing work. Invisible until you measure it, and past saturation it dominates latency entirely."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

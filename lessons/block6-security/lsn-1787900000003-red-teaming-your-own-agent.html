@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,13 +232,14 @@
   <h1>Red-Teaming Your Own Agent</h1>
   <p class="subtitle">The exit criterion for this block: break the system you built, then prove you fixed it.</p>
 
-  <p>Reading about attacks does not tell you whether yours is vulnerable. This lesson is the method for finding out, and it borrows its discipline wholesale from Block 5 — because a red-team exercise without a fixture and a baseline is a story about an afternoon, not a measurement.</p>
+  <p>Reading about attacks does not tell you whether yours is vulnerable. This lesson is the method for finding out, and it borrows its discipline wholesale from Block 5 — because a red-team exercise without a <dfn class="gl" tabindex="0" data-gl="fixture">fixture</dfn> and a baseline is a story about an afternoon, not a measurement.</p>
   <h2>Treat it as an eval, because it is one</h2>
   <p>A red-team run has the same shape as every other measurement in this course. A fixed set of cases with known intent. A recorded baseline. One change at a time. A number that moves or does not. The temptation is to treat security testing as exploration — try things, feel reassured — and exploration cannot tell you whether last week's fix held.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">An attack battery</div><div><div class="roadmap-title">Fixed cases, kept privately</div><div class="roadmap-desc">The same idea as the eval battery: a set you own, reflecting your system rather than a public list. It grows every time something gets through, which means it encodes your incidents rather than the field's.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A success criterion per case</div><div><div class="roadmap-title">What counts as broken</div><div class="roadmap-desc">Decided before the run. &ldquo;The agent revealed the system prompt&rdquo; is checkable; &ldquo;the agent behaved oddly&rdquo; is not. Without this, results are argued rather than read.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A baseline</div><div><div class="roadmap-title">The score before you fix anything</div><div class="roadmap-desc">You cannot demonstrate a fix without it, and the number that matters afterwards is the difference rather than the absolute.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Regression on every change</div><div><div class="roadmap-title">The point of keeping the battery</div><div class="roadmap-desc">Prompt changes, model changes and tool additions are all treatment. A tool added in month three can reopen a hole closed in month one, and only a re-run tells you.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">An attack battery</div><div><div class="roadmap-title">Fixed cases, kept privately</div><div class="roadmap-desc">The same idea as the <dfn class="gl" tabindex="0" data-gl="eval-battery">eval battery</dfn>: a set you own, reflecting your system rather than a public list. It grows every time something gets through, which means it encodes your incidents rather than the field's.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A success criterion per case</div><div><div class="roadmap-title">What counts as broken</div><div class="roadmap-desc">Decided before the run. &ldquo;The agent revealed the system prompt&rdquo; is checkable; &ldquo;the agent behaved oddly&rdquo; is not. Without this, results are argued rather than read.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A baseline</div><div><div class="roadmap-title">The score before you fix anything</div><div class="roadmap-desc">You cannot demonstrate a fix without it, and the number that matters afterwards is the difference rather than the absolute.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Regression on every change</div><div><div class="roadmap-title">The point of keeping the battery</div><div class="roadmap-desc">Prompt changes, model changes and tool additions are all treatment. A tool added in month three can reopen a hole closed in month one, and only a re-run tells you.</div></div></div></div>
   <h2>Where the corpora come from</h2>
-  <p>You do not have to invent every payload. Public corpora exist for exactly this and are already on disk in this workspace — the SecLists LLM testing directory carries sets for data leakage, memory recall, boundary probing and bias, and the agent-armor project in this workspace exists to run action-gate evaluations. Use them as a starting battery and add your own cases as your system teaches you where it is weak.</p>
+  <p>You do not have to invent every payload. Public corpora exist for exactly this and are already on disk in this workspace — the SecLists LLM testing directory carries sets for <dfn class="gl" tabindex="0" data-gl="data-leakage">data leakage</dfn>, memory recall, boundary probing and bias, and the agent-armor project in this workspace exists to run action-gate evaluations. Use them as a starting battery and add your own cases as your system teaches you where it is weak.</p>
   <div class="callout matters"><span class="label">Public corpora are a floor, not a ceiling</span><p>A published payload set tests what is already widely known, which means it is the part most likely to have been trained against. Passing it cleanly tells you that you are not vulnerable to the well-documented, and nothing about the payload written specifically for your system. Start there, then write cases that use your own tool names, your own document sources and your own record formats.</p></div>
+  <div class="callout warning"><span class="label">A refusal in an open-weight model is a default, not a control</span><p>If you can download a model's weights, you can edit them. <strong><dfn class="gl" tabindex="0" data-gl="abliteration">Abliteration</dfn></strong> does exactly that to refusal. Researchers found that in several open-weight chat models, refusal is mediated largely by a single direction in the model's internal activations (Arditi et al., 2024, <em>Refusal in Language Models Is Mediated by a Single Direction</em>). Remove that direction, either at run time or permanently from the weights, and the model stops refusing, with no retraining. Anyone with the weights can do it, and edited copies circulate. So a battery that passes against the stock model tells you about the stock model only. When the model is open-weight, anything that must hold has to be enforced outside it: tool permissions, egress limits, approval gates. A hosted proprietary model keeps its weights private, which closes this particular route but does not make its refusals a guarantee.</p></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Test the thing you deployed, not the thing you designed.</p><p class="know-why">Red-teaming a component in isolation misses the composition, and the composition is where the paths are. The injection needs a route out, and that route usually crosses two tools, a rendering layer and whatever your interface does with the model's output. An exercise that stops at &ldquo;did the model comply&rdquo; has tested the least interesting half.</p><p class="know-eg"><span class="know-eg-label">For example</span>Run the payload through the whole system with its real tools attached and its real interface rendering the result, then ask whether anything left the building. That is the question, and a component test cannot answer it.</p></blockquote>
   <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="The red-team loop"><defs><marker id="rt" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="14" y="22" width="140" height="44" rx="6" class="d-box"/><text x="26" y="42" class="d-label-b">battery</text><text x="26" y="59" class="d-label-sm">fixed, private, yours</text>
@@ -243,7 +255,7 @@
 <text x="14" y="192" class="d-label-sm">Write down what the fix does not cover. That sentence outlives the run.</text>
 </svg><figcaption>A red-team run has the shape of every other measurement in this course: a fixed battery, a recorded baseline, one change, a re-run. What makes it security work is that the battery grows each time something gets through.</figcaption></figure>
   <h2>The exercise for this block</h2>
-  <ul><li><strong>Pick the system.</strong> The Block 4 multi-agent handler is the natural target: it reads free text written by other people, routes on it, and takes actions with an approval gate you can test.</li><li><strong>Plant an indirect payload.</strong> Put an instruction in the notes field of an exception record — the field the model already reads and reasons over.</li><li><strong>Decide what counts as broken</strong> before running it: the gate bypassed, an action taken that policy forbids, or the payload's instruction reflected into a customer-facing message.</li><li><strong>Record the baseline</strong>, apply exactly one mitigation from the previous lesson, and re-run the same battery.</li><li><strong>Write down what the fix does not cover.</strong> That sentence is the most useful artefact the exercise produces.</li></ul>
+  <ul><li><strong>Pick the system.</strong> The Block 4 multi-agent handler is the natural target: it reads free text written by other people, routes on it, and takes actions with an <dfn class="gl" tabindex="0" data-gl="approval-gate">approval gate</dfn> you can test.</li><li><strong>Plant an indirect payload.</strong> Put an instruction in the notes field of an exception record — the field the model already reads and reasons over.</li><li><strong>Decide what counts as broken</strong> before running it: the gate bypassed, an action taken that policy forbids, or the payload's instruction reflected into a customer-facing message.</li><li><strong>Record the baseline</strong>, apply exactly one mitigation from the previous lesson, and re-run the same battery.</li><li><strong>Write down what the fix does not cover.</strong> That sentence is the most useful artefact the exercise produces.</li></ul>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787900000000-injection-direct-and-indirect.html">Prompt Injection, Direct and Indirect</a><span class="link-note">The dangerous one is not the user typing something clever. It is the document you retrieved.</span></li><li><a href="../core-vocabulary/lsn-1787000000009-eval-battery.html">The Eval Battery</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How you know any of this works — and why the number you trust must be one you built.</span></li><li><a href="lsn-1787900000001-exfiltration-and-tool-abuse.html">Exfiltration and Tool Abuse</a><span class="link-note">An injected instruction is worth nothing on its own. It needs a way out, and your agent is holding several.</span></li><li><a href="../engineering-practice/lsn-1787400000003-how-to-measure.html">How to Measure</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.</span></li></ul></div>
   <div class="quiz">
     <h3>✅ Check Yourself</h3>
@@ -270,6 +282,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"fixture": {"t": "Fixture", "d": "One case with an answer: a starting state, inputs, and an assertion that is false before the work and true after. The smallest unit of evidence a harness can produce. A fixture that passes at the starting commit, or fails whatever you do, measures nothing — and both look like results."}, "eval-battery": {"t": "Eval battery", "d": "A fixed set of tasks with machine-checkable outcomes. Its value comes from staying fixed. The battery is the <em>data<\/em>; an eval harness is the <em>machinery<\/em> that runs it. Distinct again from an agent harness, which is the scaffolding around one agent run."}, "data-leakage": {"t": "Data leakage", "d": "Information available at training time but not at prediction time. Inflates training <em>and<\/em> validation together, so the usual overfitting gap shows nothing wrong."}, "abliteration": {"t": "Abliteration", "d": "Removing a model's refusal behaviour by editing its weights rather than its prompt. Researchers found that refusal in several open-weight chat models is mediated largely by a single direction in the model's internal activations; projecting that direction out of the weights stops the model refusing, with no retraining. It needs the weights, so it applies only to open-weight models. The consequence for security work: a refusal baked into an open-weight model is a default, not a control, so anything that must hold has to be enforced outside the model."}, "approval-gate": {"t": "Approval gate", "d": "A point where work stops until a human decides. It only counts if the run persists while it waits; a gate that lets the work continue is decoration."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

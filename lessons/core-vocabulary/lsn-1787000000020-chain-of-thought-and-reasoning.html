@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,14 +232,14 @@
   <h1>Chain-of-Thought and Reasoning Tokens</h1>
   <p class="subtitle">Why letting a model think out loud works — and why its explanation isn't necessarily its reason.</p>
 
-  <p>Ask a model a multi-step question and it answers immediately, often wrongly. Ask it to work through the steps and accuracy improves markedly on the same question with the same model. That's <strong>chain-of-thought</strong>, and the mechanism behind it is more interesting than the trick.</p>
+  <p>Ask a model a multi-step question and it answers immediately, often wrongly. Ask it to work through the steps and accuracy improves markedly on the same question with the same model. That's <strong><dfn class="gl" tabindex="0" data-gl="chain-of-thought">chain-of-thought</dfn></strong>, and the mechanism behind it is more interesting than the trick.</p>
   <h2>Why thinking out loud helps</h2>
-  <p>A model does a roughly fixed amount of computation per token generated. Demanding an immediate answer to a problem needing five steps allocates one token's worth of computation to five steps of work. Generating intermediate steps gives the model more forward passes, and — crucially — each step it writes becomes part of the context for the next, so it can build on its own partial results.</p>
+  <p>A model does a roughly fixed amount of computation per <dfn class="gl" tabindex="0" data-gl="token">token</dfn> generated. Demanding an immediate answer to a problem needing five steps allocates one token's worth of computation to five steps of work. Generating intermediate steps gives the model more forward passes, and — crucially — each step it writes becomes part of the context for the next, so it can build on its own partial results.</p>
   <div class="callout insight"><span class="label">The reframing worth keeping</span>Chain-of-thought is not the model becoming smarter. It's the model being given room to compute. The generated tokens are working memory made visible — which is also why it helps far more on arithmetic, logic and multi-step planning than on recall, where there's nothing to work through.</div>
   <h2>The variants</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Zero-shot CoT</div><div><div class="roadmap-title">&quot;Think step by step&quot;</div><div class="roadmap-desc">One line, no examples, and a real improvement on reasoning tasks. Among the highest-value prompt changes available.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Few-shot CoT</div><div><div class="roadmap-title">Examples that show the working</div><div class="roadmap-desc">Demonstrate the reasoning style you want, not just the answers.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Self-consistency</div><div><div class="roadmap-title">Sample several chains, take the majority</div><div class="roadmap-desc">Costs several times more and reliably beats a single chain. Buying accuracy with tokens.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reasoning models</div><div><div class="roadmap-title">Trained to reason before answering</div><div class="roadmap-desc">The model produces an extended internal chain, sometimes hidden, before its visible answer. Reasoning effort becomes a parameter you set.</div></div></div></div>
   <h2>Reasoning tokens change the cost model</h2>
-  <p>With reasoning models you pay for tokens you may never see. A short answer can sit on top of thousands of hidden reasoning tokens, all billed. Cost stops tracking visible output length and starts tracking problem difficulty — which is a different budgeting exercise, and one that surprises people the first time.</p>
+  <p>With reasoning models you pay for tokens you may never see. A short answer can sit on top of thousands of hidden <dfn class="gl" tabindex="0" data-gl="reasoning-tokens">reasoning tokens</dfn>, all billed. Cost stops tracking visible output length and starts tracking problem difficulty — which is a different budgeting exercise, and one that surprises people the first time.</p>
   <p>It also changes when to reach for what. Simple extraction, classification and formatting don't benefit from reasoning and just cost more slowly. The gains concentrate in genuinely multi-step problems — which is a routing decision, and exactly the kind of judgement escalation logic has to encode.</p>
   <div class="callout matters"><span class="label">Measured: the same six questions with thinking on and off</span><p>Six short arithmetic and logic questions with exact answers, on a 9-billion-parameter 8-bit model served by vllm-mlx 0.5.0, run with <code>scripts/bench_engines.py thinking</code>. Median reply length with thinking on was 1,225 tokens against 392 with it off. Two of the six thinking replies reached the 1,500-token cap before giving an answer, so a thinking budget that is too small turns a reply into no answer at all. With thinking off, all six were right. Time is the part to notice: the first token arrived in under half a second either way, because the thinking streams, but the first token of the <em>answer</em> took between 17 and 56 seconds with thinking on. Median total time was 52.0 seconds against 14.8, and that includes load from other jobs, so trust the token counts more than the seconds. Six questions show direction, not accuracy, and these were mostly easy ones where thinking has little to add. Run it on your own hard cases before deciding.</p></div>
   <figure class="diagram"><svg viewBox="0 0 640 180" role="img" aria-label="When chain-of-thought helps and when it does not">
@@ -245,9 +256,9 @@
 </svg><figcaption>Extra tokens buy accuracy on multi-step problems and buy nothing on recall or formatting. Matching the mode to the task is the actual skill.</figcaption></figure>
   <h2>The part people get wrong</h2>
   <p>A chain-of-thought is not an explanation of how the model reached its answer. It's more text, generated by the same next-token process, that happens to look like reasoning. Models can produce a flawed chain and a correct answer, or a plausible chain that rationalises an answer they were always going to give. Research on unfaithful reasoning shows models omitting the cue that actually determined their output while presenting a tidy chain that doesn't mention it.</p>
-  <div class="callout pitfall"><span class="label">What this means for you</span>Treat a chain as a debugging aid and a verification surface, not as an audit trail. It's genuinely useful — you can check the intermediate steps, spot where a calculation went wrong, and catch a wrong premise. But do not present it to a regulator, a customer, or a colleague as the reason the system decided something. It is what the model said about its reasoning, which is not the same object.</div>
+  <div class="callout pitfall"><span class="label">What this means for you</span>Treat a chain as a debugging aid and a verification surface, not as an <dfn class="gl" tabindex="0" data-gl="audit-trail">audit trail</dfn>. It's genuinely useful — you can check the intermediate steps, spot where a calculation went wrong, and catch a wrong premise. But do not present it to a regulator, a customer, or a colleague as the reason the system decided something. It is what the model said about its reasoning, which is not the same object.</div>
   <h2>Where this reappears</h2>
-  <p>Block 4's agents reason before choosing tools, and a visible chain is often the only way to debug why the wrong tool was called. Block 5 measures whether the chain actually supports the conclusion, which is a distinct question from whether the conclusion is right. And rationale distillation from the previous lesson trains a small model on these chains — one of the more effective ways to move reasoning capability downward.</p>
+  <p>Block 4's agents reason before choosing tools, and a visible chain is often the only way to debug why the wrong tool was called. Block 5 measures whether the chain actually supports the conclusion, which is a distinct question from whether the conclusion is right. And <dfn class="gl" tabindex="0" data-gl="rationale-distillation">rationale distillation</dfn> from the previous lesson trains a small model on these chains — one of the more effective ways to move reasoning capability downward.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Chain-of-thought is not the model becoming smarter — it is the model being given room to compute.</p><p class="know-why">A model does roughly fixed work per token. Demanding an immediate answer to a five-step problem allocates one token's worth of computation to five steps. Generating the steps buys more forward passes, and each step becomes context the next one can build on.</p><p class="know-eg"><span class="know-eg-label">For example</span>Ask for the answer to a multi-step arithmetic word problem and you get a wrong number instantly. Ask the same model to work through it and it gets it right — same weights, same prompt otherwise. Now ask it to think step by step about the capital of Portugal: no gain, because there were never any steps to take.</p></blockquote>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000021-loops-at-inference.html">Loops at Inference: Control Flow, Limits and Dangers</a><span class="link-note">Running the model more than once — when that buys accuracy, and when it just buys tokens.</span></li><li><a href="../block7-training/lsn-1788000000003-supervised-versus-reinforcement-tuning.html">Supervised versus Reinforcement Fine-Tuning</a><span class="rel-set">Block 7 · Training and Fine-Tuning</span><span class="link-note">One shows the model the answer; the other scores its attempts. The objective decides what you can teach.</span></li><li><a href="lsn-1787000000008-routing-and-escalation.html">Routing, Escalation and Sampling Controls</a><span class="link-note">Cheap-first architecture — plus temperature and top-k, which decide how a model picks words.</span></li><li><a href="lsn-1787000000001-tokens-context-and-kv-cache.html">Tokens, the Context Window, and the KV Cache</a><span class="link-note">Why a model 'forgets', why long conversations get expensive, and what's actually being cached.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener">Chain-of-Thought Prompting (Wei et al., 2022)</a><span class="link-note">The paper that established the effect and its scale dependence.</span></li><li><a href="https://arxiv.org/abs/2203.11171" target="_blank" rel="noopener">Self-Consistency (Wang et al., 2022)</a><span class="link-note">Sampling multiple chains and taking the majority — trading tokens for accuracy.</span></li><li><a href="https://arxiv.org/abs/2307.13702" target="_blank" rel="noopener">Measuring Faithfulness in Chain-of-Thought (Lanham et al., 2023)</a><span class="link-note">The evidence that stated reasoning often isn't the actual reason. Read before trusting a chain as an explanation.</span></li></ul></div>
@@ -276,6 +287,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"chain-of-thought": {"t": "Chain-of-thought", "d": "Prompting the model to produce intermediate steps. Works because it allocates more computation and lets the model build on its own partial results — not because it becomes smarter."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "reasoning-tokens": {"t": "Reasoning tokens", "d": "Tokens a reasoning model generates before answering, often hidden and always billed. Cost tracks problem difficulty rather than visible output length."}, "audit-trail": {"t": "Audit trail", "d": "Who approved, when, and exactly what. \"Approved\" without those three is not an audit trail."}, "rationale-distillation": {"t": "Rationale distillation", "d": "Having the student learn the teacher's reasoning as well as its conclusions. Effective where the reasoning is the hard part."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -224,8 +235,8 @@
   <p>The agents lesson covered what one is and how it can hurt you. This is the operational half: how you watch it, how you stop it, and how you keep it working as everything underneath it moves. An agent is not a feature you ship — it is a system you run.</p>
   <h2>What to log, and why the usual answer is wrong</h2>
   <p>Most systems log inputs and outputs. For an agent that is not enough, because the interesting failures happen in the middle. You need the trajectory:</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Every turn</div><div><div class="roadmap-title">Full request and response</div><div class="roadmap-desc">Including the reasoning, where the provider exposes it. A harness that records only final answers cannot tell you why a run went wrong.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Every tool call</div><div><div class="roadmap-title">Arguments and result</div><div class="roadmap-desc">Truncated for storage, but recorded. This is where an injection would show up.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The termination reason</div><div><div class="roadmap-title">Named, not inferred</div><div class="roadmap-desc">Completed, turn cap, spend cap, timeout, error. Distinguishable — otherwise a wall clock looks like a model giving up.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The manifest</div><div><div class="roadmap-title">Model, versions, budgets, config</div><div class="roadmap-desc">So a run six weeks old can still be interpreted.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Cost and latency</div><div><div class="roadmap-title">Per run and per turn</div><div class="roadmap-desc">Both drift upward quietly as prompts and tool sets grow.</div></div></div></div>
-  <div class="callout matters"><span class="label">The log is the only artefact that survives</span>You cannot reproduce an agent run — sampling, retrieval, external state and the model behind an alias all move. The trajectory log is not a debugging convenience; it is the sole evidence that the run happened the way you think it did. Treat gaps in it as outages.</div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Every turn</div><div><div class="roadmap-title">Full request and response</div><div class="roadmap-desc">Including the reasoning, where the provider exposes it. A <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn> that records only final answers cannot tell you why a run went wrong.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Every tool call</div><div><div class="roadmap-title">Arguments and result</div><div class="roadmap-desc">Truncated for storage, but recorded. This is where an injection would show up.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The termination reason</div><div><div class="roadmap-title">Named, not inferred</div><div class="roadmap-desc">Completed, <dfn class="gl" tabindex="0" data-gl="turn-cap">turn cap</dfn>, spend cap, timeout, error. Distinguishable — otherwise a wall clock looks like a model giving up.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The manifest</div><div><div class="roadmap-title">Model, versions, budgets, config</div><div class="roadmap-desc">So a run six weeks old can still be interpreted.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Cost and latency</div><div><div class="roadmap-title">Per run and per turn</div><div class="roadmap-desc">Both drift upward quietly as prompts and tool sets grow.</div></div></div></div>
+  <div class="callout matters"><span class="label">The log is the only artefact that survives</span>You cannot reproduce an agent run — sampling, retrieval, external state and the model behind an alias all move. The <dfn class="gl" tabindex="0" data-gl="trajectory-log">trajectory log</dfn> is not a debugging convenience; it is the sole evidence that the run happened the way you think it did. Treat gaps in it as outages.</div>
   <h2>What to watch</h2>
   <p>Ground truth for agent quality arrives late or never, so as with drift you monitor proxies that are available immediately:</p>
   <ul><li><strong>Turn count distribution.</strong> A rising median means the agent is working harder for the same outcomes — usually the earliest signal that something upstream changed.</li><li><strong>Termination mix.</strong> The share of runs ending on a cap rather than on completion. A shift here is a shift in behaviour.</li><li><strong>Tool error rate, by tool.</strong> One integration degrading looks like general flakiness until you break it out.</li><li><strong>Cost per completed task.</strong> Not cost per call — the denominator matters, because retries hide in it.</li><li><strong>Human intervention rate.</strong> How often someone overrides, corrects or abandons. The most honest quality metric you have, and usually the last one anyone instruments.</li><li><strong>Approval-gate rejection rate.</strong> If people start rejecting what the agent proposes, that is a regression, whatever your evals say.</li></ul>
@@ -250,12 +261,12 @@
   <div class="callout warning"><span class="label">Halting is not the same as not starting</span>Flipping a flag usually stops <em>new</em> runs. An agent already mid-trajectory with a write-capable tool will finish what it is doing. If that matters — and where the tools mutate anything, it does — you need in-flight cancellation checked between turns, not just an admission gate at the front.</div>
   <h2>Maintenance: what rots</h2>
   <p>An agent that worked in March and not in September usually has not broken. Its surroundings moved:</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The model</div><div><div class="roadmap-title">Aliases float</div><div class="roadmap-desc">A version alias points somewhere new and behaviour shifts with no deploy on your side. Pin versions and upgrade deliberately.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The tools</div><div><div class="roadmap-title">APIs change under you</div><div class="roadmap-desc">A field is added, a limit tightens, an error format changes. Contract-test your tools independently of the agent.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The retrieval corpus</div><div><div class="roadmap-title">It grows</div><div class="roadmap-desc">Chunks that ranked well no longer do. Index recall degrades quietly; measure it on a schedule.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The prompts</div><div><div class="roadmap-title">They accumulate</div><div class="roadmap-desc">Every incident adds a line, nothing is removed, and eventually the instructions contradict each other. Prune.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The users</div><div><div class="roadmap-title">They learn</div><div class="roadmap-desc">As people discover what it does well, they ask harder things. Your traffic distribution shifts even when nothing about the system does.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">The model</div><div><div class="roadmap-title">Aliases float</div><div class="roadmap-desc">A version alias points somewhere new and behaviour shifts with no deploy on your side. Pin versions and upgrade deliberately.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The tools</div><div><div class="roadmap-title">APIs change under you</div><div class="roadmap-desc">A field is added, a limit tightens, an error format changes. Contract-test your tools independently of the agent.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The retrieval corpus</div><div><div class="roadmap-title">It grows</div><div class="roadmap-desc">Chunks that ranked well no longer do. <dfn class="gl" tabindex="0" data-gl="index-recall">Index recall</dfn> degrades quietly; measure it on a schedule.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The prompts</div><div><div class="roadmap-title">They accumulate</div><div class="roadmap-desc">Every incident adds a line, nothing is removed, and eventually the instructions contradict each other. Prune.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The users</div><div><div class="roadmap-title">They learn</div><div class="roadmap-desc">As people discover what it does well, they ask harder things. Your traffic distribution shifts even when nothing about the system does.</div></div></div></div>
   <div class="callout pitfall"><span class="label">The prompt-accretion failure is the most predictable</span>Each incident produces a defensive sentence in the system prompt. Six months later it is a wall of edge cases, several of which conflict, and no one can say which are load-bearing. Date every addition, attach it to the incident that caused it, and re-run your eval set with it removed before assuming it still earns its place. A rule kept past its reason is the harness failure from the practice set, in its most common form.</div>
   <h2>The routine</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Daily</div><div><div class="roadmap-title">Glance at the dashboard</div><div class="roadmap-desc">Turn counts, termination mix, cost per task, error rate by tool.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Weekly</div><div><div class="roadmap-title">Read three trajectories</div><div class="roadmap-desc">Whole ones, end to end, chosen at random. Aggregates hide the failures worth finding, and nothing substitutes for reading what actually happened.</div></div></div><div class="roadmap-item"><div class="roadmap-num">On every change</div><div><div class="roadmap-title">Re-run the eval set</div><div class="roadmap-desc">Prompt, model, tool or retrieval change — all of them are treatments.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Monthly</div><div><div class="roadmap-title">Re-run it anyway</div><div class="roadmap-desc">Nothing changed on your side is not the same as nothing changed.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Per incident</div><div><div class="roadmap-title">One line, written down</div><div class="roadmap-desc">What broke, why, and what would have caught it earlier. That third clause is the one that compounds.</div></div></div></div>
   <h2>Unattended is a different risk class</h2>
-  <p>Everything above assumes someone is watching sometimes. An agent on a schedule or a trigger, acting without anyone present, needs more: a narrow job rather than a broad one, credentials scoped to that job, safe stopping points it can reach on its own, a complete action log, and a human approval gate before anything irreversible or outward-facing.</p>
+  <p>Everything above assumes someone is watching sometimes. An agent on a schedule or a trigger, acting without anyone present, needs more: a narrow job rather than a broad one, credentials scoped to that job, safe stopping points it can reach on its own, a complete <dfn class="gl" tabindex="0" data-gl="action-log">action log</dfn>, and a human <dfn class="gl" tabindex="0" data-gl="approval-gate">approval gate</dfn> before anything irreversible or outward-facing.</p>
   <p>The arithmetic is unforgiving — broad instructions plus wide access plus nobody watching is blast radius with no one to contain it. Narrow one of those three and the other two matter far less.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../block4-agentic/lsn-1787700000003-telemetry-and-instrumentation.html">Telemetry: Making the Run Legible</a><span class="rel-set">Block 4 · Agentic AI</span><span class="link-note">You cannot reproduce an agent run. The trace is the only evidence it happened the way you think.</span></li><li><a href="lsn-1787000000029-session-lifecycle.html">Memory, Compaction and Session Decay</a><span class="link-note">A model has no memory. Everything that looks like memory is something you built — and all of it degrades.</span></li><li><a href="lsn-1787000000011-agents-autonomy-and-danger.html">Agents, Autonomy and the Danger Surface</a><span class="link-note">What actually makes something an agent, and every way it can hurt you.</span></li><li><a href="../block8-deployment/lsn-1788100000003-after-it-ships.html">After It Ships</a><span class="rel-set">Block 8 · Deployment and APIs</span><span class="link-note">What to watch, what to wake someone for, and the difference between the service being up and the service being right.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener">Effective harnesses for long-running agents — Anthropic</a><span class="link-note">What changes when an agent runs for hours, including the operational surface it creates.</span></li><li><a href="https://www.anthropic.com/engineering/multi-agent-research-system" target="_blank" rel="noopener">How we built our multi-agent research system — Anthropic</a><span class="link-note">Production experience, including the observability cost of fanning out.</span></li></ul></div>
@@ -291,6 +302,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "turn-cap": {"t": "Turn cap", "d": "A hard limit on loop iterations, which must name itself when it fires. A run that returns nothing with no reason is indistinguishable from the model failing."}, "trajectory-log": {"t": "Trajectory log", "d": "Every turn, every tool call, and a named termination reason. The only artefact that survives an agent run, since runs cannot be reproduced."}, "index-recall": {"t": "Index recall", "d": "Whether your approximate index returns what an exhaustive search would have. It is a property of the index alone, measured against brute force, and almost nobody checks it."}, "action-log": {"t": "Action log", "d": "A record of what an agent did, in order, with arguments and results. You cannot investigate what you did not record, and this is where an injection shows up."}, "approval-gate": {"t": "Approval gate", "d": "A point where work stops until a human decides. It only counts if the run persists while it waits; a gate that lets the work continue is decoration."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -28,6 +28,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Frontier vs local** — Not a quality ladder but two constraint sets. Frontier buys reasoning trained against verifiers, long context that stays usable, and tool-call reliability under compounding. Local buys data that never leaves, fixed rather than marginal cost, a version nothing deprecates under you, and ownership of the sampler — including constrained decoding against a grammar, which major hosted APIs do not offer at any price.
 
+**Open-weight vs proprietary models** — Whether you can download the weights. An open-weight model ships them, so you can run it locally, quantise it, fine-tune it and control its sampler; a proprietary model keeps them behind an API, so you get only what the provider exposes. "Open-weight" is not "open-source": the training data and code are usually not released, and the licence may restrict use. It is the property the frontier-versus-local choice turns on, and the one that makes abliteration possible.
+
 **Technique transfer** — Most of the distance between a good agent and a bad one is harness rather than model, and harness is portable. Several techniques are worth *more* locally than where they were invented: progressive disclosure, because local prefill is slower; speculative decoding, because a single-user machine has the spare compute a batched server has already sold; and grammars, because you own the sampler.
 
 **Progressive disclosure** — Keeping a pointer resident and loading the detail only when needed. One technique at three layers of the context budget: tool names with schemas fetched on demand, skill descriptions with bodies loaded on invocation, and sub-agents returning conclusions rather than the material they read.
@@ -985,6 +987,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Indirect injection** — An instruction that arrives inside content the system reads — a document, a tool result, a record field — rather than from the person using it. It borrows the agent's privileges rather than the attacker's, and the attacker need never touch the system; they only need to control something it will read.
 
+**Jailbreak** — A prompt written to get a model past its own refusal behaviour: a role-play frame, an invented authorisation, a request split into harmless-looking pieces. It targets what the model will *say*, which separates it from injection, which targets what an agent will *do* with content it reads. A jailbreak that works on a chatbot is an embarrassment; the same one on an agent holding tools is an incident.
+
 **Instruction hardening** — Telling the model in its system prompt to disregard instructions found in content. Free, worth doing, and defeated by a sufficiently determined payload, because it asks the model to police a boundary the input format never carried.
 
 **Input filtering** — Scanning incoming text for attack patterns. Catches the obvious and misses the quiet, and raises confidence faster than it raises safety — most useful logging rather than blocking, as a signal that you are being probed.
@@ -995,7 +999,11 @@ to someone non-technical in two sentences, it hasn't landed yet.
 
 **Tool chaining** — Two individually harmless capabilities that compose into a harmful one — read plus send, fetch plus interpolate. Invisible to a per-tool review, which is why tool sets are audited as sets.
 
+**Red team** — People, or a script, assigned to attack your own system before someone else does, and to report what got through. The useful form is a fixed set of cases with decided success criteria, which is the attack battery below, run against a recorded baseline. An unstructured session finds bugs once and proves nothing the second time.
+
 **Attack battery** — A fixed, privately held set of adversarial cases with decided success criteria, run against a baseline. The security counterpart of the eval battery, and it grows to encode your own incidents rather than the field's.
+
+**Abliteration** — Removing a model's refusal behaviour by editing its weights rather than its prompt. Researchers found that refusal in several open-weight chat models is mediated largely by a single direction in the model's internal activations; projecting that direction out of the weights stops the model refusing, with no retraining. It needs the weights, so it applies only to open-weight models. The consequence for security work: a refusal baked into an open-weight model is a default, not a control, so anything that must hold has to be enforced outside the model.
 
 **Exfiltration channel** — Any path by which data in context reaches somewhere the attacker can see: a fetch tool, a written file read back later, a rendered image address, or a trace written to a lower-trust store.
 
@@ -1036,6 +1044,8 @@ to someone non-technical in two sentences, it hasn't landed yet.
 **Group Relative Policy Optimisation (GRPO)** — Sampling several answers per prompt, scoring them, and moving towards those beating the group average. Dropping the separate value model earlier methods required is much of why reinforcement tuning became affordable.
 
 **Direct Preference Optimisation (DPO)** — Optimising directly on preferred/rejected response pairs without training a separate reward model. Simpler and cheaper than RLHF, and needs preference pairs rather than a verifier.
+
+**Alignment** — How closely a model's behaviour matches what its builders and users intended, including refusing what they would not want done. It is a property you measure on a given model and task, not a switch: RLHF and DPO move a model toward it, and a jailbreak is the test of how far. Not to be confused with *cross-modal alignment*, which is about matching images to captions.
 
 **RLHF (reinforcement learning from human feedback)** — Humans rank outputs, a reward model learns to predict those rankings, and the policy is optimised against it. The original recipe for turning a base model into an assistant.
 

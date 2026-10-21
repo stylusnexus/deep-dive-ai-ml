@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -222,9 +233,9 @@
   <p class="subtitle">A ladder of progressively more assistance — and the only design that tells you where the wall actually is.</p>
 
   <p>You have a task an agent fails. You have a dozen ideas about why. Testing them one at a time takes a week and, worse, each result is ambiguous — a change that produces no improvement might be the wrong lever, or the right lever applied where a different problem was blocking.</p>
-  <p>A <strong>rung</strong> is one configuration in an ordered ladder of increasing assistance. Run the same fixture across every rung and the pattern of where it starts passing localises the failure in a single sweep.</p>
+  <p>A <strong>rung</strong> is one configuration in an ordered ladder of increasing assistance. Run the same <dfn class="gl" tabindex="0" data-gl="fixture">fixture</dfn> across every rung and the pattern of where it starts passing localises the failure in a single sweep.</p>
   <h2>A ladder, bottom to top</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Bare</div><div><div class="roadmap-title">The task, nothing else</div><div class="roadmap-desc">No scaffolding, no hints. If it passes here, everything above is unnecessary.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Test-first</div><div><div class="roadmap-title">The failing test in context</div><div class="roadmap-desc">Supplies a checkable target. Passing here and not below means the agent could not work out what success looked like.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reloop</div><div><div class="roadmap-title">Failures fed back, retry allowed</div><div class="roadmap-desc">The verifier-guided loop. Passing here means it could not get it right first time but could correct itself given the signal.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Guards-off</div><div><div class="roadmap-title">Budgets and limits relaxed</div><div class="roadmap-desc">Passing here means capability was never the issue — the harness was stopping it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decomposed</div><div><div class="roadmap-title">Task pre-split into steps</div><div class="roadmap-desc">Passing here means the model could do each part and not the planning.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Oracle</div><div><div class="roadmap-title">The answer, or most of it, supplied</div><div class="roadmap-desc">The control. Failing at this rung means the fixture or the rubric is broken, not the agent.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Bare</div><div><div class="roadmap-title">The task, nothing else</div><div class="roadmap-desc">No scaffolding, no hints. If it passes here, everything above is unnecessary.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Test-first</div><div><div class="roadmap-title">The failing test in context</div><div class="roadmap-desc">Supplies a checkable target. Passing here and not below means the agent could not work out what success looked like.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Reloop</div><div><div class="roadmap-title">Failures fed back, retry allowed</div><div class="roadmap-desc">The <dfn class="gl" tabindex="0" data-gl="verifier-guided-loop">verifier-guided loop</dfn>. Passing here means it could not get it right first time but could correct itself given the signal.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Guards-off</div><div><div class="roadmap-title">Budgets and limits relaxed</div><div class="roadmap-desc">Passing here means capability was never the issue — the <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn> was stopping it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Decomposed</div><div><div class="roadmap-title">Task pre-split into steps</div><div class="roadmap-desc">Passing here means the model could do each part and not the planning.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Oracle</div><div><div class="roadmap-title">The answer, or most of it, supplied</div><div class="roadmap-desc">The control. Failing at this rung means the fixture or the <dfn class="gl" tabindex="0" data-gl="rubric">rubric</dfn> is broken, not the agent.</div></div></div></div>
   <figure class="diagram"><svg viewBox="0 0 640 235" role="img" aria-label="A ladder of rungs and what each result means">
 <rect x="12" y="14" width="300" height="30" rx="5" class="d-box"/><text x="26" y="34" class="d-label-sm">bare</text>
 <text x="330" y="34" class="d-label-sm">passes → you had no problem</text>
@@ -244,7 +255,7 @@
   <h2>Reading the ladder</h2>
   <p>The transitions carry the information, not the totals. Three patterns worth recognising:</p>
   <ul><li><strong>Passes low, fails high.</strong> Almost always a bug in your ladder — a higher rung is supposed to be strictly more helpful. If added assistance makes things worse, that assistance is doing something you did not intend.</li><li><strong>Fails everywhere including the oracle.</strong> The fixture or the rubric is broken. Fix the instrument before drawing any conclusion about the agent.</li><li><strong>Passes only at the top.</strong> A real capability limit for this configuration. This is the only pattern that justifies reaching for a different model.</li></ul>
-  <div class="callout matters"><span class="label">The oracle rung is the one people leave out, and it is the one that saves you</span>It is a control fixture doing its job continuously. Without it, a board of zeros is ambiguous between 'the agent cannot do this' and 'nothing could pass this fixture'. With it, that ambiguity resolves in one cell — and a broken fixture is far more common than people expect, because fixtures are written once and never tested against a known-good answer.</div>
+  <div class="callout matters"><span class="label">The oracle rung is the one people leave out, and it is the one that saves you</span>It is a <dfn class="gl" tabindex="0" data-gl="control-fixture">control fixture</dfn> doing its job continuously. Without it, a board of zeros is ambiguous between 'the agent cannot do this' and 'nothing could pass this fixture'. With it, that ambiguity resolves in one cell — and a broken fixture is far more common than people expect, because fixtures are written once and never tested against a known-good answer.</div>
   <h2>Running the sweep honestly</h2>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Same fixtures on every rung</div><div><div class="roadmap-title">Non-negotiable</div><div class="roadmap-desc">Change the tasks between rungs and you are comparing nothing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Repeats per cell</div><div><div class="roadmap-title">Three at minimum</div><div class="roadmap-desc">Agent runs are stochastic. A single run per cell gives you a board of coin flips presented as a table.</div></div></div><div class="roadmap-item"><div class="roadmap-num">One variable per rung</div><div><div class="roadmap-title">Strictly cumulative</div><div class="roadmap-desc">Each rung adds exactly one thing to the one below. Two changes at once and the transition tells you nothing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Record the manifest</div><div><div class="roadmap-title">Per cell</div><div class="roadmap-desc">Model, budgets, verification state, config version. Otherwise a surprising cell cannot be investigated later.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Classify non-completions</div><div><div class="roadmap-title">Before aggregating</div><div class="roadmap-desc">An infrastructure error is not a failure to solve the task, and mixing them corrupts every cell it touches.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">One run per cell produces a board of coin flips formatted as a table.</p><p class="know-why">Agent runs vary between attempts for reasons that have nothing to do with your treatment — sampling, retrieval order, timing. Without repeats you cannot distinguish a real transition between rungs from noise, and the tidy grid makes the result look more solid than it is.</p><p class="know-eg"><span class="know-eg-label">For example</span>A smoke run on one fixture showed a difference of +1.00 between two conditions — one passed and one failed, which on a single fixture is the largest gap arithmetically available and looks decisive. The full seven-fixture run showed +0.00. Nothing about the single-run result signalled that it was unrepresentative, and it had already been written up.</p></blockquote>
@@ -287,6 +298,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"fixture": {"t": "Fixture", "d": "One case with an answer: a starting state, inputs, and an assertion that is false before the work and true after. The smallest unit of evidence a harness can produce. A fixture that passes at the starting commit, or fails whatever you do, measures nothing — and both look like results."}, "verifier-guided-loop": {"t": "Verifier-guided loop", "d": "Generate, check against something external (tests, compiler, schema), retry on failure. The strongest inference-time loop, because the signal isn't the model's own opinion."}, "harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "rubric": {"t": "Rubric", "d": "A set of scoring dimensions, each with observable criteria per level and an anchor example, replacing a single score. The test of one is that two careful readers apply it to the same output and agree; if they do not, it describes nothing."}, "control-fixture": {"t": "Control fixture", "d": "A deliberately easy task in the same domain and harness. When a board reads uniformly zero, it tells you whether the wall is capability or scaffolding."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

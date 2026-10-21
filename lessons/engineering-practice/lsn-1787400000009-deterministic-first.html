@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -224,7 +235,7 @@
   <p>This idea has appeared five times already in this course, each time as a footnote to something else. It deserves stating on its own, because it is the highest-leverage engineering judgement in the field and it is the one most often skipped.</p>
   <p><strong>A model is the most expensive, slowest, least debuggable and least testable component you can put in a system.</strong> Sometimes it is the only thing that can do the job, and then it is worth every one of those costs. Frequently it is not, and reaching for it anyway is a choice you will pay for on every request forever.</p>
   <h2>Where it has already come up</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Intake question 1</div><div><div class="roadmap-title">Is this even an ML problem?</div><div class="roadmap-desc">Could a rule, a lookup, a SQL query or a person twice a day solve it? Most projects that die should die here.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Agent or workflow?</div><div><div class="roadmap-title">Did you decide the sequence?</div><div class="roadmap-desc">If you know the steps, write the steps. An agent is for when the sequence genuinely cannot be known in advance.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Prompt or tool?</div><div><div class="roadmap-title">Can the model tell it complied?</div><div class="roadmap-desc">A mechanically checkable rule belongs in a tool as a precondition. Refusal beats hope.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Judge or verifier?</div><div><div class="roadmap-title">Is there something checkable?</div><div class="roadmap-desc">A typechecker is narrower than a model judge and it is not an opinion. Where a real check exists, take it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Embeddings or keywords?</div><div><div class="roadmap-title">Is the text jargon-heavy?</div><div class="roadmap-desc">Best Matching 25 (BM25) beats vector search outright on identifiers, error codes and rare terms, at a fraction of the cost.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Intake question 1</div><div><div class="roadmap-title">Is this even an ML problem?</div><div class="roadmap-desc">Could a rule, a lookup, a SQL query or a person twice a day solve it? Most projects that die should die here.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Agent or workflow?</div><div><div class="roadmap-title">Did you decide the sequence?</div><div class="roadmap-desc">If you know the steps, write the steps. An agent is for when the sequence genuinely cannot be known in advance.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Prompt or tool?</div><div><div class="roadmap-title">Can the model tell it complied?</div><div class="roadmap-desc">A mechanically checkable rule belongs in a tool as a precondition. Refusal beats hope.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Judge or verifier?</div><div><div class="roadmap-title">Is there something checkable?</div><div class="roadmap-desc">A typechecker is narrower than a model judge and it is not an opinion. Where a real check exists, take it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Embeddings or keywords?</div><div><div class="roadmap-title">Is the text jargon-heavy?</div><div class="roadmap-desc">Best Matching 25 (<dfn class="gl" tabindex="0" data-gl="bm25">BM25</dfn>) beats vector search outright on identifiers, error codes and rare terms, at a fraction of the cost.</div></div></div></div>
   <div class="callout insight"><span class="label">The pattern</span>Every one of those is the same question at a different altitude: <em>is there a bounded, checkable mechanism that does this job?</em> When there is, it wins on cost, latency, testability and the ability to explain what happened — and it does not drift, hallucinate, or change behaviour when a provider updates a model behind an alias.</div>
   <h2>What a deterministic component gives you that a model cannot</h2>
   <figure class="diagram"><svg viewBox="0 0 640 230" role="img" aria-label="Deterministic component compared against a model">
@@ -300,6 +311,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"bm25": {"t": "BM25", "d": "Term-frequency keyword ranking, adjusted for rare terms and diminishing repeats. Beats embeddings on identifiers, error codes and rare terms."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

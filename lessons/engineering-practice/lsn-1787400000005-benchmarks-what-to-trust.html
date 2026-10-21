@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,9 +232,9 @@
   <h1>Benchmarks: Why They Matter, Why They Fail, and When to Build Your Own</h1>
   <p class="subtitle">Existing tools save you the load generator. They do not save you from asking whether the number answers your question.</p>
 
-  <p>Every choice in this course that involves a number, which engine, which model, which quantization, whether a change helped, rests on a benchmark. A benchmark is a measuring instrument, and an instrument has a validity question before it has a result: <em>does it measure the thing I am deciding about?</em> Most bad benchmark decisions are not arithmetic errors. They are a correct number answering a different question.</p>
+  <p>Every choice in this course that involves a number, which engine, which model, which <dfn class="gl" tabindex="0" data-gl="quantization">quantization</dfn>, whether a change helped, rests on a benchmark. A benchmark is a measuring instrument, and an instrument has a validity question before it has a result: <em>does it measure the thing I am deciding about?</em> Most bad benchmark decisions are not arithmetic errors. They are a correct number answering a different question.</p>
   <h2>Four instruments that get called &amp;ldquo;a benchmark&amp;rdquo;</h2>
-  <ul><li><strong>A quality benchmark</strong> asks whether the model gets the answer right: SWE-bench (software-engineering tasks drawn from real GitHub issues), MMLU (Massive Multitask Language Understanding, a multiple-choice knowledge test), your own golden set. The failure mode is the task set, not the stopwatch.</li><li><strong>A preference leaderboard</strong> asks which answer people like more, such as Chatbot Arena. The failure mode is who is voting, and who gets to submit.</li><li><strong>A serving benchmark</strong> asks how fast and how much: time to first token, tokens per second, throughput under concurrency. Tools: <code>vllm bench serve</code>, GuideLLM, AIPerf, <code>llama-bench</code>, <code>mlx_lm.benchmark</code>. The failure mode is a workload that is not yours.</li><li><strong>A load test</strong> asks whether the system holds up under traffic: scaling, queues, timeouts. NVIDIA&#39;s benchmarking guide separates it from performance benchmarking, which &ldquo;measures model-level throughput, latency, and token-level behavior under controlled conditions&rdquo;, and recommends doing both.</li></ul>
+  <ul><li><strong>A quality benchmark</strong> asks whether the model gets the answer right: <dfn class="gl" tabindex="0" data-gl="swe-bench">SWE-bench</dfn> (software-engineering tasks drawn from real GitHub issues), MMLU (Massive Multitask Language Understanding, a multiple-choice knowledge test), your own golden set. The failure mode is the task set, not the stopwatch.</li><li><strong>A preference leaderboard</strong> asks which answer people like more, such as Chatbot Arena. The failure mode is who is voting, and who gets to submit.</li><li><strong>A serving benchmark</strong> asks how fast and how much: time to first <dfn class="gl" tabindex="0" data-gl="token">token</dfn>, tokens per second, throughput under concurrency. Tools: <code>vllm bench serve</code>, GuideLLM, AIPerf, <code>llama-bench</code>, <code>mlx_lm.benchmark</code>. The failure mode is a workload that is not yours.</li><li><strong>A load test</strong> asks whether the system holds up under traffic: scaling, queues, timeouts. NVIDIA&#39;s benchmarking guide separates it from performance benchmarking, which &ldquo;measures model-level throughput, latency, and token-level behavior under controlled conditions&rdquo;, and recommends doing both.</li></ul>
   <figure class="diagram"><svg viewBox="0 0 640 170" role="img" aria-label="A line from public leaderboards, through published harnesses, to your own workload on your own hardware, trading comparability for relevance"><rect x="8" y="14" width="196" height="64" rx="7" class="d-box"/><text x="20" y="38" class="d-label-b">PUBLIC LEADERBOARD</text><text x="20" y="58" class="d-label-sm">comparable, but whose task?</text>
 <rect x="222" y="14" width="196" height="64" rx="7" class="d-box"/><text x="234" y="38" class="d-label-b">PUBLISHED HARNESS</text><text x="234" y="58" class="d-label-sm">repeatable, generic workload</text>
 <rect x="436" y="14" width="196" height="64" rx="7" class="d-box-accent"/><text x="448" y="38" class="d-label-b">YOUR WORKLOAD</text><text x="448" y="58" class="d-label-sm">relevant, nobody can compare</text>
@@ -233,11 +244,11 @@
 <text x="8" y="148" class="d-label-sm">Start left to learn what is possible. Finish right before you decide anything that costs money.</text>
 </svg><figcaption>The more a benchmark looks like your own work, the less comparable it is with anyone else&#39;s. You are choosing a point on this line, not escaping it.</figcaption></figure>
   <h2>How public benchmarks fail</h2>
-  <ul><li><strong>Broken tasks.</strong> The Decoder reported on 23 February 2026 that OpenAI says SWE-bench Verified has lost its value as a meaningful measure of coding ability: at least 59.4 percent of the benchmark&#39;s tasks are flawed, rejecting correct solutions because they enforce specific implementation details or check functions the task never describes. We could not open OpenAI&#39;s own post, so this is secondhand. Read the primary source before quoting it.</li><li><strong>Contamination.</strong> The same report says GPT-5.2, Claude Opus 4.5 and Gemini 3 Flash Preview could reproduce some original fixes from memory. When the answers are public, score growth can mean the model has seen them. OpenAI recommends SWE-bench Pro and is building its own non-public tests.</li><li><strong>Selection.</strong> The Leaderboard Illusion (NeurIPS 2025, the Neural Information Processing Systems conference) studied Chatbot Arena and reports that providers could test private variants and publish only the best. It identifies 27 private variants tested by one provider before a release. It estimates that two providers received 19.2% and 20.4% of all arena data, against 29.7% combined for 83 open-weight models.</li><li><strong>Harness sensitivity.</strong> The same model on the same 500 tasks differed by 16 points across five scaffolds, in the measurement lesson earlier in this block. A score belongs to a model <em>and</em> a harness.</li><li><strong>Different definitions of the same metric.</strong> NVIDIA&#39;s benchmarking guide says the available tools &ldquo;expose overlapping metrics but often define and calculate them differently&rdquo;. A tokens-per-second figure from one tool is not automatically the one from another.</li></ul>
+  <ul><li><strong>Broken tasks.</strong> The Decoder reported on 23 February 2026 that OpenAI says <dfn class="gl" tabindex="0" data-gl="swe-bench-verified">SWE-bench Verified</dfn> has lost its value as a meaningful measure of coding ability: at least 59.4 percent of the benchmark&#39;s tasks are flawed, rejecting correct solutions because they enforce specific implementation details or check functions the task never describes. We could not open OpenAI&#39;s own post, so this is secondhand. Read the primary source before quoting it.</li><li><strong>Contamination.</strong> The same report says GPT-5.2, Claude Opus 4.5 and Gemini 3 Flash Preview could reproduce some original fixes from memory. When the answers are public, score growth can mean the model has seen them. OpenAI recommends SWE-bench Pro and is building its own non-public tests.</li><li><strong>Selection.</strong> The Leaderboard Illusion (NeurIPS 2025, the Neural Information Processing Systems conference) studied Chatbot Arena and reports that providers could test private variants and publish only the best. It identifies 27 private variants tested by one provider before a release. It estimates that two providers received 19.2% and 20.4% of all arena data, against 29.7% combined for 83 open-weight models.</li><li><strong><dfn class="gl" tabindex="0" data-gl="harness">Harness</dfn> sensitivity.</strong> The same model on the same 500 tasks differed by 16 points across five scaffolds, in the measurement lesson earlier in this block. A score belongs to a model <em>and</em> a harness.</li><li><strong>Different definitions of the same metric.</strong> NVIDIA&#39;s benchmarking guide says the available tools &ldquo;expose overlapping metrics but often define and calculate them differently&rdquo;. A tokens-per-second figure from one tool is not automatically the one from another.</li></ul>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A benchmark result is only as good as the match between its task and your decision, and the match is not on the leaderboard.</p><p class="know-why">A public number was produced on someone else&#39;s task set, with someone else&#39;s harness, on someone else&#39;s hardware. Each of those can be sound and the number can still say nothing about your workload. The failures above are not scandals. They are what happens when a number built for comparison gets used as a decision.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team picks the highest-ranked model on a coding leaderboard and sees no improvement on their own repository. The leaderboard task set was public, partly memorised, and tested single-file fixes. Their repository is a TypeScript service with long-running tests. The number was correct and answered a different question.</p></blockquote>
   <h2>Tools that already exist, and what each one is for</h2>
   <p>You do not have to write the load generator. These are maintained by people who have already hit the problems:</p>
-  <ul><li><strong>GuideLLM</strong> (vLLM project) describes itself as a benchmarking platform that is aware of service-level objectives (SLOs) for real-world inference. The vLLM benchmarking documentation says its own <code>vllm bench</code> commands are mainly for evaluating specific vLLM features and for regression testing, and recommends GuideLLM for benchmarking production servers.</li><li><strong>AIPerf</strong> (NVIDIA, Apache 2.0) measures generative models served by any inference solution and prints per-request and aggregate metrics.</li><li><strong><code>llama-bench</code></strong> (llama.cpp) tests prompt processing and generation speed on a model file. By default it repeats each test five times and does warmup runs first, which are the two habits that matter most and are the ones most often skipped by hand.</li><li><strong><code>mlx_lm.benchmark</code></strong> and <code>vllm-mlx bench-serve</code> do the same for MLX models on a Mac, with prompt length, generation length, batch size, trials and concurrency as options.</li><li><strong>Ask of any of them:</strong> what is the default workload, how many times does it repeat, does it count failed requests, and how does it define time to first token? The defaults are the part that decides whether your result is yours.</li></ul>
+  <ul><li><strong>GuideLLM</strong> (vLLM project) describes itself as a benchmarking platform that is aware of service-level objectives (SLOs) for real-world inference. The vLLM benchmarking documentation says its own <code>vllm bench</code> commands are mainly for evaluating specific vLLM features and for regression testing, and recommends GuideLLM for benchmarking production servers.</li><li><strong>AIPerf</strong> (NVIDIA, Apache 2.0) measures generative models served by any inference solution and prints per-request and aggregate metrics.</li><li><strong><code>llama-bench</code></strong> (<dfn class="gl" tabindex="0" data-gl="llama-cpp">llama.cpp</dfn>) tests prompt processing and generation speed on a model file. By default it repeats each test five times and does warmup runs first, which are the two habits that matter most and are the ones most often skipped by hand.</li><li><strong><code>mlx_lm.benchmark</code></strong> and <code>vllm-mlx bench-serve</code> do the same for <dfn class="gl" tabindex="0" data-gl="mlx">MLX</dfn> models on a Mac, with prompt length, generation length, batch size, trials and concurrency as options.</li><li><strong>Ask of any of them:</strong> what is the default workload, how many times does it repeat, does it count failed requests, and how does it define time to first token? The defaults are the part that decides whether your result is yours.</li></ul>
   <h2>When to build your own</h2>
   <p>A published tool measures a workload it can generate. Build your own when your questions are about <em>your</em> sequence of requests. Three cases came up in this course:</p>
   <ul><li><strong>Agent-shaped requests.</strong> A loop re-sends a growing context every turn, so the next prompt extends the last. A benchmark of independent random prompts never asks whether the cache serves the extension.</li><li><strong>Cache state as the variable.</strong> Cold, warm, evicted, and warm after a restart are different conditions. We found no restart-survival or forced-eviction test in the documentation of the tools above, so check yours before assuming one exists.</li><li><strong>Behaviour that should be a failure.</strong> A server that rejects a second concurrent request answers quickly with nothing. A generic average can read that as a speedup.</li></ul>
@@ -283,6 +294,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"quantization": {"t": "Quantization", "d": "Storing each weight in fewer bits (4, 5, 8) instead of 16. Shrinks and speeds up the model at a small cost in precision."}, "swe-bench": {"t": "SWE-bench", "d": "A benchmark of 2,294 real GitHub issues across twelve Python repositories, scored by whether the agent's patch makes the project's own tests pass."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "swe-bench-verified": {"t": "SWE-bench Verified", "d": "A 500-instance subset human-validated to remove tasks that were underspecified or impossible. The variant most quoted, and the fairest."}, "harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "llama-cpp": {"t": "llama.cpp", "d": "The C++ inference engine doing the actual arithmetic, including on Apple Silicon via Metal."}, "mlx": {"t": "MLX", "d": "Apple's array framework for the Metal GPU and unified memory, and by extension the weights and engines built on it (mlx-lm, vllm-mlx). An MLX model is safetensors plus a quantization setting such as 4 bits at a group size of 64. Has a CUDA backend for Linux, with no published LLM benchmark found."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

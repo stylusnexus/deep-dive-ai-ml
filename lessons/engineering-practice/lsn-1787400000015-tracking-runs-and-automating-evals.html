@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -224,12 +235,12 @@
   <p>Two lessons in this set already argue that a result you cannot locate is not a result: record the model, the configuration, the seed, the data version and the per-item outcomes, so that months later you can tell <em>never tried</em> from <em>tried and failed</em>. That discipline is correct and it is described as something you do by hand. By hand it works for five runs. At fifty it quietly stops happening, and the first symptom is somebody re-running an experiment that was settled six weeks ago because nobody could find the answer.</p>
   <h2>What a tracking server is for</h2>
   <p>An experiment tracker is a database with a run as its unit. Each run carries its parameters, its metrics, its artefacts and its timestamp, and the point is not the recording &mdash; it is that runs become <em>comparable</em> without you having planned the comparison in advance. Sorting forty runs by a metric, or asking which configuration produced the best result at a given cost, is the operation a directory of notebook outputs cannot do.</p>
-  <div class="callout matters"><span class="label">This repository has had one running the whole time</span><p>The lab containers are started with a tracking URI already pointing at an MLflow server, the compose file marks it for the classical-ML and fine-tuning blocks, and it serves a web interface on the machine you are reading this on. It has been available since the environments were built. If you have been keeping run notes in a cell at the bottom of a notebook, the thing that replaces them is already up.</p></div>
+  <div class="callout matters"><span class="label">This repository has had one running the whole time</span><p>The lab containers are started with a tracking URI already pointing at an MLflow server, the compose file marks it for the classical-ML and <dfn class="gl" tabindex="0" data-gl="fine-tuning">fine-tuning</dfn> blocks, and it serves a web interface on the machine you are reading this on. It has been available since the environments were built. If you have been keeping run notes in a cell at the bottom of a notebook, the thing that replaces them is already up.</p></div>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Parameters</div><div><div class="roadmap-title">The inputs you chose</div><div class="roadmap-desc">Model, configuration, learning rate, rank, prompt version, retrieval depth. Anything you would have to state to repeat the run.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Metrics</div><div><div class="roadmap-title">The numbers it produced</div><div class="roadmap-desc">Logged over time rather than once, so a training curve is visible and a run that diverged is obvious at a glance rather than after re-reading a log.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Artefacts</div><div><div class="roadmap-title">The things it made</div><div class="roadmap-desc">The adapter, the confusion matrix, the per-item results file. Held with the run that produced them, which is the part that makes a result auditable months later.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The code version</div><div><div class="roadmap-title">The field people omit</div><div class="roadmap-desc">A commit hash logged alongside the run. Without it the parameters describe an experiment you can no longer reconstruct, because the code they were passed to has moved.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">The value is not in logging the runs. It is in being able to compare runs you did not plan to compare.</p><p class="know-why">Anyone will record the experiment they are running now, because they care about it now. The question a tracker answers is the one that arrives later and unbidden: did we already try this, what did the version from before the refactor score, which of these forty configurations was best on cost rather than on accuracy. Notes written for your present self do not answer those, because your present self did not know they would be asked.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team spends two days tuning retrieval depth and settles on eight chunks. Four months later, after a chunking change, somebody asks whether eight is still right. With a tracker it is a query against runs that already exist. Without one it is two days again, and the second answer is not comparable with the first because the corpus moved in between.</p></blockquote>
   <h2>The eval battery belongs in continuous integration</h2>
   <p>This course builds an evaluation battery and argues at length that measurement is what separates a claim from a result. It then leaves the battery to be run by a person who remembers to run it &mdash; which in practice means it runs when someone is confident enough to check, and that is exactly the wrong distribution of moments.</p>
-  <p>Automating it is the same argument as the harness: a check that depends on discipline gets skipped under deadline, and a check that runs itself does not. The complication is that these evaluations are not unit tests. They cost money, they take minutes rather than milliseconds, and they do not return the same answer twice.</p>
+  <p>Automating it is the same argument as the <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn>: a check that depends on discipline gets skipped under deadline, and a check that runs itself does not. The complication is that these evaluations are not unit tests. They cost money, they take minutes rather than milliseconds, and they do not return the same answer twice.</p>
   <figure class="diagram"><svg viewBox="0 0 540 158" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three tiers of automated checks: fast deterministic on every push, sampled eval on pull requests, full battery before release.">
 <rect x="10" y="16" width="330" height="34" rx="5" class="d-box-good"/>
 <text x="24" y="38" class="d-label-sm">schema, parsing, refusal paths, golden fixtures &#8212; no model call</text>
@@ -243,7 +254,7 @@
 <text x="10" y="150" class="d-label-sm">cost rises down the stack, so the gate that blocks a merge should be near the top of it</text>
 </svg><figcaption>Three tiers, by what they cost. The cheap deterministic layer runs on every push; the expensive layer runs where it is worth waiting for.</figcaption></figure>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A gate that flakes gets disabled, and it takes the discipline with it.</p><p class="know-why">The first time an evaluation fails on a change that was fine, somebody re-runs it and it passes. The second time, somebody adds a retry. The third time it is marked non-blocking and it never blocks anything again &mdash; and the damage is not the lost check, it is that the team has now learned the evaluations are noise. A threshold set without knowing the run-to-run spread guarantees this, which is why the repeats this course insists on are load-bearing here rather than pedantic.</p><p class="know-eg"><span class="know-eg-label">For example</span>An evaluation scoring 0.82 with a run-to-run spread of plus or minus 0.03 is gated at 0.82. It fails roughly half the time on changes that did nothing. Gated at 0.75 it fails when something is actually wrong, which is the only failure anyone will keep paying attention to.</p></blockquote>
-  <div class="callout pitfall"><span class="label">Two things that make an automated evaluation lie</span><p><strong>The eval set leaks into the work.</strong> Running the same set on every pull request for six months means every developer has seen its failures and fixed toward them. That is the tuning-against-the-test-set problem from the overfitting lesson, arriving through automation, and the defence is the same: hold a portion back that only runs before release, and never show it in a pull-request comment.</p><p><strong>Nobody reads a green tick.</strong> An evaluation that reports only pass or fail throws away the number, so a metric sliding from 0.88 to 0.79 over two months passes every check on the way down. Record the value to the tracker on every run and watch the series, not the tick.</p></div>
+  <div class="callout pitfall"><span class="label">Two things that make an automated evaluation lie</span><p><strong>The eval set leaks into the work.</strong> Running the same set on every pull request for six months means every developer has seen its failures and fixed toward them. That is the tuning-against-the-test-set problem from the <dfn class="gl" tabindex="0" data-gl="overfitting">overfitting</dfn> lesson, arriving through automation, and the defence is the same: hold a portion back that only runs before release, and never show it in a pull-request comment.</p><p><strong>Nobody reads a green tick.</strong> An evaluation that reports only pass or fail throws away the number, so a metric sliding from 0.88 to 0.79 over two months passes every check on the way down. Record the value to the tracker on every run and watch the series, not the tick.</p></div>
   <h2>What this costs, honestly</h2>
   <p>Every automated run of a model-backed evaluation is a bill and a wait, and a team that puts the full battery on every push will turn it off within a fortnight. Tier it by what a failure would cost you: the checks that need no model call are effectively free and should gate everything, a sampled set is affordable per pull request, and the full battery belongs on a schedule or a release. If the honest answer is that you cannot afford to run the evaluations often, that is worth knowing explicitly &mdash; it means the quality claims are being made on less evidence than the process implies.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787400000003-how-to-measure.html">How to Measure</a><span class="link-note">A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.</span></li><li><a href="../core-vocabulary/lsn-1787000000009-eval-battery.html">The Eval Battery</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">How you know any of this works — and why the number you trust must be one you built.</span></li><li><a href="lsn-1787400000013-version-control-basics.html">Version Control, and Why Agents Make It Non-Optional</a><span class="link-note">Git and GitHub from zero — plus the argument for why this matters more now, not less.</span></li><li><a href="lsn-1787400000014-rungs-and-experiments.html">Rungs: Running Experiments on an Agent</a><span class="link-note">A ladder of progressively more assistance — and the only design that tells you where the wall actually is.</span></li></ul></div>
@@ -272,6 +283,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"fine-tuning": {"t": "Fine-tuning", "d": "Changing a model's weights so it responds differently: tone, structure, schema adherence, a domain's conventions. Good at installing behaviour and poor at installing facts, which is the distinction that decides whether it is the right tool or whether you needed retrieval."}, "harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "overfitting": {"t": "Overfitting", "d": "The model memorised the training data including its noise. Excellent on seen data, poor on new data. The dangerous failure, because it looks like success."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

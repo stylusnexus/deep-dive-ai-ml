@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,7 +232,7 @@
   <h1>Inside an LLM: The Parts and What Each Does</h1>
   <p class="subtitle">Follow one sentence all the way through — from text, to numbers, to the next word.</p>
 
-  <p>You can use these models productively without knowing what's inside them. But almost every practical question — why context costs what it does, why a fine-tune changes behaviour, what quantization actually shrinks, why the tokenizer matters — has an answer that lives in the architecture. This lesson walks one sentence through the whole machine.</p>
+  <p>You can use these models productively without knowing what's inside them. But almost every practical question — why context costs what it does, why a fine-tune changes behaviour, what <dfn class="gl" tabindex="0" data-gl="quantization">quantization</dfn> actually shrinks, why the tokenizer matters — has an answer that lives in the architecture. This lesson walks one sentence through the whole machine.</p>
   <figure class="diagram"><svg viewBox="0 0 640 420" role="img" aria-label="The full path of text through a large language model"><defs><marker id="la" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="180" y="10" width="280" height="34" rx="6" class="d-box"/>
 <text x="196" y="32" class="d-label-sm">"The turbine is"</text>
@@ -256,10 +267,10 @@
 <text x="196" y="410" class="d-label-sm">5 · Sample → " spinning"</text>
 </svg><figcaption>Text becomes numbers, numbers pass through a stack of identical blocks, and the last position gets turned back into a probability over every word the model knows. Everything else is detail.</figcaption></figure>
   <h2>1 · The tokenizer</h2>
-  <p>Before any maths, text is split into tokens and each is looked up as an integer. The tokenizer is a fixed vocabulary — typically 32,000 to 200,000 entries — built once before training and never changed afterwards.</p>
+  <p>Before any maths, text is split into <dfn class="gl" tabindex="0" data-gl="token">tokens</dfn> and each is looked up as an integer. The tokenizer is a fixed vocabulary — typically 32,000 to 200,000 entries — built once before training and never changed afterwards.</p>
   <p>It explains several things that otherwise look arbitrary: why models are bad at counting letters in a word (they never see letters), why unusual names cost more tokens than common ones, and why non-English text is often more expensive — the vocabulary was fitted mostly to English, so other languages fragment into more pieces.</p>
   <h2>2 · Embeddings and position</h2>
-  <p>Each token id is looked up in an <strong>embedding matrix</strong> and becomes a vector of a few thousand numbers. This is the same idea as the embeddings used for retrieval, learned here as part of the model.</p>
+  <p>Each token id is looked up in an <strong><dfn class="gl" tabindex="0" data-gl="embedding">embedding</dfn> matrix</strong> and becomes a vector of a few thousand numbers. This is the same idea as the embeddings used for retrieval, learned here as part of the model.</p>
   <p>Because attention compares all positions equally and has no inherent sense of order, position must be added explicitly — in most current models through <strong>rotary position embeddings</strong>. This is also why extending a model's context beyond what it was trained on is largely a positional-encoding problem rather than a memory one.</p>
   <h2>3 · The transformer blocks</h2>
   <p>The bulk of the model: the same block repeated dozens of times, each containing two operations that alternate.</p>
@@ -267,13 +278,13 @@
   <div class="callout insight"><span class="label">Where the knowledge actually sits</span>It's tempting to think of attention as the clever part and the feed-forward layers as plumbing. It's closer to the reverse. Attention decides which information to route where; the feed-forward layers hold most of the learned facts, and they're where most of the parameters are. When you hear a model 'knows' something, it is largely these layers.</div>
   <h2>4 · The output head</h2>
   <p>After the final block, the vector at the last position is multiplied by an unembedding matrix to produce one score — a <strong>logit</strong> — for every token in the vocabulary. Softmax turns those scores into probabilities summing to one.</p>
-  <p>Note what is thrown away: the model computed a rich representation at <em>every</em> position, and generation uses only the last. The others aren't wasted — they're cached, which is exactly what the KV cache holds.</p>
+  <p>Note what is thrown away: the model computed a rich representation at <em>every</em> position, and generation uses only the last. The others aren't wasted — they're cached, which is exactly what the <dfn class="gl" tabindex="0" data-gl="kv-cache">KV cache</dfn> holds.</p>
   <h2>5 · Sampling</h2>
   <p>A probability distribution over the vocabulary isn't yet a word. Temperature, top-k and top-p reshape that distribution and one token is drawn. Then the whole process runs again with that token appended — one full pass through the entire model per token generated.</p>
   <h2>The parts as files on disk</h2>
   <p>Download an open model and you get the same components, made concrete:</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">config.json</div><div><div class="roadmap-title">The architecture</div><div class="roadmap-desc">Layer count, hidden size, attention heads, vocabulary size, context length. The blueprint.</div></div></div><div class="roadmap-item"><div class="roadmap-num">tokenizer.json</div><div><div class="roadmap-title">The vocabulary</div><div class="roadmap-desc">Must match the weights exactly. Mismatch it and you get fluent nonsense — a classic and baffling bug.</div></div></div><div class="roadmap-item"><div class="roadmap-num">*.safetensors</div><div><div class="roadmap-title">The weights</div><div class="roadmap-desc">The actual learned numbers, at full precision. What fine-tuning modifies.</div></div></div><div class="roadmap-item"><div class="roadmap-num">*.gguf</div><div><div class="roadmap-title">Weights, quantized and packaged</div><div class="roadmap-desc">Config, tokenizer and quantized weights in one self-contained file for local serving.</div></div></div><div class="roadmap-item"><div class="roadmap-num">chat template</div><div><div class="roadmap-title">Turn structure</div><div class="roadmap-desc">How system, user and assistant turns are formatted into one string. Get this wrong and quality drops for no visible reason.</div></div></div></div>
-  <div class="callout matters"><span class="label">What each technique actually touches</span>Prompting changes the input only. Fine-tuning adjusts the weights — usually the feed-forward layers most. LoRA freezes the original weights and trains small add-on matrices alongside them. Quantization stores the same weights in fewer bits. retrieval-augmented generation (RAG) changes nothing about the model at all; it changes what's in the context. Knowing which layer of the machine each one touches tells you which problem each can and cannot solve.</div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">config.json</div><div><div class="roadmap-title">The architecture</div><div class="roadmap-desc">Layer count, hidden size, attention heads, vocabulary size, context length. The blueprint.</div></div></div><div class="roadmap-item"><div class="roadmap-num">tokenizer.json</div><div><div class="roadmap-title">The vocabulary</div><div class="roadmap-desc">Must match the weights exactly. Mismatch it and you get fluent nonsense — a classic and baffling bug.</div></div></div><div class="roadmap-item"><div class="roadmap-num">*.safetensors</div><div><div class="roadmap-title">The weights</div><div class="roadmap-desc">The actual learned numbers, at full precision. What <dfn class="gl" tabindex="0" data-gl="fine-tuning">fine-tuning</dfn> modifies.</div></div></div><div class="roadmap-item"><div class="roadmap-num">*.gguf</div><div><div class="roadmap-title">Weights, quantized and packaged</div><div class="roadmap-desc">Config, tokenizer and quantized weights in one self-contained file for local serving.</div></div></div><div class="roadmap-item"><div class="roadmap-num">chat template</div><div><div class="roadmap-title">Turn structure</div><div class="roadmap-desc">How system, user and assistant turns are formatted into one string. Get this wrong and quality drops for no visible reason.</div></div></div></div>
+  <div class="callout matters"><span class="label">What each technique actually touches</span>Prompting changes the input only. Fine-tuning adjusts the weights — usually the feed-forward layers most. <dfn class="gl" tabindex="0" data-gl="lora-low-rank-adaptation">LoRA</dfn> freezes the original weights and trains small add-on matrices alongside them. Quantization stores the same weights in fewer bits. retrieval-augmented generation (RAG) changes nothing about the model at all; it changes what's in the context. Knowing which layer of the machine each one touches tells you which problem each can and cannot solve.</div>
   <h2>The size numbers, made concrete</h2>
   <p>A 7-billion-parameter model has roughly 32 blocks, a hidden size around 4096, 32 attention heads, and a vocabulary near 32,000. At 16-bit precision the weights alone are about 14GB — most of it in the feed-forward layers. Every one of those parameters is touched for every token generated, which is why local inference is memory-bandwidth bound and why quantization speeds things up as well as shrinking them.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../algorithms/lsn-1787100000005-attention-and-transformers.html">Attention and the Transformer</a><span class="rel-set">Algorithms That Matter Here</span><span class="link-note">The algorithm every model in this program is built from.</span></li><li><a href="../core-vocabulary/lsn-1787000000001-tokens-context-and-kv-cache.html">Tokens, the Context Window, and the KV Cache</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">Why a model 'forgets', why long conversations get expensive, and what's actually being cached.</span></li><li><a href="../core-vocabulary/lsn-1787000000002-weights-gguf-quantization.html">Weights, GGUF and Quantization</a><span class="rel-set">Core Vocabulary: The Terms Every LLM System Uses</span><span class="link-note">What Q4_K_M actually means, and the trade you're making when you pick it.</span></li><li><a href="lsn-1787200000000-the-map.html">The Map: AI, ML, Deep Learning, GenAI and Agents</a><span class="link-note">Read this before anything else. Every term in the program has a place on one picture.</span></li></ul></div>
@@ -310,6 +321,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"quantization": {"t": "Quantization", "d": "Storing each weight in fewer bits (4, 5, 8) instead of 16. Shrinks and speeds up the model at a small cost in precision."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "kv-cache": {"t": "KV cache", "d": "Stored key/value vectors for tokens already processed, so they aren't recomputed each step. Grows with context length, and is usually what exhausts memory locally. Prompt caching is this, sold as a feature."}, "fine-tuning": {"t": "Fine-tuning", "d": "Changing a model's weights so it responds differently: tone, structure, schema adherence, a domain's conventions. Good at installing behaviour and poor at installing facts, which is the distinction that decides whether it is the right tool or whether you needed retrieval."}, "lora-low-rank-adaptation": {"t": "LoRA (low-rank adaptation)", "d": "Freezing every base weight and learning a small pair of matrices whose product stands in for the update. The saving is not mainly the parameter count: a frozen weight needs no gradient and no optimiser state, and those are what dominate training memory."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,11 +232,11 @@
   <h1>Embeddings, Vectors and Semantic Routing</h1>
   <p class="subtitle">How a machine decides two things 'mean' something similar — and where that fails.</p>
 
-  <p><strong>Semantic routing</strong> depends entirely on <strong>embeddings</strong>, and so does retrieval-augmented generation (RAG) in Block 3 — so this concept pays for itself twice. It is also the cheapest classifier you will ever deploy.</p>
+  <p><strong><dfn class="gl" tabindex="0" data-gl="semantic-routing">Semantic routing</dfn></strong> depends entirely on <strong><dfn class="gl" tabindex="0" data-gl="embedding">embeddings</dfn></strong>, and so does retrieval-augmented generation (RAG) in Block 3 — so this concept pays for itself twice. It is also the cheapest classifier you will ever deploy.</p>
   <h2>An embedding is a list of numbers standing in for meaning</h2>
   <p>An embedding model takes text and returns a fixed-length list of numbers — a <strong>vector</strong>, typically a few hundred to a couple of thousand values. The useful property is that texts with similar meanings produce vectors that point in similar directions, even when they share no words at all.</p>
   <p>"How do I reset my password?" and "I'm locked out of my account" have almost no vocabulary in common. Their embeddings sit close together. That is the whole trick, and everything else is bookkeeping.</p>
-  <div class="callout insight"><span class="label">Similarity is a measurable angle</span>Closeness is usually cosine similarity — the cosine <em>of</em> the angle between two vectors, which runs from 1 (same direction) through 0 (perpendicular) to -1 (opposite). The angle itself would run 0 to 180 degrees; it is the cosine that gives the convenient range. It's a cheap arithmetic operation, which is why searching millions of vectors is fast.</div>
+  <div class="callout insight"><span class="label">Similarity is a measurable angle</span>Closeness is usually <dfn class="gl" tabindex="0" data-gl="cosine-similarity">cosine similarity</dfn> — the cosine <em>of</em> the angle between two vectors, which runs from 1 (same direction) through 0 (perpendicular) to -1 (opposite). The angle itself would run 0 to 180 degrees; it is the cosine that gives the convenient range. It's a cheap arithmetic operation, which is why searching millions of vectors is fast.</div>
   <figure class="diagram"><svg viewBox="0 0 640 260" role="img" aria-label="Embedding space with clusters">
 <rect x="12" y="12" width="616" height="236" rx="8" class="d-box"/>
 <circle cx="140" cy="80" r="6" class="d-fill-accent"/>
@@ -251,16 +262,16 @@
   <p>The reason to route this way rather than asking an LLM "which category is this?" is cost and latency. An embedding call is milliseconds and fractions of a cent. It runs on every single turn, so that difference compounds.</p>
   <h2>Where the numbers come from: contrastive training</h2>
   <p>Everything above treats the embedding model as given &mdash; text goes in, a vector comes out, similar things land near each other. It is worth knowing how that arrangement is produced, because several of the practical oddities in this course fall out of it directly.</p>
-  <p>The recipe is <strong>contrastive learning</strong>, and the idea is simpler than the name. Take pairs that should be close &mdash; a question and its answer, a sentence and its paraphrase, a caption and its image &mdash; and pairs that should not be. Train the model to pull the first kind together and push the second kind apart. Nobody labels what any dimension means and no dimension has to mean anything; the only instruction is about relative distances, and geometry that satisfies enough of those constraints turns out to encode something usable as meaning.</p>
+  <p>The recipe is <strong><dfn class="gl" tabindex="0" data-gl="contrastive-learning">contrastive learning</dfn></strong>, and the idea is simpler than the name. Take pairs that should be close &mdash; a question and its answer, a sentence and its paraphrase, a caption and its image &mdash; and pairs that should not be. Train the model to pull the first kind together and push the second kind apart. Nobody labels what any dimension means and no dimension has to mean anything; the only instruction is about relative distances, and geometry that satisfies enough of those constraints turns out to encode something usable as meaning.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Positive pairs</div><div><div class="roadmap-title">What should end up close</div><div class="roadmap-desc">Usually harvested rather than labelled: a title and its body, a question and the passage that answers it, consecutive sentences. The cheapness of collecting these is why the method scales.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Negative pairs</div><div><div class="roadmap-title">What should end up apart</div><div class="roadmap-desc">Frequently just the other items in the same batch, on the assumption that a random other document is unrelated. Which is true often enough to work and false often enough to matter.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Hard negatives</div><div><div class="roadmap-title">The ones that do the teaching</div><div class="roadmap-desc">Items that are genuinely similar but should not match. Easy negatives are learned in the first few steps and contribute nothing afterwards; a model that has never seen hard negatives has no reason to separate things that look alike.</div></div></div><div class="roadmap-item"><div class="roadmap-num">The loss</div><div><div class="roadmap-title">Relative, never absolute</div><div class="roadmap-desc">The objective compares distances rather than fixing them, so an embedding has no meaningful absolute scale. This is why a similarity of 0.8 means nothing on its own and everything relative to the same model&#39;s other scores.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">An embedding model learned the distinctions someone chose to train it on, and is indifferent to the ones they did not.</p><p class="know-why">The geometry is a record of which pairs were called positive. If negation was never a distinction the training pairs turned on, the model has no reason to place a sentence far from its opposite &mdash; and it will not. This is the same fact the semantic-cache measurement in this course arrives at from the other end, where a genuine paraphrase scored 0.149 while a negation that reverses the answer scored higher. Nothing is malfunctioning there; the model is reporting a similarity it was never asked to make sensitive to meaning-reversal.</p><p class="know-eg"><span class="know-eg-label">For example</span>So the useful question about an embedding model is not how good it is but what it was trained to separate. A model trained on question-and-answer pairs is being asked something different from one trained on paraphrases, and asking it to do the other job is a mismatch rather than a shortcoming.</p></blockquote>
   <div class="callout insight"><span class="label">Two practical oddities this explains</span><p><strong>Why some models want a prefix on your query.</strong> Several are trained with the two sides of a pair marked differently &mdash; a question is not a passage &mdash; so they expect a short instruction such as a query prefix at inference. Omitting it silently degrades retrieval, because you are handing the model an input in the wrong costume.</p><p><strong>Why two builds of nominally the same model are not interchangeable.</strong> The training only fixed relative distances, so nothing pins the space to a canonical orientation. Two versions can agree closely on average similarity and still rank your candidates differently, which is enough to change what gets retrieved. Re-embed the whole corpus when you change the model, and re-run your retrieval evaluation even when the change looks like a rebuild.</p></div>
   <h2>The same trick across two modalities</h2>
-  <p>The interesting consequence is that nothing in the recipe requires both halves of a pair to be the same kind of thing. Train on images with their captions &mdash; pulling each image towards its own caption and away from everyone else&#39;s &mdash; and you get one space holding both, where a photograph of a dog sits near the words &ldquo;a dog&rdquo;. This is <strong>cross-modal alignment</strong>, and it is what makes it possible to search images with text, or to classify an image against a list of written labels the model was never explicitly trained to recognise.</p>
+  <p>The interesting consequence is that nothing in the recipe requires both halves of a pair to be the same kind of thing. Train on images with their captions &mdash; pulling each image towards its own caption and away from everyone else&#39;s &mdash; and you get one space holding both, where a photograph of a dog sits near the words &ldquo;a dog&rdquo;. This is <strong><dfn class="gl" tabindex="0" data-gl="cross-modal-alignment">cross-modal alignment</dfn></strong>, and it is what makes it possible to search images with text, or to classify an image against a list of written labels the model was never explicitly trained to recognise.</p>
   <p>It also explains what a vision-language model is doing under the surface, and where it is weak. The alignment is only as good as the caption pairs it learned from, so these systems are strong on the sorts of description that appear in captions and much weaker on anything captions rarely mention &mdash; counting, spatial relations, text inside the image, or fine distinctions that nobody bothers writing down.</p>
   <h2>Where embeddings fail</h2>
-  <ul><li><strong>Negation.</strong> "I want a refund" and "I don't want a refund" embed close together. Sign is meaning, and embeddings are weak at it.</li><li><strong>Jargon and identifiers.</strong> Internal names, error codes, and file paths often carry no useful semantics. Keyword search beats embeddings here — which is why serious retrieval combines both.</li><li><strong>Chunking artefacts.</strong> An embedding represents whatever text you gave it. Split a document badly and you get vectors representing half-thoughts.</li></ul>
-  <div class="callout pitfall"><span class="label">The baseline you should always run</span>Before reaching for a vector database, try keyword search — Best Matching 25 (BM25) or plain Postgres full-text. On short, jargon-heavy, identifier-rich corpora it frequently wins, and it costs nothing to test. This is the intake sheet's 'dumb baseline' question applied to retrieval.</div>
+  <ul><li><strong>Negation.</strong> "I want a refund" and "I don't want a refund" embed close together. Sign is meaning, and embeddings are weak at it.</li><li><strong>Jargon and identifiers.</strong> Internal names, error codes, and file paths often carry no useful semantics. Keyword search beats embeddings here — which is why serious retrieval combines both.</li><li><strong><dfn class="gl" tabindex="0" data-gl="chunking">Chunking</dfn> artefacts.</strong> An embedding represents whatever text you gave it. Split a document badly and you get vectors representing half-thoughts.</li></ul>
+  <div class="callout pitfall"><span class="label">The baseline you should always run</span>Before reaching for a vector database, try keyword search — Best Matching 25 (<dfn class="gl" tabindex="0" data-gl="bm25">BM25</dfn>) or plain Postgres full-text. On short, jargon-heavy, identifier-rich corpora it frequently wins, and it costs nothing to test. This is the intake sheet's 'dumb baseline' question applied to retrieval.</div>
   <h2>Vector stores</h2>
   <p>A <strong>vector database</strong> stores vectors alongside their source text and finds nearest neighbours quickly. Block 3 uses <code>pgvector</code> — the Postgres extension — because it means one database rather than two, and because at the scale you'll work at, the specialist stores buy speed you don't need.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Try keyword search before you reach for a vector database.</p><p class="know-why">Embeddings compress meaning into a few hundred numbers, and precise tokens are exactly what gets lost in that compression. Keyword search matches them exactly. On technical corpora this is frequently the difference between finding the answer and not.</p><p class="know-eg"><span class="know-eg-label">For example</span>Your corpus is internal error codes, file paths and function names. A user searches for ERR_QUEUE_4471. The embedding of that string sits near the embeddings of every other error code, because to the model they all look like the same kind of token. BM25 matches it exactly, in milliseconds, with no model and no index to maintain.</p></blockquote>
@@ -291,6 +302,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"semantic-routing": {"t": "Semantic routing", "d": "Picking a lane by embedding the incoming turn and comparing it to embedded examples. Milliseconds and fractions of a cent, versus asking an LLM to classify."}, "embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "cosine-similarity": {"t": "Cosine similarity", "d": "The angle between two vectors, from 1 to -1. How \"closeness of meaning\" is actually measured."}, "contrastive-learning": {"t": "Contrastive learning", "d": "How embedding models are trained: pull pairs that should be close together, push pairs that should not apart. Nobody labels what a dimension means; the only instruction is about relative distances, which is why an embedding has no meaningful absolute scale and a similarity of 0.8 means nothing except relative to the same model's other scores."}, "cross-modal-alignment": {"t": "Cross-modal alignment", "d": "Contrastive training where the two halves of a pair are different kinds of thing, most often an image and its caption. Produces one space holding both, which is what allows searching images with text. Only as good as the captions it learned from, so it is weak on what captions rarely mention: counting, spatial relations, text inside an image."}, "chunking": {"t": "Chunking", "d": "Cutting documents into retrievable pieces before embedding them. Split on structure — headings, sections, functions — because a chunk that ends mid-sentence embeds badly and reads worse."}, "bm25": {"t": "BM25", "d": "Term-frequency keyword ranking, adjusted for rare terms and diminishing repeats. Beats embeddings on identifiers, error codes and rare terms."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -1,0 +1,14 @@
+# Forms the popover linker must never link, whatever the glossary says. One per
+# line, case-insensitive. Add a form here when --report shows it matching in a
+# sense the glossary entry does not mean.
+#
+# Everywhere:
+agentic ai
+sliding window
+#
+# One lesson only ("lesson-slug :: form"): the word is right elsewhere and means
+# something else here.
+mcp-dangers :: token
+building-an-mcp-server :: token
+tokens-context-and-kv-cache :: retrieval quality
+vector-search-algorithms :: quantization

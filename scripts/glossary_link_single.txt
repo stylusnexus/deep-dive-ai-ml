@@ -1,0 +1,54 @@
+# Single ordinary words the popover linker may link. Everything not listed here
+# is skipped, because a lone word usually has a second meaning somewhere in the
+# course. Add a word only after checking it means the glossary sense wherever it
+# appears; `python3 scripts/glossary_links.py --report` shows every link in context.
+#
+# Deliberately NOT listed: temperature (turbine sensors), transformer (electrical),
+# precision, accuracy, specificity (everyday senses), alignment (cross-modal
+# alignment is a different term), pipeline, agent, tool, skill, workflow, node,
+# edge, head, trace, span, logs, metrics, events, attributes, inference (the
+# glossary entry itself warns of the logical and statistical senses), batching
+# (mini-batches in training), chatbot ("Chatbot Arena").
+Fixture
+Harness
+Token
+Embedding
+Quantization
+Perplexity
+Ollama
+Overfitting
+Underfitting
+Regularisation
+Hallucination
+Groundedness
+Distillation
+Compaction
+Sandboxing
+Backpropagation
+Perceptron
+Autoencoder
+Bagging
+Adam
+Jailbreak
+Abliteration
+FlashAttention
+Keras
+PyTorch
+GraphRAG
+Chunking
+Checkpointer
+Jitter
+Undersampling
+Eviction
+Queueing
+Preloading
+Resumption
+Rubric
+Peeking
+Discriminator
+Confounding
+Differencing
+Distractor
+dtype
+stdio
+QLoRA

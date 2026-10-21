@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -249,8 +260,8 @@
 <text x="12" y="194" class="d-label-sm">split mid-thought. Most "the model is bad at this" complaints are stage 2 or stage 4 problems.</text>
 </svg><figcaption>Five stages. Chunking and ranking are where quality is won or lost — the model at the end can only work with what reaches it, and most RAG failures happen before generation.</figcaption></figure>
   <h2>Chunking is a modelling decision, not a parameter</h2>
-  <p>The default advice — 512 tokens with 50 overlap — is a starting point that nobody should ship without looking at the output. The right question is not what size but <em>what is a self-contained thought in this corpus?</em></p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Split on structure first</div><div><div class="roadmap-title">Headings, sections, functions</div><div class="roadmap-desc">A chunk that ends mid-sentence embeds badly and reads worse. Character counts are a fallback, not a strategy.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Too small</div><div><div class="roadmap-title">Loses its referent</div><div class="roadmap-desc">A paragraph saying "this threshold must not be exceeded" is useless if the threshold was defined two chunks earlier.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Too large</div><div><div class="roadmap-title">Averages several topics</div><div class="roadmap-desc">The embedding represents none of them well, and retrieving it burns context on material the question did not ask about.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Overlap a little</div><div><div class="roadmap-title">10-15%</div><div class="roadmap-desc">So a passage spanning a boundary is not lost by both neighbours.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Keep the parent link</div><div><div class="roadmap-title">Small to match, larger to read</div><div class="roadmap-desc">Retrieve the precise chunk, then optionally expand to its section for the model to read.</div></div></div></div>
+  <p>The default advice — 512 <dfn class="gl" tabindex="0" data-gl="token">tokens</dfn> with 50 overlap — is a starting point that nobody should ship without looking at the output. The right question is not what size but <em>what is a self-contained thought in this corpus?</em></p>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Split on structure first</div><div><div class="roadmap-title">Headings, sections, functions</div><div class="roadmap-desc">A chunk that ends mid-sentence embeds badly and reads worse. Character counts are a fallback, not a strategy.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Too small</div><div><div class="roadmap-title">Loses its referent</div><div class="roadmap-desc">A paragraph saying "this threshold must not be exceeded" is useless if the threshold was defined two chunks earlier.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Too large</div><div><div class="roadmap-title">Averages several topics</div><div class="roadmap-desc">The <dfn class="gl" tabindex="0" data-gl="embedding">embedding</dfn> represents none of them well, and retrieving it burns context on material the question did not ask about.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Overlap a little</div><div><div class="roadmap-title">10-15%</div><div class="roadmap-desc">So a passage spanning a boundary is not lost by both neighbours.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Keep the parent link</div><div><div class="roadmap-title">Small to match, larger to read</div><div class="roadmap-desc">Retrieve the precise chunk, then optionally expand to its section for the model to read.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Print twenty random chunks and read them before tuning anything downstream.</p><p class="know-why">If you cannot tell what a chunk is about without its neighbours, neither can an embedding model. Every hour spent on embedding models or rerankers before doing this is spent on the wrong layer.</p><p class="know-eg"><span class="know-eg-label">For example</span>A team spent two weeks comparing embedding models on a technical corpus with flat retrieval quality throughout. Their PDF parser was splitting on page boundaries, so roughly a third of chunks began mid-sentence and ended mid-table. No embedding model can rescue that, and ten minutes of reading would have found it.</p></blockquote>
   <h2>What actually makes retrieval fail</h2>
   <p>In rough order of how often it is the real cause:</p>
@@ -258,7 +269,7 @@
   <div class="callout matters"><span class="label">Diagnose in that order, and cheaply</span>For a failing question, look at what was retrieved before looking at the answer. If the right chunk is absent, it is a retrieval problem. If it is present but ranked low, it is a ranking problem. If it is present and first and the answer is still wrong, only then is it a generation problem. Three different fixes, and people reach for the third by default.</div>
   <h2>Retrieval: cheap, wide, then precise</h2>
   <p>The architecture that works, and the reasoning behind each step:</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Retrieve wide</div><div><div class="roadmap-title">50 by keyword, 50 by vector</div><div class="roadmap-desc">Independent failure modes, so coverage is better than either alone. Cheap at this stage.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Fuse by rank</div><div><div class="roadmap-title">Reciprocal rank fusion</div><div class="roadmap-desc">Two lines of code, no score normalisation, no tuning. Reliably beats either input list.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Rerank the shortlist</div><div><div class="roadmap-title">Cross-encoder over ~100</div><div class="roadmap-desc">Scores query and document together rather than separately. Far more accurate, and only affordable because the set is small.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Send few</div><div><div class="roadmap-title">Top 3 to 5</div><div class="roadmap-desc">Precision beats volume. Distractors actively degrade the answer rather than being politely ignored.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Retrieve wide</div><div><div class="roadmap-title">50 by keyword, 50 by vector</div><div class="roadmap-desc">Independent failure modes, so coverage is better than either alone. Cheap at this stage.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Fuse by rank</div><div><div class="roadmap-title">Reciprocal rank fusion</div><div class="roadmap-desc">Two lines of code, no score normalisation, no tuning. Reliably beats either input list.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Rerank the shortlist</div><div><div class="roadmap-title">Cross-encoder over ~100</div><div class="roadmap-desc">Scores query and document together rather than separately. Far more accurate, and only affordable because the set is small.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Send few</div><div><div class="roadmap-title">Top 3 to 5</div><div class="roadmap-desc">Precision beats volume. <dfn class="gl" tabindex="0" data-gl="distractor">Distractors</dfn> actively degrade the answer rather than being politely ignored.</div></div></div></div>
   <h2>Generation, and making the answer checkable</h2>
   <ul><li><strong>Require citations to the retrieved chunks.</strong> Not a bibliography — a mapping from claim to source span, so a human can verify one sentence without re-reading the corpus.</li><li><strong>Licence refusal explicitly.</strong> "If the context does not contain the answer, say so" costs one line and is the difference between a wrong answer and no answer.</li><li><strong>Define the empty-retrieval path.</strong> When nothing relevant came back, the model must not fall through to its parameters. This is where grounded systems quietly stop being grounded.</li><li><strong>Put the retrieved material at the start or the end.</strong> Never buried in the middle of a long prompt.</li></ul>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A grounded system stops being grounded the moment retrieval returns nothing and the model answers anyway.</p><p class="know-why">The grounding lives in the pipeline, not in the model. If your prompt does not explicitly handle the empty case, the model falls back to its parameters and produces a fluent, uncited, unverifiable answer that looks exactly like the grounded ones.</p><p class="know-eg"><span class="know-eg-label">For example</span>A support assistant answers a question about a product discontinued before its training cutoff. Retrieval returned nothing, because the product is not in the knowledge base. The answer is confident, plausible, and drawn entirely from training data — indistinguishable in tone from the answers that were genuinely retrieved.</p></blockquote>
@@ -290,6 +301,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "distractor": {"t": "Distractor", "d": "A retrieved chunk that is topically close but does not answer the question. Models do not politely ignore them; they actively degrade the answer, which is why you send three to five chunks rather than twenty."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

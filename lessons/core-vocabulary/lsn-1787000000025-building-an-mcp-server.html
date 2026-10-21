@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -255,8 +266,8 @@
   <p>A server is a program with a protocol on one side and an API on the other, and both sides need testing separately. Unit-test the handlers directly, without a model in the loop. Then run the server against a real client and read the trajectory — what the model <em>tried</em> to call, and with what arguments, tells you more about your descriptions than any schema validation will.</p>
   <div class="callout insight"><span class="label">The evaluation that actually finds problems</span>Give an agent five realistic tasks that need your server and watch which tools it reaches for. Wrong tool chosen, right tool called with malformed arguments, and tool ignored entirely are three different problems with three different fixes — and all three are invisible if you only test the handlers.</div>
   <h2>When not to build one</h2>
-  <p>MCP solves an integration problem: write once, work across clients. If you have one client and one integration, a direct tool in your own harness is simpler, faster to change, and has no protocol surface to secure. The protocol earns its cost when the integration is reused — across clients, across agents, or by other people.</p>
-  <p>And the deterministic-first question still applies. If the agent's job is to run a fixed sequence against your API, that sequence is a script, and the script can be a bundled resource in a skill rather than six tools the model has to orchestrate correctly.</p>
+  <p>MCP solves an integration problem: write once, work across clients. If you have one client and one integration, a direct tool in your own <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn> is simpler, faster to change, and has no protocol surface to secure. The protocol earns its cost when the integration is reused — across clients, across agents, or by other people.</p>
+  <p>And the <dfn class="gl" tabindex="0" data-gl="deterministic-first">deterministic-first</dfn> question still applies. If the agent's job is to run a fixed sequence against your API, that sequence is a script, and the script can be a bundled resource in a skill rather than six tools the model has to orchestrate correctly.</p>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000007-tool-calls-and-mcp.html">Tool Calls and MCP</a><span class="link-note">How a text model comes to run your code, and what the protocol standardises.</span></li><li><a href="lsn-1787000000026-mcp-dangers.html">Model Context Protocol (MCP): The Danger Surface</a><span class="link-note">Named attack classes from the specification itself — and why the protocol says it cannot enforce its own security principles.</span></li><li><a href="../block6-security/lsn-1787900000001-exfiltration-and-tool-abuse.html">Exfiltration and Tool Abuse</a><span class="rel-set">Block 6 · Security</span><span class="link-note">An injected instruction is worth nothing on its own. It needs a way out, and your agent is holding several.</span></li><li><a href="lsn-1787000000023-skills.html">Skills: Packaging What an Agent Should Know</a><span class="link-note">Procedural knowledge as a loadable folder — and why the scripts inside it matter as much as the prose.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/transports" target="_blank" rel="noopener">MCP specification</a><span class="link-note">Transports, the base protocol, and capability negotiation.</span></li><li><a href="https://modelcontextprotocol.io/docs/develop/build-server" target="_blank" rel="noopener">Build a server — MCP docs</a><span class="link-note">The practical walkthrough in Python and TypeScript.</span></li><li><a href="https://github.com/modelcontextprotocol/servers" target="_blank" rel="noopener">modelcontextprotocol/servers</a><span class="link-note">Reference implementations. Read two or three before writing your own, particularly how they shape return values.</span></li></ul></div>
   <div class="quiz">
@@ -291,6 +302,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "deterministic-first": {"t": "Deterministic-first", "d": "A model is the most expensive, slowest, least testable component available. The judgement is knowing when it earns that: is there a bounded, checkable mechanism that does this job well?"}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -227,7 +238,7 @@
   <p>The underrated property is <strong>interpretability</strong>: the coefficients are readable. "Each extra year of equipment age adds 0.4 to predicted failure risk" is a sentence you can take to a stakeholder. A gradient-boosted ensemble that scores two points higher gives you nothing you can say out loud.</p>
   <h2>Logistic regression predicts a probability</h2>
   <p>Despite the name, it classifies. It fits a linear combination of inputs and then squashes the result through a sigmoid into the range 0–1, giving a probability rather than a hard label.</p>
-  <div class="callout matters"><span class="label">Where the threshold lives</span>Logistic regression outputs 0.73, not "fraud". Turning that into a decision requires a threshold, and choosing it is a business decision about the cost of false positives versus false negatives — question 6 on your intake sheet. The default of 0.5 is a convention, not an answer.</div>
+  <div class="callout matters"><span class="label">Where the threshold lives</span><dfn class="gl" tabindex="0" data-gl="logistic-regression">Logistic regression</dfn> outputs 0.73, not "fraud". Turning that into a decision requires a threshold, and choosing it is a business decision about the cost of false positives versus false negatives — question 6 on your intake sheet. The default of 0.5 is a convention, not an answer.</div>
   <figure class="diagram"><svg viewBox="0 0 640 190" role="img" aria-label="Linear versus logistic regression">
 <g>
 <text x="70" y="18" class="d-accent">LINEAR — predicts a value</text>
@@ -255,7 +266,7 @@
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Ridge (L2)</div><div><div class="roadmap-title">Shrinks coefficients toward zero</div><div class="roadmap-desc">Handles correlated inputs gracefully. Keeps every feature, just smaller.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Lasso (L1)</div><div><div class="roadmap-title">Drives some coefficients to exactly zero</div><div class="roadmap-desc">Performs feature selection for you. Useful when you suspect most inputs are noise.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Elastic Net</div><div><div class="roadmap-title">Both penalties combined</div><div class="roadmap-desc">The pragmatic default when you don't know which you want.</div></div></div></div>
   <h2>Assumptions that break quietly</h2>
   <ul><li><strong>Linearity.</strong> The relationship really is roughly a straight line. Plot it before assuming.</li><li><strong>Independence.</strong> Rows don't influence each other. Time series violate this badly — consecutive days are not independent samples.</li><li><strong>No extreme multicollinearity.</strong> Two nearly-identical inputs make coefficients unstable and uninterpretable, even while predictions stay fine.</li><li><strong>Outlier sensitivity.</strong> Squared error means one extreme point can drag the whole line.</li></ul>
-  <div class="callout pitfall"><span class="label">The thing to actually do</span>Run logistic or linear regression first, on every tabular problem, before touching a neural network. If it gets within a couple of points of your fancy model, ship the simple one — it trains in seconds, deploys anywhere, and you can explain its decisions when someone asks.</div>
+  <div class="callout pitfall"><span class="label">The thing to actually do</span>Run logistic or <dfn class="gl" tabindex="0" data-gl="linear-regression">linear regression</dfn> first, on every tabular problem, before touching a neural network. If it gets within a couple of points of your fancy model, ship the simple one — it trains in seconds, deploys anywhere, and you can explain its decisions when someone asks.</div>
   <h2>Reading the coefficients, which is the point</h2>
   <p>Fit a model on the turbine data and you get a number per feature. Those numbers are the deliverable as much as the predictions are — but only if you read them carefully.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Scale changes everything</div><div><div class="roadmap-title">Standardise before comparing</div><div class="roadmap-desc">A coefficient on vibration in mm/s and one on hours are not comparable magnitudes. Standardise the inputs first, then relative sizes mean something.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Sign can flip</div><div><div class="roadmap-title">When features correlate</div><div class="roadmap-desc">Add a correlated feature and a coefficient can reverse sign while predictions barely move. That is multicollinearity, and it is why an unstable coefficient is a warning about your features rather than about the world.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Log-odds, not probability</div><div><div class="roadmap-title">For logistic regression</div><div class="roadmap-desc">A coefficient of 0.7 does not mean 70%. Exponentiate it for an odds ratio — about 2.0, meaning the odds roughly double per unit.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Association, not cause</div><div><div class="roadmap-title">Always</div><div class="roadmap-desc">Coefficients describe the fitted surface. They are not effects, and reporting them as effects is the commonest way a good model produces a bad decision.</div></div></div></div>
@@ -290,6 +301,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"logistic-regression": {"t": "Logistic regression", "d": "Fits a linear combination through a sigmoid to produce a probability. Classifies, despite the name. The threshold is a business decision, not a model output."}, "linear-regression": {"t": "Linear regression", "d": "Fits a line minimising squared error. Interpretable coefficients. The baseline for numeric prediction."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,10 +232,10 @@
   <h1>Memory, Compaction and Session Decay</h1>
   <p class="subtitle">A model has no memory. Everything that looks like memory is something you built — and all of it degrades.</p>
 
-  <p>The single most useful correction a beginner can make: <strong>a language model retains nothing between calls.</strong> What looks like memory is the harness re-sending the conversation every turn. Once you hold that, every memory feature and every memory failure becomes predictable.</p>
+  <p>The single most useful correction a beginner can make: <strong>a language model retains nothing between calls.</strong> What looks like memory is the <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn> re-sending the conversation every turn. Once you hold that, every memory feature and every memory failure becomes predictable.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A model has no memory. Everything that behaves like memory is re-sent context, and you are paying for it every turn.</p><p class="know-why">Nothing persists inside the model between calls. The conversation appears continuous because the whole transcript is included in each request, which is why long sessions get expensive and why a fresh session forgets everything instantly.</p><p class="know-eg"><span class="know-eg-label">For example</span>A user says 'as I mentioned earlier, I use metric units' at turn 30 and the model complies. Nothing was remembered — turn 4 was re-sent along with turns 1 to 29. Trim the history to save cost and that instruction vanishes with no warning, because it was never stored anywhere.</p></blockquote>
   <h2>The four things people call memory</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Conversation history</div><div><div class="roadmap-title">Re-sent every turn</div><div class="roadmap-desc">The default. Simple, and grows without limit until something manages it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Compaction</div><div><div class="roadmap-title">History replaced by a summary</div><div class="roadmap-desc">Preserves the thread at a fraction of the tokens. Lossy, and the loss is not visible.</div></div></div><div class="roadmap-item"><div class="roadmap-num">External notes</div><div><div class="roadmap-title">Written to a file, read back</div><div class="roadmap-desc">Survives resets because it was never in the context to begin with. The most durable option.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Retrieved memory</div><div><div class="roadmap-title">Facts stored, fetched when relevant</div><div class="roadmap-desc">Semantic search over past interactions &mdash; the same embeddings, vector index and ranking machinery Block 3 builds for documents, pointed at your own history instead of a corpus. Powerful, and it means every retrieval failure mode from that block is now a memory failure mode: the fact is stored, ranks below something else, and the agent reports not knowing it. Where the questions are about relationships between things rather than passages, the graph option from that block applies here too.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Conversation history</div><div><div class="roadmap-title">Re-sent every turn</div><div class="roadmap-desc">The default. Simple, and grows without limit until something manages it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Compaction</div><div><div class="roadmap-title">History replaced by a summary</div><div class="roadmap-desc">Preserves the thread at a fraction of the <dfn class="gl" tabindex="0" data-gl="token">tokens</dfn>. Lossy, and the loss is not visible.</div></div></div><div class="roadmap-item"><div class="roadmap-num">External notes</div><div><div class="roadmap-title">Written to a file, read back</div><div class="roadmap-desc">Survives resets because it was never in the context to begin with. The most durable option.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Retrieved memory</div><div><div class="roadmap-title">Facts stored, fetched when relevant</div><div class="roadmap-desc">Semantic search over past interactions &mdash; the same <dfn class="gl" tabindex="0" data-gl="embedding">embeddings</dfn>, vector index and ranking machinery Block 3 builds for documents, pointed at your own history instead of a corpus. Powerful, and it means every retrieval failure mode from that block is now a memory failure mode: the fact is stored, ranks below something else, and the agent reports not knowing it. Where the questions are about relationships between things rather than passages, the graph option from that block applies here too.</div></div></div></div>
   <h2>Compaction, and what it costs</h2>
   <p>When the window fills, replace the older part of the transcript with a summary and continue. The guidance that matters: <strong>tune the compaction prompt for recall first, precision second.</strong> Carrying redundancy is cheap; losing a decision the agent made two hours ago is not.</p>
   <p>The safest form is clearing old tool results rather than summarising conversation. They are usually the largest thing in the window and, once acted upon, rarely needed verbatim. Reach for that before summarisation, which always risks dropping something.</p>
@@ -277,7 +288,7 @@
 <text x="368" y="104" class="d-label-sm">has nothing to do with</text>
 </svg><figcaption>The same trade-off as preloading versus retrieval, one layer up: what is loaded every time versus what is fetched when needed.</figcaption></figure>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">An instruction file is preloading; a notes directory is retrieval. The choice between them is the trade this course has already made twice.</p><p class="know-why">Everything in the always-loaded file is spent from the context budget on every session, whether or not this task needed it &mdash; the same economics as a cached prompt prefix, and the same economics as preloading a corpus instead of retrieving from it. Everything in the searchable directory costs nothing until something fetches it. So the question to ask of a fact is not whether it is useful, but whether it is useful <em>every single time</em>.</p><p class="know-eg"><span class="know-eg-label">For example</span>&ldquo;Run the tests with the project&#39;s task runner rather than invoking pytest directly&rdquo; applies to every task and belongs in the instruction file. &ldquo;The staging database was migrated to a new host in March and the old credentials still work but point at stale data&rdquo; applies to roughly one task a year and belongs in a note, where it costs nothing until the day someone searches for it.</p></blockquote>
-  <div class="callout pitfall"><span class="label">The instruction file that became the problem it was meant to solve</span><p>These files grow, because adding a line is free and deleting one requires deciding it is no longer true. A file that has reached several hundred lines is read into every session, so on any task it does not apply to it is several hundred lines of distractor &mdash; and this course has already measured what distractors do, which is cost more than empty space. The failure is quiet: nothing errors, the agent just does slightly worse at everything, for a reason that never appears in a log.</p><p>Prune it the way you would prune a test suite. If a line has not been load-bearing in months, it is not documentation, it is ballast.</p></div>
+  <div class="callout pitfall"><span class="label">The instruction file that became the problem it was meant to solve</span><p>These files grow, because adding a line is free and deleting one requires deciding it is no longer true. A file that has reached several hundred lines is read into every session, so on any task it does not apply to it is several hundred lines of <dfn class="gl" tabindex="0" data-gl="distractor">distractor</dfn> &mdash; and this course has already measured what distractors do, which is cost more than empty space. The failure is quiet: nothing errors, the agent just does slightly worse at everything, for a reason that never appears in a log.</p><p>Prune it the way you would prune a test suite. If a line has not been load-bearing in months, it is not documentation, it is ballast.</p></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A written memory records what was true when it was written, and nothing tells the agent it has expired.</p><p class="know-why">A note naming a file, a flag or a command is a claim about a codebase that keeps moving. Once it is wrong it is worse than absent, because absence prompts a look and a stale note prompts confident action on something that no longer exists. This is the same failure as silent compaction loss, arriving from the opposite direction &mdash; there the fact vanished, here it persists past its truth.</p><p class="know-eg"><span class="know-eg-label">For example</span>A note says the deployment flag is <code>--legacy-build</code>. The flag was renamed four months ago. An agent reading that note does not check, passes the old flag, gets an error it cannot connect to the note, and starts debugging the build system. Date every entry, and verify anything that names a specific file or flag before acting on it.</p></blockquote>
   <p>Markdown is doing real work here rather than being an arbitrary choice. It is read natively by both the model and the person, so there is no format that one of them has to be taught. It diffs in version control, which means changes to an agent&#39;s instructions get reviewed like any other change rather than accumulating unexamined. It needs no parser and therefore cannot fail to parse. And it degrades gracefully: a tool that ignores the frontmatter, the headings or the cross-references still reads the prose underneath and gets most of the value.</p>
   <h2>The part nobody specifies: what earns a write</h2>
@@ -399,6 +410,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "distractor": {"t": "Distractor", "d": "A retrieved chunk that is topically close but does not answer the question. Models do not politely ignore them; they actively degrade the answer, which is why you send three to five chunks rather than twenty."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

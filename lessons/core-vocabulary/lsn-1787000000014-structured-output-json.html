@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,9 +232,9 @@
   <h1>Structured Output: JSON You Can Actually Parse</h1>
   <p class="subtitle">The gap between 'the model returned JSON' and 'the model always returns valid JSON'.</p>
 
-  <p>The moment code consumes a model's output rather than a human reading it, free text becomes a liability. Tool calls, routing decisions, extraction, classification, anything feeding a database — all need a shape that parses every time. Getting from "usually" to "always" is a specific engineering problem with a ladder of solutions.</p>
+  <p>The moment code consumes a model's output rather than a human reading it, free text becomes a liability. <dfn class="gl" tabindex="0" data-gl="tool-call">Tool calls</dfn>, routing decisions, extraction, classification, anything feeding a database — all need a shape that parses every time. Getting from "usually" to "always" is a specific engineering problem with a ladder of solutions.</p>
   <h2>Why &#x27;usually&#x27; isn&#x27;t good enough</h2>
-  <p>A model that returns valid JSON 97% of the time fails three times in a hundred. Inside an agent loop making six calls per task, that's roughly one task in six broken. Reliability multiplies against you, exactly as it did with agent chains.</p>
+  <p>A model that returns valid JSON 97% of the time fails three times in a hundred. Inside an <dfn class="gl" tabindex="0" data-gl="agent-loop">agent loop</dfn> making six calls per task, that's roughly one task in six broken. Reliability multiplies against you, exactly as it did with agent chains.</p>
   <h2>The ladder</h2>
   <figure class="diagram"><svg viewBox="0 0 640 230" role="img" aria-label="Ladder of structured output guarantees">
 <rect x="12" y="176" width="450" height="42" rx="6" class="d-box-warn"/>
@@ -241,11 +252,11 @@
 <text x="28" y="62" class="d-label-sm">invalid tokens made impossible at sampling time — llama.cpp GGML Backus-Naur Form (GBNF)</text>
 <text x="480" y="52" class="d-fill-green" font-size="11" font-weight="600">strongest</text>
 </svg><figcaption>Each rung constrains the model more and leaves less to chance. Use the highest rung your provider supports, and validate anyway.</figcaption></figure>
-  <p>Rung 4 deserves a note because it's the one people don't know about. When you control the sampler — as <code>llama.cpp</code> does locally — you can mask out any token that would make the output invalid before it's ever sampled. The model is not asked to comply; non-compliance is unrepresentable. A local serving lane can use this; hosted APIs generally expose rung 3 instead.</p>
+  <p>Rung 4 deserves a note because it's the one people don't know about. When you control the sampler — as <code>llama.cpp</code> does locally — you can mask out any <dfn class="gl" tabindex="0" data-gl="token">token</dfn> that would make the output invalid before it's ever sampled. The model is not asked to comply; non-compliance is unrepresentable. A local serving lane can use this; hosted APIs generally expose rung 3 instead.</p>
   <h3>What a grammar is, and how the masking works</h3>
-  <p>A grammar describes the set of strings that count as valid — the same idea as the grammar of a programming language, written down formally. Backus-Naur Form and its variants are the usual notation, and llama.cpp's GBNF is one of them. A JSON Schema is compiled into one; a regular expression is a very small one. Anything you can describe as a set of legal strings, you can constrain to.</p>
+  <p>A grammar describes the set of strings that count as valid — the same idea as the grammar of a programming language, written down formally. Backus-Naur Form and its variants are the usual notation, and <dfn class="gl" tabindex="0" data-gl="llama-cpp">llama.cpp</dfn>'s <dfn class="gl" tabindex="0" data-gl="gbnf">GBNF</dfn> is one of them. A JSON Schema is compiled into one; a regular expression is a very small one. Anything you can describe as a set of legal strings, you can constrain to.</p>
   <p>The sampler then walks that grammar as a state machine. At every step it knows which productions could legally come next, therefore which tokens could legally come next, and it sets the probability of every other token to zero before sampling. Nothing about the model changes — the model still produces its distribution — but the choices it is offered have been narrowed to those that keep the output valid.</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Grammar</div><div><div class="roadmap-title">The set of legal strings, written formally</div><div class="roadmap-desc">A schema, a regular expression and a domain-specific language are all grammars of different sizes. If you can specify what counts as valid, you can constrain generation to it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Masking at sampling time</div><div><div class="roadmap-title">Where the guarantee comes from</div><div class="roadmap-desc">Illegal tokens are given zero probability before a token is drawn. This is why it is a guarantee rather than a strong preference: the failure is not made unlikely, it is made unrepresentable.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Tokenizer reconciliation</div><div><div class="roadmap-title">The awkward part, handled for you</div><div class="roadmap-desc">The grammar is written over characters and sampling happens over tokens, so the implementation has to work out which tokens are consistent with which grammar states. This is the same mismatch that makes logit bias frustrating, one layer up and solved properly rather than by hand.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Per-step masking overhead</div><div><div class="roadmap-title">The price of the guarantee</div><div class="roadmap-desc">Computing the legal set at every token is real work. Usually worth it, and worth measuring rather than assuming, particularly with a large grammar.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Grammar</div><div><div class="roadmap-title">The set of legal strings, written formally</div><div class="roadmap-desc">A schema, a regular expression and a domain-specific language are all grammars of different sizes. If you can specify what counts as valid, you can constrain generation to it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Masking at sampling time</div><div><div class="roadmap-title">Where the guarantee comes from</div><div class="roadmap-desc">Illegal tokens are given zero probability before a token is drawn. This is why it is a guarantee rather than a strong preference: the failure is not made unlikely, it is made unrepresentable.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Tokenizer reconciliation</div><div><div class="roadmap-title">The awkward part, handled for you</div><div class="roadmap-desc">The grammar is written over characters and sampling happens over tokens, so the implementation has to work out which tokens are consistent with which grammar states. This is the same mismatch that makes <dfn class="gl" tabindex="0" data-gl="logit-bias">logit bias</dfn> frustrating, one layer up and solved properly rather than by hand.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Per-step masking overhead</div><div><div class="roadmap-title">The price of the guarantee</div><div class="roadmap-desc">Computing the legal set at every token is real work. Usually worth it, and worth measuring rather than assuming, particularly with a large grammar.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Constraining the form can make the content worse, and it does so silently.</p><p class="know-why">A grammar guarantees the shape of the answer and says nothing whatever about its truth. Worse, it can actively cause wrongness: if your schema requires one of five categories and the honest answer is &ldquo;none of these&rdquo;, you have removed the model's ability to say so and it will pick one. The refusal path this course insists on throughout — a system that can decline — has to be <em>in</em> the grammar, or constraining the output has quietly deleted it.</p><p class="know-eg"><span class="know-eg-label">For example</span>Put the escape hatch in the schema. An optional null, an explicit &ldquo;unknown&rdquo; enum member, a confidence field the caller can threshold on. A constrained system with no way to abstain is a system that fabricates on exactly the inputs where you most needed it not to.</p></blockquote>
   <div class="callout matters"><span class="label">Schema mode when hosted, grammars when you own the sampler</span><p>The practical split. Hosted providers generally expose rung 3 — you supply a schema and the provider enforces it — and that covers most needs with no work on your part. Reach for a grammar when you are serving the model yourself, or when the structure you need is beyond what a schema expresses: a query language, a restricted subset of code, an output format with rules a JSON Schema cannot state. Writing one is real work and a subtly wrong grammar fails in ways that look like the model misbehaving.</p></div>
   <h2>The schema is prompt engineering</h2>
@@ -257,7 +268,7 @@
   <p>Parse into a typed model — Pydantic in Python — so validation checks structure <em>and</em> values. On failure, one repair attempt that hands the model the error text is worth having; it fixes most transient mistakes. Beyond one retry you're usually looking at a schema problem, not a model problem, and retrying costs tokens without changing the outcome.</p>
   <div class="callout pitfall"><span class="label">Never trust it because it parsed</span>Valid JSON is not correct JSON. A perfectly-formed object can contain an invented product ID, a date that doesn't exist, or a confidence score of 0.99 attached to a guess. Schema validation catches shape. Only your own checks catch sense — which is the same lesson as Block 5's: the thing being evaluated cannot be the thing that grades it.</div>
   <h2>Where this connects</h2>
-  <p>This is the mechanism under tool calling from lesson 6 — a tool call <em>is</em> schema-constrained structured output, which is why providers that support tool calling support structured output essentially for free. It's also what makes deterministic grading possible in Block 5: an output that validates against a schema is machine-checkable without a judge.</p>
+  <p>This is the mechanism under tool calling from lesson 6 — a tool call <em>is</em> schema-constrained structured output, which is why providers that support tool calling support structured output essentially for free. It's also what makes <dfn class="gl" tabindex="0" data-gl="deterministic-grading">deterministic grading</dfn> possible in Block 5: an output that validates against a schema is machine-checkable without a judge.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Valid JSON is not correct JSON.</p><p class="know-why">Schema validation checks shape. It says nothing about whether the values correspond to anything real, and a model that is uncertain will still produce a perfectly-formed object rather than an error.</p><p class="know-eg"><span class="know-eg-label">For example</span>Your extraction returns a product_id of SKU-88213 with a confidence of 0.97. It parses, it validates, every field is the right type. The SKU does not exist — the model produced something SKU-shaped because the schema demanded a string there. The 0.97 is generated the same way as the SKU.</p></blockquote>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="lsn-1787000000008-routing-and-escalation.html">Routing, Escalation and Sampling Controls</a><span class="link-note">Cheap-first architecture — plus temperature and top-k, which decide how a model picks words.</span></li><li><a href="lsn-1787000000015-hallucination-and-grounding.html">Hallucination and Grounding</a><span class="link-note">Why a model states falsehoods with total confidence — and what actually reduces it.</span></li><li><a href="../engineering-practice/lsn-1787400000009-deterministic-first.html">Deterministic First</a><span class="rel-set">Recipes, Decisions and Harnesses</span><span class="link-note">The best AI engineering decision is frequently to use less of it.</span></li><li><a href="lsn-1787000000007-tool-calls-and-mcp.html">Tool Calls and MCP</a><span class="link-note">How a text model comes to run your code, and what the protocol standardises.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://platform.openai.com/docs/guides/structured-outputs" target="_blank" rel="noopener">Structured outputs (OpenAI)</a><span class="link-note">Rung 3 of the ladder, documented — schema-constrained generation and its limits.</span></li><li><a href="https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md" target="_blank" rel="noopener">GBNF grammars in llama.cpp</a><span class="link-note">Rung 4. Constrained decoding, where invalid output is made unrepresentable.</span></li><li><a href="https://docs.pydantic.dev" target="_blank" rel="noopener">Pydantic</a><span class="link-note">Validation that checks values, not just shape. The repair loop hangs off its error messages.</span></li></ul></div>
@@ -293,6 +304,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"tool-call": {"t": "Tool call", "d": "Structured text the model emits requesting a function. The harness parses and executes it; the model never touches the tool."}, "agent-loop": {"t": "Agent loop", "d": "The while-loop that runs a model repeatedly, executing any tool it asks for and feeding the result back, until the model answers without needing a tool."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "llama-cpp": {"t": "llama.cpp", "d": "The C++ inference engine doing the actual arithmetic, including on Apple Silicon via Metal."}, "gbnf": {"t": "GBNF", "d": "GGML Backus-Naur Form, the grammar notation llama.cpp accepts for constrained decoding. Naming it matters because a grammar is only usable by the serving stack that parses that notation."}, "logit-bias": {"t": "Logit bias", "d": "An adjustment added to named tokens' logits before sampling, forbidding or forcing specific tokens rather than shaping the whole distribution. Surgical, and tokenizer-specific: you are naming tokens rather than words, so banning one spelling leaves the model free to reach the same idea another way — and a bias table stops meaning anything when the model is swapped."}, "deterministic-grading": {"t": "Deterministic grading", "d": "Scoring by something that cannot be argued with: it compiles, the tests pass, the schema validates. Cheap and trustworthy, so use it wherever the task allows."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

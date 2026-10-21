@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -224,7 +235,7 @@
   <p>&ldquo;How would you scale this to millions of documents?&rdquo; is usually answered with the name of an index. The nearest-neighbour lesson already covers that choice. This lesson covers the part around it, because at a few million chunks the search algorithm is seldom the first thing to fail. Start with arithmetic, and the shape of the problem appears.</p>
   <h2>Do the memory sum before choosing anything</h2>
   <p>A vector index that is fast keeps its vectors in memory. A chunk stored as a 1,024-dimension vector of 32-bit floats takes 1,024 &times; 4 = 4,096 bytes. Ten million of those take 40,960,000,000 bytes, about 41 GB, before the index adds a single link and before the text itself is stored. Half-precision halves it. An eight-bit code takes a quarter. A product-quantized code of 64 bytes per vector takes 640 MB for the same ten million, at a cost in recall that you then have to measure.</p>
-  <div class="callout warning"><span class="label">Every figure above is arithmetic, not a benchmark</span>The byte counts follow from the dimension, the number type and the row count. The 64-byte code is an assumed setting chosen to show scale. How much recall a given compression costs depends on your embeddings and your queries, and only a measurement against exact search on your own sample can say.</div>
+  <div class="callout warning"><span class="label">Every figure above is arithmetic, not a benchmark</span>The byte counts follow from the dimension, the number type and the row count. The 64-byte code is an assumed setting chosen to show scale. How much recall a given compression costs depends on your <dfn class="gl" tabindex="0" data-gl="embedding">embeddings</dfn> and your queries, and only a measurement against exact search on your own sample can say.</div>
   <figure class="diagram"><svg viewBox="0 0 640 220" role="img" aria-label="Memory for ten million 1024-dimension vectors at four precisions"><rect x="12" y="14" width="600" height="28" rx="4" class="d-fill-red" opacity="0.55"/><text x="20" y="33" class="d-label-sm">float32 · 4,096 bytes per vector · about 41 GB</text>
 <rect x="12" y="60" width="300" height="28" rx="4" class="d-fill-accent" opacity="0.65"/><text x="20" y="79" class="d-label-sm">float16 · 2,048 bytes · about 20 GB</text>
 <rect x="12" y="106" width="150" height="28" rx="4" class="d-fill-accent" opacity="0.65"/><text x="20" y="125" class="d-label-sm">int8 · 1,024 bytes · about 10 GB</text>
@@ -232,7 +243,7 @@
 <text x="12" y="206" class="d-label-sm">Each row is ten million vectors of 1,024 dimensions. Bar lengths are proportional to bytes per vector.</text>
 </svg><figcaption>Memory is the first wall. The vectors dominate at ten million rows; each compression step moves the line left and moves recall with it.</figcaption></figure>
   <h2>What each lever buys and costs</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Store less</div><div><div class="roadmap-title">Fewer, better chunks</div><div class="roadmap-desc">Deduplicate near-identical chunks, drop boilerplate such as headers, footers and licence text, and choose a chunk size on purpose. The cheapest vector is the one never stored, and it improves retrieval at the same time.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Compress</div><div><div class="roadmap-title">Smaller numbers per vector</div><div class="roadmap-desc">Lower precision or product quantization shrinks memory. Common practice is to search the compressed vectors for a wide shortlist, then re-score the shortlist with the full-precision vectors, which is meant to recover the lost recall. Measure how much it does on your own index.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Partition by metadata</div><div><div class="roadmap-title">Search one slice, not everything</div><div class="roadmap-desc">Tenant, source, year, language. A query that can only match one customer's documents should only search that customer's partition. This is also the strongest isolation boundary you have.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Shard across machines</div><div><div class="roadmap-title">Split the index, query all, merge</div><div class="roadmap-desc">Each shard returns its own top-k and a merge step picks the global top-k. It adds capacity and adds a coordination cost, and it makes tail latency a property of the slowest shard.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Two stages</div><div><div class="roadmap-title">Cheap candidates, then a better ranker</div><div class="roadmap-desc">Fetch a wide shortlist with the index, then rerank it with a slower, more accurate model, as in the hybrid-retrieval lesson. It lets the first stage run at lower recall settings and still end with a good top five.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Store less</div><div><div class="roadmap-title">Fewer, better chunks</div><div class="roadmap-desc">Deduplicate near-identical chunks, drop boilerplate such as headers, footers and licence text, and choose a chunk size on purpose. The cheapest vector is the one never stored, and it improves retrieval at the same time.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Compress</div><div><div class="roadmap-title">Smaller numbers per vector</div><div class="roadmap-desc">Lower precision or <dfn class="gl" tabindex="0" data-gl="product-quantization">product quantization</dfn> shrinks memory. Common practice is to search the compressed vectors for a wide shortlist, then re-score the shortlist with the full-precision vectors, which is meant to recover the lost recall. Measure how much it does on your own index.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Partition by metadata</div><div><div class="roadmap-title">Search one slice, not everything</div><div class="roadmap-desc">Tenant, source, year, language. A query that can only match one customer's documents should only search that customer's partition. This is also the strongest isolation boundary you have.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Shard across machines</div><div><div class="roadmap-title">Split the index, query all, merge</div><div class="roadmap-desc">Each shard returns its own top-k and a merge step picks the global top-k. It adds capacity and adds a coordination cost, and it makes tail latency a property of the slowest shard.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Two stages</div><div><div class="roadmap-title">Cheap candidates, then a better ranker</div><div class="roadmap-desc">Fetch a wide shortlist with the index, then rerank it with a slower, more accurate model, as in the hybrid-retrieval lesson. It lets the first stage run at lower recall settings and still end with a good top five.</div></div></div></div>
   <h2>The slowest shard sets the latency</h2>
   <p>When a query fans out to every shard it cannot return until the last one answers. If each shard is slow on one request in a hundred, then with ten shards the chance that at least one is slow on a given query is 1 &minus; 0.99<sup>10</sup>, about 9.6%. The tail you measured on one machine becomes the typical case on ten.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A fanned-out query is as slow as its slowest shard, so the tail you measured on one machine gets worse with every shard you add.</p><p class="know-why">Latency is set by the maximum across shards, not the average. The probability that at least one shard is slow grows with the shard count, even when each shard is individually healthy.</p><p class="know-eg"><span class="know-eg-label">For example</span>Each shard is slow on 1% of requests. With 1 shard, 1% of queries are slow. With 10 shards, 1 &minus; 0.99<sup>10</sup> is about 9.6% of queries slow. With 50, about 39.5%. Partitioning by tenant so most queries touch one shard avoids the multiplication entirely.</p></blockquote>
@@ -242,7 +253,7 @@
   <p>A corpus of millions is never loaded once. Documents arrive, change and get deleted, so the design needs an incremental path, a deletion path that actually removes the vector, and a record of which embedding model produced each one. That last field is the dangerous one. Vectors from two different embedding models are not comparable, so a half-migrated index returns neighbours that look plausible and are wrong.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Changing the embedding model means re-embedding and re-indexing the whole corpus, so build the new index beside the old one and switch when it passes evaluation.</p><p class="know-why">Vectors from different models live in different spaces. Mixing them in one index silently corrupts retrieval, and re-embedding is the one cost that scales with the entire corpus rather than with what changed.</p><p class="know-eg"><span class="know-eg-label">For example</span>A corpus of 10 million chunks averaging 400 tokens is 4 billion tokens to re-embed. The price per token for your embedding model sets the bill; it was not looked up here and is not guessed. The safe plan is a second index built and scored against the gold set, then an alias switched, with the first kept until the second is proven.</p></blockquote>
   <h2>What to measure before and after</h2>
-  <ul><li>Recall@k against exact search on a sample of real queries, re-run at each scale step. Recall drifts down as a corpus grows, and a setting tuned at 50,000 rows is not guaranteed at 5,000,000.</li><li>Latency at p95 and p99 under your real concurrency, with the real filters applied.</li><li>Index size and memory in the system you will actually run, read from the database rather than estimated.</li><li>Retrieval quality on slices: the newest documents, the rarest sources, the most selective tenants. An aggregate hides the slice that broke.</li></ul>
+  <ul><li><dfn class="gl" tabindex="0" data-gl="recall-k">Recall@k</dfn> against exact search on a sample of real queries, re-run at each scale step. Recall drifts down as a corpus grows, and a setting tuned at 50,000 rows is not guaranteed at 5,000,000.</li><li>Latency at p95 and p99 under your real concurrency, with the real filters applied.</li><li>Index size and memory in the system you will actually run, read from the database rather than estimated.</li><li><dfn class="gl" tabindex="0" data-gl="retrieval-quality">Retrieval quality</dfn> on slices: the newest documents, the rarest sources, the most selective tenants. An aggregate hides the slice that broke.</li></ul>
   <div class="callout matters"><span class="label">Most corpora are smaller than the question assumes</span>The honest first answer to a scale question is a number: how many chunks, how many queries a second, what latency budget. Forty thousand vectors is exact-search territory. The design above is for the day the measurement says otherwise, not the first day.</div>
   <div class="further related"><h3>Related lessons</h3><ul class="links"><li><a href="../algorithms/lsn-1787100000007-vector-search-algorithms.html">Nearest-Neighbour Search at Scale</a><span class="rel-set">Algorithms That Matter Here</span><span class="link-note">Exact search, HNSW, and the recall you quietly trade away for speed.</span></li><li><a href="lsn-1787600000002-measuring-retrieval.html">Measuring Retrieval</a><span class="link-note">Three numbers, measured separately, because they fail independently and have different fixes.</span></li><li><a href="lsn-1787600000000-building-a-rag-system.html">Building a Retrieval System That Works</a><span class="link-note">Five stages, and the two that decide whether the other three matter.</span></li><li><a href="../block8-deployment/lsn-1788100000004-the-artefact-is-code-data-and-config.html">The Artefact Is Code, Data and Configuration</a><span class="rel-set">Block 8 · Deployment and APIs</span><span class="link-note">A model file is not a deployment; behaviour only becomes reproducible when its inputs and assumptions travel with it.</span></li></ul></div>
   <div class="further"><h3>Further reading</h3><ul class="links"><li><a href="https://github.com/pgvector/pgvector" target="_blank" rel="noopener">pgvector: indexing and filtering</a><span class="link-note">HNSW and IVFFlat in Postgres, including how filtering interacts with approximate indexes.</span></li><li><a href="https://arxiv.org/abs/1603.09320" target="_blank" rel="noopener">Efficient and robust ANN search using HNSW (Malkov &amp; Yashunin)</a><span class="link-note">The graph index the memory sum above is about.</span></li><li><a href="https://doi.org/10.1109/TPAMI.2010.57" target="_blank" rel="noopener">Product Quantization for Nearest Neighbor Search (Jegou et al.)</a><span class="link-note">The original compression method behind the 64-byte code.</span></li></ul></div>
@@ -278,6 +289,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "product-quantization": {"t": "Product quantization", "d": "Compressing the stored vectors themselves rather than the search over them. Often paired with an inverted file index to cut memory dramatically — quantization again, a different object."}, "recall-k": {"t": "Recall@k", "d": "The fraction of true nearest neighbours an index actually returned. The number nobody measures, and a common hidden cause of poor RAG."}, "retrieval-quality": {"t": "Retrieval quality", "d": "Whether the right chunk reaches the top k. Distinct from index recall: the index can be perfect and the embedding still wrong, and the two failures have different fixes."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

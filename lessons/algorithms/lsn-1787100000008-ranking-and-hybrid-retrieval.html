@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -223,12 +234,12 @@
 
   <p>The context-engineering lesson concluded that ranking matters more than recall — that getting the right chunk into the first position beats retrieving more chunks. This lesson is the algorithms that do the ranking.</p>
   <h2>BM25: keyword search, done properly</h2>
-  <p><strong>BM25</strong> scores a document against a query using term frequency, adjusted two ways: rare terms count for more than common ones, and repeated occurrences give diminishing returns. It's decades old, needs no training, no GPU and no embedding model, and it is a genuinely strong baseline.</p>
-  <div class="callout matters"><span class="label">Where BM25 beats embeddings outright</span>Exact identifiers, error codes, product SKUs, function names, file paths, proper nouns, and any rare term. Embeddings compress meaning and lose precise tokens; BM25 matches them exactly. For a technical corpus this is not a small difference — it is frequently the difference between finding the answer and not.</div>
+  <p><strong><dfn class="gl" tabindex="0" data-gl="bm25">BM25</dfn></strong> scores a document against a query using term frequency, adjusted two ways: rare terms count for more than common ones, and repeated occurrences give diminishing returns. It's decades old, needs no training, no GPU and no <dfn class="gl" tabindex="0" data-gl="embedding">embedding</dfn> model, and it is a genuinely strong baseline.</p>
+  <div class="callout matters"><span class="label">Where BM25 beats embeddings outright</span>Exact identifiers, error codes, product SKUs, function names, file paths, proper nouns, and any rare term. Embeddings compress meaning and lose precise <dfn class="gl" tabindex="0" data-gl="token">tokens</dfn>; BM25 matches them exactly. For a technical corpus this is not a small difference — it is frequently the difference between finding the answer and not.</div>
   <h2>Why hybrid wins</h2>
   <p>Vector search finds paraphrases and misses exact terms. BM25 finds exact terms and misses paraphrases. Their failures are largely independent, which is precisely the condition under which combining two methods helps — the same logic as ensembles in lesson 4.</p>
   <h2>Reciprocal rank fusion</h2>
-  <p>The problem with combining them is that a BM25 score of 14.2 and a cosine similarity of 0.83 aren't comparable quantities. <strong>Reciprocal rank fusion</strong> sidesteps this entirely by ignoring the scores and using only the ranks: each document scores the sum of <code>1 / (k + rank)</code> across the lists it appears in, with k typically 60.</p>
+  <p>The problem with combining them is that a BM25 score of 14.2 and a <dfn class="gl" tabindex="0" data-gl="cosine-similarity">cosine similarity</dfn> of 0.83 aren't comparable quantities. <strong><dfn class="gl" tabindex="0" data-gl="reciprocal-rank-fusion">Reciprocal rank fusion</dfn></strong> sidesteps this entirely by ignoring the scores and using only the ranks: each document scores the sum of <code>1 / (k + rank)</code> across the lists it appears in, with k typically 60.</p>
   <p>A document ranked highly by both methods rises to the top; one ranked highly by a single method still places well. No score normalisation, no tuning, no training. It's a two-line algorithm that reliably outperforms either input list.</p>
   <figure class="diagram"><svg viewBox="0 0 640 200" role="img" aria-label="Reciprocal rank fusion of two result lists">
 <text x="20" y="18" class="d-accent">BM25</text>
@@ -247,10 +258,10 @@
 <text x="20" y="168" class="d-label-sm">doc-C placed well in both lists and wins. doc-B was first in one list and still ranks.</text>
 </svg><figcaption>Two independent rankings fused by position rather than score. The document both methods liked wins, without ever comparing incomparable numbers.</figcaption></figure>
   <h2>Rerankers: the expensive final pass</h2>
-  <p>Retrieval embeds queries and documents separately, so it can never see them together. A <strong>cross-encoder reranker</strong> does — it takes the query and one document as a single input and scores their relevance directly. Far more accurate, and far too slow to run over a whole corpus.</p>
+  <p>Retrieval embeds queries and documents separately, so it can never see them together. A <strong><dfn class="gl" tabindex="0" data-gl="cross-encoder-reranker">cross-encoder reranker</dfn></strong> does — it takes the query and one document as a single input and scores their relevance directly. Far more accurate, and far too slow to run over a whole corpus.</p>
   <p>So the standard architecture is a funnel: retrieve 100 candidates cheaply with hybrid search, rerank those 100 properly, keep the top 5 for the model. You get cross-encoder quality at nearly bi-encoder cost, and the top-of-list precision that context engineering demands.</p>
   <h2>The pipeline worth defaulting to</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">1. Retrieve wide</div><div><div class="roadmap-title">BM25 + vector, ~50 each</div><div class="roadmap-desc">Independent failure modes, so coverage is better than either alone.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2. Fuse</div><div><div class="roadmap-title">Reciprocal rank fusion</div><div class="roadmap-desc">Two lines of code, no tuning, no normalisation.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3. Rerank</div><div><div class="roadmap-title">Cross-encoder over ~100</div><div class="roadmap-desc">The accuracy step. Only affordable because the candidate set is small.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4. Truncate</div><div><div class="roadmap-title">Top 3–5 into context</div><div class="roadmap-desc">Precision beats volume — distractors actively cost you.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">1. Retrieve wide</div><div><div class="roadmap-title">BM25 + vector, ~50 each</div><div class="roadmap-desc">Independent failure modes, so coverage is better than either alone.</div></div></div><div class="roadmap-item"><div class="roadmap-num">2. Fuse</div><div><div class="roadmap-title">Reciprocal rank fusion</div><div class="roadmap-desc">Two lines of code, no tuning, no normalisation.</div></div></div><div class="roadmap-item"><div class="roadmap-num">3. Rerank</div><div><div class="roadmap-title">Cross-encoder over ~100</div><div class="roadmap-desc">The accuracy step. Only affordable because the candidate set is small.</div></div></div><div class="roadmap-item"><div class="roadmap-num">4. Truncate</div><div><div class="roadmap-title">Top 3–5 into context</div><div class="roadmap-desc">Precision beats volume — <dfn class="gl" tabindex="0" data-gl="distractor">distractors</dfn> actively cost you.</div></div></div></div>
   <h2>What BM25 is actually computing</h2>
   <p>Three ideas, each fixing a flaw in the one before it.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Term frequency</div><div><div class="roadmap-title">A word appearing often signals relevance</div><div class="roadmap-desc">But not linearly. Ten mentions is not ten times more relevant than one, so BM25 saturates — the fifth occurrence adds far less than the second.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Inverse document frequency</div><div><div class="roadmap-title">Rare words carry more information</div><div class="roadmap-desc">A document matching "gearbox" tells you much more than one matching "the". Weight each term by how rare it is across the corpus.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Length normalisation</div><div><div class="roadmap-title">Long documents match everything</div><div class="roadmap-desc">A 50-page manual contains most words by accident. Divide the benefit by length, tuned so that being long is penalised but not fatal.</div></div></div></div>
@@ -287,6 +298,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"bm25": {"t": "BM25", "d": "Term-frequency keyword ranking, adjusted for rare terms and diminishing repeats. Beats embeddings on identifiers, error codes and rare terms."}, "embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "cosine-similarity": {"t": "Cosine similarity", "d": "The angle between two vectors, from 1 to -1. How \"closeness of meaning\" is actually measured."}, "reciprocal-rank-fusion": {"t": "Reciprocal rank fusion", "d": "Combine ranked lists using positions rather than scores: sum of 1/(k + rank), k≈60. No normalisation needed."}, "cross-encoder-reranker": {"t": "Cross-encoder reranker", "d": "Scores query and document together rather than separately. Much more accurate, far too slow for a whole corpus — so it reranks a shortlist."}, "distractor": {"t": "Distractor", "d": "A retrieved chunk that is topically close but does not answer the question. Models do not politely ignore them; they actively degrade the answer, which is why you send three to five chunks rather than twenty."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

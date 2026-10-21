@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -225,7 +236,7 @@
   <div class="callout warning"><span class="label">Read this as shapes, not numbers</span>Everything here was read from provider documentation on 2026-10-10 through a summarising fetch tool. No dollar price was obtainable from any of the three, so none appears. Default quota values, latency targets and several retention periods were not retrieved and are left out rather than guessed. Model names, multipliers and dates change; treat every figure as dated.</div>
   <figure class="diagram"><svg viewBox="0 0 640 230" role="img" aria-label="What a team keeps and what the provider keeps on a managed model API"><rect x="14" y="14" width="296" height="196" rx="8" class="d-box"/><text x="162" y="38" class="d-label-b" text-anchor="middle">You keep</text><text x="30" y="66" class="d-label-sm">which model and version you call</text><text x="30" y="88" class="d-label-sm">prompt layout and max_tokens</text><text x="30" y="110" class="d-label-sm">region or profile you route through</text><text x="30" y="132" class="d-label-sm">retries and fallbacks</text><text x="30" y="154" class="d-label-sm">guardrail settings, log destinations</text><text x="30" y="176" class="d-label-sm">whether to buy reserved capacity</text><text x="30" y="198" class="d-label-sm">the regression suite for a model swap</text><rect x="330" y="14" width="296" height="196" rx="8" class="d-box d-fill-amber"/><text x="478" y="38" class="d-label-b" text-anchor="middle">The provider keeps</text><text x="346" y="66" class="d-label-sm">hardware and routing inside your scope</text><text x="346" y="88" class="d-label-sm">quota values and whether they rise</text><text x="346" y="110" class="d-label-sm">how the quota is counted</text><text x="346" y="132" class="d-label-sm">cache storage and eviction</text><text x="346" y="154" class="d-label-sm">the models behind safety filters</text><text x="346" y="176" class="d-label-sm">abuse-monitoring carve-outs</text><text x="346" y="198" class="d-label-sm">the retirement date of every model</text></svg><figcaption>Control follows the request and the account. Capacity, cache internals and retirement dates follow the provider.</figcaption></figure>
   <h2>Quota is counted differently from the bill</h2>
-  <p>All three providers throttle with HTTP 429. Two document how the quota is counted, and in both the number that limits you is not the number you are billed for. Bedrock deducts the input tokens plus <code>max_tokens</code> when a request starts, then refunds the unused part when it finishes. Foundry's tokens-per-minute check likewise uses an estimate of the maximum tokens at the moment the request arrives, and its page says that is not the count used for billing.</p>
+  <p>All three providers throttle with HTTP 429. Two document how the quota is counted, and in both the number that limits you is not the number you are billed for. Bedrock deducts the input <dfn class="gl" tabindex="0" data-gl="token">tokens</dfn> plus <code>max_tokens</code> when a request starts, then refunds the unused part when it finishes. Foundry's tokens-per-minute check likewise uses an estimate of the maximum tokens at the moment the request arrives, and its page says that is not the count used for billing.</p>
   <p>Bedrock also multiplies output tokens when it counts them against quota: its page lists 15x for one model family, 10x for several current ones, 5x for older Anthropic models and 1:1 for all others. Its worked example has 3,000 input tokens, 1,000 cache-write tokens, 1,000 output tokens and a <code>max_tokens</code> of 32,000. The initial deduction is 36,000 tokens and the final one is 9,000. With a <code>max_tokens</code> of 1,250 the same request starts at 5,250. A generous output cap can throttle you before the model has written anything.</p>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Set max_tokens to what the task needs, not to the largest value the API allows.</p><p class="know-why">On Bedrock and Foundry the quota check reserves your output cap at the start of the request. An oversized cap reserves capacity you will not use, so concurrent requests are rejected earlier than their real size would suggest, and the bill never shows the reason.</p><p class="know-eg"><span class="know-eg-label">For example</span>A summariser that returns about 300 tokens is configured with a cap of 32,000. Each request reserves roughly 32,000 tokens of quota while it runs, so a handful of concurrent calls hit a 429 on a quota that would have carried dozens at a cap of 1,000.</p></blockquote>
   <div class="callout pitfall"><span class="label">A 429 is not always your quota</span>Bedrock separates its 429 (account quota) from its 503 and 529 (capacity on the provider's side). Google says a pay-as-you-go 429 on Vertex AI does not mean you hit a fixed quota, because that traffic runs on shared capacity. Foundry documents temporary reductions of your effective limit when a shared pool is under pressure. Log the status and the response headers, because raising a quota will not fix a capacity error.</div>
@@ -233,7 +244,7 @@
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Bedrock</div><div><div class="roadmap-title">Model units, or a Reserved tier</div><div class="roadmap-desc">Provisioned Throughput is hourly capacity per model with no commitment, one month or six months. A newer Reserved service tier states a 99.5% uptime target and overflows to the Standard tier. Whether Provisioned Throughput itself carries a latency or availability guarantee is not stated on its page.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Vertex AI</div><div><div class="roadmap-title">Generative AI Scale Units (GSUs)</div><div class="roadmap-desc">A fixed-term subscription of one week, one month, three months or one year. Fees cannot be cancelled and apply regardless of usage. By default overage is billed as pay-as-you-go, and a request header can force a 429 instead. SLA terms were not retrieved.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Foundry</div><div><div class="roadmap-title">Provisioned Throughput Units (PTUs)</div><div class="roadmap-desc">Capacity held for your deployment whether or not you send requests, with a defined latency target per model. The numeric targets sit on a sizing page that was not retrieved. Holding PTU quota does not guarantee that capacity exists in the region.</div></div></div></div>
   <p>Reservation changes who pays for idle time, not who owns the failure. Even with reserved capacity a deployment can reach full utilisation, so the retry or spillover path still has to exist.</p>
   <h2>Caching and batching: you shape the prompt, they own the cache</h2>
-  <p>Prompt caching is best effort on all three, and the only lever you hold is putting the stable part of the prompt first. Foundry needs an identical prefix of at least 1,024 tokens. Bedrock publishes per-model minimums between 512 and 4,096 tokens, and says an identical prompt does not guarantee a hit, so you verify with the cache-read and cache-write token counts in the response. Cache writes can cost more than uncached input on newer models, so a prompt that never repeats can cost more with caching switched on.</p>
+  <p><dfn class="gl" tabindex="0" data-gl="prompt-caching">Prompt caching</dfn> is best effort on all three, and the only lever you hold is putting the stable part of the prompt first. Foundry needs an identical prefix of at least 1,024 tokens. Bedrock publishes per-model minimums between 512 and 4,096 tokens, and says an identical prompt does not guarantee a hit, so you verify with the cache-read and cache-write token counts in the response. Cache writes can cost more than uncached input on newer models, so a prompt that never repeats can cost more with caching switched on.</p>
   <p>Batch is the cheapest option and has the weakest timing promise. Vertex AI and Foundry both describe a 24-hour target for their batch modes. Google says batch is excluded from the service-level objective. Foundry's own page both says it does not expire slow jobs and lists an <code>expired</code> status, so teach it as a target with no hard guarantee. Bedrock's batch turnaround time was not found.</p>
   <h2>Data: the defaults hold, with carve-outs you must read</h2>
   <p>Bedrock states that by default it does not store model inputs or outputs. The carve-outs are model-specific: for two named Anthropic models, traffic is retained for up to 30 days for automated abuse detection, and flagged traffic for a list of OpenAI models is retained for up to 30 days. A per-Region retention setting can refuse any model that requires retention.</p>
@@ -280,6 +291,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "prompt-caching": {"t": "Prompt caching", "d": "Prefix caching exposed as a billable feature: you mark where the stable part of the prompt ends, entries expire, and writes and reads are priced differently. Reads cost about a tenth of normal input; writes cost 1.25× at the five-minute lifetime and 2× at the one-hour one, so break-even arrives at roughly the second use: a prefix read twice already costs about a third less than not caching, and one reused fifty times is a large win. The losing case is a prefix written and never read."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

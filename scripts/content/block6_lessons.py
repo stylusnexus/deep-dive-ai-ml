@@ -25,6 +25,10 @@ LESSONS = [
 
     ("p", "The asymmetry is what matters. A direct injection is limited to the attacker's own privileges, because they are the one talking. An indirect injection borrows <em>your agent's</em> privileges — its tools, its credentials, its trust — and the person who planted it may never interact with your system at all. They only need to control something your system will read."),
 
+    ("h2", "A jailbreak is a different target"),
+    ("p", "A <strong>jailbreak</strong> is a prompt written to get a model past its own refusal behaviour: a role-play frame, an invented authorisation, a request split into harmless-looking pieces. It looks like direct injection and is easy to confuse with it, but the target differs. A jailbreak goes after what the model will <em>say</em>. Injection goes after what an agent will <em>do</em> with content it reads. A jailbreak that works on a chatbot is an embarrassment. The same one on an agent holding tools is an incident, because the refusal was the only thing between the request and the action."),
+    ("p", "That is the reason this block never treats a refusal as a control. Whatever must hold, such as which tools may run, which data may leave and which actions need approval, is enforced outside the model, in the parts of the system the prompt cannot reach."),
+
     ("figure", "The model cannot tell the difference. Everything arrives as tokens in one context, and the instruction planted in a retrieved document sits in the same window as the instruction you wrote.", '''<svg viewBox="0 0 640 226" role="img" aria-label="Direct and indirect injection routes into one context"><defs><marker id="inj" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-accent"/></marker></defs>
 <rect x="12" y="16" width="150" height="40" rx="6" class="d-box"/><text x="24" y="34" class="d-label-b">your system prompt</text><text x="24" y="50" class="d-label-sm">trusted, written by you</text>
 <rect x="12" y="70" width="150" height="40" rx="6" class="d-box"/><text x="24" y="88" class="d-label-b">user turn</text><text x="24" y="104" class="d-label-sm">direct injection lands here</text>
@@ -251,6 +255,9 @@ LESSONS = [
 
     ("callout", "matters", "Public corpora are a floor, not a ceiling",
      "<p>A published payload set tests what is already widely known, which means it is the part most likely to have been trained against. Passing it cleanly tells you that you are not vulnerable to the well-documented, and nothing about the payload written specifically for your system. Start there, then write cases that use your own tool names, your own document sources and your own record formats.</p>"),
+
+    ("callout", "warning", "A refusal in an open-weight model is a default, not a control",
+     "<p>If you can download a model's weights, you can edit them. <strong>Abliteration</strong> does exactly that to refusal. Researchers found that in several open-weight chat models, refusal is mediated largely by a single direction in the model's internal activations (Arditi et al., 2024, <em>Refusal in Language Models Is Mediated by a Single Direction</em>). Remove that direction, either at run time or permanently from the weights, and the model stops refusing, with no retraining. Anyone with the weights can do it, and edited copies circulate. So a battery that passes against the stock model tells you about the stock model only. When the model is open-weight, anything that must hold has to be enforced outside it: tool permissions, egress limits, approval gates. A hosted proprietary model keeps its weights private, which closes this particular route but does not make its refusals a guarantee.</p>"),
 
     ("know",
      "Test the thing you deployed, not the thing you designed.",

@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,13 +232,13 @@
   <h1>Multi-Agent Systems and Gates That Actually Halt</h1>
   <p class="subtitle">When to split an agent, what it costs, and why most approval gates do not stop what matters.</p>
 
-  <p>Two topics that belong together, because the same mechanism underlies both: a multi-agent system is a graph where control passes between specialised nodes, and an approval gate is a graph that stops and waits. Both depend on the state being persistable, which is the previous lesson's point arriving in practice.</p>
+  <p>Two topics that belong together, because the same mechanism underlies both: a multi-agent system is a graph where control passes between specialised nodes, and an <dfn class="gl" tabindex="0" data-gl="approval-gate">approval gate</dfn> is a graph that stops and waits. Both depend on the state being persistable, which is the previous lesson's point arriving in practice.</p>
   <h2>When splitting is justified</h2>
   <p>The vocabulary lesson gave the answer that survives scrutiny: <strong>context isolation</strong>, not specialisation. A sub-agent explores in a clean window and returns a distilled summary, so the expensive search never touches the main context. Specialisation alone is usually an org chart being imitated rather than a constraint being solved.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Sub-agent as a tool</div><div><div class="roadmap-title">Called, returns, disappears</div><div class="roadmap-desc">The simplest useful form and the one to reach for first. The parent does not manage it; it calls it like any other tool.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Orchestrator and workers</div><div><div class="roadmap-title">One plans, several execute</div><div class="roadmap-desc">Works when subtasks are genuinely independent. Fails when they need each other's intermediate results, at which point you have built a slow, expensive single agent.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Planner, generator, evaluator</div><div><div class="roadmap-title">Roles that conflict, separated</div><div class="roadmap-desc">The evaluator has a different context from the generator, so it is not marking its own work. This is the judging lesson's independence requirement expressed as architecture.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">Every handoff is a place where context is lost and error compounds.</p><p class="know-why">State that was implicit in one agent's context must become explicit to cross a boundary, and whatever you forget to pass simply does not exist on the other side. Five agents is not five times the debugging difficulty — it is worse, because the failures are now in the seams.</p><p class="know-eg"><span class="know-eg-label">For example</span>An orchestrator delegates research to three workers and synthesis to a fourth. The synthesiser produces a confident summary missing the caveat one worker found, because the worker's summary dropped it as a detail. Nothing errored. Every agent did its job. The finding was lost in a handoff.</p></blockquote>
   <h2>The cost nobody budgets</h2>
-  <p>Parallel agents multiply token spend, and each carries its own growing context. A fan-out of five is more than five times one agent's cost, because coordination and summarisation are extra turns on top. Measure it before scaling out — the pattern that reads as efficient on an architecture diagram is frequently the most expensive component in the system.</p>
+  <p>Parallel agents multiply <dfn class="gl" tabindex="0" data-gl="token">token</dfn> spend, and each carries its own growing context. A fan-out of five is more than five times one agent's cost, because coordination and summarisation are extra turns on top. Measure it before scaling out — the pattern that reads as efficient on an architecture diagram is frequently the most expensive component in the system.</p>
   <h2>Approval gates, and why most of them do not work</h2>
   <p>The operating lesson made the distinction; here is what it means in code. Most approval implementations gate <em>admission</em> — they check a flag before starting new work. An agent already mid-trajectory with a write-capable tool sails straight through.</p>
   <figure class="diagram"><svg viewBox="0 0 640 215" role="img" aria-label="Admission control versus a real interrupt"><defs><marker id="a4" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0, 9 3.5, 0 7" class="d-fill-muted"/></marker></defs>
@@ -256,7 +267,7 @@
 </svg><figcaption>Admission control stops new runs. It does nothing about the run already in flight, which is the one holding a write-capable tool. Only a checked interrupt between nodes halts that.</figcaption></figure>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">An approval gate that only checks before starting is not a stop button.</p><p class="know-why">Halting new work and halting work in progress are different mechanisms. The run you actually need to stop is the one already holding a write-capable tool, and it will finish unless something is checked between its steps.</p><p class="know-eg"><span class="know-eg-label">For example</span>A flag is flipped to halt an agent that is mis-tagging customer records. New runs are refused immediately. The three runs already in flight keep going for another four minutes and write two hundred more records, because nothing between their steps was checking anything.</p></blockquote>
   <h2>What an interrupt requires</h2>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">A checkpoint before the gated node</div><div><div class="roadmap-title">So state survives the pause</div><div class="roadmap-desc">Without persistence the pause is just a crash.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A durable pending record</div><div><div class="roadmap-title">Not an in-memory queue</div><div class="roadmap-desc">The approval may arrive tomorrow, after a deploy.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Identity on the decision</div><div><div class="roadmap-title">Who approved, when, what exactly</div><div class="roadmap-desc">This is the audit trail. "Approved" without those three is not one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A timeout with a default</div><div><div class="roadmap-title">Usually deny</div><div class="roadmap-desc">Approvals get forgotten. Decide now what happens after 24 hours, or the system decides by hanging.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Enough context to decide</div><div><div class="roadmap-title">The diff, not the summary</div><div class="roadmap-desc">An approver shown 'the agent wants to update 3 records' cannot approve meaningfully. Show which records and what changes.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">A checkpoint before the gated node</div><div><div class="roadmap-title">So state survives the pause</div><div class="roadmap-desc">Without persistence the pause is just a crash.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A durable pending record</div><div><div class="roadmap-title">Not an in-memory queue</div><div class="roadmap-desc">The approval may arrive tomorrow, after a deploy.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Identity on the decision</div><div><div class="roadmap-title">Who approved, when, what exactly</div><div class="roadmap-desc">This is the <dfn class="gl" tabindex="0" data-gl="audit-trail">audit trail</dfn>. "Approved" without those three is not one.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A timeout with a default</div><div><div class="roadmap-title">Usually deny</div><div class="roadmap-desc">Approvals get forgotten. Decide now what happens after 24 hours, or the system decides by hanging.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Enough context to decide</div><div><div class="roadmap-title">The diff, not the summary</div><div class="roadmap-desc">An approver shown 'the agent wants to update 3 records' cannot approve meaningfully. Show which records and what changes.</div></div></div></div>
   <div class="callout pitfall"><span class="label">The gate that trains people to click yes</span>An approval that fires on everything gets approved reflexively within a week, and you have added latency while removing nothing. Gate the irreversible and the outward-facing — sending, publishing, deleting, paying, merging — and let the rest through. A gate that is always right to approve is not a control, it is a delay.</div>
   <h2>What to log, since you now have several actors</h2>
   <p>Everything the operating lesson asked for, plus the seams: which agent produced which message, what crossed each handoff, and what was dropped in each summarisation. That last one is not usually recorded and it is where the failures live.</p>
@@ -297,6 +308,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"approval-gate": {"t": "Approval gate", "d": "A point where work stops until a human decides. It only counts if the run persists while it waits; a gate that lets the work continue is decoration."}, "token": {"t": "Token", "d": "The unit a model actually reads, roughly ¾ of an English word. All cost, speed and limit figures are denominated in these."}, "audit-trail": {"t": "Audit trail", "d": "Who approved, when, and exactly what. \"Approved\" without those three is not an audit trail."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");

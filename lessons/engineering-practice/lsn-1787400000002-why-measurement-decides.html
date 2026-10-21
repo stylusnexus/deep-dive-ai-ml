@@ -212,6 +212,17 @@
     display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.09em;
     text-transform: uppercase; color: var(--green); margin-bottom: 5px;
   }
+
+  /* Glossary popovers (scripts/glossary_links.py) */
+  dfn.gl { font-style: normal; border-bottom: 1px dotted var(--accent); cursor: help; }
+  dfn.gl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .gl-tip {
+    position: absolute; z-index: 50; max-width: min(360px, calc(100vw - 24px)); max-height: 60vh; overflow: auto;
+    background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 0.85em; line-height: 1.5; box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+  .gl-tip[hidden] { display: none; }
+  .gl-tip .gl-t { display: block; color: var(--accent2); margin-bottom: 2px; }
 </style>
 
 </head>
@@ -221,10 +232,10 @@
   <h1>Why Measurement Decides</h1>
   <p class="subtitle">The only thing that corrects a harness, a recipe or a decision is a number that disagrees with it.</p>
 
-  <p>Everything in the previous lesson failed the same way: an artifact stayed confident after its truth expired. None of the three can notice this about itself. A harness cannot tell you its own message is misleading; a recipe cannot tell you its first step is stale; an architecture decision record (ADR) cannot tell you its evidence was overturned. Only a measurement can.</p>
+  <p>Everything in the previous lesson failed the same way: an artifact stayed confident after its truth expired. None of the three can notice this about itself. A <dfn class="gl" tabindex="0" data-gl="harness">harness</dfn> cannot tell you its own message is misleading; a recipe cannot tell you its first step is stale; an architecture decision record (ADR) cannot tell you its evidence was overturned. Only a measurement can.</p>
   <h2>Plausible mechanisms are not findings</h2>
   <p>The failure mode is not laziness. It is the opposite — it is a good engineer reasoning carefully from a mechanism that makes sense, and shipping it. Some real examples, each of which sounded correct and was wrong:</p>
-  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">“Mean-centering will sharpen the router”</div><div><div class="roadmap-title">Regressed, twice</div><div class="roadmap-desc">Standard practice for embedding similarity. Accuracy fell from 88% to 70% on the first attempt and 92% to 66% on the second.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“More exemplars will help classification”</div><div><div class="roadmap-title">Regressed</div><div class="roadmap-desc">True only when paired with a different aggregation method. Alone, it made things worse.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“This model class can’t drive tool loops”</div><div><div class="roadmap-title">False</div><div class="roadmap-desc">A property of one model-and-runtime combination, generalised into a law that shaped months of architecture.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“The cheap tier is weak at agentic work, skip it”</div><div><div class="roadmap-title">False</div><div class="roadmap-desc">It edited fine. The harness was strangling it with a read budget tuned for a different model.</div></div></div></div>
+  <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">“Mean-centering will sharpen the router”</div><div><div class="roadmap-title">Regressed, twice</div><div class="roadmap-desc">Standard practice for <dfn class="gl" tabindex="0" data-gl="embedding">embedding</dfn> similarity. Accuracy fell from 88% to 70% on the first attempt and 92% to 66% on the second.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“More exemplars will help classification”</div><div><div class="roadmap-title">Regressed</div><div class="roadmap-desc">True only when paired with a different aggregation method. Alone, it made things worse.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“This model class can’t drive tool loops”</div><div><div class="roadmap-title">False</div><div class="roadmap-desc">A property of one model-and-runtime combination, generalised into a law that shaped months of architecture.</div></div></div><div class="roadmap-item"><div class="roadmap-num">“The cheap tier is weak at agentic work, skip it”</div><div><div class="roadmap-title">False</div><div class="roadmap-desc">It edited fine. The harness was strangling it with a read budget tuned for a different model.</div></div></div></div>
   <div class="callout warning"><span class="label">The rule that falls out of this</span>If you are about to write “this should improve X”, stop and write the measurement that would prove it instead. The sentence is the same length. One of them can be wrong without anyone noticing.</div>
   <h2>The instrument lies before the result does</h2>
   <p>There is a failure worse than a wrong conclusion: a conclusion drawn from an instrument that cannot distinguish success from doing nothing. It produces confident numbers, they move when you change things, and every one of them is noise.</p>
@@ -233,12 +244,12 @@
   <figure class="diagram"><svg viewBox="0 0 640 240" role="img" aria-label="Diagram of the two honesty invariants for a test fixture"><rect x="30" y="40" width="250" height="70" rx="8" class="d-box"/><text x="52" y="68" class="d-label-b">At the starting commit</text><text x="52" y="90" class="d-label-sm">feature absent → verify MUST FAIL</text><rect x="360" y="40" width="250" height="70" rx="8" class="d-box"/><text x="382" y="68" class="d-label-b">With the known-good fix</text><text x="382" y="90" class="d-label-sm">feature present → verify MUST PASS</text><rect x="30" y="150" width="580" height="60" rx="8" class="d-box-accent"/><text x="52" y="176" class="d-label-b">If either half is untrue</text><text x="52" y="196" class="d-label-sm">“did nothing” and “solved it” score identically, and every number the instrument produces is noise</text></svg><figcaption>An honest fixture must fail before the work and pass after it. Fail either half and the instrument cannot tell the two columns apart.</figcaption></figure>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">An instrument that cannot tell success from inaction produces noise, not numbers.</p><p class="know-why">Before trusting any measurement, prove the fixture fails at the starting state and passes with a known-good fix applied. If either half is untrue, every number it produces afterwards is meaningless.</p><p class="know-eg"><span class="know-eg-label">For example</span>A benchmark reported six of eight tasks passing before any work had been done. The verification step was checking that the test command exited zero, and the command was piped through head, which exits zero regardless of what failed upstream. Weeks of comparisons had been run against that fixture.</p></blockquote>
   <h2>The same rule applies to every check, not just the fixture</h2>
-  <p>Step 0 asks a fixture to fail before the work and pass after it. That invariant is usually filed as a rule about evaluation fixtures, and it is a rule about <em>checks</em> &mdash; every test, threshold, gate and assertion in the system is subject to it, and most of them have never been asked.</p>
+  <p>Step 0 asks a <dfn class="gl" tabindex="0" data-gl="fixture">fixture</dfn> to fail before the work and pass after it. That invariant is usually filed as a rule about evaluation fixtures, and it is a rule about <em>checks</em> &mdash; every test, threshold, gate and assertion in the system is subject to it, and most of them have never been asked.</p>
   <p>The procedure is short. For each check, name the specific mistake it exists to catch. Then introduce that mistake deliberately and confirm the check goes red. A check that stays green has told you something more useful than a passing suite: it cannot fail, so it has never been protecting anything.</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">A test whose premise is unreachable</div><div><div class="roadmap-title">Green because it never ran</div><div class="roadmap-desc">The setup can no longer produce the state the assertion is about, so the body executes against a case that cannot occur. Nothing errors and the suite counts it as a pass.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A sweep where nothing differs</div><div><div class="roadmap-title">Green because the axis is flat</div><div class="roadmap-desc">A threshold or parameter sweep in which the change being validated moves no case across any boundary. Every setting agrees, which reads as robustness and is actually a sweep with no signal in it.</div></div></div><div class="roadmap-item"><div class="roadmap-num">An aggregate over zero rows</div><div><div class="roadmap-title">Green because the set is empty</div><div class="roadmap-desc">A comparison that holds vacuously because the filter upstream matched nothing. The strongest-looking results in a report are sometimes these.</div></div></div><div class="roadmap-item"><div class="roadmap-num">A check downstream of its own subject</div><div><div class="roadmap-title">Green because it inherits the bug</div><div class="roadmap-desc">A validator that consumes output from the component it is validating. If that component is wrong, the check is wrong in the same direction and confirms it.</div></div></div></div>
   <blockquote class="know"><span class="know-label">Worth knowing</span><p class="know-rule">A green suite full of checks that cannot fail is indistinguishable from a green suite that works &mdash; and it is what people trust when deciding to ship.</p><p class="know-why">This is the same argument as the instrument invariant, applied one level out. The evaluation fixture gets scrutinised because everyone knows an eval can lie; the surrounding tests and gates get a pass because they are &ldquo;just tests&rdquo;. But a gate nobody has seen fail is a gate nobody has evidence about, and the failure is silent in the direction that feels like success.</p><p class="know-eg"><span class="know-eg-label">For example</span>Budget for it the way you budget for the fixture check: once per gate, when the gate is written. Break the thing the gate protects, watch it go red, put it back. If that is expensive enough to be worth skipping, the gate is probably too complicated to trust anyway.</p></blockquote>
   <h2>Two kinds of honesty</h2>
-  <p>The invariant above is <strong>outcome honesty</strong> — can the instrument tell success from inaction? There is a second one, checked far less often. <strong>Process honesty</strong>: did the instrument record what the system actually did and said, or only whether it succeeded?</p>
+  <p>The invariant above is <strong><dfn class="gl" tabindex="0" data-gl="outcome-honesty">outcome honesty</dfn></strong> — can the instrument tell success from inaction? There is a second one, checked far less often. <strong><dfn class="gl" tabindex="0" data-gl="process-honesty">Process honesty</dfn></strong>: did the instrument record what the system actually did and said, or only whether it succeeded?</p>
   <p>Two completely different failures score identically under outcome metrics alone:</p>
   <div class="roadmap terms"><div class="roadmap-item"><div class="roadmap-num">Never understood the task</div><div><div class="roadmap-title">edit_attempted = false</div><div class="roadmap-desc">Needs better grounding, retrieval, or task framing.</div></div></div><div class="roadmap-item"><div class="roadmap-num">Understood it and would not act</div><div><div class="roadmap-title">edit_attempted = false</div><div class="roadmap-desc">Needs a prompt or tool change. Grounding is already fine, and every grounding fix will measure flat.</div></div></div></div>
   <p>In the case that opened this module, nine consecutive experiments were run against the second failure using fixes aimed at the first — because the reasoning that would have distinguished them was being parsed off the API response and discarded on every tool-calling turn. One trace, once logging was restored, answered what nine experiments had not.</p>
@@ -276,6 +287,48 @@
     <div class="quiz-feedback"></div>
   </div>
 
+<script type="application/json" id="gl-defs">{"harness": {"t": "Harness", "d": "Everything around the loop: prompt assembly, tool registry, result formatting, turn limits, persistence. Most agent failures are harness failures. (Also used for <em>evaluation<\/em> harness — context disambiguates.)"}, "embedding": {"t": "Embedding", "d": "A fixed-length list of numbers representing text, where similar meanings produce similar directions. Weak at negation and at identifiers."}, "fixture": {"t": "Fixture", "d": "One case with an answer: a starting state, inputs, and an assertion that is false before the work and true after. The smallest unit of evidence a harness can produce. A fixture that passes at the starting commit, or fails whatever you do, measures nothing — and both look like results."}, "outcome-honesty": {"t": "Outcome honesty", "d": "Whether your fixture can tell success from inaction. At the starting state the check must fail, and with a known-good change it must pass — otherwise every number downstream is noise."}, "process-honesty": {"t": "Process honesty", "d": "Whether the harness recorded what actually happened: the model's reasoning, its tool arguments, and why the run stopped. Without it you cannot tell \"never attempted\" from \"attempted and failed\"."}}</script>
+<script>
+(function () {
+  const holder = document.getElementById("gl-defs");
+  if (!holder) return;
+  const defs = JSON.parse(holder.textContent);
+  const tip = document.createElement("div");
+  tip.className = "gl-tip"; tip.id = "gl-tip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+  document.body.appendChild(tip);
+  let cur = null;
+  function place(el) {
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const left = Math.max(12, Math.min(r.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - w - 12));
+    const below = r.bottom + h + 12 < window.innerHeight || r.top < h + 12;
+    tip.style.left = left + "px";
+    tip.style.top = (below ? r.bottom + window.scrollY + 6 : r.top + window.scrollY - h - 6) + "px";
+  }
+  function show(el) {
+    const d = defs[el.dataset.gl]; if (!d) return;
+    hide();
+    tip.innerHTML = '<strong class="gl-t"></strong>' + d.d;
+    tip.firstChild.textContent = d.t;
+    tip.hidden = false; cur = el; el.setAttribute("aria-describedby", "gl-tip");
+    place(el);
+  }
+  function hide() {
+    if (cur) cur.removeAttribute("aria-describedby");
+    tip.hidden = true; cur = null;
+  }
+  const term = t => t.closest && t.closest("dfn.gl");
+  document.addEventListener("mouseover", e => { const el = term(e.target); if (el && el !== cur) show(el); });
+  document.addEventListener("mouseout", e => { if (term(e.target) && !(e.relatedTarget && tip.contains(e.relatedTarget))) hide(); });
+  document.addEventListener("focusin", e => { const el = term(e.target); if (el) show(el); });
+  document.addEventListener("focusout", e => { if (term(e.target)) hide(); });
+  document.addEventListener("click", e => {
+    const el = term(e.target);
+    if (el) { cur === el ? hide() : show(el); } else if (!tip.contains(e.target)) hide();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+  window.addEventListener("scroll", () => { if (cur) place(cur); }, { passive: true });
+})();
+</script>
 <script>
 document.querySelectorAll(".quiz-options").forEach(group => {
   const fb = group.parentElement.querySelector(".quiz-feedback");
