@@ -14,7 +14,8 @@ import html, json, pathlib, posixpath, re, sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "artifacts" / "sop"
 sys.path.insert(0, str(ROOT / "scripts"))
-from build_docs import BY_SRC          # worksheet pages the checklists link to
+from build_docs import BY_SRC
+from seo_meta import head_meta          # worksheet pages the checklists link to
 
 ORDER = ["README", "training", "deep-learning", "fine-tuning", "generative-ai",
          "llm-engineering", "tuning", "measurement", "judging", "security",
@@ -125,7 +126,7 @@ def parse(path: pathlib.Path) -> dict:
 def render(doc: dict) -> str:
     out = [f'<section class="sop" id="sop-{doc["id"]}" hidden>']
     out.append(f'<div class="sop-head"><button class="back" hidden>&larr; Return</button>'
-               f'<h1>{E(doc["title"])}</h1>'
+               f'<h2>{E(doc["title"])}</h2>'
                f'<div class="progress"><span class="bar"><i></i></span>'
                f'<span class="count"></span>'
                f'<button class="reset" title="Clear ticks on this checklist">reset</button></div>'
@@ -135,9 +136,9 @@ def render(doc: dict) -> str:
     for b in doc["blocks"]:
         t = b["t"]
         if t == "h2":
-            out.append(f'<h2>{inline(b["text"])}</h2>')
-        elif t == "h3":
             out.append(f'<h3>{inline(b["text"])}</h3>')
+        elif t == "h3":
+            out.append(f'<h4>{inline(b["text"])}</h4>')
         elif t == "p":
             out.append(f'<p>{inline(b["text"])}</p>')
         elif t == "bullet":
@@ -188,10 +189,15 @@ nav = "".join(
     f'<span class="navcount" data-for="{d["id"]}"></span></button>'
     for d in docs)
 
+SOP_HEAD = head_meta("Master SOP: operating checklists for LLM work",
+    "Aviation-style operating checklists for LLM engineering, with killer items, hard gates and a separate non-normal checklist for when something is already wrong.",
+    "artifacts/sop/index.html", og_type="website")
+
 page = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Master SOP — Building LLM Systems</title>
+<title>Master SOP: operating checklists for LLM work</title>
+{SOP_HEAD}
 <style>
 :root {{
   --bg:#0f1117; --surface:#1a1d27; --surface2:#242736; --border:#2e3248;
@@ -216,10 +222,11 @@ nav {{ position:sticky; top:0; z-index:10; background:var(--surface);
 .navcount {{ margin-left:6px; opacity:.75; font-variant-numeric:tabular-nums; }}
 main {{ max-width:880px; margin:0 auto; padding:28px 20px 100px; }}
 .sop-head {{ margin-bottom:20px; }}
-h1 {{ font-size:1.7em; margin:6px 0 10px; }}
-h2 {{ color:var(--accent); font-size:1.2em; margin:34px 0 10px;
+.sr {{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }}
+.sop-head h2 {{ font-size:1.7em; margin:6px 0 10px; }}
+h3 {{ color:var(--accent); font-size:1.2em; margin:34px 0 10px;
      border-bottom:1px solid var(--border); padding-bottom:6px; }}
-h3 {{ color:var(--accent2); font-size:1.02em; margin:24px 0 8px; }}
+h4 {{ color:var(--accent2); font-size:1.02em; margin:24px 0 8px; }}
 p {{ margin:10px 0; }} p.bullet {{ padding-left:16px; position:relative; }}
 p.bullet::before {{ content:"·"; position:absolute; left:4px; color:var(--muted); }}
 a {{ color:var(--accent); }}
@@ -269,6 +276,7 @@ th {{ color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spac
   .item {{ break-inside:avoid; }}
 }}
 </style></head><body>
+<h1 class="sr">Master SOP: operating checklists for LLM work</h1>
 <nav><span class="brand">MASTER SOP</span>{nav}</nav>
 <main>{"".join(render(d) for d in docs)}</main>
 <script type="application/json" id="sop-src">{SRC_JSON}</script>
@@ -336,7 +344,7 @@ document.addEventListener("click", e => {{
     return show(jump.dataset.to, {{
       section: from.id.replace("sop-", ""),
       anchor: anchor.id,
-      label: heading ? heading.textContent.trim() : from.querySelector("h1").textContent.trim(),
+      label: heading ? heading.textContent.trim() : from.querySelector("h2").textContent.trim(),
     }});
   }}
 

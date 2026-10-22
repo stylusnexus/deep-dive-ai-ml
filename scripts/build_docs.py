@@ -31,10 +31,10 @@ DOCS = [
     ("artifacts/cumulative-exam.md", "cumulative-exam", "worksheet", {"answers": True}),
     ("artifacts/design-interview-rubric.md", "design-interview-rubric", "worksheet", {}),
     ("artifacts/prerequisite-diagnostic.md", "entry-diagnostic", "worksheet", {}),
-    ("projects/p1-turbine-failure/intake.md", "p1-intake", "worksheet", {}),
-    ("projects/p2-financial-rag/intake.md", "p2-intake", "worksheet", {}),
-    ("projects/p3-delivery-agents/intake.md", "p3-intake", "worksheet", {}),
-    ("projects/p4-deployed-assistant/intake.md", "p4-intake", "worksheet", {}),
+    ("projects/p1-turbine-failure/intake.md", "p1-intake", "worksheet", {"title": "Project 1 intake sheet: wind turbine failure"}),
+    ("projects/p2-financial-rag/intake.md", "p2-intake", "worksheet", {"title": "Project 2 intake sheet: financial retrieval"}),
+    ("projects/p3-delivery-agents/intake.md", "p3-intake", "worksheet", {"title": "Project 3 intake sheet: delivery agents"}),
+    ("projects/p4-deployed-assistant/intake.md", "p4-intake", "worksheet", {"title": "Project 4 intake sheet: deployed assistant"}),
     ("CURRICULUM.md", "curriculum", "reference", {}),
     ("GLOSSARY.md", "glossary", "reference", {}),
     ("HOW-TO-USE.md", "how-to-use", "reference", {}),
@@ -58,6 +58,13 @@ LABEL_QUOTE = re.compile(r"^([A-Za-z][A-Za-z0-9 /'’-]{0,48}):\s*$")  # > Basel
 TABLE_SEP = re.compile(r"^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$")
 LIST_ITEM = re.compile(r"^(\s*)([-*]|\d+\.)\s+(.*)$")
 TASK = re.compile(r"^\[( |x|X)\]\s+(.*)$", re.S)
+
+
+def md_plain(text):
+    """Markdown to plain text for descriptions: no emphasis marks, no link syntax, no code ticks."""
+    t = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", text)
+    t = re.sub(r"[`*]|(?<!\w)_|_(?!\w)", "", t)
+    return t
 
 
 def slugify(text):
@@ -179,8 +186,10 @@ class Doc:
                 hid = self.unique_id(slugify(text))
                 if lvl == 2:
                     self.h2.append((hid, re.sub(r"<[^>]+>", "", self.inline(text))))
-                if lvl == 1 and not hasattr(self, "title"):
-                    self.title = re.sub(r"<[^>]+>", "", self.inline(text))
+                if lvl == 1:
+                    text = self.opts.get("title", text)
+                    if not hasattr(self, "title"):
+                        self.title = re.sub(r"<[^>]+>", "", self.inline(text))
                 out.append(f'<h{lvl} id="{hid}">{self.inline(text)}</h{lvl}>')
                 i += 1; continue
             if re.match(r"^\s*(-{3,}|\*{3,}|_{3,})\s*$", line):
@@ -328,7 +337,9 @@ class Doc:
 def page(doc, body):
     title = doc.title
     first_p = next((l for l in doc.lines if l.strip() and not l.startswith(("#", ">", "|", "-", "*", "`", "!")) and not LABEL_BOLD.match(l.strip())), title)
-    desc = plain(first_p, 158)
+    desc = plain(md_plain(first_p), 158)
+    if "title" in doc.opts:
+        desc = plain(f"{title}. {md_plain(first_p)}", 158)
     if len(desc) < 110:
         kind = "A fill-in worksheet" if doc.fill else "A reference page"
         desc = plain(f"{desc} {kind} from the free {NAME} course.", 158)
@@ -401,15 +412,15 @@ def index_page(built):
     sop = ('<h2>Checklists</h2><p>Operating checklists with killer items and hard gates.</p>'
            '<ul class="cards"><li><a class="card" href="../artifacts/sop/index.html"><h3>SOP checklists</h3>'
            '<p>Aviation-style checklists for LLM work, with a separate non-normal checklist for when something is already wrong.</p></a></li></ul>')
-    desc = ("Fill-in worksheets and reference pages for the free Building and Measuring LLM Systems course: "
-            "intake sheets, a selection scorecard, an exam, a rubric, the curriculum and glossary.")
+    desc = ("Fill-in worksheets and reference pages for the free LLM systems course: intake sheets, "
+            "a scorecard, an exam, a rubric, the curriculum and glossary.")
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Worksheets and references | {E(NAME)}</title>
-{head_meta("Worksheets and references", desc, "docs/", None, og_type="website")}
+{head_meta("Worksheets and references", desc, "docs/", {"@context": "https://schema.org", "@type": "CollectionPage", "name": "Worksheets and references", "description": desc, "url": SITE + "docs/", "isPartOf": {"@type": "Course", "name": NAME, "url": SITE}}, og_type="website")}
 {STYLE}
 </head>
 <body>
@@ -434,7 +445,7 @@ def main():
         d = Doc(src, slug, mode, opts)
         body = d.render()
         d.title = getattr(d, "title", slug)
-        d.blurb = plain(next((l for l in d.lines if l.strip() and not l.startswith(("#", ">", "|", "-", "*", "`")) and not LABEL_BOLD.match(l.strip())), d.title), 150)
+        d.blurb = plain(md_plain(next((l for l in d.lines if l.strip() and not l.startswith(("#", ">", "|", "-", "*", "`")) and not LABEL_BOLD.match(l.strip())), d.title)), 150)
         (out_dir / f"{slug}.html").write_text(page(d, body))
         problems += d.warnings
         built.append(d)

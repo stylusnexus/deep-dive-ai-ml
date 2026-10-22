@@ -1,7 +1,20 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Master SOP — Building LLM Systems</title>
+<title>Master SOP: operating checklists for LLM work</title>
+<meta name="description" content="Aviation-style operating checklists for LLM engineering, with killer items, hard gates and a separate non-normal checklist for when something is already wrong.">
+<link rel="canonical" href="https://stylusnexus.github.io/deep-dive-ai-ml/artifacts/sop/index.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Building and Measuring LLM Systems">
+<meta property="og:title" content="Master SOP: operating checklists for LLM work">
+<meta property="og:description" content="Aviation-style operating checklists for LLM engineering, with killer items, hard gates and a separate non-normal checklist for when something is already wrong.">
+<meta property="og:url" content="https://stylusnexus.github.io/deep-dive-ai-ml/artifacts/sop/index.html">
+<meta property="og:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Master SOP: operating checklists for LLM work">
+<meta name="twitter:description" content="Aviation-style operating checklists for LLM engineering, with killer items, hard gates and a separate non-normal checklist for when something is already wrong.">
+<meta name="twitter:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
 <style>
 :root {
   --bg:#0f1117; --surface:#1a1d27; --surface2:#242736; --border:#2e3248;
@@ -26,10 +39,11 @@ nav { position:sticky; top:0; z-index:10; background:var(--surface);
 .navcount { margin-left:6px; opacity:.75; font-variant-numeric:tabular-nums; }
 main { max-width:880px; margin:0 auto; padding:28px 20px 100px; }
 .sop-head { margin-bottom:20px; }
-h1 { font-size:1.7em; margin:6px 0 10px; }
-h2 { color:var(--accent); font-size:1.2em; margin:34px 0 10px;
+.sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.sop-head h2 { font-size:1.7em; margin:6px 0 10px; }
+h3 { color:var(--accent); font-size:1.2em; margin:34px 0 10px;
      border-bottom:1px solid var(--border); padding-bottom:6px; }
-h3 { color:var(--accent2); font-size:1.02em; margin:24px 0 8px; }
+h4 { color:var(--accent2); font-size:1.02em; margin:24px 0 8px; }
 p { margin:10px 0; } p.bullet { padding-left:16px; position:relative; }
 p.bullet::before { content:"·"; position:absolute; left:4px; color:var(--muted); }
 a { color:var(--accent); }
@@ -79,20 +93,21 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
   .item { break-inside:avoid; }
 }
 </style></head><body>
+<h1 class="sr">Master SOP: operating checklists for LLM work</h1>
 <nav><span class="brand">MASTER SOP</span><button class="navbtn master" data-to="README">Master<span class="navcount" data-for="README"></span></button><button class="navbtn" data-to="training">Training<span class="navcount" data-for="training"></span></button><button class="navbtn" data-to="deep-learning">Deep learning<span class="navcount" data-for="deep-learning"></span></button><button class="navbtn" data-to="fine-tuning">Fine-tuning<span class="navcount" data-for="fine-tuning"></span></button><button class="navbtn" data-to="generative-ai">Generative AI<span class="navcount" data-for="generative-ai"></span></button><button class="navbtn" data-to="llm-engineering">LLM engineering<span class="navcount" data-for="llm-engineering"></span></button><button class="navbtn" data-to="tuning">Tuning a working agent loop<span class="navcount" data-for="tuning"></span></button><button class="navbtn" data-to="measurement">Measurement<span class="navcount" data-for="measurement"></span></button><button class="navbtn" data-to="judging">Judging and reading results<span class="navcount" data-for="judging"></span></button><button class="navbtn" data-to="security">Security<span class="navcount" data-for="security"></span></button><button class="navbtn" data-to="mcp">MCP servers<span class="navcount" data-for="mcp"></span></button><button class="navbtn" data-to="hardware">Hardware<span class="navcount" data-for="hardware"></span></button><button class="navbtn" data-to="incident">NON-NORMAL<span class="navcount" data-for="incident"></span></button></nav>
 <main><section class="sop" id="sop-README" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>Master SOP — Building LLM Systems</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="README.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="README">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>Master SOP — Building LLM Systems</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="README.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="README">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
 <blockquote>Open <a href="index.html" target="_blank" rel="noopener"><code>index.html</code></a> for the linked version: jump into a focused checklist and return to the exact item you left, with ticks that persist. Generated by <code>make sop</code> — edit the markdown, never the HTML.</blockquote>
 <p>Checklists, in the aviation sense: this master, and ten focused ones you jump to when you are in that phase.</p>
-<h2>How to use these (this part matters)</h2>
+<h3>How to use these (this part matters)</h3>
 <p>Borrowed from flight decks, because the conventions there were paid for:</p>
 <p><strong>A checklist is not the procedure.</strong> Pilots fly the flow from training, <em>then</em> run the checklist to verify. If you&#x27;re reading these to find out what to do, you&#x27;re using them wrong — do the work, then come back and confirm nothing was skipped. That&#x27;s why every item is phrased as something you can answer yes or no to, not as an instruction.</p>
 <p><strong>Killer items are marked ☠.</strong> Miss one of these and the work is wrong in a way you probably won&#x27;t detect until it&#x27;s expensive. If you&#x27;re short on time, run only those.</p>
 <p><strong>Gates are hard.</strong> A gate means stop. Not &quot;note it and continue&quot; — the later phases produce meaningless output if an earlier gate is open.</p>
 <p><strong>Short beats complete.</strong> A checklist nobody finishes protects nobody. If one of these grows past a page, it&#x27;s failing, and the fix is to cut items rather than shrink the font.</p>
 <p><strong>Non-normal checklists are separate.</strong> <a class="jump" data-to="incident"><code>incident.md</code> &rarr;</a> is the one you reach for when something is already wrong. Don&#x27;t mix it into normal flow.</p>
-<h2>Master checklist</h2>
-<h3>Phase 0 · Before there is a project</h3>
+<h3>Master checklist</h3>
+<h4>Phase 0 · Before there is a project</h4>
 <label class="item killer" id="README-1"><input type="checkbox" data-id="README-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> Confirmed this needs ML at all — a rule, a query or a lookup won&#x27;t do it</span></label>
 <label class="item killer" id="README-2"><input type="checkbox" data-id="README-2"><span class="tick"></span><span class="body"><b class=skull>☠</b> Dumb baseline built and scored, not just described</span></label>
 <label class="item" id="README-3"><input type="checkbox" data-id="README-3"><span class="tick"></span><span class="body">The decision this output drives is named, with who makes it</span></label>
@@ -101,7 +116,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="README-6"><input type="checkbox" data-id="README-6"><span class="tick"></span><span class="body">Kill condition named while you&#x27;re still objective</span></label>
 <label class="item" id="README-7"><input type="checkbox" data-id="README-7"><span class="tick"></span><span class="body"><a href="../../docs/project-intake.html"><code>project-intake.md</code></a> filled in and dated</span></label>
 <div class="gate">GATE — do not build until every ☠ above is closed.</div>
-<h3>Phase 1 · Data</h3>
+<h4>Phase 1 · Data</h4>
 <label class="item killer" id="README-8"><input type="checkbox" data-id="README-8"><span class="tick"></span><span class="body"><b class=skull>☠</b> Every feature interrogated: would I have this value, with this content, at prediction time?</span></label>
 <label class="item killer" id="README-9"><input type="checkbox" data-id="README-9"><span class="tick"></span><span class="body"><b class=skull>☠</b> Split done <strong>before</strong> any scaler, imputer or encoder is fitted</span></label>
 <label class="item" id="README-10"><input type="checkbox" data-id="README-10"><span class="tick"></span><span class="body">Class balance measured; majority-class score written down</span></label>
@@ -110,12 +125,12 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="README-13"><input type="checkbox" data-id="README-13"><span class="tick"></span><span class="body">Dtypes read; sentinel values and unit inconsistencies hunted</span></label>
 <label class="item" id="README-14"><input type="checkbox" data-id="README-14"><span class="tick"></span><span class="body">Group and time structure respected in the split where they exist</span></label>
 <div class="gate">GATE — a leak here invalidates everything downstream and hides from the usual checks.</div>
-<h3>Phase 2 · Approach</h3>
+<h4>Phase 2 · Approach</h4>
 <label class="item" id="README-15"><input type="checkbox" data-id="README-15"><span class="tick"></span><span class="body">Simplest thing that could work tried first, in order: prompt → retrieval → fine-tune → train</span></label>
 <label class="item" id="README-16"><input type="checkbox" data-id="README-16"><span class="tick"></span><span class="body">Model / vendor / framework choice run through <a href="../../docs/selection-scorecard.html"><code>selection-scorecard.md</code></a></span></label>
 <label class="item" id="README-17"><input type="checkbox" data-id="README-17"><span class="tick"></span><span class="body">Build-vs-call decided on cost at <em>your</em> volume, not at demo volume</span></label>
 <label class="item" id="README-18"><input type="checkbox" data-id="README-18"><span class="tick"></span><span class="body">→ jump to <a class="jump" data-to="deep-learning"><code>deep-learning.md</code> &rarr;</a>, <a class="jump" data-to="generative-ai"><code>generative-ai.md</code> &rarr;</a> or <a class="jump" data-to="llm-engineering"><code>llm-engineering.md</code> &rarr;</a></span></label>
-<h3>Phase 3 · Measurement</h3>
+<h4>Phase 3 · Measurement</h4>
 <label class="item killer" id="README-19"><input type="checkbox" data-id="README-19"><span class="tick"></span><span class="body"><b class=skull>☠</b> Instrument validated: it fails before the work and passes after it</span></label>
 <label class="item killer" id="README-20"><input type="checkbox" data-id="README-20"><span class="tick"></span><span class="body"><b class=skull>☠</b> Held-out set exists that no tuning has ever seen</span></label>
 <label class="item" id="README-21"><input type="checkbox" data-id="README-21"><span class="tick"></span><span class="body">Target metric and threshold fixed <strong>before</strong> the run</span></label>
@@ -125,7 +140,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="README-25"><input type="checkbox" data-id="README-25"><span class="tick"></span><span class="body">→ full procedure in <a class="jump" data-to="measurement"><code>measurement.md</code> &rarr;</a></span></label>
 <label class="item" id="README-26"><input type="checkbox" data-id="README-26"><span class="tick"></span><span class="body">Scoring something with no right answer, or comparing two runs? → <a class="jump" data-to="judging"><code>judging.md</code> &rarr;</a></span></label>
 <div class="gate">GATE — an unvalidated instrument makes every later number noise.</div>
-<h3>Phase 4 · Build</h3>
+<h4>Phase 4 · Build</h4>
 <label class="item killer" id="README-27"><input type="checkbox" data-id="README-27"><span class="tick"></span><span class="body"><b class=skull>☠</b> Models compared threshold-free, on identical folds, with spread reported</span></label>
 <label class="item killer" id="README-28"><input type="checkbox" data-id="README-28"><span class="tick"></span><span class="body"><b class=skull>☠</b> Ordered data split by time, with a gap matching the prediction horizon</span></label>
 <label class="item" id="README-29"><input type="checkbox" data-id="README-29"><span class="tick"></span><span class="body">One change at a time, or a bundled screen with its cost stated out loud</span></label>
@@ -133,7 +148,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="README-31"><input type="checkbox" data-id="README-31"><span class="tick"></span><span class="body">Seeds and versions pinned; run recorded with model, config, date, per-item outcomes</span></label>
 <label class="item" id="README-32"><input type="checkbox" data-id="README-32"><span class="tick"></span><span class="body">Fix reverted once to confirm it was the fix</span></label>
 <label class="item" id="README-33"><input type="checkbox" data-id="README-33"><span class="tick"></span><span class="body">→ once it works and you need it cheaper or more reliable: <a class="jump" data-to="tuning"><code>tuning.md</code> &rarr;</a></span></label>
-<h3>Phase 5 · Before it touches anyone</h3>
+<h4>Phase 5 · Before it touches anyone</h4>
 <label class="item killer" id="README-34"><input type="checkbox" data-id="README-34"><span class="tick"></span><span class="body"><b class=skull>☠</b> Threshold chosen deliberately, with its error trade written down</span></label>
 <label class="item killer" id="README-35"><input type="checkbox" data-id="README-35"><span class="tick"></span><span class="body"><b class=skull>☠</b> Failure path defined — what happens when it&#x27;s wrong, who hears about it</span></label>
 <label class="item killer" id="README-36"><input type="checkbox" data-id="README-36"><span class="tick"></span><span class="body"><b class=skull>☠</b> Human approval gate on anything irreversible or outward-facing</span></label>
@@ -143,12 +158,12 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="README-40"><input type="checkbox" data-id="README-40"><span class="tick"></span><span class="body">Monitoring live: input distributions, prediction distribution, data quality</span></label>
 <label class="item" id="README-41"><input type="checkbox" data-id="README-41"><span class="tick"></span><span class="body">Rollback tested, not just written down</span></label>
 <div class="gate">GATE — nothing ships with a ☠ open in this phase.</div>
-<h2>The focused checklists</h2>
+<h3>The focused checklists</h3>
 <table><thead><tr><th>Checklist</th><th>When</th></tr></thead><tbody><tr><td><a class="jump" data-to="deep-learning"><code>deep-learning.md</code> &rarr;</a></td><td>Training a neural network from scratch</td></tr><tr><td><a class="jump" data-to="training"><code>training.md</code> &rarr;</a></td><td>Any training run, classical or deep</td></tr><tr><td><a class="jump" data-to="fine-tuning"><code>fine-tuning.md</code> &rarr;</a></td><td>Adapting an existing model to your task</td></tr><tr><td><a class="jump" data-to="generative-ai"><code>generative-ai.md</code> &rarr;</a></td><td>Prompting, RAG, structured output</td></tr><tr><td><a class="jump" data-to="llm-engineering"><code>llm-engineering.md</code> &rarr;</a></td><td>Agents, tools, loops, production</td></tr><tr><td><a class="jump" data-to="tuning"><code>tuning.md</code> &rarr;</a></td><td>A loop that works, and you need it cheaper or more reliable</td></tr><tr><td><a class="jump" data-to="hardware"><code>hardware.md</code> &rarr;</a></td><td>Deciding whether a model can run on the machine in front of you</td></tr><tr><td><a class="jump" data-to="mcp"><code>mcp.md</code> &rarr;</a></td><td>Connecting someone else&#x27;s MCP server, or shipping your own</td></tr><tr><td><a class="jump" data-to="measurement"><code>measurement.md</code> &rarr;</a></td><td>Any time you need a number you can trust</td></tr><tr><td><a class="jump" data-to="judging"><code>judging.md</code> &rarr;</a></td><td>Scoring open-ended output, or deciding whether a number really moved</td></tr><tr><td><a class="jump" data-to="security"><code>security.md</code> &rarr;</a></td><td>Before an agent touches anything real</td></tr><tr><td><a class="jump" data-to="incident"><code>incident.md</code> &rarr;</a></td><td><strong>Non-normal.</strong> Something is already wrong</td></tr></tbody></table>
 </section><section class="sop" id="sop-training" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>Training — any model, classical or deep</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="training.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="training">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>Training — any model, classical or deep</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="training.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="training">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
 <p>Run after the data checklist. ☠ = miss it and the result is wrong, not just worse.</p>
-<h2>Before the run</h2>
+<h3>Before the run</h3>
 <label class="item killer" id="training-1"><input type="checkbox" data-id="training-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> Train / validation / test split done, and test is untouched</span></label>
 <label class="item killer" id="training-2"><input type="checkbox" data-id="training-2"><span class="tick"></span><span class="body"><b class=skull>☠</b> All preprocessing inside a pipeline, fitted on train only</span></label>
 <label class="item" id="training-3"><input type="checkbox" data-id="training-3"><span class="tick"></span><span class="body">Group and time structure respected (<code>GroupKFold</code>, time-ordered split)</span></label>
@@ -156,31 +171,31 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="training-5"><input type="checkbox" data-id="training-5"><span class="tick"></span><span class="body">Metric chosen for the problem, not by habit; accuracy rejected if classes are imbalanced</span></label>
 <label class="item" id="training-6"><input type="checkbox" data-id="training-6"><span class="tick"></span><span class="body">Baseline scored: majority class, or predict-the-mean</span></label>
 <label class="item" id="training-7"><input type="checkbox" data-id="training-7"><span class="tick"></span><span class="body">Seeds pinned; library versions recorded</span></label>
-<h2>During</h2>
+<h3>During</h3>
 <label class="item" id="training-8"><input type="checkbox" data-id="training-8"><span class="tick"></span><span class="body">Training and validation loss both tracked, on one chart</span></label>
 <label class="item" id="training-9"><input type="checkbox" data-id="training-9"><span class="tick"></span><span class="body">Early stopping on validation, not on training loss</span></label>
 <label class="item" id="training-10"><input type="checkbox" data-id="training-10"><span class="tick"></span><span class="body">Learning rate sane — loss falling, not NaN, not flat</span></label>
 <label class="item" id="training-11"><input type="checkbox" data-id="training-11"><span class="tick"></span><span class="body">Run logged to something (MLflow) rather than scrollback</span></label>
-<h2>Comparing models fairly</h2>
+<h3>Comparing models fairly</h3>
 <label class="item killer" id="training-12"><input type="checkbox" data-id="training-12"><span class="tick"></span><span class="body"><b class=skull>☠</b> Compared <strong>threshold-free</strong> (average precision or AUC) — recall or F1 at a fixed 0.5 is unfair across model families that shape probabilities differently</span></label>
 <label class="item" id="training-13"><input type="checkbox" data-id="training-13"><span class="tick"></span><span class="body">Identical folds, identical seed, identical preprocessing pipeline for every candidate</span></label>
 <label class="item" id="training-14"><input type="checkbox" data-id="training-14"><span class="tick"></span><span class="body">Metric chosen <strong>before</strong> looking at any result</span></label>
 <label class="item killer" id="training-15"><input type="checkbox" data-id="training-15"><span class="tick"></span><span class="body"><b class=skull>☠</b> Spread reported alongside the mean — overlapping intervals are not a demonstrated difference</span></label>
 <label class="item" id="training-16"><input type="checkbox" data-id="training-16"><span class="tick"></span><span class="body">If the top two are indistinguishable, said so plainly and chosen on interpretability and operating cost instead</span></label>
-<h2>If the data is ordered in time</h2>
+<h3>If the data is ordered in time</h3>
 <label class="item killer" id="training-17"><input type="checkbox" data-id="training-17"><span class="tick"></span><span class="body"><b class=skull>☠</b> Split by time, never randomly — a random split trains on the future</span></label>
 <label class="item killer" id="training-18"><input type="checkbox" data-id="training-18"><span class="tick"></span><span class="body"><b class=skull>☠</b> Gap between train and test matching the prediction horizon</span></label>
 <label class="item" id="training-19"><input type="checkbox" data-id="training-19"><span class="tick"></span><span class="body">Rolling and lag features shifted, computed within each entity, and inside the fold</span></label>
 <label class="item" id="training-20"><input type="checkbox" data-id="training-20"><span class="tick"></span><span class="body">Walk-forward validation rather than one split, so you get a spread</span></label>
 <label class="item" id="training-21"><input type="checkbox" data-id="training-21"><span class="tick"></span><span class="body">Naive baseline computed (&quot;tomorrow equals today&quot;, or same period last season)</span></label>
 <label class="item" id="training-22"><input type="checkbox" data-id="training-22"><span class="tick"></span><span class="body">Regime changes identified — a sliding window may beat an expanding one</span></label>
-<h2>After</h2>
+<h3>After</h3>
 <label class="item killer" id="training-23"><input type="checkbox" data-id="training-23"><span class="tick"></span><span class="body"><b class=skull>☠</b> Compared against the baseline, not just reported alone</span></label>
 <label class="item" id="training-24"><input type="checkbox" data-id="training-24"><span class="tick"></span><span class="body">Gap between train and validation read — small gap + poor scores = underfit; large gap = overfit</span></label>
 <label class="item" id="training-25"><input type="checkbox" data-id="training-25"><span class="tick"></span><span class="body">Cross-validated with the whole pipeline inside the folds</span></label>
 <label class="item" id="training-26"><input type="checkbox" data-id="training-26"><span class="tick"></span><span class="body">Test set touched <strong>once</strong>, at the end, and never again</span></label>
 <label class="item" id="training-27"><input type="checkbox" data-id="training-27"><span class="tick"></span><span class="body">Result recorded with config, data version, date, per-item outcomes</span></label>
-<h2>If this is a retrain rather than a first run</h2>
+<h3>If this is a retrain rather than a first run</h3>
 <label class="item killer" id="training-28"><input type="checkbox" data-id="training-28"><span class="tick"></span><span class="body"><b class=skull>☠</b> Treated as a deployment, not a refresh — it is a new model that can be worse, so it earns</span></label>
 <p>the same shadow, canary and slice checks as any other change</p>
 <label class="item" id="training-29"><input type="checkbox" data-id="training-29"><span class="tick"></span><span class="body">The trigger named: schedule, drift threshold, measured performance drop, or accumulated data</span></label>
@@ -189,62 +204,62 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="training-31"><input type="checkbox" data-id="training-31"><span class="tick"></span><span class="body">The model it replaces still exists and is still servable</span></label>
 <label class="item" id="training-32"><input type="checkbox" data-id="training-32"><span class="tick"></span><span class="body">Budget covers the evaluation cycle, not only the compute — if you cannot afford to evaluate</span></label>
 <p>it, you cannot afford to retrain it</p>
-<h2>Smells</h2>
+<h3>Smells</h3>
 <p class="bullet">Score suspiciously high on a hard problem → suspect leakage before celebrating</p>
 <p class="bullet">One model far worse than the rest at a fixed threshold → probably a threshold artefact, not a model problem; re-check threshold-free</p>
 <p class="bullet">Time-ordered data scoring far better on a random split than a time split → the random split was leaking the future</p>
 <p class="bullet">Validation better than training → check for a split bug or a leak</p>
 <p class="bullet">Wild variance across folds → too little data, or grouped data split wrongly</p>
 </section><section class="sop" id="sop-deep-learning" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>Deep learning — training a network</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="deep-learning.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="deep-learning">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>Deep learning — training a network</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="deep-learning.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="deep-learning">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
 <p>Use with <a class="jump" data-to="training"><code>training.md</code> &rarr;</a>, which still applies.</p>
-<h2>Setup</h2>
+<h3>Setup</h3>
 <label class="item killer" id="deep-learning-1"><input type="checkbox" data-id="deep-learning-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> A simpler model tried first and beaten — trees usually win on tabular data</span></label>
 <label class="item killer" id="deep-learning-2"><input type="checkbox" data-id="deep-learning-2"><span class="tick"></span><span class="body"><b class=skull>☠</b> If the data is tabular, the network is the option you must <strong>justify</strong>, not the default</span></label>
 <label class="item" id="deep-learning-3"><input type="checkbox" data-id="deep-learning-3"><span class="tick"></span><span class="body">Backend chosen deliberately, and the environment variable set <strong>before</strong> importing Keras</span></label>
 <label class="item" id="deep-learning-4"><input type="checkbox" data-id="deep-learning-4"><span class="tick"></span><span class="body">Enough data for the capacity, or transfer learning used instead of scratch</span></label>
 <label class="item" id="deep-learning-5"><input type="checkbox" data-id="deep-learning-5"><span class="tick"></span><span class="body">Inputs normalised; images and text preprocessed consistently between train and inference</span></label>
 <label class="item" id="deep-learning-6"><input type="checkbox" data-id="deep-learning-6"><span class="tick"></span><span class="body">Device confirmed (MPS on Apple Silicon) — silent CPU fallback wastes hours</span></label>
-<h2>Architecture</h2>
+<h3>Architecture</h3>
 <label class="item" id="deep-learning-7"><input type="checkbox" data-id="deep-learning-7"><span class="tick"></span><span class="body">Smallest architecture that could work, first</span></label>
 <label class="item" id="deep-learning-8"><input type="checkbox" data-id="deep-learning-8"><span class="tick"></span><span class="body">Task-appropriate output layer and loss (softmax + cross-entropy; sigmoid + BCE; linear + MSE)</span></label>
 <label class="item" id="deep-learning-9"><input type="checkbox" data-id="deep-learning-9"><span class="tick"></span><span class="body">Residual connections and normalisation where depth warrants them</span></label>
 <label class="item" id="deep-learning-10"><input type="checkbox" data-id="deep-learning-10"><span class="tick"></span><span class="body">Parameter count sane relative to sample count</span></label>
-<h2>Training loop</h2>
+<h3>Training loop</h3>
 <label class="item" id="deep-learning-11"><input type="checkbox" data-id="deep-learning-11"><span class="tick"></span><span class="body">Overfit a single batch deliberately, first — if it can&#x27;t, the loop is broken, not the model</span></label>
 <label class="item" id="deep-learning-12"><input type="checkbox" data-id="deep-learning-12"><span class="tick"></span><span class="body">Learning rate found by sweep, not guessed; schedule chosen</span></label>
 <label class="item" id="deep-learning-13"><input type="checkbox" data-id="deep-learning-13"><span class="tick"></span><span class="body">Batch size set by memory, and its effect on stability understood</span></label>
 <label class="item" id="deep-learning-14"><input type="checkbox" data-id="deep-learning-14"><span class="tick"></span><span class="body">Gradient clipping if loss spikes</span></label>
 <label class="item" id="deep-learning-15"><input type="checkbox" data-id="deep-learning-15"><span class="tick"></span><span class="body">Checkpoints saved, best-by-validation kept</span></label>
-<h2>Regularisation</h2>
+<h3>Regularisation</h3>
 <label class="item" id="deep-learning-16"><input type="checkbox" data-id="deep-learning-16"><span class="tick"></span><span class="body">Early stopping in place</span></label>
 <label class="item" id="deep-learning-17"><input type="checkbox" data-id="deep-learning-17"><span class="tick"></span><span class="body">Dropout / weight decay tuned against validation, not vibes</span></label>
 <label class="item" id="deep-learning-18"><input type="checkbox" data-id="deep-learning-18"><span class="tick"></span><span class="body">Augmentation applied to train only, never to validation or test</span></label>
-<h2>Reproducibility</h2>
+<h3>Reproducibility</h3>
 <label class="item" id="deep-learning-19"><input type="checkbox" data-id="deep-learning-19"><span class="tick"></span><span class="body">Understood that runs are <strong>not</strong> bit-identical across backends, hardware or library versions</span></label>
 <label class="item" id="deep-learning-20"><input type="checkbox" data-id="deep-learning-20"><span class="tick"></span><span class="body">Tests and evaluations tolerate small numeric differences rather than asserting equality</span></label>
 <label class="item" id="deep-learning-21"><input type="checkbox" data-id="deep-learning-21"><span class="tick"></span><span class="body">A claimed improvement smaller than run-to-run variation is treated as unproven until repeated</span></label>
-<h2>Smells</h2>
+<h3>Smells</h3>
 <p class="bullet">Loss NaN → learning rate too high; drop 10× before anything else</p>
 <p class="bullet">Loss flat from step one → wiring bug, wrong loss, or labels not connected</p>
 <p class="bullet">Train loss falls, validation flat → overfitting; more data or more regularisation</p>
 <p class="bullet">Cannot overfit one batch → the bug is in the loop</p>
 </section><section class="sop" id="sop-fine-tuning" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>Fine-tuning — adapting an existing model</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="fine-tuning.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="fine-tuning">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
-<h2>☠ Before you fine-tune at all</h2>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>Fine-tuning — adapting an existing model</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="fine-tuning.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="fine-tuning">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<h3>☠ Before you fine-tune at all</h3>
 <label class="item killer" id="fine-tuning-1"><input type="checkbox" data-id="fine-tuning-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> Prompt engineering exhausted and measured</span></label>
 <label class="item killer" id="fine-tuning-2"><input type="checkbox" data-id="fine-tuning-2"><span class="tick"></span><span class="body"><b class=skull>☠</b> Retrieval tried — if the gap is <em>knowledge</em>, RAG is the answer, not fine-tuning</span></label>
 <label class="item killer" id="fine-tuning-3"><input type="checkbox" data-id="fine-tuning-3"><span class="tick"></span><span class="body"><b class=skull>☠</b> The gap is format, tone, domain idiom or consistency — things weights can fix</span></label>
 <label class="item" id="fine-tuning-4"><input type="checkbox" data-id="fine-tuning-4"><span class="tick"></span><span class="body">Few-shot economics calculated: example tokens × call volume vs training cost</span></label>
 <label class="item" id="fine-tuning-5"><input type="checkbox" data-id="fine-tuning-5"><span class="tick"></span><span class="body">Eval set built <strong>before</strong> training, so before/after is comparable</span></label>
 <p>If the first three aren&#x27;t all yes, stop. Most fine-tuning projects should end here.</p>
-<h2>Data</h2>
+<h3>Data</h3>
 <label class="item" id="fine-tuning-6"><input type="checkbox" data-id="fine-tuning-6"><span class="tick"></span><span class="body">Enough examples for the method — hundreds for LoRA on a narrow task, not tens</span></label>
 <label class="item" id="fine-tuning-7"><input type="checkbox" data-id="fine-tuning-7"><span class="tick"></span><span class="body">Examples consistent in format; contradictions in the data become contradictions in the model</span></label>
 <label class="item" id="fine-tuning-8"><input type="checkbox" data-id="fine-tuning-8"><span class="tick"></span><span class="body">Held-out split the training never sees</span></label>
 <label class="item" id="fine-tuning-9"><input type="checkbox" data-id="fine-tuning-9"><span class="tick"></span><span class="body">Licensing checked if the data came from another model&#x27;s outputs</span></label>
 <label class="item" id="fine-tuning-10"><input type="checkbox" data-id="fine-tuning-10"><span class="tick"></span><span class="body">Deduplicated — near-duplicates inflate your eval</span></label>
-<h2>Method</h2>
+<h3>Method</h3>
 <label class="item killer" id="fine-tuning-11"><input type="checkbox" data-id="fine-tuning-11"><span class="tick"></span><span class="body"><b class=skull>☠</b> Objective chosen for what you can actually supply: demonstrations you can write →</span></label>
 <p>supervised; something you can only <em>check</em> → reinforcement against a verifier. Reaching for the second without a grader is the commonest way this becomes an expensive nothing</p>
 <label class="item" id="fine-tuning-12"><input type="checkbox" data-id="fine-tuning-12"><span class="tick"></span><span class="body">LoRA / QLoRA before full fine-tune; rank chosen deliberately</span></label>
@@ -255,7 +270,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <p>checkpointing — in that order — <em>before</em> reaching for a smaller model. The first two cost no accuracy at all and the third costs only time; a smaller model costs capability</p>
 <label class="item" id="fine-tuning-17"><input type="checkbox" data-id="fine-tuning-17"><span class="tick"></span><span class="body">Loss flat immediately after enabling mixed precision treated as a numerics problem</span></label>
 <p>(gradient underflow, loss scaling) rather than a learning-rate one</p>
-<h2>After</h2>
+<h3>After</h3>
 <label class="item killer" id="fine-tuning-18"><input type="checkbox" data-id="fine-tuning-18"><span class="tick"></span><span class="body"><b class=skull>☠</b> Evaluated against the <strong>base model</strong> on the same held-out set — not just &quot;it looks better&quot;</span></label>
 <label class="item" id="fine-tuning-19"><input type="checkbox" data-id="fine-tuning-19"><span class="tick"></span><span class="body">If a reward or verifier was used: checked against an evaluation the reward never saw. A</span></label>
 <p>rising reward curve is evidence the reward went up, which equals improvement only where the reward captures the goal — and it never quite does</p>
@@ -266,12 +281,12 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="fine-tuning-23"><input type="checkbox" data-id="fine-tuning-23"><span class="tick"></span><span class="body">The model it replaces still exists and is still servable — a rollback you cannot perform</span></label>
 <p>turns an incident into an unplanned training run</p>
 <label class="item" id="fine-tuning-24"><input type="checkbox" data-id="fine-tuning-24"><span class="tick"></span><span class="body">Quantized for serving if it&#x27;s going local; re-evaluated after quantizing</span></label>
-<h2>Smells</h2>
+<h3>Smells</h3>
 <p class="bullet">Brilliant on training examples, worse everywhere else → trained too long on too little</p>
 <p class="bullet">No improvement at all → the gap was knowledge, not format; go back to retrieval</p>
 </section><section class="sop" id="sop-generative-ai" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>Generative AI — prompting, RAG, structured output</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="generative-ai.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="generative-ai">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
-<h2>Prompting</h2>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>Generative AI — prompting, RAG, structured output</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="generative-ai.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="generative-ai">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<h3>Prompting</h3>
 <label class="item" id="generative-ai-1"><input type="checkbox" data-id="generative-ai-1"><span class="tick"></span><span class="body">Task actually needs a generative model — not classification wearing a costume</span></label>
 <label class="item" id="generative-ai-2"><input type="checkbox" data-id="generative-ai-2"><span class="tick"></span><span class="body">Output format specified and constrained, not requested politely</span></label>
 <label class="item" id="generative-ai-3"><input type="checkbox" data-id="generative-ai-3"><span class="tick"></span><span class="body">Few-shot examples cover the classes, including the awkward ones</span></label>
@@ -279,7 +294,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="generative-ai-5"><input type="checkbox" data-id="generative-ai-5"><span class="tick"></span><span class="body">Temperature 0 for anything parsed by code</span></label>
 <label class="item" id="generative-ai-6"><input type="checkbox" data-id="generative-ai-6"><span class="tick"></span><span class="body">Stable content at the front of the prompt so caching works</span></label>
 <label class="item" id="generative-ai-7"><input type="checkbox" data-id="generative-ai-7"><span class="tick"></span><span class="body">Refusal explicitly licensed — &quot;say you don&#x27;t know&quot; costs little and helps</span></label>
-<h2>Retrieval</h2>
+<h3>Retrieval</h3>
 <label class="item killer" id="generative-ai-8"><input type="checkbox" data-id="generative-ai-8"><span class="tick"></span><span class="body"><b class=skull>☠</b> Keyword baseline (BM25) tried before reaching for vectors</span></label>
 <label class="item" id="generative-ai-9"><input type="checkbox" data-id="generative-ai-9"><span class="tick"></span><span class="body">Chunking checked by eye — are chunks whole thoughts?</span></label>
 <label class="item" id="generative-ai-10"><input type="checkbox" data-id="generative-ai-10"><span class="tick"></span><span class="body">Hybrid retrieval, fused by rank not by score</span></label>
@@ -291,7 +306,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <p>whose answer is a relationship rather than a passage. It moves cost from query time to build time, which only repays at volume</p>
 <label class="item" id="generative-ai-16"><input type="checkbox" data-id="generative-ai-16"><span class="tick"></span><span class="body">If a graph exists, its edges spot-checked by a human — extraction errors become structure,</span></label>
 <p>get reused by every question that traverses them, and are invisible at query time</p>
-<h2>Structured output</h2>
+<h3>Structured output</h3>
 <label class="item" id="generative-ai-17"><input type="checkbox" data-id="generative-ai-17"><span class="tick"></span><span class="body">Highest rung available used: constrained decoding &gt; schema &gt; JSON mode &gt; asking</span></label>
 <label class="item" id="generative-ai-18"><input type="checkbox" data-id="generative-ai-18"><span class="tick"></span><span class="body">Schema field names and enums written as if explaining them — they&#x27;re read by the model</span></label>
 <label class="item killer" id="generative-ai-19"><input type="checkbox" data-id="generative-ai-19"><span class="tick"></span><span class="body"><b class=skull>☠</b> The schema can express &quot;I don&#x27;t know&quot; — an optional null, an <code>unknown</code> enum member or a</span></label>
@@ -301,37 +316,37 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="generative-ai-22"><input type="checkbox" data-id="generative-ai-22"><span class="tick"></span><span class="body">Any stop sequence checked against real content — it fires wherever it appears, and it is</span></label>
 <p>normally not returned, so a parser expecting the closing character will fail</p>
 <label class="item" id="generative-ai-23"><input type="checkbox" data-id="generative-ai-23"><span class="tick"></span><span class="body">Truncation ruled out as a cause before blaming the model</span></label>
-<h2>Evaluation</h2>
+<h3>Evaluation</h3>
 <label class="item killer" id="generative-ai-24"><input type="checkbox" data-id="generative-ai-24"><span class="tick"></span><span class="body"><b class=skull>☠</b> Private eval set of ~20 real items exists</span></label>
 <label class="item" id="generative-ai-25"><input type="checkbox" data-id="generative-ai-25"><span class="tick"></span><span class="body">Groundedness measured separately from correctness</span></label>
 <label class="item" id="generative-ai-26"><input type="checkbox" data-id="generative-ai-26"><span class="tick"></span><span class="body">Model-as-judge used only as a last resort, never with the judge as the model under test</span></label>
 <label class="item" id="generative-ai-27"><input type="checkbox" data-id="generative-ai-27"><span class="tick"></span><span class="body">Cost per call and p95 latency measured, not estimated</span></label>
-<h2>Smells</h2>
+<h3>Smells</h3>
 <p class="bullet">Answers confident and wrong → ungrounded; retrieval before prompt-tuning</p>
 <p class="bullet">RAG quality dropped with no prompt change → measure index recall first</p>
 <p class="bullet">Intermittent malformed JSON → check temperature, then max-tokens</p>
 <p class="bullet">Output consistently missing its final character → a stop sequence is firing and is not returned</p>
 <p class="bullet">Every record comes back with a confident category and none is ever <code>unknown</code> → the schema has no abstain path, so you are reading forced guesses, not findings</p>
 </section><section class="sop" id="sop-llm-engineering" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>LLM engineering — agents, tools, loops, production</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="llm-engineering.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="llm-engineering">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
-<h2>Do you need an agent?</h2>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>LLM engineering — agents, tools, loops, production</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="llm-engineering.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="llm-engineering">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<h3>Do you need an agent?</h3>
 <label class="item killer" id="llm-engineering-1"><input type="checkbox" data-id="llm-engineering-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> A fixed workflow ruled out — most &quot;agentic&quot; tasks are workflows with a model in one slot</span></label>
 <label class="item" id="llm-engineering-2"><input type="checkbox" data-id="llm-engineering-2"><span class="tick"></span><span class="body">The sequence genuinely cannot be known in advance</span></label>
 <label class="item" id="llm-engineering-3"><input type="checkbox" data-id="llm-engineering-3"><span class="tick"></span><span class="body">Fewest agents that do the job; every handoff costs observability</span></label>
-<h2>The loop</h2>
+<h3>The loop</h3>
 <label class="item killer" id="llm-engineering-4"><input type="checkbox" data-id="llm-engineering-4"><span class="tick"></span><span class="body"><b class=skull>☠</b> Termination is <strong>not</strong> &quot;the model says it&#x27;s done&quot;</span></label>
 <label class="item killer" id="llm-engineering-5"><input type="checkbox" data-id="llm-engineering-5"><span class="tick"></span><span class="body"><b class=skull>☠</b> Hard ceiling on turns <strong>and</strong> on spend</span></label>
 <label class="item" id="llm-engineering-6"><input type="checkbox" data-id="llm-engineering-6"><span class="tick"></span><span class="body">Repetition detection, so it cannot spin on the same failing action</span></label>
 <label class="item" id="llm-engineering-7"><input type="checkbox" data-id="llm-engineering-7"><span class="tick"></span><span class="body">External signal enters the loop — a test, a validator, a retrieval hit. If nothing does, expect little</span></label>
 <label class="item" id="llm-engineering-8"><input type="checkbox" data-id="llm-engineering-8"><span class="tick"></span><span class="body">Compounding error accounted for: ten steps at 95% is ~60%</span></label>
-<h2>Prompt vs tool — decide per rule</h2>
+<h3>Prompt vs tool — decide per rule</h3>
 <label class="item killer" id="llm-engineering-9"><input type="checkbox" data-id="llm-engineering-9"><span class="tick"></span><span class="body"><b class=skull>☠</b> For every rule: <strong>can the model tell when it has complied?</strong></span></label>
 <label class="item" id="llm-engineering-10"><input type="checkbox" data-id="llm-engineering-10"><span class="tick"></span><span class="body">Mechanically checkable rules live in the tool as a precondition, not in prose</span></label>
 <label class="item" id="llm-engineering-11"><input type="checkbox" data-id="llm-engineering-11"><span class="tick"></span><span class="body">No prompt instruction states a precondition a tool already enforces</span></label>
 <label class="item" id="llm-engineering-12"><input type="checkbox" data-id="llm-engineering-12"><span class="tick"></span><span class="body">No prompt instruction gates the work without a completion test (&quot;inspect thoroughly first&quot; has none)</span></label>
 <label class="item" id="llm-engineering-13"><input type="checkbox" data-id="llm-engineering-13"><span class="tick"></span><span class="body">Prompt states the mechanism and a bounded action, rather than requesting a behaviour</span></label>
 <label class="item" id="llm-engineering-14"><input type="checkbox" data-id="llm-engineering-14"><span class="tick"></span><span class="body">Prompt carries only what tools cannot check: goals, priorities, ambiguity handling, when to stop and ask</span></label>
-<h2>Tools</h2>
+<h3>Tools</h3>
 <label class="item" id="llm-engineering-15"><input type="checkbox" data-id="llm-engineering-15"><span class="tick"></span><span class="body">Names and descriptions written as prompt engineering, because they are</span></label>
 <label class="item killer" id="llm-engineering-16"><input type="checkbox" data-id="llm-engineering-16"><span class="tick"></span><span class="body"><b class=skull>☠</b> Least privilege — read-only first, widen per task, narrow back</span></label>
 <label class="item killer" id="llm-engineering-17"><input type="checkbox" data-id="llm-engineering-17"><span class="tick"></span><span class="body"><b class=skull>☠</b> Scoped credentials, not account-wide</span></label>
@@ -340,16 +355,16 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="llm-engineering-20"><input type="checkbox" data-id="llm-engineering-20"><span class="tick"></span><span class="body">Execution sandboxed in a container if the agent runs code</span></label>
 <label class="item killer" id="llm-engineering-21"><input type="checkbox" data-id="llm-engineering-21"><span class="tick"></span><span class="body"><b class=skull>☠</b> Timeouts kill the <strong>process group</strong>, not just the direct child — an orphaned tree survives its own timeout and compounds every iteration</span></label>
 <label class="item" id="llm-engineering-22"><input type="checkbox" data-id="llm-engineering-22"><span class="tick"></span><span class="body">Process count checked after any run that timed out on a spawned command</span></label>
-<h2>Adversarial</h2>
+<h3>Adversarial</h3>
 <label class="item killer" id="llm-engineering-23"><input type="checkbox" data-id="llm-engineering-23"><span class="tick"></span><span class="body"><b class=skull>☠</b> Full adversarial pass run → <a class="jump" data-to="security"><code>security.md</code> &rarr;</a></span></label>
-<h2>Calling something you do not control</h2>
+<h3>Calling something you do not control</h3>
 <label class="item" id="llm-engineering-24"><input type="checkbox" data-id="llm-engineering-24"><span class="tick"></span><span class="body">Status code read before deciding to retry — 4xx never, 429 only when told, 5xx with backoff</span></label>
 <label class="item killer" id="llm-engineering-25"><input type="checkbox" data-id="llm-engineering-25"><span class="tick"></span><span class="body"><b class=skull>☠</b> Timeouts treated as unknown rather than failed: an idempotency key per <em>operation</em>,</span></label>
 <p>reused across every attempt, or a retry may pay for the work twice</p>
 <label class="item" id="llm-engineering-26"><input type="checkbox" data-id="llm-engineering-26"><span class="tick"></span><span class="body">Backoff exponential <strong>and</strong> jittered, capped, and bounded in total attempts</span></label>
 <label class="item" id="llm-engineering-27"><input type="checkbox" data-id="llm-engineering-27"><span class="tick"></span><span class="body">Retry budget understood as a spending policy — three attempts at a large prompt is</span></label>
 <p>three times the bill for one answer</p>
-<h2>Context</h2>
+<h3>Context</h3>
 <label class="item" id="llm-engineering-28"><input type="checkbox" data-id="llm-engineering-28"><span class="tick"></span><span class="body">Budget allocated deliberately across instructions, tools, history, retrieval, answer</span></label>
 <label class="item" id="llm-engineering-29"><input type="checkbox" data-id="llm-engineering-29"><span class="tick"></span><span class="body">Tool results truncated or summarised before they enter context</span></label>
 <label class="item" id="llm-engineering-30"><input type="checkbox" data-id="llm-engineering-30"><span class="tick"></span><span class="body">History managed — window, compaction or structured memory</span></label>
@@ -362,7 +377,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <p>place on <em>every</em> task, not just the one that prompted it — it is spent from every session&#x27;s budget. Facts needed occasionally belong in a searchable note instead</p>
 <label class="item" id="llm-engineering-35"><input type="checkbox" data-id="llm-engineering-35"><span class="tick"></span><span class="body">Written memory dated, and anything naming a file, flag or command verified before it is acted</span></label>
 <p>on — a stale note is worse than a missing one, because absence prompts a look</p>
-<h2>Production</h2>
+<h3>Production</h3>
 <label class="item killer" id="llm-engineering-36"><input type="checkbox" data-id="llm-engineering-36"><span class="tick"></span><span class="body"><b class=skull>☠</b> Human approval before anything irreversible or outward-facing</span></label>
 <label class="item" id="llm-engineering-37"><input type="checkbox" data-id="llm-engineering-37"><span class="tick"></span><span class="body">Full action log — you cannot investigate what you didn&#x27;t record</span></label>
 <label class="item" id="llm-engineering-38"><input type="checkbox" data-id="llm-engineering-38"><span class="tick"></span><span class="body">Any counter that both reports and triggers a control split in two — the control resets on</span></label>
@@ -375,42 +390,42 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <p>healthy. For the joint case a domain classifier — old data vs recent — catches what per-feature checks cannot, because features can move together while each looks unchanged</p>
 <label class="item" id="llm-engineering-43"><input type="checkbox" data-id="llm-engineering-43"><span class="tick"></span><span class="body">Rate limits on every paid endpoint</span></label>
 <label class="item" id="llm-engineering-44"><input type="checkbox" data-id="llm-engineering-44"><span class="tick"></span><span class="body">Unattended runs: narrow job, scoped access, safe stopping points, someone reachable</span></label>
-<h2>Smells</h2>
+<h3>Smells</h3>
 <p class="bullet">Agent loops without progress → no external verifier; nothing tells it that it failed</p>
 <p class="bullet">Wrong tool chosen repeatedly → rewrite descriptions before upgrading the model</p>
 <p class="bullet">Works alone, fails in production → context differs; log what actually went in</p>
 <p class="bullet">Agent slightly worse at everything, no error anywhere → check the size of the always-loaded instruction file; it is distractors on every task it does not apply to</p>
 </section><section class="sop" id="sop-tuning" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>Tuning a working agent loop</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="tuning.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="tuning">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>Tuning a working agent loop</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="tuning.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="tuning">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
 <p><strong>Different moment from <a class="jump" data-to="llm-engineering"><code>llm-engineering.md</code> &rarr;</a>.</strong> That one asks <em>am I building this correctly?</em> This one asks <em>this works — how do I make it cheaper and more reliable without breaking it?</em></p>
-<h2>Things to know</h2>
+<h3>Things to know</h3>
 <blockquote><strong>Each lever trades tokens and latency against reliability.</strong> There is no free setting. The correct position for each is a property of your failure distribution, not a best practice you can copy.</blockquote>
 <blockquote><strong>They interact, so change one at a time.</strong> Truncating reads improves cache hit rates by stabilising the prompt. Per-edit verification adds turns, which makes read accumulation worse. Adjust two and the result tells you something moved, not what.</blockquote>
-<h2>Before you tune anything ☠</h2>
+<h3>Before you tune anything ☠</h3>
 <label class="item killer" id="tuning-1"><input type="checkbox" data-id="tuning-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> <strong>Read the trace.</strong> Where do runs actually fail — turn cap, spend cap, wrong tool, broken edit, or just cost? Each points at a different lever</span></label>
 <label class="item killer" id="tuning-2"><input type="checkbox" data-id="tuning-2"><span class="tick"></span><span class="body"><b class=skull>☠</b> Baseline recorded on the whole battery, repeated, with spread</span></label>
 <label class="item" id="tuning-3"><input type="checkbox" data-id="tuning-3"><span class="tick"></span><span class="body">The metric you are trying to move, named, before you start</span></label>
 <label class="item" id="tuning-4"><input type="checkbox" data-id="tuning-4"><span class="tick"></span><span class="body">A guardrail metric chosen — usually correctness, since every lever here can trade it away</span></label>
 <div class="gate">GATE — tuning without a trace is guessing with extra steps.</div>
-<h2>1 · Truncate tool results</h2>
+<h3>1 · Truncate tool results</h3>
 <p>Cheapest real win. One line, and it caps the worst case immediately.</p>
 <label class="item" id="tuning-5"><input type="checkbox" data-id="tuning-5"><span class="tick"></span><span class="body">Every tool result capped at ingest</span></label>
 <label class="item" id="tuning-6"><input type="checkbox" data-id="tuning-6"><span class="tick"></span><span class="body">Cap chosen from actual result sizes, not guessed</span></label>
 <label class="item" id="tuning-7"><input type="checkbox" data-id="tuning-7"><span class="tick"></span><span class="body">Truncation marker present, so the model knows content was omitted</span></label>
 <label class="item" id="tuning-8"><input type="checkbox" data-id="tuning-8"><span class="tick"></span><span class="body">Large reads scoped at the source where possible — fetch the relevant slice, not the file</span></label>
-<h2>2 · Order the prompt for caching</h2>
+<h3>2 · Order the prompt for caching</h3>
 <label class="item" id="tuning-9"><input type="checkbox" data-id="tuning-9"><span class="tick"></span><span class="body">Stable content first: system prompt, tool definitions, long documents</span></label>
 <label class="item" id="tuning-10"><input type="checkbox" data-id="tuning-10"><span class="tick"></span><span class="body">Variable content last: the user turn, anything with a timestamp or session id</span></label>
 <label class="item killer" id="tuning-11"><input type="checkbox" data-id="tuning-11"><span class="tick"></span><span class="body"><b class=skull>☠</b> <strong>Nothing variable near the front</strong> — one changing character invalidates everything after it</span></label>
 <label class="item killer" id="tuning-12"><input type="checkbox" data-id="tuning-12"><span class="tick"></span><span class="body"><b class=skull>☠</b> Cache hit rate instrumented and alerted on. A cache that stopped matching looks exactly like one that never existed, except on the bill</span></label>
 <label class="item" id="tuning-13"><input type="checkbox" data-id="tuning-13"><span class="tick"></span><span class="body">Reuse count checked against the write premium — caching a prefix used twice is roughly break-even</span></label>
-<h2>3 · Set verification granularity</h2>
+<h3>3 · Set verification granularity</h3>
 <label class="item" id="tuning-14"><input type="checkbox" data-id="tuning-14"><span class="tick"></span><span class="body">Change shape identified: are edits independent, or atomic across files?</span></label>
 <label class="item" id="tuning-15"><input type="checkbox" data-id="tuning-15"><span class="tick"></span><span class="body">Independent edits → verify per edit, for precise attribution</span></label>
 <label class="item" id="tuning-16"><input type="checkbox" data-id="tuning-16"><span class="tick"></span><span class="body">Atomic changes → verify per logical unit; per-edit checking reports failures the next edit would resolve</span></label>
 <label class="item" id="tuning-17"><input type="checkbox" data-id="tuning-17"><span class="tick"></span><span class="body">The agent can tell which regime it is in</span></label>
 <label class="item" id="tuning-18"><input type="checkbox" data-id="tuning-18"><span class="tick"></span><span class="body">Verification cost measured — it is a turn, and turns compound</span></label>
-<h2>4 · Tune reasoning effort last</h2>
+<h3>4 · Tune reasoning effort last</h3>
 <label class="item" id="tuning-19"><input type="checkbox" data-id="tuning-19"><span class="tick"></span><span class="body">Repetition penalties reached for only after the harness — they act per token and a</span></label>
 <p>degenerate loop repeats a block, so turning them high enough to break one damages ordinary output first, structured output soonest</p>
 <label class="item" id="tuning-20"><input type="checkbox" data-id="tuning-20"><span class="tick"></span><span class="body">Routed by turn shape, not set globally</span></label>
@@ -418,13 +433,13 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="tuning-22"><input type="checkbox" data-id="tuning-22"><span class="tick"></span><span class="body">Low or none where it is executing a decision already made, extracting, or formatting</span></label>
 <label class="item" id="tuning-23"><input type="checkbox" data-id="tuning-23"><span class="tick"></span><span class="body">Reasoning tokens counted — they are billed whether or not you see them</span></label>
 <label class="item" id="tuning-24"><input type="checkbox" data-id="tuning-24"><span class="tick"></span><span class="body">Measured, not assumed: on recall and extraction the gain is usually zero</span></label>
-<h2>After each change</h2>
+<h3>After each change</h3>
 <label class="item killer" id="tuning-25"><input type="checkbox" data-id="tuning-25"><span class="tick"></span><span class="body"><b class=skull>☠</b> One lever moved, not two</span></label>
 <label class="item" id="tuning-26"><input type="checkbox" data-id="tuning-26"><span class="tick"></span><span class="body">Whole battery re-run, not a spot check</span></label>
 <label class="item" id="tuning-27"><input type="checkbox" data-id="tuning-27"><span class="tick"></span><span class="body">Guardrail metric checked before declaring a win</span></label>
 <label class="item killer" id="tuning-28"><input type="checkbox" data-id="tuning-28"><span class="tick"></span><span class="body"><b class=skull>☠</b> Change reverted once to confirm it caused the improvement</span></label>
 <label class="item" id="tuning-29"><input type="checkbox" data-id="tuning-29"><span class="tick"></span><span class="body">Manifest updated — the settings are now part of what a score means</span></label>
-<h2>Smells</h2>
+<h3>Smells</h3>
 <p class="bullet">Cost fell and correctness fell with it → you traded away the thing you were protecting; check the guardrail</p>
 <p class="bullet">Cache hit rate near zero with no code change → something variable crept into the prefix</p>
 <p class="bullet">Agent spinning on a build error it keeps re-fixing → per-edit verification on an atomic change</p>
@@ -432,9 +447,9 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <p class="bullet">Turn counts rising over weeks with no deploy → read accumulation growing as the corpus or tool set grows</p>
 <p class="bullet">A tuning win you cannot reproduce → two levers moved, or no manifest</p>
 </section><section class="sop" id="sop-measurement" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>Measurement — getting a number you can trust</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="measurement.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="measurement">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>Measurement — getting a number you can trust</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="measurement.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="measurement">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
 <p>In dependency order. Every step is worthless before the one above it.</p>
-<h2>0 · Prove the instrument ☠</h2>
+<h3>0 · Prove the instrument ☠</h3>
 <label class="item killer" id="measurement-1"><input type="checkbox" data-id="measurement-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> Fixture <strong>fails</strong> at the starting state, before the work</span></label>
 <label class="item killer" id="measurement-2"><input type="checkbox" data-id="measurement-2"><span class="tick"></span><span class="body"><b class=skull>☠</b> Fixture <strong>passes</strong> with a known-good fix applied</span></label>
 <label class="item" id="measurement-3"><input type="checkbox" data-id="measurement-3"><span class="tick"></span><span class="body">&quot;Did nothing&quot; and &quot;solved it&quot; cannot score the same</span></label>
@@ -450,11 +465,11 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <p>comparison to drift the round-robin would have spread</p>
 <label class="item" id="measurement-9"><input type="checkbox" data-id="measurement-9"><span class="tick"></span><span class="body">Process recorded, not just outcome — you can tell <em>never attempted</em> from <em>attempted and failed</em></span></label>
 <p>If either half is untrue, stop. Everything below produces noise.</p>
-<h2>1 · Write the number down before you run</h2>
+<h3>1 · Write the number down before you run</h3>
 <label class="item" id="measurement-10"><input type="checkbox" data-id="measurement-10"><span class="tick"></span><span class="body">Target metric named</span></label>
 <label class="item" id="measurement-11"><input type="checkbox" data-id="measurement-11"><span class="tick"></span><span class="body">Threshold that would count as success, fixed in advance</span></label>
 <label class="item" id="measurement-12"><input type="checkbox" data-id="measurement-12"><span class="tick"></span><span class="body">Guardrail metric chosen — what must not get worse</span></label>
-<h2>1b · Rule out the invisible</h2>
+<h3>1b · Rule out the invisible</h3>
 <label class="item killer" id="measurement-13"><input type="checkbox" data-id="measurement-13"><span class="tick"></span><span class="body"><b class=skull>☠</b> Run manifest emitted: model, endpoint, every budget, verification state, config version</span></label>
 <label class="item" id="measurement-14"><input type="checkbox" data-id="measurement-14"><span class="tick"></span><span class="body">Every terminator names itself when it fires — a wall clock must not look like a model stopping</span></label>
 <label class="item" id="measurement-15"><input type="checkbox" data-id="measurement-15"><span class="tick"></span><span class="body">Effective values printed <strong>after</strong> all writers, not the values you requested</span></label>
@@ -464,7 +479,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="measurement-19"><input type="checkbox" data-id="measurement-19"><span class="tick"></span><span class="body">Every detector asked what it <em>does</em> when it fires, and under what precondition it declines to — a detector that reports without interrupting is telemetry, not a control</span></label>
 <label class="item" id="measurement-20"><input type="checkbox" data-id="measurement-20"><span class="tick"></span><span class="body">Non-completions classified — infrastructure errors kept out of capability numbers</span></label>
 <label class="item" id="measurement-21"><input type="checkbox" data-id="measurement-21"><span class="tick"></span><span class="body">Control fixture included, and read first when a board looks uniform</span></label>
-<h2>2 · Baseline</h2>
+<h3>2 · Baseline</h3>
 <label class="item killer" id="measurement-22"><input type="checkbox" data-id="measurement-22"><span class="tick"></span><span class="body"><b class=skull>☠</b> Every row in the set could actually reach the code being measured — production&#x27;s gates</span></label>
 <p>applied to the eval, not bypassed by calling the function directly</p>
 <label class="item" id="measurement-23"><input type="checkbox" data-id="measurement-23"><span class="tick"></span><span class="body">Ground truth taken from an artefact somebody else wrote where one exists, and the direction</span></label>
@@ -478,16 +493,16 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <p>treatment, in the same session, on the same machine. A stored number from last month attributes every change since — a model updated under you, a grown corpus, a busier machine — to your treatment</p>
 <label class="item" id="measurement-29"><input type="checkbox" data-id="measurement-29"><span class="tick"></span><span class="body">A previous run reused as the reference only when you can state what has not</span></label>
 <p>changed since, and are willing to be wrong about it</p>
-<h2>3 · One treatment at a time</h2>
+<h3>3 · One treatment at a time</h3>
 <label class="item" id="measurement-30"><input type="checkbox" data-id="measurement-30"><span class="tick"></span><span class="body">One change, or a bundled screen with the cost stated: you&#x27;ll know <em>something</em> worked, not <em>what</em></span></label>
 <label class="item" id="measurement-31"><input type="checkbox" data-id="measurement-31"><span class="tick"></span><span class="body">Everything else held fixed</span></label>
-<h2>3b · Make the result locatable</h2>
+<h3>3b · Make the result locatable</h3>
 <label class="item" id="measurement-32"><input type="checkbox" data-id="measurement-32"><span class="tick"></span><span class="body">Logged to the tracker, not only to a notebook cell — including the commit hash, without</span></label>
 <p>which the parameters describe a run you can no longer reconstruct</p>
 <label class="item" id="measurement-33"><input type="checkbox" data-id="measurement-33"><span class="tick"></span><span class="body">Engagement reported separately from correctness — a metric that merges them hides what to fix</span></label>
 <label class="item" id="measurement-34"><input type="checkbox" data-id="measurement-34"><span class="tick"></span><span class="body">Every model failing identically? Suspect the harness before the models</span></label>
 <label class="item" id="measurement-35"><input type="checkbox" data-id="measurement-35"><span class="tick"></span><span class="body">For each passing test, what it does <strong>not</strong> establish, written down now</span></label>
-<h2>4 · Read it honestly</h2>
+<h3>4 · Read it honestly</h3>
 <label class="item" id="measurement-36"><input type="checkbox" data-id="measurement-36"><span class="tick"></span><span class="body">Any per-case promise (a latency budget, a per-customer forecast) stated from a</span></label>
 <p><em>prediction</em> interval, not a confidence interval — the second is about the mean and says nothing about how wrong a single case can be</p>
 <label class="item" id="measurement-37"><input type="checkbox" data-id="measurement-37"><span class="tick"></span><span class="body">Compared against baseline spread, not against zero</span></label>
@@ -495,24 +510,24 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="measurement-39"><input type="checkbox" data-id="measurement-39"><span class="tick"></span><span class="body">Guardrail checked before declaring a win</span></label>
 <label class="item" id="measurement-40"><input type="checkbox" data-id="measurement-40"><span class="tick"></span><span class="body">For a metric you have been optimising against for a while: re-derived, not assumed.</span></label>
 <p>Does it still correlate with the outcome it was chosen for? A measure under pressure drifts from the thing it stood for, and it looks best just before it stops working</p>
-<h2>4b · Turn the number into a decision</h2>
+<h3>4b · Turn the number into a decision</h3>
 <label class="item killer" id="measurement-41"><input type="checkbox" data-id="measurement-41"><span class="tick"></span><span class="body"><b class=skull>☠</b> Threshold chosen from the <strong>costs of each error type</strong>, not left at the 0.5 default</span></label>
 <label class="item" id="measurement-42"><input type="checkbox" data-id="measurement-42"><span class="tick"></span><span class="body">Decision table produced: at each threshold, what is caught, what is missed, what it costs</span></label>
 <label class="item" id="measurement-43"><input type="checkbox" data-id="measurement-43"><span class="tick"></span><span class="body">Error reported in units someone can act on — &quot;out by about four days&quot; beats &quot;RMSE 0.34&quot;</span></label>
 <label class="item" id="measurement-44"><input type="checkbox" data-id="measurement-44"><span class="tick"></span><span class="body">Stated what would make you distrust this result in six months</span></label>
-<h2>5 · Revert the fix ☠</h2>
+<h3>5 · Revert the fix ☠</h3>
 <label class="item killer" id="measurement-45"><input type="checkbox" data-id="measurement-45"><span class="tick"></span><span class="body"><b class=skull>☠</b> Change removed and re-run — did the number go back?</span></label>
 <p>If it didn&#x27;t, the improvement came from somewhere else and you&#x27;ve learned the wrong lesson. This is the step everyone skips.</p>
-<h2>Smells</h2>
+<h3>Smells</h3>
 <p class="bullet">A surprisingly good result → suspect the instrument before celebrating; check step 0 again</p>
 <p class="bullet">A null result on a change you were confident about → prove the treatment actually engaged before concluding it does not work</p>
 <p class="bullet">Every configuration failing identically → suspect the harness, not the thing under test</p>
 <p class="bullet">A number you cannot reproduce a week later → the manifest was incomplete</p>
 <p class="bullet">A conclusion drawn from one run → that is an anecdote with a decimal point</p>
 </section><section class="sop" id="sop-judging" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>Judging and reading results — when there is no right answer</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="judging.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="judging">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>Judging and reading results — when there is no right answer</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="judging.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="judging">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
 <p>For scoring open-ended output, and for deciding whether a number that moved actually moved. Run it before trusting a comparison, not after publishing one.</p>
-<h2>Before the judge runs</h2>
+<h3>Before the judge runs</h3>
 <label class="item killer" id="judging-1"><input type="checkbox" data-id="judging-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> Rubric written: dimensions that fail independently, observable criteria</span></label>
 <p>rather than adjectives, three or four levels, an anchor example per level</p>
 <label class="item killer" id="judging-2"><input type="checkbox" data-id="judging-2"><span class="tick"></span><span class="body"><b class=skull>☠</b> Two people scored ten items against it independently and agreed — if they</span></label>
@@ -520,7 +535,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="judging-3"><input type="checkbox" data-id="judging-3"><span class="tick"></span><span class="body">Judge is from a different family than the system under test, and never the</span></label>
 <p>model under test</p>
 <label class="item" id="judging-4"><input type="checkbox" data-id="judging-4"><span class="tick"></span><span class="body">Deterministic checks exhausted first — a verifier beats a judge wherever one exists</span></label>
-<h2>Blinding</h2>
+<h3>Blinding</h3>
 <label class="item killer" id="judging-5"><input type="checkbox" data-id="judging-5"><span class="tick"></span><span class="body"><b class=skull>☠</b> Source blinded: which model or variant produced each output</span></label>
 <label class="item killer" id="judging-6"><input type="checkbox" data-id="judging-6"><span class="tick"></span><span class="body"><b class=skull>☠</b> Condition blinded: which arm is the treatment</span></label>
 <label class="item killer" id="judging-7"><input type="checkbox" data-id="judging-7"><span class="tick"></span><span class="body"><b class=skull>☠</b> Calibration set hand-labelled <em>blind</em> — labelling ground truth while knowing</span></label>
@@ -528,7 +543,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="judging-8"><input type="checkbox" data-id="judging-8"><span class="tick"></span><span class="body">Pairwise rather than absolute, and presented in both orders</span></label>
 <label class="item" id="judging-9"><input type="checkbox" data-id="judging-9"><span class="tick"></span><span class="body">Recorded whether the reader could plausibly have guessed anyway — style tells</span></label>
 <p>survive blinding</p>
-<h2>Reading the number</h2>
+<h3>Reading the number</h3>
 <label class="item killer" id="judging-10"><input type="checkbox" data-id="judging-10"><span class="tick"></span><span class="body"><b class=skull>☠</b> Concurrent baseline, not a stored one (see measurement, step 2)</span></label>
 <label class="item" id="judging-11"><input type="checkbox" data-id="judging-11"><span class="tick"></span><span class="body">Paired comparison where the data is paired — same items through both systems.</span></label>
 <p>An unpaired test on paired data leaves item difficulty in the noise and can hide a real effect entirely</p>
@@ -542,30 +557,30 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <p>score; raw agreement only where the calibration labels are roughly balanced</p>
 <blockquote>A rubric without blinding gives consistent bias. Blinding without a rubric gives honest noise. Neither substitutes for the other.</blockquote>
 </section><section class="sop" id="sop-security" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>Security — before an agent touches anything real</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="security.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="security">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>Security — before an agent touches anything real</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="security.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="security">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
 <p>Block 6 covers why these matter. This is the pre-flight, and it assumes the threat is an instruction arriving inside content the system reads rather than typed at it by the person using it.</p>
-<h2>Before it is reachable</h2>
+<h3>Before it is reachable</h3>
 <label class="item killer" id="security-1"><input type="checkbox" data-id="security-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> Confirmed what the agent may <em>do</em>, not what the input may say — the input</span></label>
 <p>is unbounded and the action set is not</p>
 <label class="item killer" id="security-2"><input type="checkbox" data-id="security-2"><span class="tick"></span><span class="body"><b class=skull>☠</b> Every credential scoped to the task, and read-only until a task needs write</span></label>
 <label class="item" id="security-3"><input type="checkbox" data-id="security-3"><span class="tick"></span><span class="body">Reading and acting split where possible, so an injection in a document reaches</span></label>
 <p>a component holding nothing worth having</p>
 <label class="item" id="security-4"><input type="checkbox" data-id="security-4"><span class="tick"></span><span class="body">Irreversible actions gated on a human, and the gate genuinely halts the run</span></label>
-<h2>The exfiltration audit</h2>
+<h3>The exfiltration audit</h3>
 <label class="item killer" id="security-5"><input type="checkbox" data-id="security-5"><span class="tick"></span><span class="body"><b class=skull>☠</b> Tool set reviewed as a <em>set</em>, not tool by tool — the finding is always a pair</span></label>
 <label class="item" id="security-6"><input type="checkbox" data-id="security-6"><span class="tick"></span><span class="body">Every tool listed with what it can read and what it can reach; any pair joining</span></label>
 <p>something sensitive to something outside is the path</p>
 <label class="item" id="security-7"><input type="checkbox" data-id="security-7"><span class="tick"></span><span class="body">Rendering treated as a channel — if the interface renders model output, images</span></label>
 <p>and links fetch from the reader&#x27;s browser, past your egress rules</p>
 <label class="item" id="security-8"><input type="checkbox" data-id="security-8"><span class="tick"></span><span class="body">Traces and logs checked as a destination, not just a record</span></label>
-<h2>Containment</h2>
+<h3>Containment</h3>
 <label class="item" id="security-9"><input type="checkbox" data-id="security-9"><span class="tick"></span><span class="body">Agent-executed code runs where its filesystem and process access are enumerated</span></label>
 <label class="item killer" id="security-10"><input type="checkbox" data-id="security-10"><span class="tick"></span><span class="body"><b class=skull>☠</b> Egress restricted to the hosts it needs — default container networking permits</span></label>
 <p>arbitrary outbound, which is the direction exfiltration uses</p>
 <label class="item" id="security-11"><input type="checkbox" data-id="security-11"><span class="tick"></span><span class="body">Runs as a non-root user</span></label>
 <label class="item" id="security-12"><input type="checkbox" data-id="security-12"><span class="tick"></span><span class="body">What the agent <em>read</em> is logged, not only what it did — otherwise an incident</span></label>
 <p>cannot be reconstructed</p>
-<h2>Persistent memory, if the agent has any</h2>
+<h3>Persistent memory, if the agent has any</h3>
 <label class="item killer" id="security-13"><input type="checkbox" data-id="security-13"><span class="tick"></span><span class="body"><b class=skull>☠</b> A memory write treated as an action with a gate, not as bookkeeping — it changes</span></label>
 <p>what every future session believes</p>
 <label class="item" id="security-14"><input type="checkbox" data-id="security-14"><span class="tick"></span><span class="body">Every stored memory carries its source, so a fact learned from a fetched document is</span></label>
@@ -576,7 +591,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <p>session never loads into another&#x27;s</p>
 <label class="item" id="security-17"><input type="checkbox" data-id="security-17"><span class="tick"></span><span class="body">Understood that restarting does not clear a poisoned store, and that the trace of the</span></label>
 <p>harmful session will not contain the read that caused it</p>
-<h2>Before believing it is safe</h2>
+<h3>Before believing it is safe</h3>
 <label class="item killer" id="security-18"><input type="checkbox" data-id="security-18"><span class="tick"></span><span class="body"><b class=skull>☠</b> Tested against the whole system with real tools and real rendering, not a</span></label>
 <p>component in isolation</p>
 <label class="item" id="security-19"><input type="checkbox" data-id="security-19"><span class="tick"></span><span class="body">Attack battery is fixed, private, and kept — with a decided criterion per case</span></label>
@@ -586,31 +601,31 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item killer" id="security-22"><input type="checkbox" data-id="security-22"><span class="tick"></span><span class="body"><b class=skull>☠</b> Written down what the fix does <em>not</em> cover</span></label>
 <blockquote>Ask of every control: if the model were fully persuaded and cooperating with the attacker, would this still hold? A system prompt would not. A missing credential would.</blockquote>
 </section><section class="sop" id="sop-mcp" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>MCP servers — connecting and building</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="mcp.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="mcp">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>MCP servers — connecting and building</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="mcp.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="mcp">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
 <p>Two checklists. The first runs before you connect someone else&#x27;s server; the second before you ship your own. ☠ = miss it and the failure is a security incident, not a bug.</p>
-<h2>A · Before connecting a server</h2>
-<h3>Vet it</h3>
+<h3>A · Before connecting a server</h3>
+<h4>Vet it</h4>
 <label class="item killer" id="mcp-1"><input type="checkbox" data-id="mcp-1"><span class="tick"></span><span class="body"><b class=skull>☠</b> <strong>Read the startup command in full, untruncated</strong> — it executes on your machine with your privileges</span></label>
 <label class="item" id="mcp-2"><input type="checkbox" data-id="mcp-2"><span class="tick"></span><span class="body">Maintainer identified; is this an official server, a known org, or an anonymous package?</span></label>
 <label class="item" id="mcp-3"><input type="checkbox" data-id="mcp-3"><span class="tick"></span><span class="body">Transitive dependencies checked — a server is a supply-chain surface</span></label>
 <label class="item" id="mcp-4"><input type="checkbox" data-id="mcp-4"><span class="tick"></span><span class="body">Source read, or at least the tool handlers and anything doing network I/O</span></label>
 <label class="item" id="mcp-5"><input type="checkbox" data-id="mcp-5"><span class="tick"></span><span class="body">No instructions in the server&#x27;s own text directing the agent outward (fetch, upload, contact)</span></label>
-<h3>Scope it</h3>
+<h4>Scope it</h4>
 <label class="item killer" id="mcp-6"><input type="checkbox" data-id="mcp-6"><span class="tick"></span><span class="body"><b class=skull>☠</b> Credentials scoped to the task, not to the account — this connection does not need every repo/table/mailbox</span></label>
 <label class="item killer" id="mcp-7"><input type="checkbox" data-id="mcp-7"><span class="tick"></span><span class="body"><b class=skull>☠</b> Read-only first; widen only when a task needs write, then narrow back</span></label>
 <label class="item" id="mcp-8"><input type="checkbox" data-id="mcp-8"><span class="tick"></span><span class="body">Production connected <strong>last</strong>, never first</span></label>
 <label class="item" id="mcp-9"><input type="checkbox" data-id="mcp-9"><span class="tick"></span><span class="body">Minimal scopes requested; nothing granted &quot;to avoid prompts later&quot;</span></label>
-<h3>Run it safely</h3>
+<h4>Run it safely</h4>
 <label class="item" id="mcp-10"><input type="checkbox" data-id="mcp-10"><span class="tick"></span><span class="body">stdio transport for local servers — nothing listening on a port</span></label>
 <label class="item" id="mcp-11"><input type="checkbox" data-id="mcp-11"><span class="tick"></span><span class="body">If HTTP locally: auth token required, or a unix socket</span></label>
 <label class="item" id="mcp-12"><input type="checkbox" data-id="mcp-12"><span class="tick"></span><span class="body">Sandboxed where the server executes code</span></label>
 <label class="item" id="mcp-13"><input type="checkbox" data-id="mcp-13"><span class="tick"></span><span class="body">All tool calls logged with arguments and results</span></label>
-<h3>Operate it</h3>
+<h4>Operate it</h4>
 <label class="item killer" id="mcp-14"><input type="checkbox" data-id="mcp-14"><span class="tick"></span><span class="body"><b class=skull>☠</b> Human approval gate before anything irreversible or outward-facing — <strong>regardless of what a tool&#x27;s annotation claims about itself</strong></span></label>
 <label class="item" id="mcp-15"><input type="checkbox" data-id="mcp-15"><span class="tick"></span><span class="body">Everything the server returns treated as untrusted input, never as instructions</span></label>
 <label class="item" id="mcp-16"><input type="checkbox" data-id="mcp-16"><span class="tick"></span><span class="body">Periodic re-review: servers update, and the one you audited is not the one running now</span></label>
-<h2>B · Before shipping a server</h2>
-<h3>Design</h3>
+<h3>B · Before shipping a server</h3>
+<h4>Design</h4>
 <label class="item" id="mcp-17"><input type="checkbox" data-id="mcp-17"><span class="tick"></span><span class="body">Read-only data exposed as <strong>resources</strong>, not as tools that fetch it</span></label>
 <label class="item" id="mcp-18"><input type="checkbox" data-id="mcp-18"><span class="tick"></span><span class="body">Deliberate workflows exposed as <strong>prompts</strong>, so a person invokes them rather than a model inferring them</span></label>
 <label class="item" id="mcp-19"><input type="checkbox" data-id="mcp-19"><span class="tick"></span><span class="body">Few composite tools preferred over many granular ones — definitions cost context on every turn</span></label>
@@ -619,7 +634,7 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="mcp-22"><input type="checkbox" data-id="mcp-22"><span class="tick"></span><span class="body">Errors name the fix, not just the failure</span></label>
 <label class="item" id="mcp-23"><input type="checkbox" data-id="mcp-23"><span class="tick"></span><span class="body">Destructive operations annotated and expected to be gated</span></label>
 <label class="item" id="mcp-24"><input type="checkbox" data-id="mcp-24"><span class="tick"></span><span class="body">Example calls included in definitions — schemas give structure, examples give convention</span></label>
-<h3>Security</h3>
+<h4>Security</h4>
 <label class="item killer" id="mcp-25"><input type="checkbox" data-id="mcp-25"><span class="tick"></span><span class="body"><b class=skull>☠</b> <strong>Never accept a token that was not issued to this server</strong> (token passthrough is forbidden, not discouraged)</span></label>
 <label class="item killer" id="mcp-26"><input type="checkbox" data-id="mcp-26"><span class="tick"></span><span class="body"><b class=skull>☠</b> Sessions are <strong>not</strong> authentication — verify every inbound request independently</span></label>
 <label class="item" id="mcp-27"><input type="checkbox" data-id="mcp-27"><span class="tick"></span><span class="body">Session IDs from a secure random source, bound to user identity (<code>&lt;user_id&gt;:&lt;session_id&gt;</code>)</span></label>
@@ -628,31 +643,31 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="mcp-30"><input type="checkbox" data-id="mcp-30"><span class="tick"></span><span class="body">Redirect URIs matched exactly; no wildcards or patterns</span></label>
 <label class="item" id="mcp-31"><input type="checkbox" data-id="mcp-31"><span class="tick"></span><span class="body">OAuth <code>state</code> generated securely, stored only after consent, single-use, short-lived</span></label>
 <label class="item" id="mcp-32"><input type="checkbox" data-id="mcp-32"><span class="tick"></span><span class="body">HTTPS enforced; private and link-local IP ranges blocked on any URL you fetch</span></label>
-<h3>Before release</h3>
+<h4>Before release</h4>
 <label class="item" id="mcp-33"><input type="checkbox" data-id="mcp-33"><span class="tick"></span><span class="body">Handlers unit-tested without a model in the loop</span></label>
 <label class="item" id="mcp-34"><input type="checkbox" data-id="mcp-34"><span class="tick"></span><span class="body">Five realistic agent tasks run end to end; trajectory read</span></label>
 <label class="item" id="mcp-35"><input type="checkbox" data-id="mcp-35"><span class="tick"></span><span class="body">Wrong-tool, malformed-arguments and tool-ignored failures distinguished — three problems, three fixes</span></label>
 <label class="item" id="mcp-36"><input type="checkbox" data-id="mcp-36"><span class="tick"></span><span class="body">README states what the server can reach and with what permissions</span></label>
-<h2>The question that precedes both</h2>
+<h3>The question that precedes both</h3>
 <label class="item" id="mcp-37"><input type="checkbox" data-id="mcp-37"><span class="tick"></span><span class="body">Does this need to be an MCP server at all? One client and one integration is simpler as a direct tool. The protocol earns its cost when the integration is reused — across clients, agents, or people.</span></label>
-<h2>Smells</h2>
+<h3>Smells</h3>
 <p class="bullet">A tool&#x27;s annotation claims it is read-only → that string is chosen by the server; verify what it can reach</p>
 <p class="bullet">Server asks for scopes far beyond its stated purpose → treat as hostile until explained</p>
 <p class="bullet">One-click install shows a truncated command → do not proceed until you can read all of it</p>
 <p class="bullet">Agent behaviour changes after a server update → you audited a version that is no longer running</p>
 <p class="bullet">Server returns text that reads like an instruction → that is data arriving in a model&#x27;s context, not guidance</p>
 </section><section class="sop" id="sop-hardware" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>Hardware — can I run this locally?</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="hardware.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="hardware">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>Hardware — can I run this locally?</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="hardware.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="hardware">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
 <p>Run top to bottom. Most people fail at step 3 and spend their time on step 2.</p>
-<h2>Things to know</h2>
+<h3>Things to know</h3>
 <blockquote><strong>Capacity is a hard wall; bandwidth is only a slope.</strong> A model that does not fit does not run at any speed. A model that fits but runs slowly still runs. Check that it fits before comparing tokens per second.</blockquote>
 <blockquote><strong>What blocks you is usually neither memory nor speed — it is library support.</strong> CUDA-only kernels do not run on Metal regardless of how much memory you have. Check the library before you check the chip.</blockquote>
 <blockquote><strong>A heavily quantised large model beats a precise small one.</strong> A 4-bit 70B almost always outperforms a 16-bit 13B of similar file size. Prefer the bigger model, more compressed.</blockquote>
-<h2>0 · Does it need to be local at all?</h2>
+<h3>0 · Does it need to be local at all?</h3>
 <label class="item" id="hardware-1"><input type="checkbox" data-id="hardware-1"><span class="tick"></span><span class="body">A real reason exists: privacy, cost at volume, or offline operation</span></label>
 <label class="item" id="hardware-2"><input type="checkbox" data-id="hardware-2"><span class="tick"></span><span class="body">Preference is not a reason — an API call is frequently cheaper than the electricity</span></label>
 <label class="item" id="hardware-3"><input type="checkbox" data-id="hardware-3"><span class="tick"></span><span class="body">Cost compared honestly at <em>your</em> volume, not at demo volume</span></label>
-<h2>1 · Will it fit? ☠</h2>
+<h3>1 · Will it fit? ☠</h3>
 <label class="item killer" id="hardware-4"><input type="checkbox" data-id="hardware-4"><span class="tick"></span><span class="body"><b class=skull>☠</b> Weights computed: parameters × bits ÷ 8 (70B at 4-bit ≈ 35GB)</span></label>
 <label class="item killer" id="hardware-5"><input type="checkbox" data-id="hardware-5"><span class="tick"></span><span class="body"><b class=skull>☠</b> For a mixture-of-experts model, <strong>total</strong> parameters used for this sum, not the</span></label>
 <p>activated count — every expert stays resident because the router may pick any of them next. Active parameters decide roughly how fast a token is, not whether it fits</p>
@@ -662,13 +677,13 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <p class="bullet">NVIDIA: VRAM only. Spilling to system RAM collapses throughput</p>
 <p class="bullet">Apple Silicon: the wired limit, ~75% of RAM by default and adjustable</p>
 <label class="item" id="hardware-9"><input type="checkbox" data-id="hardware-9"><span class="tick"></span><span class="body">If it does not fit: quantise further, or take a smaller model — in that order</span></label>
-<h2>2 · Is it supported? ☠</h2>
+<h3>2 · Is it supported? ☠</h3>
 <label class="item killer" id="hardware-10"><input type="checkbox" data-id="hardware-10"><span class="tick"></span><span class="body"><b class=skull>☠</b> The <em>library</em> checked, not the chip — this is the step that actually blocks people</span></label>
 <label class="item" id="hardware-11"><input type="checkbox" data-id="hardware-11"><span class="tick"></span><span class="body">No CUDA-only kernels in the path (several quantisation and attention implementations)</span></label>
 <label class="item" id="hardware-12"><input type="checkbox" data-id="hardware-12"><span class="tick"></span><span class="body">For PyTorch on Apple Silicon: fallback-to-error enabled during development, so an</span></label>
 <p>unimplemented operation announces itself instead of silently running on CPU</p>
 <label class="item" id="hardware-13"><input type="checkbox" data-id="hardware-13"><span class="tick"></span><span class="body">Containers understood to be CPU-only on macOS — reproducibility, not training</span></label>
-<h2>3 · Is it fast enough for the job?</h2>
+<h3>3 · Is it fast enough for the job?</h3>
 <label class="item" id="hardware-14"><input type="checkbox" data-id="hardware-14"><span class="tick"></span><span class="body">For a mixture-of-experts model, remembered that skipping experts removes arithmetic</span></label>
 <p>and not bytes — it does not help a decode that was already memory-bound</p>
 <label class="item" id="hardware-15"><input type="checkbox" data-id="hardware-15"><span class="tick"></span><span class="body">Decode speed measured, not quoted — vendor figures are usually decode-only</span></label>
@@ -683,39 +698,39 @@ th { color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spaci
 <label class="item" id="hardware-21"><input type="checkbox" data-id="hardware-21"><span class="tick"></span><span class="body">Prefix-KV reuse available if this is a multi-turn agent loop — usually the biggest lever</span></label>
 <label class="item" id="hardware-22"><input type="checkbox" data-id="hardware-22"><span class="tick"></span><span class="body">Speculative decoding considered if one user is waiting rather than a thousand — it spends</span></label>
 <p>spare compute to cut latency, so it wins at low concurrency and does nothing for a server already compute-saturated by batching. It costs no quality: the output distribution is unchanged</p>
-<h2>4 · Before concluding &quot;it cannot run here&quot;</h2>
+<h3>4 · Before concluding &quot;it cannot run here&quot;</h3>
 <label class="item" id="hardware-23"><input type="checkbox" data-id="hardware-23"><span class="tick"></span><span class="body">Which artifact did you actually test? A load failure in one build format is not a</span></label>
 <p>fact about the model — another build of the same weights may load fine</p>
 <label class="item" id="hardware-24"><input type="checkbox" data-id="hardware-24"><span class="tick"></span><span class="body">Was anything truncated? A too-small output budget manufactures false conclusions</span></label>
 <label class="item" id="hardware-25"><input type="checkbox" data-id="hardware-25"><span class="tick"></span><span class="body">Was the documented control mechanism used, or the folklore one?</span></label>
-<h2>Quick reference</h2>
+<h3>Quick reference</h3>
 <table><thead><tr><th>Setup</th><th>Good for</th><th>Ceiling</th></tr></thead><tbody><tr><td>Apple Silicon, high memory</td><td>Large quantised models, inference, LoRA on 7B–13B</td><td>Bandwidth, and library gaps</td></tr><tr><td>Consumer NVIDIA 8–24GB</td><td>Small models, real training, full ecosystem</td><td>Capacity — a hard wall</td></tr><tr><td>Rented cloud GPU</td><td>Anything big and fast</td><td>Hourly cost</td></tr><tr><td>No GPU</td><td>Embeddings, classical ML, API work</td><td>Nothing — most of Block 2 runs on CPU</td></tr></tbody></table>
-<h2>Smells</h2>
+<h3>Smells</h3>
 <p class="bullet">Model loads fine, then fails on a long document → the KV cache, not the weights</p>
 <p class="bullet">Correct results at a twentieth of expected speed on Apple Silicon → silent CPU fallback for an unimplemented operation</p>
 <p class="bullet">Fast in development, unusably slow in production → bursty traffic means most requests are cold starts</p>
 <p class="bullet">&quot;It cannot run here&quot; after one failed load → which build format did you actually test? Another may work</p>
 <p class="bullet">Vendor quotes a large speed multiple → ask which phase it measures, and whether that phase is your bottleneck</p>
 </section><section class="sop" id="sop-incident" hidden>
-<div class="sop-head"><button class="back" hidden>&larr; Return</button><h1>NON-NORMAL — something is already wrong</h1><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="incident.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="incident">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
+<div class="sop-head"><button class="back" hidden>&larr; Return</button><h2>NON-NORMAL — something is already wrong</h2><div class="progress"><span class="bar"><i></i></span><span class="count"></span><button class="reset" title="Clear ticks on this checklist">reset</button></div><div class="acts"><a class="act" href="incident.md" download>Download blank (.md)</a><button type="button" class="act" data-dl="incident">Download my ticks (.md)</button><button type="button" class="act" data-print>Print or save as PDF</button></div></div>
 <p>Separate from normal flow on purpose. Work top to bottom; do not skip.</p>
-<h2>Stop the bleeding</h2>
+<h3>Stop the bleeding</h3>
 <label class="item" id="incident-1"><input type="checkbox" data-id="incident-1"><span class="tick"></span><span class="body">Is it still happening? Disable the feature or flag before diagnosing</span></label>
 <label class="item" id="incident-2"><input type="checkbox" data-id="incident-2"><span class="tick"></span><span class="body">Is anything irreversible in flight? Halt agents with write access first</span></label>
 <label class="item" id="incident-3"><input type="checkbox" data-id="incident-3"><span class="tick"></span><span class="body">Cost runaway? Kill the loop, then look</span></label>
-<h2>Establish what is true</h2>
+<h3>Establish what is true</h3>
 <label class="item killer" id="incident-4"><input type="checkbox" data-id="incident-4"><span class="tick"></span><span class="body"><b class=skull>☠</b> Reproduce it before theorising — a plausible mechanism is not a finding</span></label>
 <label class="item" id="incident-5"><input type="checkbox" data-id="incident-5"><span class="tick"></span><span class="body">Check the data before the model: schema change, units, new categories, silently dropped rows</span></label>
 <label class="item" id="incident-6"><input type="checkbox" data-id="incident-6"><span class="tick"></span><span class="body">Check whether anything deployed — model version, prompt, dependency, upstream job</span></label>
 <label class="item" id="incident-7"><input type="checkbox" data-id="incident-7"><span class="tick"></span><span class="body">Read the actual trace, not the summary</span></label>
-<h2>Common causes, cheapest first</h2>
+<h3>Common causes, cheapest first</h3>
 <label class="item" id="incident-8"><input type="checkbox" data-id="incident-8"><span class="tick"></span><span class="body">Upstream pipeline changed (most likely)</span></label>
 <label class="item" id="incident-9"><input type="checkbox" data-id="incident-9"><span class="tick"></span><span class="body">Model version moved under a floating alias</span></label>
 <label class="item" id="incident-10"><input type="checkbox" data-id="incident-10"><span class="tick"></span><span class="body">Retrieval index degraded or empty</span></label>
 <label class="item" id="incident-11"><input type="checkbox" data-id="incident-11"><span class="tick"></span><span class="body">Temperature or max-tokens changed on a structured task</span></label>
 <label class="item" id="incident-12"><input type="checkbox" data-id="incident-12"><span class="tick"></span><span class="body">Context grown past the point where mid-prompt material is used</span></label>
 <label class="item" id="incident-13"><input type="checkbox" data-id="incident-13"><span class="tick"></span><span class="body">Genuine drift (least likely, and the one everyone reaches for first)</span></label>
-<h2>Before you call it fixed</h2>
+<h3>Before you call it fixed</h3>
 <label class="item killer" id="incident-14"><input type="checkbox" data-id="incident-14"><span class="tick"></span><span class="body"><b class=skull>☠</b> Fix verified by reverting it — the number moves back</span></label>
 <label class="item" id="incident-15"><input type="checkbox" data-id="incident-15"><span class="tick"></span><span class="body">Eval set re-run whole, not just the failing case</span></label>
 <label class="item" id="incident-16"><input type="checkbox" data-id="incident-16"><span class="tick"></span><span class="body">Guardrail metrics checked</span></label>
@@ -787,7 +802,7 @@ document.addEventListener("click", e => {
     return show(jump.dataset.to, {
       section: from.id.replace("sop-", ""),
       anchor: anchor.id,
-      label: heading ? heading.textContent.trim() : from.querySelector("h1").textContent.trim(),
+      label: heading ? heading.textContent.trim() : from.querySelector("h2").textContent.trim(),
     });
   }
 
