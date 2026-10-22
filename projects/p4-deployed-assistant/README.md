@@ -22,6 +22,12 @@ failure that only you see. A service may assume none of those. Everything in
 | Provider fallback | A model endpoint will fail or stall. `src/resilience.py` walks a ladder of endpoints under a deadline with a circuit breaker, and the last step is a `503` with `Retry-After` by default, or the retrieved passages for a caller that opts in with `allow_degraded` |
 | Generic error responses | An exception message is the cheapest way to leak a path or a hostname |
 
+## Do I need Render?
+
+No. Render is one optional place to host this service. Everything below runs on
+your own machine, and the tests and benchmark need no hosting at all. Deploying is
+the last step of the project, not a prerequisite for it.
+
 ## Running it
 
 ```bash
@@ -37,6 +43,12 @@ curl -X POST localhost:8000/v1/ask \
   -H 'Content-Type: application/json' -H 'X-API-Key: dev-key' \
   -d '{"question":"What is the maximum gearbox oil temperature?"}'
 ```
+
+Real answers need a model. Point `GENERATION_ENDPOINTS` at any OpenAI-compatible
+chat-completions server, such as a local model (`GENERATION_ENDPOINTS=http://localhost:11455/v1`).
+With none reachable, `/v1/ask` returns `503` with `Retry-After`, or only the
+retrieved passages if the caller sends `allow_degraded`. That is the fallback
+behaviour working, not a bug.
 
 ## Tests
 
@@ -201,10 +213,20 @@ is not measured without a model.
 
 ## The deploy is deliberately not automated
 
-`render.yaml` describes the service reproducibly and is not applied from here.
-Publishing a public endpoint has a bill and an audience attached, and the API keys
-belong in the dashboard rather than in this repository. Applying the blueprint and
-setting `API_KEYS` is a decision, not a build step.
+`render.yaml` (at the repo root, where Render looks for it) describes the service
+reproducibly on the free plan and is not applied from here. Publishing a public
+endpoint has an audience attached, and the API keys belong in the dashboard rather
+than in this repository. Applying the blueprint and setting `API_KEYS` is a
+decision, not a build step.
+
+The free plan spins the service down after about 15 minutes idle, so the first
+request after a quiet spell waits roughly a minute for a cold start. The lessons
+site on GitHub Pages is static and does not have this delay.
+
+Deploy your own copy: fork the repo, apply `render.yaml` in your own Render account
+and set your own `API_KEYS`. There is no shared public instance, because the free
+plan's hours, the in-memory rate limiter and the model endpoint cost are all
+per-instance. The benchmark and the tests run locally without Render.
 
 ## The honest framing
 

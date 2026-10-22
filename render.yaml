@@ -1,13 +1,15 @@
-# Render blueprint. Deliberately not applied from here — deploying a public
-# endpoint is a decision with a bill and an audience attached, so this file is
-# the reproducible description and the deploy stays a human action.
+# Render blueprint for the Project 4 assistant API (free plan).
+# Free web services spin down after ~15 minutes idle; the first request after
+# that waits roughly a minute for a cold start. The lessons site on GitHub
+# Pages is static and unaffected.
 services:
   - type: web
     name: aiml-course-assistant
     runtime: docker
+    rootDir: projects/p4-deployed-assistant
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    plan: starter
+    plan: free
     healthCheckPath: /health
     envVars:
       - key: API_KEYS
