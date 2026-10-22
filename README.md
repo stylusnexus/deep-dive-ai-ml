@@ -76,7 +76,7 @@ scripts/     Setup and helper scripts
 
 Two blocks were built previously and are wired in rather than rebuilt:
 
-- **Statistical Learning** → [`statistics-for-ai`](https://github.com/stylusnexus/statistics-for-ai) (10 lessons)
+- **Statistical Learning** → [`statistics-for-ai`](https://github.com/stylusnexus/statistics-for-ai) (19 lessons), with a companion [Math for AI](https://stylusnexus.github.io/statistics-for-ai/math.html) course on linear algebra and calculus (7 lessons)
 - **Responsible AI / Governance** → `aigp-exam-prep` (12 lessons, private)
 
 ## Hardware and accounts this assumes

@@ -157,7 +157,9 @@ doc = f"""<!DOCTYPE html>
 <h2 style="margin-top:44px">Already complete elsewhere</h2>
 <ol class="lessons">
   <li><a class="card" href="https://github.com/stylusnexus/statistics-for-ai"><h2>Statistical Learning</h2>
-    <p>Ten lessons — probability, distributions, the CLT, regression, information theory, evaluation metrics and LLM statistics.</p></a></li>
+    <p>Nineteen lessons — probability, distributions, the CLT, hypothesis tests, Bayesian inference, regression, information theory, evaluation metrics and LLM statistics.</p></a></li>
+  <li><a class="card" href="https://stylusnexus.github.io/statistics-for-ai/math.html"><h2>Math for AI</h2>
+    <p>Seven lessons — vectors, matrices, SVD, derivatives, gradients, backpropagation and integrals.</p></a></li>
   <li><a class="card" href="https://github.com/stylusnexus/aigp-exam-prep"><h2>Responsible AI &amp; Governance</h2>
     <p>Twelve lessons — the EU AI Act, NIST AI RMF, ISO 42001, and the governance lifecycle.</p></a></li>
 </ol>

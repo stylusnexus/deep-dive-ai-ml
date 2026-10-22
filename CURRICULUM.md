@@ -287,7 +287,8 @@ and `asking-the-database-properly` still have lessons only.
 
 | Block | Where | Status |
 |---|---|---|
-| Statistical Learning | [`statistics-for-ai`](https://github.com/stylusnexus/statistics-for-ai) | ✅ 10 lessons |
+| Statistical Learning | [`statistics-for-ai`](https://github.com/stylusnexus/statistics-for-ai) | ✅ 19 lessons |
+| Math for AI (linear algebra, calculus) | [`statistics-for-ai`](https://stylusnexus.github.io/statistics-for-ai/math.html) | ✅ 7 lessons |
 | Responsible AI / Governance | `aigp-exam-prep` (private) | ✅ 12 lessons |
 
 ## Projects
