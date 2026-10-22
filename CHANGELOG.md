@@ -15,12 +15,23 @@ releases yet, so everything sits under Unreleased.
   Open Graph tags and JSON-LD.
 - `sitemap.xml`, `robots.txt` and `llms.txt`, generated from the lesson content by
   `scripts/build_seo.py` (also run by `make lessons` and `make seo`).
+- Worksheet and reference pages under `docs/`, generated from the markdown by
+  `scripts/build_docs.py`: tick-boxes and fill-in fields that save in the browser,
+  a download of your answers as markdown, CSV export for tables, and print.
+  `scripts/check_docs.py` checks the downloaded markdown round trip.
+- Download and print buttons on every SOP checklist.
+- A score sheet in the design interview rubric.
 - Dependabot version updates for the Project 4 Python and Docker files, the lab
   Dockerfiles and the compose file.
 - `LICENSE` (MIT), `CONTRIBUTING.md`, `SECURITY.md` and this file.
 
 ### Changed
 
+- Lab containers publish Jupyter, Postgres and MLflow on `127.0.0.1` only (they were
+  reachable from the whole network).
+- `main` is protected: pull requests only, linear history, no force pushes or
+  deletions.
+- `SECURITY.md` documents what the scripts and lab containers do.
 - The quantization notebook prints tool locations relative to the home folder and
   has been re-executed.
 - The selection scorecard's worked comparison now refers to "your own services".

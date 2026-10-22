@@ -12,7 +12,7 @@ on its own is fine.
 ## The one rule that trips people up
 
 **Never edit a file in `lessons/`.** The lesson pages, `index.html`,
-`things-to-know.html`, `llms.txt`, `sitemap.xml` and the SOP page are generated.
+`things-to-know.html`, `docs/`, `llms.txt`, `sitemap.xml` and the SOP page are generated.
 An edit to a generated file is destroyed by the next build.
 
 Edit the source and rebuild:
@@ -22,7 +22,8 @@ Edit the source and rebuild:
 | A lesson | `scripts/content/<module>.py` | `make lessons` |
 | The landing page | `scripts/build_index.py`, `scripts/_index_style.html` | `make lessons` |
 | A notebook | `scripts/content/*_notebooks.py` | `python3 scripts/build_notebooks.py <module>`, then re-execute it |
-| An SOP checklist | the markdown in `artifacts/sop/` | `make sop` |
+| An SOP checklist | the markdown in `artifacts/sop/` | `make docs` |
+| A worksheet or reference page | the markdown file listed in `DOCS` in `scripts/build_docs.py` | `make docs` |
 
 `make lessons` rebuilds every set, the index, the revision sheet and the search
 files. Rebuild everything rather than one set: inserting a lesson renames files
@@ -52,7 +53,7 @@ A notebook without outputs is a claim nobody has checked.
 ## Check your change
 
 ```bash
-make verify     # glossary, links, numbers and notebook checks
+make verify     # glossary, links, numbers, notebook and worksheet checks
 ```
 
 For the Project 4 service, run `CORPUS_DIR=corpus pytest tests/` from

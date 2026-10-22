@@ -37,11 +37,16 @@ script before you run it, especially one from a fork or a pull request.
 
 - **Build and check scripts** (`build_*.py`, `check_*.py`, `apply_related.py`,
   `lesson_map.py`, `seo_meta.py`) use only the Python standard library. They read
-  and write files inside the repository. The one subprocess is `git log`, in
-  `build_seo.py`. They use no `eval`, `exec`, `pickle` or `shell=True`, and they
-  fetch nothing: `check_links.py` checks internal links only.
+  and write files inside the repository. There are two subprocesses: `git log`, in
+  `build_seo.py`, and `node`, in `check_docs.py`, which runs a page's own
+  serializer on the data embedded in that page. They use no `eval`, `exec`,
+  `pickle` or `shell=True`, and they fetch nothing: `check_links.py` checks
+  internal links only.
 - **They delete only what they generate.** The lesson and page builders remove
   stale files under `lessons/` and `docs/`, and nothing else.
+- **The worksheet pages keep your answers in your browser.** The pages under
+  `docs/` and the SOP checklists save ticks and text in `localStorage` and make no
+  network requests. A download is built in the page and never leaves it.
 - **Two scripts use the network.** `bench_engines.py` sends prompts to the
   endpoint you give it with `--base-url` (default `http://127.0.0.1:8000/v1`),
   using a placeholder bearer token. `measure_quantization.py` downloads model files
