@@ -3,628 +3,748 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Building and Measuring LLM Systems</title>
+<title>Building and Measuring LLM Systems | Free applied AI course</title>
+<meta name="description" content="Free, runnable applied AI course on evaluation, retrieval, agents, security and fine-tuning for large language models, with notebooks that ship their outputs.">
+<link rel="canonical" href="https://stylusnexus.github.io/deep-dive-ai-ml/">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Building and Measuring LLM Systems">
+<meta property="og:title" content="Building and Measuring LLM Systems | Free applied AI course">
+<meta property="og:description" content="Free, runnable applied AI course on evaluation, retrieval, agents, security and fine-tuning for large language models, with notebooks that ship their outputs.">
+<meta property="og:url" content="https://stylusnexus.github.io/deep-dive-ai-ml/">
+<meta property="og:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Building and Measuring LLM Systems | Free applied AI course">
+<meta name="twitter:description" content="Free, runnable applied AI course on evaluation, retrieval, agents, security and fine-tuning for large language models, with notebooks that ship their outputs.">
+<meta name="twitter:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Course", "name": "Building and Measuring LLM Systems", "description": "Free, runnable applied AI course on evaluation, retrieval, agents, security and fine-tuning for large language models, with notebooks that ship their outputs.", "url": "https://stylusnexus.github.io/deep-dive-ai-ml/", "inLanguage": "en", "isAccessibleForFree": true, "provider": {"@type": "Organization", "name": "Stylus Nexus", "url": "https://github.com/stylusnexus"}, "educationalLevel": "Intermediate", "teaches": ["LLM evaluation", "retrieval-augmented generation", "agentic AI", "LLM security", "model quantization and fine-tuning", "classical machine learning"]}</script>
+<meta name="color-scheme" content="dark light">
+<script>document.documentElement.classList.add('js')</script>
 <style>
+  /* Landing page. Direction: type and nothing else; the seam in the hero is the
+     line between a claim and the run that settles it. System fonts only. */
   :root {
-    --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
-    --accent: #34d399; --accent2: #6c8fff;
-    --text: #e2e8f0; --muted: #94a3b8;
+    --m: clamp(16px, 2.5vw, 32px);
+    --gap: clamp(12px, 2vw, 28px);
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* fixed fields, the same in both themes */
+    --forest: #0f1f10; --paper: #f3f6ee; --lime: #c6f19d;
+    /* themed */
+    --bg: #0f1f10; --surface: #162a17; --ink: #ffffff; --muted: #b3bdb3;
+    --accent: #c6f19d; --accent-ink: #0f1f10; --focus: #c6f19d;
+    --n1: #1f4023; --n2: #2b5a32; --n3: #37753f; --nest-ink: #ffffff;
+    --agent: #f3f6ee; --agent-ink: #0f1f10;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f3f6ee; --surface: #e3eadb; --ink: #0f1f10; --muted: #3f4f40;
+      --accent: #1d4d24; --accent-ink: #ffffff; --focus: #1d4d24;
+      --n1: #dde7d2; --n2: #c3d8b4; --n3: #a5c590; --nest-ink: #0f1f10;
+      --agent: #0f1f10; --agent-ink: #f3f6ee;
+    }
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    max-width: 860px; margin: 0 auto; padding: 48px 24px 80px;
-    background: var(--bg); color: var(--text); line-height: 1.7; font-size: 16px;
-    font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', sans-serif;
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 1.125rem/1.6 var(--font);
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
   }
-  .eyebrow { color: var(--muted); font-size: 0.85em; letter-spacing: 0.08em; text-transform: uppercase; }
-  h1 { font-size: 2.1em; margin: 10px 0 8px; line-height: 1.2; }
-  .lede { color: var(--muted); font-size: 1.08em; margin: 0 0 32px; }
-  .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 40px; }
-  .chip {
-    background: var(--surface2); border: 1px solid var(--border); border-radius: 999px;
-    padding: 4px 14px; font-size: 0.82em; color: var(--muted);
+  h1, h2, h3, p, ol, ul, figure { margin: 0; }
+  a { color: inherit; }
+  a:focus-visible, .btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  .skip {
+    position: absolute; left: var(--m); top: -80px; z-index: 100;
+    background: var(--lime); color: var(--forest); padding: 0.7rem 1.1rem; font-weight: 700;
   }
-  ol.lessons { list-style: none; counter-reset: lsn; padding: 0; margin: 0; }
-  ol.lessons li { counter-increment: lsn; margin-bottom: 12px; }
-  a.card {
-    display: block; text-decoration: none; color: inherit; position: relative;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-    padding: 18px 22px 18px 68px; transition: border-color .15s, background .15s, transform .15s;
+  .skip:focus { top: 10px; outline: 3px solid var(--forest); outline-offset: 2px; }
+
+  /* shared pieces */
+  .wrap { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); }
+  section { padding: clamp(64px, 9vw, 130px) var(--m); }
+  .h2 {
+    font: 800 clamp(2rem, 1.2rem + 4vw, 4.5rem)/1 var(--font);
+    letter-spacing: -0.035em; text-wrap: balance;
   }
-  a.card:hover { border-color: var(--accent); background: var(--surface2); transform: translateY(-1px); }
-  a.card::before {
-    content: counter(lsn); position: absolute; left: 20px; top: 18px;
-    width: 32px; height: 32px; border-radius: 8px;
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--accent); font-weight: 700; font-size: 0.95em;
-    display: flex; align-items: center; justify-content: center;
+  .btn {
+    display: inline-block; text-decoration: none; font-weight: 700; font-size: 1.125rem;
+    padding: 1rem 1.6rem; min-height: 56px; background: var(--accent); color: var(--accent-ink);
+    transition: transform .18s ease, background-color .18s ease;
   }
-  a.card:hover::before { border-color: var(--accent); }
-  .card h2 { font-size: 1.05em; margin: 0 0 4px; line-height: 1.35; color: var(--text); }
-  .card p { margin: 0; color: var(--muted); font-size: 0.92em; line-height: 1.55; }
-  .aside {
-    margin-top: 44px; background: var(--surface); border: 1px solid var(--border);
-    border-left: 3px solid var(--accent2); border-radius: 8px; padding: 18px 22px;
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); }
+
+  /* hero: two fields meet at half height; the seam runs between the two lines of the title */
+  .hero {
+    --H: max(640px, 100svh); --f: clamp(1.9rem, 8vw, 10rem);
+    position: relative; height: var(--H); background: var(--forest); overflow: hidden; padding: 0;
   }
-  .aside h3 { margin: 0 0 8px; font-size: 0.95em; }
-  .aside p { margin: 0 0 10px; color: var(--muted); font-size: 0.92em; }
-  .aside p:last-child { margin-bottom: 0; }
-  .aside a { color: var(--accent2); }
-  footer { margin-top: 40px; color: var(--muted); font-size: 0.85em; border-top: 1px solid var(--border); padding-top: 20px; }
-  @media (max-width: 480px) {
-    body { padding: 32px 16px 60px; }
-    h1 { font-size: 1.7em; }
-    a.card { padding: 16px 16px 16px 60px; }
-    a.card::before { left: 14px; }
+  .hero .up { position: absolute; inset: 0 0 50% 0; background: var(--paper); }
+  .hero .down { position: absolute; inset: 50% 0 0 0; color: #fff; }
+  .hero-title {
+    position: absolute; z-index: 2; left: var(--m); top: calc(var(--H) / 2 - 1.05 * var(--f));
+    font: 800 var(--f)/1.05 var(--font); letter-spacing: -0.035em; white-space: nowrap;
+  }
+  .ln { display: block; overflow: hidden; padding: 0.08em 0 0.1em; margin: -0.08em 0 -0.1em; }
+  .ln:first-child { color: var(--forest); }
+  .ln:last-child { color: var(--lime); }
+  .ln > span { display: inline-block; animation: rise .95s cubic-bezier(.16,.8,.2,1) both; }
+  .ln:nth-child(2) > span { animation-delay: .11s; }
+  .hero-copy {
+    position: absolute; left: var(--m); right: var(--m);
+    top: calc(1.05 * var(--f) + clamp(32px, 3vw, 48px));
+    animation: fade .8s ease .55s both;
+  }
+  .hero-copy p { max-width: 36rem; font-size: 1.375rem; line-height: 1.5; }
+  .hero-copy .btn { margin-top: 28px; background: var(--lime); color: var(--forest); }
+  .hero-copy small { display: block; margin-top: 14px; font-size: 0.9375rem; color: #c9d3c9; }
+  @keyframes rise { from { transform: translateY(105%); } to { transform: none; } }
+  @keyframes fade { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+  .bar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 5; color: var(--forest);
+    display: flex; justify-content: space-between; align-items: center; padding: 10px var(--m);
+  }
+  .bar .mark { font-weight: 800; font-size: 1.125rem; text-decoration: none; letter-spacing: -0.01em; padding: 0.7rem 0; }
+  .bar ul { list-style: none; padding: 0; display: flex; gap: clamp(0.75rem, 2.5vw, 2rem); }
+  .bar ul a { display: block; padding: 0.7rem 0.15rem; font-weight: 600; font-size: 0.9375rem; text-decoration: none; }
+  .bar a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .bar a:focus-visible { outline-color: var(--forest); }
+
+  /* the claims: poster lines */
+  .claims .head { grid-column: 1 / 9; }
+  .claims .head p { margin-top: 1.25rem; max-width: 34rem; }
+  .claims ol { list-style: none; padding: 0; margin-top: clamp(40px, 6vw, 88px); grid-column: 1 / -1; }
+  .claim {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 23rem); column-gap: var(--gap);
+    align-items: baseline; padding: 0.03em 0 clamp(8px, 1.2vw, 18px);
+  }
+  .claim a {
+    font: 800 clamp(2.3rem, 8vw, 10rem)/0.98 var(--font); letter-spacing: -0.04em;
+    text-decoration: none; transition: color .18s ease;
+  }
+  .claim a:hover, .claim a:focus-visible { color: var(--accent); }
+  .claim p { font-size: 1.125rem; line-height: 1.45; }
+
+  /* what this is */
+  .about { background: var(--surface); }
+  .about .h2 { grid-column: 1 / 7; }
+  .about .note { grid-column: 9 / 13; align-self: end; }
+  .facts {
+    grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between;
+    gap: 36px var(--gap); margin-top: clamp(56px, 8vw, 120px); padding: 0; list-style: none;
+  }
+  .facts strong { display: block; font: 300 clamp(2.5rem, 1.2rem + 4vw, 4.5rem)/1 var(--font); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .facts span { display: block; font-size: 0.9375rem; color: var(--muted); max-width: 15rem; margin-top: 6px; }
+  .figure { grid-column: 1 / 8; margin-top: clamp(56px, 8vw, 120px); }
+  .figure svg { display: block; width: 100%; height: auto; }
+  .figure figcaption { margin-top: 14px; font-size: 0.9375rem; color: var(--muted); }
+  .start { grid-column: 9 / 13; margin-top: clamp(56px, 8vw, 120px); align-self: end; }
+  .start p { margin-bottom: 24px; }
+  .nest-t { font: 700 26px var(--font); fill: var(--nest-ink); }
+  .nest-s { font: 400 24px var(--font); fill: var(--nest-ink); }
+  .nest-l { font: 700 26px var(--font); fill: var(--forest); }
+  .nest-ls { font: 400 24px var(--font); fill: var(--forest); }
+  .nest-a { font: 700 26px var(--font); fill: var(--agent-ink); }
+  .nest-as { font: 400 24px var(--font); fill: var(--agent-ink); }
+
+  /* the lessons */
+  .lessons-intro { padding-bottom: clamp(32px, 4vw, 56px); }
+  .lessons-intro .h2 { grid-column: 1 / 10; }
+  .lessons-intro p { grid-column: 1 / 8; margin-top: 1.25rem; }
+  .set { background: var(--bg); }
+  .set.alt { background: var(--surface); }
+  .set h3 { grid-column: 1 / 7; font: 800 clamp(1.5rem, 1.1rem + 1.4vw, 2.125rem)/1.1 var(--font); letter-spacing: -0.03em; text-wrap: balance; }
+  .set .note { grid-column: 8 / 13; font-size: 1.125rem; }
+  .set ol {
+    grid-column: 1 / -1; list-style: none; padding: 0; margin-top: clamp(32px, 4vw, 56px);
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px var(--gap);
+  }
+  .set li { position: relative; }
+  .set li a { font-weight: 700; font-size: 1.125rem; line-height: 1.35; text-underline-offset: 4px; text-decoration-thickness: 0.08em; }
+  .set li a::after { content: ""; position: absolute; inset: -8px -10px; }
+  .set li a:hover { color: var(--accent); }
+  .set li a:focus-visible { outline: none; }
+  .set li a:focus-visible::after { outline: 3px solid var(--focus); outline-offset: 0; }
+  .set li p { margin-top: 6px; font-size: 1.125rem; line-height: 1.5; }
+
+  /* paper field */
+  .paper {
+    --bg: var(--paper); --ink: var(--forest); --muted: #3f4f40; --accent: #1d4d24;
+    --accent-ink: #fff; --focus: #1d4d24; --t: #e3eadb;
+    background: var(--paper); color: var(--forest);
+  }
+  .program .h2 { grid-column: 1 / 7; }
+  .program .lead { grid-column: 8 / 13; align-self: end; }
+  .rows {
+    grid-column: 1 / -1; list-style: none; padding: 0; margin-top: clamp(40px, 6vw, 88px);
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(32px, 4vw, 56px) var(--gap);
+  }
+  .rows li { position: relative; }
+  .rows a { font: 800 clamp(1.5rem, 1.1rem + 1.4vw, 2.125rem)/1.1 var(--font); letter-spacing: -0.025em; text-decoration: none; }
+  .rows a::after { content: ""; position: absolute; inset: -6px -8px; }
+  .rows a:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 0.06em; }
+  .rows a:focus-visible { outline: none; }
+  .rows a:focus-visible::after { outline: 3px solid var(--focus); outline-offset: 0; }
+  .rows p { margin-top: 10px; }
+
+  /* the three courses elsewhere */
+  .elsewhere .h2 { grid-column: 1 / 10; }
+  .elsewhere ul { grid-column: 1 / -1; list-style: none; padding: 0; margin-top: clamp(40px, 6vw, 88px); }
+  .elsewhere li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 24rem); column-gap: var(--gap); align-items: baseline; padding-bottom: clamp(20px, 3vw, 40px); }
+  .elsewhere a { font: 800 clamp(1.9rem, 1.2rem + 4vw, 4.5rem)/1 var(--font); letter-spacing: -0.035em; text-decoration: none; transition: color .18s ease; }
+  .elsewhere a:hover, .elsewhere a:focus-visible { color: var(--accent); }
+
+  /* close */
+  .cta { background: var(--ink); color: var(--bg); min-height: 90svh; display: flex; flex-direction: column; justify-content: space-between; --focus: var(--bg); }
+  .cta h2 { font: 800 clamp(3rem, 13vw, 15rem)/0.92 var(--font); letter-spacing: -0.045em; max-width: 9.5em; }
+  .cta .foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px 48px; }
+  .cta .foot p { max-width: 32rem; font-size: 1.375rem; line-height: 1.5; }
+  .cta .btn { background: var(--bg); color: var(--ink); }
+
+  footer { background: var(--forest); color: #fff; padding: clamp(64px, 8vw, 110px) var(--m) 36px; --focus: var(--lime); }
+  footer .places { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 36px; }
+  footer .places a { display: block; padding: 0.5rem 0; font-size: clamp(1.25rem, 1rem + 1vw, 2.125rem); font-weight: 700; color: var(--lime); text-decoration: none; letter-spacing: -0.02em; }
+  footer .places a:hover { text-decoration: underline; text-underline-offset: 6px; }
+  footer .name { font: 800 clamp(3rem, 13vw, 15rem)/1 var(--font); letter-spacing: -0.05em; margin-top: clamp(40px, 6vw, 90px); white-space: nowrap; }
+  footer .legal { margin-top: 28px; font-size: 0.9375rem; color: #b3bdb3; }
+
+  /* motion: only transform and opacity, and only when script is running */
+  .js [data-rise] { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s cubic-bezier(.16,.8,.2,1); transition-delay: var(--d, 0ms); }
+  .js [data-rise].in { opacity: 1; transform: none; }
+
+  @media (max-width: 860px) {
+    .claims .head, .about .h2, .about .note, .figure, .start, .lessons-intro .h2, .lessons-intro p,
+    .set h3, .set .note, .program .h2, .program .lead, .elsewhere .h2 { grid-column: 1 / -1; }
+    .set .note, .program .lead { margin-top: 1rem; }
+    .rows { grid-template-columns: minmax(0, 1fr); }
+    .about .note { margin-top: 1.25rem; }
+    .claim, .elsewhere li { grid-template-columns: minmax(0, 1fr); row-gap: 6px; }
+    .claim a { font-size: clamp(2rem, 11.5vw, 5rem); }
+    .facts { display: grid; grid-template-columns: 1fr 1fr; }
+    .cta { min-height: 80svh; }
+    .cta .foot .btn { width: 100%; text-align: center; }
+  }
+  @media (max-width: 640px) { .set ol { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 520px) {
+    .bar ul li:last-child { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .ln > span, .hero-copy { animation: none; }
+    .js [data-rise] { opacity: 1; transform: none; transition: none; }
+    .btn, .claim a, .elsewhere a { transition: none; }
+    .btn:hover { transform: none; }
   }
 </style>
 
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<p class="eyebrow">🎯 Self-built curriculum</p>
-<h1>Building and Measuring LLM Systems</h1>
-<p class="lede">Applied AI and machine learning as ~13 weeks of lessons, runnable notebooks and four portfolio projects — including the security, evaluation, cost and fine-tuning material that short courses usually leave out.</p>
+<header class="bar">
+  <a class="mark" href="./">Stylus Nexus</a>
+  <nav aria-label="Primary">
+    <ul>
+      <li><a href="#lessons">Lessons</a></li>
+      <li><a href="#program">Program</a></li>
+      <li><a href="#elsewhere">Other courses</a></li>
+    </ul>
+  </nav>
+</header>
 
-<div class="meta">
-  <span class="chip">116 lessons built</span>
-  <span class="chip">10 blocks</span>
-  <span class="chip">4 portfolio projects</span>
-  <span class="chip">Docker environments</span>
+<main id="main">
+
+<section class="hero" aria-label="Introduction">
+  <div class="up"></div>
+  <h1 class="hero-title"><span class="ln"><span>Building and Measuring</span></span><span class="ln"><span>LLM Systems</span></span></h1>
+  <div class="down">
+    <div class="hero-copy">
+      <p>Applied artificial intelligence (AI) with large language models (LLMs): evaluation, retrieval, agents, security and fine-tuning. Free, and every notebook ships with its outputs.</p>
+      <a class="btn" href="lessons/orientation/lsn-1787200000000-the-map.html">Start with the map</a>
+      <small>Ten minutes, and the rest makes more sense.</small>
+    </div>
+  </div>
+</section>
+
+<section class="claims" aria-labelledby="claims-h">
+  <div class="wrap">
+    <div class="head" data-rise>
+      <h2 class="h2" id="claims-h">Claims, and the runs that settle them</h2>
+      <p>Five results the lessons are built around. Each one links to the lesson that earns it.</p>
+    </div>
+    <ol>
+    <li class="claim" data-rise style="--d:0ms"><a href="lessons/core-vocabulary/lsn-1787000000017-class-imbalance-and-thresholds.html">99% accuracy</a><p>Can mean a model that learned nothing.</p></li>
+    <li class="claim" data-rise style="--d:70ms"><a href="lessons/block1-data-eda/lsn-1787300000000-tabular-data-and-dtypes.html">22 sentinels</a><p>Twenty-two sentinel values can shift a mean fourfold.</p></li>
+    <li class="claim" data-rise style="--d:140ms"><a href="lessons/block2-classical-ml/lsn-1787500000003-time-series.html">Random splits</a><p>Lie on ordered data. Walk-forward validation does not.</p></li>
+    <li class="claim" data-rise style="--d:210ms"><a href="lessons/core-vocabulary/lsn-1787000000021-loops-at-inference.html">Self-critique</a><p>Often makes things worse unless a verifier checks it.</p></li>
+    <li class="claim" data-rise style="--d:280ms"><a href="docs/p4-deployed-assistant.html#capstone">29 questions</a><p>The gold set the capstone run is graded against.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="about" aria-labelledby="about-h">
+  <div class="wrap">
+    <h2 class="h2" id="about-h" data-rise>A course that shows its work</h2>
+    <p class="note" data-rise style="--d:100ms">Notebooks ship with their executed outputs, because a notebook that has not been run is a hypothesis. Every external link is checked before it is committed. Numbers in lessons come from runs, not from memory.</p>
+    <ul class="facts">
+      <li data-rise><strong>116</strong><span>lessons in 14 sets, each readable on its own</span></li>
+      <li data-rise style="--d:70ms"><strong>10</strong><span>blocks, from vocabulary to deployment</span></li>
+      <li data-rise style="--d:140ms"><strong>26</strong><span>notebooks, saved with their outputs</span></li>
+      <li data-rise style="--d:210ms"><strong>4</strong><span>portfolio projects, each a script you can run</span></li>
+    </ul>
+    <figure class="figure" data-rise>
+      <svg viewBox="0 0 700 420" role="img" aria-label="Nested shapes: artificial intelligence contains machine learning, which contains deep learning, which contains generative AI and large language models. Agents sit beside them.">
+<rect x="0" y="0" width="470" height="420" fill="var(--n1)"/>
+<text x="22" y="44" class="nest-t">Artificial intelligence (AI)</text>
+<rect x="20" y="64" width="430" height="340" fill="var(--n2)"/>
+<text x="42" y="108" class="nest-t">Machine learning (ML)</text>
+<rect x="40" y="128" width="390" height="260" fill="var(--n3)"/>
+<text x="62" y="172" class="nest-t">Deep learning</text>
+<rect x="60" y="192" width="350" height="180" fill="var(--lime)"/>
+<text x="82" y="236" class="nest-l">Generative AI</text>
+<text x="82" y="272" class="nest-ls">Large language models</text>
+<text x="82" y="302" class="nest-ls">(LLMs)</text>
+<rect x="490" y="192" width="190" height="180" fill="var(--agent)"/>
+<text x="508" y="236" class="nest-a">Agents</text>
+<text x="508" y="272" class="nest-as">a loop</text>
+<text x="508" y="302" class="nest-as">around a model</text>
+</svg>
+      <figcaption>The first lesson draws this: how the terms nest, and where the rest of the course sits on it.</figcaption>
+    </figure>
+    <div class="start" data-rise>
+      <p>Read the map before anything else. Every term in the program has a place on that one picture.</p>
+      <a class="btn" href="lessons/orientation/lsn-1787200000000-the-map.html">Open the map</a>
+    </div>
+  </div>
+</section>
+
+<div id="lessons">
+<section class="lessons-intro" aria-labelledby="lessons-h">
+  <div class="wrap">
+    <h2 class="h2" id="lessons-h" data-rise>All 116 lessons, in course order</h2>
+    <p data-rise>14 sets. Lessons are read standalone, so every term is explained where it first appears.</p>
+  </div>
+</section>
+<section class="set" id="set-orientation" aria-labelledby="h-orientation">
+  <div class="wrap">
+  <h3 id="h-orientation">Start here</h3>
+  <p class="note">One picture that places every term in the program. Ten minutes, and the rest makes more sense.</p>
+  <ol>
+    <li><a href="lessons/orientation/lsn-1787200000000-the-map.html">The Map: AI, ML, Deep Learning, generative AI (GenAI) and Agents</a>
+      <p>AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it&#x27;s an architecture, not a model. Read this first.</p></li>
+    <li><a href="lessons/orientation/lsn-1787200000001-inside-an-llm.html">Inside an LLM: The Parts and What Each Does</a>
+      <p>Follow one sentence from text to next word — tokenizer, embeddings, transformer blocks, output head, and what each file on disk holds.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set alt" id="set-core-vocabulary" aria-labelledby="h-core-vocabulary">
+  <div class="wrap">
+  <h3 id="h-core-vocabulary">Block 0: Vocabulary</h3>
+  <p class="note">The terms the rest of the program assumes — each taught through the failure it explains, rather than as a definition.</p>
+  <ol>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000000-agent-loop-and-harness.html">The Agent Loop and the Harness</a>
+      <p>The two most-confused words in any agent codebase — and why most agent failures are harness failures, not model failures.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000001-tokens-context-and-kv-cache.html">Tokens, the Context Window, and the key-value (KV) Cache</a>
+      <p>Why a model &#x27;forgets&#x27;, why long conversations get expensive quadratically, and what prompt caching is actually caching.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000002-weights-gguf-quantization.html">Weights, GGUF and Quantization</a>
+      <p>What Q4_K_M means character by character, and why a heavily quantized big model beats a small precise one.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000003-quantization-recipes.html">Quantization Recipes: Beyond Plain Rounding</a>
+      <p>Plain rounding, GPTQ, activation-aware weight quantization (AWQ), DWQ, importance matrices and mixed precision — same bits, chosen better — with where to get them and how to judge one.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000004-serving-locally.html">Serving Locally: Ollama, llama.cpp and tok/s</a>
+      <p>Ollama, llama.cpp and the metal underneath — plus how to read a tokens-per-second number without being misled.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000005-formats-and-engines.html">Formats and Engines: GGUF, MLX and What NVIDIA Runs</a>
+      <p>Container, method and kernel are three different things called the format — GGUF, MLX and the NVIDIA checkpoints, measured on a Mac and cited for NVIDIA.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000006-embeddings-and-retrieval.html">Embeddings, Vectors and Semantic Routing</a>
+      <p>How a machine decides two things mean the same, the routing it enables, and the three places it quietly fails.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000007-tool-calls-and-mcp.html">Tool Calls and Model Context Protocol (MCP)</a>
+      <p>How a text model comes to run your code, what MCP standardises, and where prompt injection gets its leverage.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000008-routing-and-escalation.html">Routing, Escalation and Sampling Controls</a>
+      <p>Try cheap, verify, escalate — plus temperature and top-k, which decide how a model picks words.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000009-eval-battery.html">The Eval Battery</a>
+      <p>How you know any of it works, and why the only number worth trusting is one you built yourself.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000010-overfitting-and-underfitting.html">Overfitting and Underfitting</a>
+      <p>The most important pair of words in machine learning, and the habit that catches the dangerous one.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000011-agents-autonomy-and-danger.html">Agents, Autonomy and the Danger Surface</a>
+      <p>What actually makes something an agent, the autonomy ladder, and every way one can hurt you.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000012-feedback-rlhf-and-humans.html">Reinforcement, Feedback and Humans in the Loop</a>
+      <p>Reinforcement learning from human feedback (RLHF), direct preference optimization (DPO) and Constitutional AI — plus the difference between in, on, and out of the loop.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000013-context-engineering.html">Context Engineering: What Goes In Decides What Comes Out</a>
+      <p>Attention is U-shaped over position, distractors actively hurt, and tool results are context too.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000014-structured-output-json.html">Structured Output: JavaScript Object Notation (JSON) You Can Actually Parse</a>
+      <p>The ladder from &#x27;asking nicely&#x27; to constrained decoding, and why valid JSON still isn&#x27;t correct JSON.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000015-hallucination-and-grounding.html">Hallucination and Grounding</a>
+      <p>Why a model states falsehoods confidently, and why telling it not to achieves nothing.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000016-shots-and-in-context-learning.html">Zero-shot, Few-shot and In-Context Learning</a>
+      <p>Zero-, few- and many-shot — what examples are genuinely good at, and when to stop paying for them.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000017-class-imbalance-and-thresholds.html">Class Imbalance and Choosing a Threshold</a>
+      <p>Why 99% accuracy can mean a model that learned nothing, and why 0.5 is just a convention.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000018-drift.html">Drift: Why Deployment Isn&#x27;t the End</a>
+      <p>The model didn&#x27;t change, the world did — and why you monitor inputs when ground truth arrives late.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000019-distillation.html">Distillation</a>
+      <p>Training a small model to imitate a large one, and the licensing trap that catches people.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000020-chain-of-thought-and-reasoning.html">Chain-of-Thought and Reasoning Tokens</a>
+      <p>Why thinking out loud works, and why the chain is not an audit trail.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000021-loops-at-inference.html">Loops at Inference: Control Flow, Limits and Dangers</a>
+      <p>Running the model more than once — why verifier-guided retry works, why unaided self-critique often makes things worse.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000022-loops-in-training.html">Loops in Training: Flywheels and Model Collapse</a>
+      <p>Flywheels that improve a model across generations, and model collapse — the way the tails disappear first.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000023-skills.html">Skills: Packaging What an Agent Should Know</a>
+      <p>Procedural knowledge as a loadable folder — progressive disclosure, bundled scripts, and when a skill beats a tool or an MCP server.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000024-operating-an-agent.html">Operating an Agent</a>
+      <p>Logging trajectories, watching the right proxies, three control switches, and what rots when nothing on your side changed.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000025-building-an-mcp-server.html">Building an Model Context Protocol (MCP) Server</a>
+      <p>Six primitives not one, two transports, and the design choices that decide whether an agent uses your server well.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000026-mcp-dangers.html">Model Context Protocol (MCP): The Danger Surface</a>
+      <p>Named attack classes from the spec itself — and why it says the protocol cannot enforce its own security principles.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000027-local-hardware-limits.html">Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</a>
+      <p>CUDA versus Metal, why capacity beats bandwidth, and the silent central processing unit (CPU) fallback that wastes days.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000028-latency-and-caching.html">Latency, Prefills and Caching</a>
+      <p>Prefill versus decode, warm and cold states, the cache prefix rule, and why the model is rarely the slow part.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000029-session-lifecycle.html">Memory, Compaction and Session Decay</a>
+      <p>A model has no memory — everything that looks like it is re-sent context, and all of it decays.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000030-why-the-gpu-is-waiting.html">Why the Graphics Processing Unit (GPU) Is Waiting</a>
+      <p>One number — work done per byte fetched — explains quantization, batching, and why a chip rated for a quadrillion operations a second gives you thirty tokens a second.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000031-frontier-and-local.html">Frontier and Local, and What Each Is Actually For</a>
+      <p>Not a ladder with one at the top. Two different sets of constraints, and the choice is which set you would rather have.</p></li>
+    <li><a href="lessons/core-vocabulary/lsn-1787000000032-techniques-that-transfer.html">Techniques That Transfer, and the Ones That Change Value</a>
+      <p>Most of what makes a frontier harness good is not the model. It is portable — and several techniques are worth more locally than they are where they were invented.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set" id="set-algorithms" aria-labelledby="h-algorithms">
+  <div class="wrap">
+  <h3 id="h-algorithms">Block 0: Algorithms</h3>
+  <p class="note">What each algorithm does and where it breaks. Your statistics course covers the maths; this covers the machinery.</p>
+  <ol>
+    <li><a href="lessons/algorithms/lsn-1787100000000-gradient-descent-and-backprop.html">Gradient Descent and Backpropagation</a>
+      <p>The one algorithm underneath every trained model, and why training needs so much more memory than inference.</p></li>
+    <li><a href="lessons/algorithms/lsn-1787100000001-regression-algorithms.html">Linear and Logistic Regression</a>
+      <p>The baseline everything else must beat — and why the threshold, not the model, makes the decision.</p></li>
+    <li><a href="lessons/algorithms/lsn-1787100000002-decision-trees.html">Decision Trees: How a Split Gets Chosen</a>
+      <p>How a split gets chosen, and why depth is the overfitting dial.</p></li>
+    <li><a href="lessons/algorithms/lsn-1787100000003-ensembles.html">Ensembles: Bagging, Forests and Boosting</a>
+      <p>Bagging cancels variance, boosting corrects errors — and which to reach for first.</p></li>
+    <li><a href="lessons/algorithms/lsn-1787100000004-clustering-and-knn.html">k-Means, k-NN and the Curse of Dimensionality</a>
+      <p>Two algorithms built on distance, and why distance means less as dimensions rise.</p></li>
+    <li><a href="lessons/algorithms/lsn-1787100000005-attention-and-transformers.html">Attention and the Transformer</a>
+      <p>Query, key, value — and why doubling the context quadruples the cost.</p></li>
+    <li><a href="lessons/algorithms/lsn-1787100000006-mixture-of-experts.html">Mixture of Experts</a>
+      <p>How a model gets larger without getting slower — and why that trade lands badly on the machine under your desk.</p></li>
+    <li><a href="lessons/algorithms/lsn-1787100000007-vector-search-algorithms.html">Nearest-Neighbour Search at Scale</a>
+      <p>Hierarchical navigable small world (HNSW), inverted file index (IVF), and the recall you quietly trade for speed without ever measuring it.</p></li>
+    <li><a href="lessons/algorithms/lsn-1787100000008-ranking-and-hybrid-retrieval.html">Ranking and Hybrid Retrieval</a>
+      <p>BM25, reciprocal rank fusion and rerankers — why pure vector search is rarely best.</p></li>
+    <li><a href="lessons/algorithms/lsn-1787100000009-data-leakage.html">Data Leakage</a>
+      <p>The failure that inflates training and validation together, so nothing looks wrong until production.</p></li>
+    <li><a href="lessons/algorithms/lsn-1787100000010-mlp-patterns.html">Multilayer perceptron (MLP) Patterns: Twelve Wirings of One Layer</a>
+      <p>Most architectures are the same layer wired differently. The wiring tells you what a model is for, and where it will fail.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set alt" id="set-block1-data-eda" aria-labelledby="h-block1-data-eda">
+  <div class="wrap">
+  <h3 id="h-block1-data-eda">Block 1: Python, Data and Exploratory Analysis</h3>
+  <p class="note">Real tabular data, read properly. Paired with four runnable notebooks in <code>notebooks/01-python-eda/</code>.</p>
+  <ol>
+    <li><a href="lessons/block1-data-eda/lsn-1787300000000-tabular-data-and-dtypes.html">Tabular Data and the Lies dtypes Tell</a>
+      <p>The dtype a column loads as is a free diagnostic — and 22 sentinel values can shift a mean fourfold.</p></li>
+    <li><a href="lessons/block1-data-eda/lsn-1787300000001-first-fifteen-minutes.html">The First Fifteen Minutes</a>
+      <p>Survey before you fix: the target&#x27;s balance, the leaking feature, the duplicates, the missingness pattern.</p></li>
+    <li><a href="lessons/block1-data-eda/lsn-1787300000002-missing-data-mechanisms.html">Missing Data: The Mechanism Matters More Than the Amount</a>
+      <p>Missing completely at random (MCAR), missing at random (MAR), missing not at random (MNAR) — and why &#x27;fill with the median&#x27; can destroy exactly the signal you need.</p></li>
+    <li><a href="lessons/block1-data-eda/lsn-1787300000003-what-a-plot-is-for.html">What a Plot Is Actually For</a>
+      <p>Five questions with decisions attached, and the two chart mistakes that recur everywhere.</p></li>
+    <li><a href="lessons/block1-data-eda/lsn-1787300000004-ai-assisted-analysis.html">AI-Assisted Analysis, and Where It Lies to You</a>
+      <p>Let it write the code, don&#x27;t let it make the decisions — and check row counts after every transform.</p></li>
+    <li><a href="lessons/block1-data-eda/lsn-1787300000005-labels-and-holdouts.html">Labels, and What You Hold Back</a>
+      <p>Label quality is a ceiling, and the data you refuse to look at is what makes any number believable.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set" id="set-block2-classical-ml" aria-labelledby="h-block2-classical-ml">
+  <div class="wrap">
+  <h3 id="h-block2-classical-ml">Block 2: Predictive Modelling</h3>
+  <p class="note">Classical machine learning done properly — the metrics, the models, and knowing when a neural network is the wrong answer.</p>
+  <ol>
+    <li><a href="lessons/block2-classical-ml/lsn-1787500000000-confusion-matrix-and-metrics.html">The Confusion Matrix and What Comes Out of It</a>
+      <p>Four numbers, and every classification metric is built from them — plus what area under the curve (AUC) actually means and when it misleads.</p></li>
+    <li><a href="lessons/block2-classical-ml/lsn-1787500000001-baseline-to-model.html">From Baseline to Model</a>
+      <p>A ladder of increasing complexity, climbed only as far as the evidence justifies — and how to compare fairly.</p></li>
+    <li><a href="lessons/block2-classical-ml/lsn-1787500000002-neural-networks-both-ways.html">Neural Networks, in Keras and in PyTorch</a>
+      <p>The same network in Keras and raw PyTorch, and an honest account of when it is the wrong tool.</p></li>
+    <li><a href="lessons/block2-classical-ml/lsn-1787500000003-time-series.html">Time Series, and Why Random Splits Lie</a>
+      <p>Why random splits lie on ordered data, walk-forward validation, and the gap people leave out.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set alt" id="set-block3-retrieval" aria-labelledby="h-block3-retrieval">
+  <div class="wrap">
+  <h3 id="h-block3-retrieval">Block 3: Retrieval-Augmented Generation (RAG)</h3>
+  <p class="note">Building a retrieval system that works, measuring the part everyone skips, the loop that answers multi-hop questions, and what changes at millions of documents.</p>
+  <ol>
+    <li><a href="lessons/block3-retrieval/lsn-1787600000000-building-a-rag-system.html">Building a Retrieval System That Works</a>
+      <p>Five stages, and the two that decide whether the other three matter.</p></li>
+    <li><a href="lessons/block3-retrieval/lsn-1787600000001-transforming-the-query.html">Transforming the Query</a>
+      <p>Every technique so far improves what you search. This one changes what you search for.</p></li>
+    <li><a href="lessons/block3-retrieval/lsn-1787600000002-measuring-retrieval.html">Measuring Retrieval</a>
+      <p>Index recall, retrieval quality and groundedness — three numbers that fail independently.</p></li>
+    <li><a href="lessons/block3-retrieval/lsn-1787600000003-agentic-rag.html">Agentic RAG: Retrieval as a Loop</a>
+      <p>When one retrieval cannot answer the question, and the failure modes the loop brings with it.</p></li>
+    <li><a href="lessons/block3-retrieval/lsn-1787600000004-preloading-instead-of-retrieving.html">Preloading Instead of Retrieving</a>
+      <p>If the corpus does not change between queries, nothing forces you to wait for a question before reading it.</p></li>
+    <li><a href="lessons/block3-retrieval/lsn-1787600000005-retrieval-at-scale.html">Retrieval at Scale: Millions of Documents</a>
+      <p>What breaks first is rarely the search. It is memory, the filter, the re-index and the slowest shard.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set" id="set-block4-agentic" aria-labelledby="h-block4-agentic">
+  <div class="wrap">
+  <h3 id="h-block4-agentic">Block 4: Agentic AI</h3>
+  <p class="note">The loop by hand before the framework, what a graph runtime actually buys, and approval gates that halt what matters.</p>
+  <ol>
+    <li><a href="lessons/block4-agentic/lsn-1787700000000-the-loop-by-hand.html">The Agent Loop, By Hand</a>
+      <p>Forty lines. Build it once and every framework afterwards is legible.</p></li>
+    <li><a href="lessons/block4-agentic/lsn-1787700000001-what-a-graph-buys.html">What a Graph Runtime Buys</a>
+      <p>Checkpointing is the feature; everything else you could write in an afternoon.</p></li>
+    <li><a href="lessons/block4-agentic/lsn-1787700000002-multi-agent-and-approval.html">Multi-Agent Systems and Gates That Actually Halt</a>
+      <p>When splitting is justified, what handoffs cost, and why most approval gates do not stop what matters.</p></li>
+    <li><a href="lessons/block4-agentic/lsn-1787700000003-telemetry-and-instrumentation.html">Telemetry: Making the Run Legible</a>
+      <p>You cannot reproduce an agent run, so the trace is the only evidence it happened the way you think.</p></li>
+    <li><a href="lessons/block4-agentic/lsn-1787700000004-loop-tradeoffs.html">Four Levers, and What Each Costs</a>
+      <p>Prefix caching, read accumulation, verification granularity and reasoning effort — each trades tokens against reliability.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set alt" id="set-block5-evaluation" aria-labelledby="h-block5-evaluation">
+  <div class="wrap">
+  <h3 id="h-block5-evaluation">Block 5: Evaluation</h3>
+  <p class="note">The front door to the measurement material scattered across this course, then labels you can defend and a cross-model comparison that does not lie.</p>
+  <ol>
+    <li><a href="lessons/block5-evaluation/lsn-1787800000000-where-evaluation-lives.html">Where Evaluation Lives</a>
+      <p>The map. Which artefact answers which question, and the order that stops you wasting a week.</p></li>
+    <li><a href="lessons/block5-evaluation/lsn-1787800000001-eval-data-you-can-trust.html">Eval Data You Can Trust</a>
+      <p>A gold label is only correct if you can name the rule that produces it.</p></li>
+    <li><a href="lessons/block5-evaluation/lsn-1787800000002-one-set-many-models.html">One Set, Many Models</a>
+      <p>The comparison is the point, and a budget you set without thinking is what breaks it.</p></li>
+    <li><a href="lessons/block5-evaluation/lsn-1787800000003-rubrics-and-blind-reads.html">Rubrics and Blind Reads</a>
+      <p>A rubric makes a judgement checkable. Blinding makes it honest. Neither works without the other.</p></li>
+    <li><a href="lessons/block5-evaluation/lsn-1787800000004-is-the-difference-real.html">Is the Difference Real?</a>
+      <p>Pairing, spread, Bessel&#x27;s correction and the peeking problem — the arithmetic that decides whether a number moved or wobbled.</p></li>
+    <li><a href="lessons/block5-evaluation/lsn-1787800000005-judging-a-conversation.html">Judging a Conversation</a>
+      <p>Every score so far graded one answer. An agent produces a trajectory, and the failure is usually three turns back.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set" id="set-block6-security" aria-labelledby="h-block6-security">
+  <div class="wrap">
+  <h3 id="h-block6-security">Block 6: Security</h3>
+  <p class="note">Block 0 named the attack classes; this block runs them against the agent you built, starting with the injection your own retrieval pipeline invites.</p>
+  <ol>
+    <li><a href="lessons/block6-security/lsn-1787900000000-injection-direct-and-indirect.html">Prompt Injection, Direct and Indirect</a>
+      <p>The dangerous one is not the user typing something clever. It is the document you retrieved.</p></li>
+    <li><a href="lessons/block6-security/lsn-1787900000001-exfiltration-and-tool-abuse.html">Exfiltration and Tool Abuse</a>
+      <p>An injected instruction is worth nothing on its own. It needs a way out, and your agent is holding several.</p></li>
+    <li><a href="lessons/block6-security/lsn-1787900000002-sandboxing-and-what-actually-works.html">Sandboxing, and What Actually Works</a>
+      <p>Sorting the mitigations that hold from the ones that mostly produce confidence.</p></li>
+    <li><a href="lessons/block6-security/lsn-1787900000003-red-teaming-your-own-agent.html">Red-Teaming Your Own Agent</a>
+      <p>The exit criterion for this block: break the system you built, then prove you fixed it.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set alt" id="set-block7-training" aria-labelledby="h-block7-training">
+  <div class="wrap">
+  <h3 id="h-block7-training">Block 7: Training and Fine-Tuning</h3>
+  <p class="note">When changing the weights is the right answer — rarely — and the four ways to shrink a model, including the fact that compression does not remove capability evenly.</p>
+  <ol>
+    <li><a href="lessons/block7-training/lsn-1788000000000-when-fine-tuning-is-wrong.html">When Fine-Tuning Is the Wrong Answer</a>
+      <p>Which is most of the time, and the order to exhaust before you reach for it.</p></li>
+    <li><a href="lessons/block7-training/lsn-1788000000001-building-the-dataset.html">Building the Dataset, and How Little You Need</a>
+      <p>The part that decides whether the training run was worth doing — and it is smaller than people expect.</p></li>
+    <li><a href="lessons/block7-training/lsn-1788000000002-lora-qlora-and-full-fine-tuning.html">Low-rank adaptation (LoRA), quantized low-rank adaptation (QLoRA) and the Full Fine-Tune</a>
+      <p>What low-rank adaptation actually changes, what rank buys you, and the one case where updating every weight is still right.</p></li>
+    <li><a href="lessons/block7-training/lsn-1788000000003-supervised-versus-reinforcement-tuning.html">Supervised versus Reinforcement Fine-Tuning</a>
+      <p>One shows the model the answer; the other scores its attempts. The objective decides what you can teach.</p></li>
+    <li><a href="lessons/block7-training/lsn-1788000000004-when-the-training-run-does-not-fit.html">When the Training Run Does Not Fit</a>
+      <p>Three techniques that trade time or precision for memory — and the order to reach for them.</p></li>
+    <li><a href="lessons/block7-training/lsn-1788000000005-the-four-ways-to-shrink-a-model.html">The Four Ways to Shrink a Model</a>
+      <p>Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set" id="set-block8-deployment" aria-labelledby="h-block8-deployment">
+  <div class="wrap">
+  <h3 id="h-block8-deployment">Block 8: Deployment and Interfaces</h3>
+  <p class="note">Calling an interface you do not control, serving one, failing over when the provider does not answer, and the design walk-through that ties the course to the questions interviewers ask.</p>
+  <ol>
+    <li><a href="lessons/block8-deployment/lsn-1788100000000-calling-an-api-you-do-not-control.html">Calling an application programming interface (API) You Do Not Control</a>
+      <p>It will fail, it will be slow, and it will occasionally charge you twice for the same work.</p></li>
+    <li><a href="lessons/block8-deployment/lsn-1788100000001-serving-one-yourself.html">Serving One Yourself</a>
+      <p>The concerns that appear the moment the caller is not you — worked against Project 4.</p></li>
+    <li><a href="lessons/block8-deployment/lsn-1788100000002-the-image-is-the-unit.html">The Image Is the Unit</a>
+      <p>What goes inside, what stays configuration, and why the size is a design decision rather than an outcome.</p></li>
+    <li><a href="lessons/block8-deployment/lsn-1788100000003-after-it-ships.html">After It Ships</a>
+      <p>What to watch, what to wake someone for, and the difference between the service being up and the service being right.</p></li>
+    <li><a href="lessons/block8-deployment/lsn-1788100000004-the-artefact-is-code-data-and-config.html">The Artefact Is Code, Data and Configuration</a>
+      <p>A model file is not a deployment; behaviour only becomes reproducible when its inputs and assumptions travel with it.</p></li>
+    <li><a href="lessons/block8-deployment/lsn-1788100000005-managed-cloud-surfaces.html">Managed Cloud Surfaces</a>
+      <p>Calling a model through Amazon Bedrock, Google Vertex AI or Microsoft Foundry keeps the request in your hands and the capacity, the cache and the calendar in the provider&#x27;s.</p></li>
+    <li><a href="lessons/block8-deployment/lsn-1788100000006-when-the-provider-goes-down.html">When the Provider Goes Down</a>
+      <p>Failing over is a design with five rungs, a clock and a test, not a second API key in an environment variable.</p></li>
+    <li><a href="lessons/block8-deployment/lsn-1788100000007-designing-the-whole-system.html">Designing the Whole System: The Interview Questions</a>
+      <p>Nine questions that keep coming up, a drawing from query to answer, and where this course teaches each part.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set alt" id="set-block9-electives" aria-labelledby="h-block9-electives">
+  <div class="wrap">
+  <h3 id="h-block9-electives">Block 9: Electives</h3>
+  <p class="note">Directions the spine does not cover: input that is not text, asking the database properly, where the money goes, convolutions, recommenders, and agents that improve themselves.</p>
+  <ol>
+    <li><a href="lessons/block9-electives/lsn-1788200000000-when-the-input-is-not-text.html">When the Input Is Not Text</a>
+      <p>Images and documents enter the same context window, cost tokens, and break the assumptions the rest of this course made about both.</p></li>
+    <li><a href="lessons/block9-electives/lsn-1788200000001-asking-the-database-properly.html">Asking the Database Properly</a>
+      <p>The intake sheet keeps asking whether a query would do. This is what that query looks like.</p></li>
+    <li><a href="lessons/block9-electives/lsn-1788200000002-where-the-money-goes.html">Where the Money Goes</a>
+      <p>Block 0 taught routing, which is architecture. This is the measurement — attributing spend, and the four places it hides.</p></li>
+    <li><a href="lessons/block9-electives/lsn-1788200000003-convolutions-and-computer-vision.html">Convolutions, and What a convolutional neural network (CNN) Assumes</a>
+      <p>A grid is not a list, and building that in rather than learning it is the whole idea.</p></li>
+    <li><a href="lessons/block9-electives/lsn-1788200000004-recommendation-systems.html">Recommendation Systems, and the Loop They Sit In</a>
+      <p>The one system in this course whose training data is its own past output.</p></li>
+    <li><a href="lessons/block9-electives/lsn-1788200000005-agents-that-improve-themselves.html">Agents That Improve Themselves</a>
+      <p>A closed loop that measures its own output, searches for a better version, and ships the winner — without ever retraining the model.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set" id="set-closing-future-of-work" aria-labelledby="h-closing-future-of-work">
+  <div class="wrap">
+  <h3 id="h-closing-future-of-work">Closing: The Future of Work</h3>
+  <p class="note">The only chapter that argues rather than instructs — what the 2026 labour evidence shows, and a thesis about which capability becomes scarce, with its counter-argument attached.</p>
+  <ol>
+    <li><a href="lessons/closing-future-of-work/lsn-1788300000000-what-the-evidence-shows.html">What the Evidence Actually Shows</a>
+      <p>Before anyone&#x27;s thesis, including mine: the measured numbers, and how much weight they hold.</p></li>
+    <li><a href="lessons/closing-future-of-work/lsn-1788300000001-the-apprenticeship-problem.html">The Apprenticeship Problem</a>
+      <p>An argument, not a finding: the scarce thing becomes knowing where the boundary is, and we are automating the work that used to teach it.</p></li>
+  </ol>
+  </div>
+</section>
+<section class="set alt" id="set-engineering-practice" aria-labelledby="h-engineering-practice">
+  <div class="wrap">
+  <h3 id="h-engineering-practice">Block 0: Engineering Practice</h3>
+  <p class="note">The three artifacts an LLM project accumulates — harness, recipes, decision records — how each one turns harmful, and the measurement procedure that corrects them.</p>
+  <ol>
+    <li><a href="lessons/engineering-practice/lsn-1787400000000-three-artifacts.html">Recipes, architecture decision records (ADRs) and the Harness</a>
+      <p>Three things every LLM project grows, answering three different questions.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000001-when-scaffolding-turns.html">When the Scaffolding Turns on You</a>
+      <p>Each of the three artifacts has a characteristic way of becoming actively harmful.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000002-why-measurement-decides.html">Why Measurement Decides</a>
+      <p>The only thing that corrects a harness, a recipe or a decision is a number that disagrees with it.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000003-how-to-measure.html">How to Measure</a>
+      <p>A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000004-swe-bench-and-how-to-run-it.html">SWE-bench, and How to Actually Run It</a>
+      <p>How a SWE-bench task is built, how to run it on Apple Silicon, and how to build the same thing from your own merged pull requests (PRs).</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000005-benchmarks-what-to-trust.html">Benchmarks: Why They Matter, Why They Fail, and When to Build Your Own</a>
+      <p>Quality benchmarks, leaderboards, serving benchmarks and load tests answer different questions — how public ones fail, which tools exist, and when to build your own.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000006-confounds-you-cannot-see.html">Confounds You Cannot See</a>
+      <p>The limits, overrides and truncations that end a run silently — and get read as model capability.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000007-localising-a-failure.html">Localising a Failure</a>
+      <p>Control fixtures, metric design, and why a true narrow observation keeps getting promoted to a false general one.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000008-models-judging-models.html">Models Judging Models</a>
+      <p>LLM-as-judge: four documented biases, and the one failure mode that manufactures effects rather than adding noise.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000009-deterministic-first.html">Deterministic First</a>
+      <p>A model is the most expensive, slowest, least testable component you can use — the judgement is knowing when it earns that.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000010-code-nobody-decided.html">Code Nobody Decided</a>
+      <p>The previous lesson asked whether to use a model. This one asks who chose the behaviour when you did.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000011-what-ai-makes-worse.html">What AI Makes Worse</a>
+      <p>You do not need to want to be a software engineer. You do need the parts of it that generation puts under pressure.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000012-spec-driven-development.html">Vibe Coding and Spec-Driven Development</a>
+      <p>Vibe coding and spec-driven development as a spectrum — and the one question that tells you where a task belongs on it.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000013-version-control-basics.html">Version Control, and Why Agents Make It Non-Optional</a>
+      <p>Git and GitHub from zero — and why an agent writing the code makes version control more necessary, not less.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000014-rungs-and-experiments.html">Rungs: Running Experiments on an Agent</a>
+      <p>A ladder of progressively more assistance, where a task starts passing tells you what was wrong.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000015-tracking-runs-and-automating-evals.html">Tracking Runs, and Running the Evals Automatically</a>
+      <p>The measurement discipline this course teaches does not survive contact with fifty experiments unless something records them for you.</p></li>
+    <li><a href="lessons/engineering-practice/lsn-1787400000016-the-artifact-and-when-to-retrain.html">The Artifact, and When to Retrain</a>
+      <p>What actually ships is not the code — and the drift lesson tells you something moved without telling you what to do about it.</p></li>
+  </ol>
+  </div>
+</section>
 </div>
 
-<h2 style="margin-top:44px">Start here</h2>
-<p class="lede" style="font-size:1em">One picture that places every term in the program. Ten minutes, and the rest makes more sense.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/orientation/lsn-1787200000000-the-map.html">
-    <h2>The Map: AI, ML, Deep Learning, GenAI and Agents</h2>
-    <p>AI, machine learning, deep learning and generative AI nest inside one another — and agentic AI sits outside because it&#x27;s an architecture, not a model. Read this first.</p>
-  </a></li>
-  <li><a class="card" href="lessons/orientation/lsn-1787200000001-inside-an-llm.html">
-    <h2>Inside an LLM: The Parts and What Each Does</h2>
-    <p>Follow one sentence from text to next word — tokenizer, embeddings, transformer blocks, output head, and what each file on disk holds.</p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 0 · Vocabulary</h2>
-<p class="lede" style="font-size:1em">The terms the rest of the program assumes — each taught through the failure it explains, rather than as a definition.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000000-agent-loop-and-harness.html">
-    <h2>The Agent Loop and the Harness</h2>
-    <p>The two most-confused words in any agent codebase — and why most agent failures are harness failures, not model failures.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000001-tokens-context-and-kv-cache.html">
-    <h2>Tokens, the Context Window, and the KV Cache</h2>
-    <p>Why a model &#x27;forgets&#x27;, why long conversations get expensive quadratically, and what prompt caching is actually caching.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000002-weights-gguf-quantization.html">
-    <h2>Weights, GGUF and Quantization</h2>
-    <p>What Q4_K_M means character by character, and why a heavily quantized big model beats a small precise one.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000003-quantization-recipes.html">
-    <h2>Quantization Recipes: Beyond Plain Rounding</h2>
-    <p>Plain rounding, GPTQ, AWQ, DWQ, importance matrices and mixed precision — same bits, chosen better — with where to get them and how to judge one.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000004-serving-locally.html">
-    <h2>Serving Locally: Ollama, llama.cpp and tok/s</h2>
-    <p>Ollama, llama.cpp and the metal underneath — plus how to read a tokens-per-second number without being misled.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000005-formats-and-engines.html">
-    <h2>Formats and Engines: GGUF, MLX and What NVIDIA Runs</h2>
-    <p>Container, method and kernel are three different things called the format — GGUF, MLX and the NVIDIA checkpoints, measured on a Mac and cited for NVIDIA.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000006-embeddings-and-retrieval.html">
-    <h2>Embeddings, Vectors and Semantic Routing</h2>
-    <p>How a machine decides two things mean the same, the routing it enables, and the three places it quietly fails.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000007-tool-calls-and-mcp.html">
-    <h2>Tool Calls and MCP</h2>
-    <p>How a text model comes to run your code, what MCP standardises, and where prompt injection gets its leverage.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000008-routing-and-escalation.html">
-    <h2>Routing, Escalation and Sampling Controls</h2>
-    <p>Try cheap, verify, escalate — plus temperature and top-k, which decide how a model picks words.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000009-eval-battery.html">
-    <h2>The Eval Battery</h2>
-    <p>How you know any of it works, and why the only number worth trusting is one you built yourself.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000010-overfitting-and-underfitting.html">
-    <h2>Overfitting and Underfitting</h2>
-    <p>The most important pair of words in machine learning, and the habit that catches the dangerous one.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000011-agents-autonomy-and-danger.html">
-    <h2>Agents, Autonomy and the Danger Surface</h2>
-    <p>What actually makes something an agent, the autonomy ladder, and every way one can hurt you.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000012-feedback-rlhf-and-humans.html">
-    <h2>Reinforcement, Feedback and Humans in the Loop</h2>
-    <p>RLHF, DPO and Constitutional AI — plus the difference between in, on, and out of the loop.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000013-context-engineering.html">
-    <h2>Context Engineering: What Goes In Decides What Comes Out</h2>
-    <p>Attention is U-shaped over position, distractors actively hurt, and tool results are context too.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000014-structured-output-json.html">
-    <h2>Structured Output: JSON You Can Actually Parse</h2>
-    <p>The ladder from &#x27;asking nicely&#x27; to constrained decoding, and why valid JSON still isn&#x27;t correct JSON.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000015-hallucination-and-grounding.html">
-    <h2>Hallucination and Grounding</h2>
-    <p>Why a model states falsehoods confidently, and why telling it not to achieves nothing.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000016-shots-and-in-context-learning.html">
-    <h2>Zero-shot, Few-shot and In-Context Learning</h2>
-    <p>Zero-, few- and many-shot — what examples are genuinely good at, and when to stop paying for them.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000017-class-imbalance-and-thresholds.html">
-    <h2>Class Imbalance and Choosing a Threshold</h2>
-    <p>Why 99% accuracy can mean a model that learned nothing, and why 0.5 is just a convention.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000018-drift.html">
-    <h2>Drift: Why Deployment Isn&#x27;t the End</h2>
-    <p>The model didn&#x27;t change, the world did — and why you monitor inputs when ground truth arrives late.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000019-distillation.html">
-    <h2>Distillation</h2>
-    <p>Training a small model to imitate a large one, and the licensing trap that catches people.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000020-chain-of-thought-and-reasoning.html">
-    <h2>Chain-of-Thought and Reasoning Tokens</h2>
-    <p>Why thinking out loud works, and why the chain is not an audit trail.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000021-loops-at-inference.html">
-    <h2>Loops at Inference: Control Flow, Limits and Dangers</h2>
-    <p>Running the model more than once — why verifier-guided retry works, why unaided self-critique often makes things worse.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000022-loops-in-training.html">
-    <h2>Loops in Training: Flywheels and Model Collapse</h2>
-    <p>Flywheels that improve a model across generations, and model collapse — the way the tails disappear first.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000023-skills.html">
-    <h2>Skills: Packaging What an Agent Should Know</h2>
-    <p>Procedural knowledge as a loadable folder — progressive disclosure, bundled scripts, and when a skill beats a tool or an MCP server.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000024-operating-an-agent.html">
-    <h2>Operating an Agent</h2>
-    <p>Logging trajectories, watching the right proxies, three control switches, and what rots when nothing on your side changed.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000025-building-an-mcp-server.html">
-    <h2>Building an Model Context Protocol (MCP) Server</h2>
-    <p>Six primitives not one, two transports, and the design choices that decide whether an agent uses your server well.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000026-mcp-dangers.html">
-    <h2>Model Context Protocol (MCP): The Danger Surface</h2>
-    <p>Named attack classes from the spec itself — and why it says the protocol cannot enforce its own security principles.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000027-local-hardware-limits.html">
-    <h2>Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You</h2>
-    <p>CUDA versus Metal, why capacity beats bandwidth, and the silent CPU fallback that wastes days.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000028-latency-and-caching.html">
-    <h2>Latency, Prefills and Caching</h2>
-    <p>Prefill versus decode, warm and cold states, the cache prefix rule, and why the model is rarely the slow part.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000029-session-lifecycle.html">
-    <h2>Memory, Compaction and Session Decay</h2>
-    <p>A model has no memory — everything that looks like it is re-sent context, and all of it decays.</p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000030-why-the-gpu-is-waiting.html">
-    <h2>Why the Graphics Processing Unit (GPU) Is Waiting</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000031-frontier-and-local.html">
-    <h2>Frontier and Local, and What Each Is Actually For</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/core-vocabulary/lsn-1787000000032-techniques-that-transfer.html">
-    <h2>Techniques That Transfer, and the Ones That Change Value</h2>
-    <p></p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 0 · Algorithms</h2>
-<p class="lede" style="font-size:1em">What each algorithm does and where it breaks. Your statistics course covers the maths; this covers the machinery.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/algorithms/lsn-1787100000000-gradient-descent-and-backprop.html">
-    <h2>Gradient Descent and Backpropagation</h2>
-    <p>The one algorithm underneath every trained model, and why training needs so much more memory than inference.</p>
-  </a></li>
-  <li><a class="card" href="lessons/algorithms/lsn-1787100000001-regression-algorithms.html">
-    <h2>Linear and Logistic Regression</h2>
-    <p>The baseline everything else must beat — and why the threshold, not the model, makes the decision.</p>
-  </a></li>
-  <li><a class="card" href="lessons/algorithms/lsn-1787100000002-decision-trees.html">
-    <h2>Decision Trees: How a Split Gets Chosen</h2>
-    <p>How a split gets chosen, and why depth is the overfitting dial.</p>
-  </a></li>
-  <li><a class="card" href="lessons/algorithms/lsn-1787100000003-ensembles.html">
-    <h2>Ensembles: Bagging, Forests and Boosting</h2>
-    <p>Bagging cancels variance, boosting corrects errors — and which to reach for first.</p>
-  </a></li>
-  <li><a class="card" href="lessons/algorithms/lsn-1787100000004-clustering-and-knn.html">
-    <h2>k-Means, k-NN and the Curse of Dimensionality</h2>
-    <p>Two algorithms built on distance, and why distance means less as dimensions rise.</p>
-  </a></li>
-  <li><a class="card" href="lessons/algorithms/lsn-1787100000005-attention-and-transformers.html">
-    <h2>Attention and the Transformer</h2>
-    <p>Query, key, value — and why doubling the context quadruples the cost.</p>
-  </a></li>
-  <li><a class="card" href="lessons/algorithms/lsn-1787100000006-mixture-of-experts.html">
-    <h2>Mixture of Experts</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/algorithms/lsn-1787100000007-vector-search-algorithms.html">
-    <h2>Nearest-Neighbour Search at Scale</h2>
-    <p>HNSW, IVF, and the recall you quietly trade for speed without ever measuring it.</p>
-  </a></li>
-  <li><a class="card" href="lessons/algorithms/lsn-1787100000008-ranking-and-hybrid-retrieval.html">
-    <h2>Ranking and Hybrid Retrieval</h2>
-    <p>BM25, reciprocal rank fusion and rerankers — why pure vector search is rarely best.</p>
-  </a></li>
-  <li><a class="card" href="lessons/algorithms/lsn-1787100000009-data-leakage.html">
-    <h2>Data Leakage</h2>
-    <p>The failure that inflates training and validation together, so nothing looks wrong until production.</p>
-  </a></li>
-  <li><a class="card" href="lessons/algorithms/lsn-1787100000010-mlp-patterns.html">
-    <h2>MLP Patterns: Twelve Wirings of One Layer</h2>
-    <p></p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 1 · Python, Data and EDA</h2>
-<p class="lede" style="font-size:1em">Real tabular data, read properly. Paired with four runnable notebooks in <code>notebooks/01-python-eda/</code>.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/block1-data-eda/lsn-1787300000000-tabular-data-and-dtypes.html">
-    <h2>Tabular Data and the Lies dtypes Tell</h2>
-    <p>The dtype a column loads as is a free diagnostic — and 22 sentinel values can shift a mean fourfold.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block1-data-eda/lsn-1787300000001-first-fifteen-minutes.html">
-    <h2>The First Fifteen Minutes</h2>
-    <p>Survey before you fix: the target&#x27;s balance, the leaking feature, the duplicates, the missingness pattern.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block1-data-eda/lsn-1787300000002-missing-data-mechanisms.html">
-    <h2>Missing Data: The Mechanism Matters More Than the Amount</h2>
-    <p>MCAR, MAR, MNAR — and why &#x27;fill with the median&#x27; can destroy exactly the signal you need.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block1-data-eda/lsn-1787300000003-what-a-plot-is-for.html">
-    <h2>What a Plot Is Actually For</h2>
-    <p>Five questions with decisions attached, and the two chart mistakes that recur everywhere.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block1-data-eda/lsn-1787300000004-ai-assisted-analysis.html">
-    <h2>AI-Assisted Analysis, and Where It Lies to You</h2>
-    <p>Let it write the code, don&#x27;t let it make the decisions — and check row counts after every transform.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block1-data-eda/lsn-1787300000005-labels-and-holdouts.html">
-    <h2>Labels, and What You Hold Back</h2>
-    <p>Label quality is a ceiling, and the data you refuse to look at is what makes any number believable.</p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 2 · Predictive Modelling</h2>
-<p class="lede" style="font-size:1em">Classical machine learning done properly — the metrics, the models, and knowing when a neural network is the wrong answer.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/block2-classical-ml/lsn-1787500000000-confusion-matrix-and-metrics.html">
-    <h2>The Confusion Matrix and What Comes Out of It</h2>
-    <p>Four numbers, and every classification metric is built from them — plus what AUC actually means and when it misleads.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block2-classical-ml/lsn-1787500000001-baseline-to-model.html">
-    <h2>From Baseline to Model</h2>
-    <p>A ladder of increasing complexity, climbed only as far as the evidence justifies — and how to compare fairly.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block2-classical-ml/lsn-1787500000002-neural-networks-both-ways.html">
-    <h2>Neural Networks, in Keras and in PyTorch</h2>
-    <p>The same network in Keras and raw PyTorch, and an honest account of when it is the wrong tool.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block2-classical-ml/lsn-1787500000003-time-series.html">
-    <h2>Time Series, and Why Random Splits Lie</h2>
-    <p>Why random splits lie on ordered data, walk-forward validation, and the gap people leave out.</p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 3 · Retrieval and Agentic RAG</h2>
-<p class="lede" style="font-size:1em">Building a retrieval system that works, measuring the part everyone skips, the loop that answers multi-hop questions, and what changes at millions of documents.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/block3-retrieval/lsn-1787600000000-building-a-rag-system.html">
-    <h2>Building a Retrieval System That Works</h2>
-    <p>Five stages, and the two that decide whether the other three matter.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block3-retrieval/lsn-1787600000001-transforming-the-query.html">
-    <h2>Transforming the Query</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block3-retrieval/lsn-1787600000002-measuring-retrieval.html">
-    <h2>Measuring Retrieval</h2>
-    <p>Index recall, retrieval quality and groundedness — three numbers that fail independently.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block3-retrieval/lsn-1787600000003-agentic-rag.html">
-    <h2>Agentic RAG: Retrieval as a Loop</h2>
-    <p>When one retrieval cannot answer the question, and the failure modes the loop brings with it.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block3-retrieval/lsn-1787600000004-preloading-instead-of-retrieving.html">
-    <h2>Preloading Instead of Retrieving</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block3-retrieval/lsn-1787600000005-retrieval-at-scale.html">
-    <h2>Retrieval at Scale: Millions of Documents</h2>
-    <p></p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 4 · Agentic AI</h2>
-<p class="lede" style="font-size:1em">The loop by hand before the framework, what a graph runtime actually buys, and approval gates that halt what matters.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/block4-agentic/lsn-1787700000000-the-loop-by-hand.html">
-    <h2>The Agent Loop, By Hand</h2>
-    <p>Forty lines. Build it once and every framework afterwards is legible.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block4-agentic/lsn-1787700000001-what-a-graph-buys.html">
-    <h2>What a Graph Runtime Buys</h2>
-    <p>Checkpointing is the feature; everything else you could write in an afternoon.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block4-agentic/lsn-1787700000002-multi-agent-and-approval.html">
-    <h2>Multi-Agent Systems and Gates That Actually Halt</h2>
-    <p>When splitting is justified, what handoffs cost, and why most approval gates do not stop what matters.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block4-agentic/lsn-1787700000003-telemetry-and-instrumentation.html">
-    <h2>Telemetry: Making the Run Legible</h2>
-    <p>You cannot reproduce an agent run, so the trace is the only evidence it happened the way you think.</p>
-  </a></li>
-  <li><a class="card" href="lessons/block4-agentic/lsn-1787700000004-loop-tradeoffs.html">
-    <h2>Four Levers, and What Each Costs</h2>
-    <p>Prefix caching, read accumulation, verification granularity and reasoning effort — each trades tokens against reliability.</p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 5 · Evaluation</h2>
-<p class="lede" style="font-size:1em">The front door to the measurement material scattered across this course, then labels you can defend and a cross-model comparison that does not lie.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/block5-evaluation/lsn-1787800000000-where-evaluation-lives.html">
-    <h2>Where Evaluation Lives</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block5-evaluation/lsn-1787800000001-eval-data-you-can-trust.html">
-    <h2>Eval Data You Can Trust</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block5-evaluation/lsn-1787800000002-one-set-many-models.html">
-    <h2>One Set, Many Models</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block5-evaluation/lsn-1787800000003-rubrics-and-blind-reads.html">
-    <h2>Rubrics and Blind Reads</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block5-evaluation/lsn-1787800000004-is-the-difference-real.html">
-    <h2>Is the Difference Real?</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block5-evaluation/lsn-1787800000005-judging-a-conversation.html">
-    <h2>Judging a Conversation</h2>
-    <p></p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 6 · Security</h2>
-<p class="lede" style="font-size:1em">Block 0 named the attack classes; this block runs them against the agent you built, starting with the injection your own retrieval pipeline invites.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/block6-security/lsn-1787900000000-injection-direct-and-indirect.html">
-    <h2>Prompt Injection, Direct and Indirect</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block6-security/lsn-1787900000001-exfiltration-and-tool-abuse.html">
-    <h2>Exfiltration and Tool Abuse</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block6-security/lsn-1787900000002-sandboxing-and-what-actually-works.html">
-    <h2>Sandboxing, and What Actually Works</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block6-security/lsn-1787900000003-red-teaming-your-own-agent.html">
-    <h2>Red-Teaming Your Own Agent</h2>
-    <p></p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 7 · Training and Fine-Tuning</h2>
-<p class="lede" style="font-size:1em">When changing the weights is the right answer — rarely — and the four ways to shrink a model, including the fact that compression does not remove capability evenly.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/block7-training/lsn-1788000000000-when-fine-tuning-is-wrong.html">
-    <h2>When Fine-Tuning Is the Wrong Answer</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block7-training/lsn-1788000000001-building-the-dataset.html">
-    <h2>Building the Dataset, and How Little You Need</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block7-training/lsn-1788000000002-lora-qlora-and-full-fine-tuning.html">
-    <h2>LoRA, QLoRA and the Full Fine-Tune</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block7-training/lsn-1788000000003-supervised-versus-reinforcement-tuning.html">
-    <h2>Supervised versus Reinforcement Fine-Tuning</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block7-training/lsn-1788000000004-when-the-training-run-does-not-fit.html">
-    <h2>When the Training Run Does Not Fit</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block7-training/lsn-1788000000005-the-four-ways-to-shrink-a-model.html">
-    <h2>The Four Ways to Shrink a Model</h2>
-    <p></p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 8 · Deployment and APIs</h2>
-<p class="lede" style="font-size:1em">Calling an interface you do not control, serving one, failing over when the provider does not answer, and the design walk-through that ties the course to the questions interviewers ask.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/block8-deployment/lsn-1788100000000-calling-an-api-you-do-not-control.html">
-    <h2>Calling an API You Do Not Control</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block8-deployment/lsn-1788100000001-serving-one-yourself.html">
-    <h2>Serving One Yourself</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block8-deployment/lsn-1788100000002-the-image-is-the-unit.html">
-    <h2>The Image Is the Unit</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block8-deployment/lsn-1788100000003-after-it-ships.html">
-    <h2>After It Ships</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block8-deployment/lsn-1788100000004-the-artefact-is-code-data-and-config.html">
-    <h2>The Artefact Is Code, Data and Configuration</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block8-deployment/lsn-1788100000005-managed-cloud-surfaces.html">
-    <h2>Managed Cloud Surfaces</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block8-deployment/lsn-1788100000006-when-the-provider-goes-down.html">
-    <h2>When the Provider Goes Down</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block8-deployment/lsn-1788100000007-designing-the-whole-system.html">
-    <h2>Designing the Whole System: The Interview Questions</h2>
-    <p></p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 9 · Electives</h2>
-<p class="lede" style="font-size:1em">Directions the spine does not cover: input that is not text, asking the database properly, where the money goes, convolutions, recommenders, and agents that improve themselves.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/block9-electives/lsn-1788200000000-when-the-input-is-not-text.html">
-    <h2>When the Input Is Not Text</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block9-electives/lsn-1788200000001-asking-the-database-properly.html">
-    <h2>Asking the Database Properly</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block9-electives/lsn-1788200000002-where-the-money-goes.html">
-    <h2>Where the Money Goes</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block9-electives/lsn-1788200000003-convolutions-and-computer-vision.html">
-    <h2>Convolutions, and What a CNN Assumes</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block9-electives/lsn-1788200000004-recommendation-systems.html">
-    <h2>Recommendation Systems, and the Loop They Sit In</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/block9-electives/lsn-1788200000005-agents-that-improve-themselves.html">
-    <h2>Agents That Improve Themselves</h2>
-    <p></p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Closing · The Future of Work</h2>
-<p class="lede" style="font-size:1em">The only chapter that argues rather than instructs — what the 2026 labour evidence shows, and a thesis about which capability becomes scarce, with its counter-argument attached.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/closing-future-of-work/lsn-1788300000000-what-the-evidence-shows.html">
-    <h2>What the Evidence Actually Shows</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/closing-future-of-work/lsn-1788300000001-the-apprenticeship-problem.html">
-    <h2>The Apprenticeship Problem</h2>
-    <p></p>
-  </a></li>
-</ol>
-<h2 style="margin-top:44px">Block 0 · Engineering Practice</h2>
-<p class="lede" style="font-size:1em">The three artifacts an LLM project accumulates — harness, recipes, decision records — how each one turns harmful, and the measurement procedure that corrects them.</p>
-<ol class="lessons">
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000000-three-artifacts.html">
-    <h2>Recipes, ADRs and the Harness</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000001-when-scaffolding-turns.html">
-    <h2>When the Scaffolding Turns on You</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000002-why-measurement-decides.html">
-    <h2>Why Measurement Decides</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000003-how-to-measure.html">
-    <h2>How to Measure</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000004-swe-bench-and-how-to-run-it.html">
-    <h2>SWE-bench, and How to Actually Run It</h2>
-    <p>How a SWE-bench task is built, how to run it on Apple Silicon, and how to build the same thing from your own merged PRs.</p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000005-benchmarks-what-to-trust.html">
-    <h2>Benchmarks: Why They Matter, Why They Fail, and When to Build Your Own</h2>
-    <p>Quality benchmarks, leaderboards, serving benchmarks and load tests answer different questions — how public ones fail, which tools exist, and when to build your own.</p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000006-confounds-you-cannot-see.html">
-    <h2>Confounds You Cannot See</h2>
-    <p>The limits, overrides and truncations that end a run silently — and get read as model capability.</p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000007-localising-a-failure.html">
-    <h2>Localising a Failure</h2>
-    <p>Control fixtures, metric design, and why a true narrow observation keeps getting promoted to a false general one.</p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000008-models-judging-models.html">
-    <h2>Models Judging Models</h2>
-    <p>LLM-as-judge: four documented biases, and the one failure mode that manufactures effects rather than adding noise.</p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000009-deterministic-first.html">
-    <h2>Deterministic First</h2>
-    <p>A model is the most expensive, slowest, least testable component you can use — the judgement is knowing when it earns that.</p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000010-code-nobody-decided.html">
-    <h2>Code Nobody Decided</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000011-what-ai-makes-worse.html">
-    <h2>What AI Makes Worse</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000012-spec-driven-development.html">
-    <h2>Vibe Coding and Spec-Driven Development</h2>
-    <p>Vibe coding and spec-driven development as a spectrum — and the one question that tells you where a task belongs on it.</p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000013-version-control-basics.html">
-    <h2>Version Control, and Why Agents Make It Non-Optional</h2>
-    <p>Git and GitHub from zero — and why an agent writing the code makes version control more necessary, not less.</p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000014-rungs-and-experiments.html">
-    <h2>Rungs: Running Experiments on an Agent</h2>
-    <p>A ladder of progressively more assistance, where a task starts passing tells you what was wrong.</p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000015-tracking-runs-and-automating-evals.html">
-    <h2>Tracking Runs, and Running the Evals Automatically</h2>
-    <p></p>
-  </a></li>
-  <li><a class="card" href="lessons/engineering-practice/lsn-1787400000016-the-artifact-and-when-to-retrain.html">
-    <h2>The Artifact, and When to Retrain</h2>
-    <p></p>
-  </a></li>
-</ol>
+<section class="program paper" id="program" aria-labelledby="program-h">
+  <div class="wrap">
+    <h2 class="h2" id="program-h">The program</h2>
+    <p class="lead">The checklists, exams and records that surround the lessons.</p>
+    <ul class="rows">
+    <li><a href="docs/curriculum.html">Curriculum</a>
+      <p>All ten blocks, week by week, each with an exit criterion that runs rather than a box that ticks.</p></li>
+    <li><a href="docs/project-intake.html">Project intake sheet</a>
+      <p>Ten questions to answer before writing code. Filled in before every project, reviewed after.</p></li>
+    <li><a href="docs/selection-scorecard.html">Selection scorecard</a>
+      <p>For choosing a model, a vendor, or a framework — three decisions with three different failure modes.</p></li>
+    <li><a href="docs/">Worksheets and references</a>
+      <p>The intake sheets, scorecard, exam and rubric as pages you can fill in, then download or print.</p></li>
+    <li><a href="docs/p4-deployed-assistant.html#capstone">Capstone run</a>
+      <p>Project 4&#x27;s graded run: its tests, a provider-failure drill, a 29-question gold set and the memory arithmetic, in one report.</p></li>
+    <li><a href="docs/cumulative-exam.html">Cumulative exam</a>
+      <p>Ten scenarios across Blocks 3 to 8, each needing two or more lessons, with a marking key.</p></li>
+    <li><a href="docs/design-interview-rubric.html">Design interview rubric</a>
+      <p>A scored 45-minute mock interview on the nine system-design questions AI roles keep asking.</p></li>
+    <li><a href="things-to-know.html">Things to Know</a>
+      <p>Every compressed, load-bearing line in the course, collected and linked back to the lesson that earns it.</p></li>
+    <li><a href="artifacts/sop/index.html">Standard operating procedure (SOP) checklists</a>
+      <p>Aviation-style: killer items marked, hard gates, and a separate non-normal checklist for when something is already wrong.</p></li>
+    <li><a href="docs/glossary.html">Glossary</a>
+      <p>Every term the program defines, accumulating block by block and feeding spaced repetition.</p></li>
+    </ul>
+  </div>
+</section>
 
-<h2 style="margin-top:44px">Already complete elsewhere</h2>
-<ol class="lessons">
-  <li><a class="card" href="https://github.com/stylusnexus/statistics-for-ai"><h2>Statistical Learning</h2>
-    <p>Nineteen lessons — probability, distributions, the CLT, hypothesis tests, Bayesian inference, regression, information theory, evaluation metrics and LLM statistics.</p></a></li>
-  <li><a class="card" href="https://stylusnexus.github.io/statistics-for-ai/math.html"><h2>Math for AI</h2>
-    <p>Seven lessons — vectors, matrices, SVD, derivatives, gradients, backpropagation and integrals.</p></a></li>
-  <li><a class="card" href="https://github.com/stylusnexus/aigp-exam-prep"><h2>Responsible AI &amp; Governance</h2>
-    <p>Twelve lessons — the EU AI Act, NIST AI RMF, ISO 42001, and the governance lifecycle.</p></a></li>
-</ol>
+<section class="elsewhere" id="elsewhere" aria-labelledby="elsewhere-h">
+  <div class="wrap">
+    <h2 class="h2" id="elsewhere-h">Already complete elsewhere</h2>
+    <ul>
+    <li><a href="https://github.com/stylusnexus/statistics-for-ai">Statistical Learning</a><p>Nineteen lessons — probability, distributions, the CLT, hypothesis tests, Bayesian inference, regression, information theory, evaluation metrics and LLM statistics.</p></li>
+    <li><a href="https://stylusnexus.github.io/statistics-for-ai/math.html">Math for AI</a><p>Seven lessons — vectors, matrices, SVD, derivatives, gradients, backpropagation and integrals.</p></li>
+    <li><a href="https://github.com/stylusnexus/aigp-exam-prep">Responsible AI &amp; Governance</a><p>Twelve lessons — the EU AI Act, NIST AI RMF, ISO 42001, and the governance lifecycle.</p></li>
+    </ul>
+  </div>
+</section>
 
-<h2 style="margin-top:44px">The program</h2>
-<ol class="lessons">
-  <li><a class="card" href="CURRICULUM.md"><h2>Curriculum</h2>
-    <p>All ten blocks, week by week, each with an exit criterion that runs rather than a box that ticks.</p></a></li>
-  <li><a class="card" href="artifacts/project-intake.md"><h2>Project intake sheet</h2>
-    <p>Ten questions to answer before writing code. Filled in before every project, reviewed after.</p></a></li>
-  <li><a class="card" href="artifacts/selection-scorecard.md"><h2>Selection scorecard</h2>
-    <p>For choosing a model, a vendor, or a framework — three decisions with three different failure modes.</p></a></li>
-  <li><a class="card" href="projects/p4-deployed-assistant/README.md#capstone"><h2>Capstone run</h2>
-    <p>Project 4's graded run: its tests, a provider-failure drill, a 29-question gold set and the memory arithmetic, in one report.</p></a></li>
-  <li><a class="card" href="artifacts/cumulative-exam.md"><h2>Cumulative exam</h2>
-    <p>Ten scenarios across Blocks 3 to 8, each needing two or more lessons, with a marking key.</p></a></li>
-  <li><a class="card" href="artifacts/design-interview-rubric.md"><h2>Design interview rubric</h2>
-    <p>A scored 45-minute mock interview on the nine system-design questions AI roles keep asking.</p></a></li>
-  <li><a class="card" href="things-to-know.html"><h2>Things to Know</h2>
-    <p>Every compressed, load-bearing line in the course, collected and linked back to the lesson that earns it.</p></a></li>
-  <li><a class="card" href="artifacts/sop/README.md"><h2>SOP checklists</h2>
-    <p>Aviation-style: killer items marked, hard gates, and a separate non-normal checklist for when something is already wrong.</p></a></li>
-  <li><a class="card" href="GLOSSARY.md"><h2>Glossary</h2>
-    <p>Every term the program defines, accumulating block by block and feeding spaced repetition.</p></a></li>
-</ol>
+<section class="cta" aria-labelledby="cta-h">
+  <h2 id="cta-h">Now run it yourself.</h2>
+  <div class="foot">
+    <p>Open the first lesson, then the notebook that goes with it. The environments are in Docker, so your run matches ours.</p>
+    <a class="btn" href="lessons/orientation/lsn-1787200000000-the-map.html">Start with the map</a>
+  </div>
+</section>
 
+</main>
+
+<footer>
+  <nav aria-label="Project">
+    <ul class="places">
+      <li><a href="https://github.com/stylusnexus/deep-dive-ai-ml">Source on GitHub</a></li>
+      <li><a href="docs/curriculum.html">Curriculum</a></li>
+      <li><a href="docs/glossary.html">Glossary</a></li>
+      <li><a href="docs/">Worksheets</a></li>
+      <li><a href="things-to-know.html">Things to Know</a></li>
+    </ul>
+  </nav>
+  <p class="name" aria-hidden="true">Stylus Nexus</p>
+  <p class="legal">Published by Stylus Nexus. Building and Measuring LLM Systems.</p>
+</footer>
+
+<script>
+(function () {
+  var d = document.documentElement;
+  if (!('IntersectionObserver' in window)) { d.classList.remove('js'); return; }
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { rootMargin: '0px 0px -6% 0px' });
+  document.querySelectorAll('[data-rise]').forEach(function (el) { io.observe(el); });
+})();
+</script>
 </body>
 </html>

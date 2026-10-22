@@ -4,8 +4,8 @@ import html, json, pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
-from seo_meta import head_meta
-STYLE = (ROOT / "scripts" / "_index_style.html").read_text()
+from seo_meta import SITE, head_meta, lesson_jsonld
+STYLE = (ROOT / "scripts" / "_knows_style.html").read_text()
 
 sections, total = [], 0
 ORDER = ["orientation", "core-vocabulary", "algorithms", "engineering-practice"]
@@ -34,7 +34,7 @@ doc = f"""<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Things to Know | LLM systems revision sheet</title>
-{head_meta("Things to Know", f"Every load-bearing rule from the course, {total} in all, each with its reason and a worked example, linked to the lesson that earns it.", "things-to-know.html", og_type="website")}
+{head_meta("Things to Know", f"Every load-bearing rule from the course, {total} in all, each with its reason and a worked example, linked to the lesson that earns it.", "things-to-know.html", {**lesson_jsonld("Things to Know", "Every load-bearing rule from the course, each with its reason and a worked example.", "things-to-know.html", "Building and Measuring LLM Systems"), "learningResourceType": "reference"}, og_type="website")}
 {STYLE}
 <style>
   ul.knows {{ list-style: none; padding: 0; }}

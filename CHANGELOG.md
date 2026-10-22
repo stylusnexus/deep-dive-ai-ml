@@ -8,6 +8,8 @@ releases yet, so everything sits under Unreleased.
 
 ### Added
 
+- A redesigned landing page (`scripts/build_index.py`, `scripts/_index_style.html`) with light
+  and dark themes, and a social card (`og.png`, source in `scripts/og_card.html`).
 - Free-plan Render blueprint (`render.yaml`) for the Project 4 assistant, with a
   note that the free plan has a cold start after about 15 idle minutes.
 - A "Do I need Render?" section and a model-endpoint note in the Project 4 README.
