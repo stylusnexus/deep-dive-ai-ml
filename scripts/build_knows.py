@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Collect every "worth knowing" line into one revision sheet."""
-import html, json, pathlib, re
+import html, json, pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+from seo_meta import head_meta
 STYLE = (ROOT / "scripts" / "_index_style.html").read_text()
 
 sections, total = [], 0
@@ -31,7 +33,8 @@ doc = f"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Things to Know</title>
+<title>Things to Know | LLM systems revision sheet</title>
+{head_meta("Things to Know", f"Every load-bearing rule from the course, {total} in all, each with its reason and a worked example, linked to the lesson that earns it.", "things-to-know.html", og_type="website")}
 {STYLE}
 <style>
   ul.knows {{ list-style: none; padding: 0; }}

@@ -1,0 +1,206 @@
+# Building and Measuring LLM Systems
+
+> A free, self-built course in applied AI and machine learning: 116 lessons, runnable notebooks with their executed outputs, and four portfolio projects. It covers evaluation, retrieval and agentic systems, LLM security, quantization and fine-tuning, cost, and deployment. Claims that can be checked have been checked, and numbers in lessons come from runs.
+
+Lessons are self-contained HTML pages and can be read in any order; each defines its terms on first use. The notebooks and projects live in the GitHub repository and run locally.
+
+## Start here
+
+One picture that places every term in the program. Ten minutes, and the rest makes more sense.
+
+- [The Map: AI, ML, Deep Learning, GenAI and Agents](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/orientation/lsn-1787200000000-the-map.html): Read this before anything else. Every term in the program has a place on one picture.
+- [Inside an LLM: The Parts and What Each Does](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/orientation/lsn-1787200000001-inside-an-llm.html): Follow one sentence all the way through — from text, to numbers, to the next word.
+
+## Block 0 · Vocabulary
+
+The terms the rest of the program assumes — each taught through the failure it explains, rather than as a definition.
+
+- [The Agent Loop and the Harness](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000000-agent-loop-and-harness.html): The two words that appear most often in your own docs — and the difference between them.
+- [Tokens, the Context Window, and the KV Cache](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000001-tokens-context-and-kv-cache.html): Why a model 'forgets', why long conversations get expensive, and what's actually being cached.
+- [Weights, GGUF and Quantization](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000002-weights-gguf-quantization.html): What Q4_K_M actually means, and the trade you're making when you pick it.
+- [Quantization Recipes: Beyond Plain Rounding](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000003-quantization-recipes.html): The same number of bits, chosen better. What the recipes are, what they cost, how to make your own, and where to get them already made.
+- [Serving Locally: Ollama, llama.cpp and tok/s](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000004-serving-locally.html): The most-mentioned tool in your codebase, and how to read a speed number.
+- [Formats and Engines: GGUF, MLX and What NVIDIA Runs](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000005-formats-and-engines.html): Which file, which engine, which chip — and which of these numbers we measured ourselves.
+- [Embeddings, Vectors and Semantic Routing](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000006-embeddings-and-retrieval.html): How a machine decides two things 'mean' something similar — and where that fails.
+- [Tool Calls and MCP](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000007-tool-calls-and-mcp.html): How a text model comes to run your code, and what the protocol standardises.
+- [Routing, Escalation and Sampling Controls](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000008-routing-and-escalation.html): Cheap-first architecture — plus temperature and top-k, which decide how a model picks words.
+- [The Eval Battery](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000009-eval-battery.html): How you know any of this works — and why the number you trust must be one you built.
+- [Overfitting and Underfitting](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000010-overfitting-and-underfitting.html): The single most important pair of words in machine learning — and the reason you always hold data back.
+- [Agents, Autonomy and the Danger Surface](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000011-agents-autonomy-and-danger.html): What actually makes something an agent, and every way it can hurt you.
+- [Reinforcement, Feedback and Humans in the Loop](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000012-feedback-rlhf-and-humans.html): How a raw model becomes a useful one — and where human judgement is inserted.
+- [Context Engineering: What Goes In Decides What Comes Out](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000013-context-engineering.html): For a model you've already chosen, context is the largest lever you still control.
+- [Structured Output: JSON You Can Actually Parse](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000014-structured-output-json.html): The gap between 'the model returned JSON' and 'the model always returns valid JSON'.
+- [Hallucination and Grounding](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000015-hallucination-and-grounding.html): Why a model states falsehoods with total confidence — and what actually reduces it.
+- [Zero-shot, Few-shot and In-Context Learning](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000016-shots-and-in-context-learning.html): Teaching a model a task in the prompt — what it is, and where it stops working.
+- [Class Imbalance and Choosing a Threshold](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000017-class-imbalance-and-thresholds.html): Why 99% accuracy can mean a model that has learned nothing at all.
+- [Drift: Why Deployment Isn't the End](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000018-drift.html): The model didn't change. The world did.
+- [Distillation](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000019-distillation.html): Training a small model to imitate a large one — and getting most of the capability at a fraction of the cost.
+- [Chain-of-Thought and Reasoning Tokens](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000020-chain-of-thought-and-reasoning.html): Why letting a model think out loud works — and why its explanation isn't necessarily its reason.
+- [Loops at Inference: Control Flow, Limits and Dangers](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000021-loops-at-inference.html): Running the model more than once — when that buys accuracy, and when it just buys tokens.
+- [Loops in Training: Flywheels and Model Collapse](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000022-loops-in-training.html): How a model improves itself across generations — and the way that process eats itself.
+- [Skills: Packaging What an Agent Should Know](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000023-skills.html): Procedural knowledge as a loadable folder — and why the scripts inside it matter as much as the prose.
+- [Operating an Agent](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000024-operating-an-agent.html): Monitoring, controlling and maintaining one after it ships — the part nobody plans for.
+- [Building an Model Context Protocol (MCP) Server](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000025-building-an-mcp-server.html): The full capability set, the two transports, and the design decisions that make a server usable rather than merely working.
+- [Model Context Protocol (MCP): The Danger Surface](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000026-mcp-dangers.html): Named attack classes from the specification itself — and why the protocol says it cannot enforce its own security principles.
+- [Local Hardware: Compute Unified Device Architecture (CUDA), Metal and What Actually Constrains You](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000027-local-hardware-limits.html): Why the same model runs beautifully on one machine and not at all on another with the same amount of memory.
+- [Latency, Prefills and Caching](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000028-latency-and-caching.html): Why the first token is slow, why the tenth turn is slower, and the two levers that actually move it.
+- [Memory, Compaction and Session Decay](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000029-session-lifecycle.html): A model has no memory. Everything that looks like memory is something you built — and all of it degrades.
+- [Why the Graphics Processing Unit (GPU) Is Waiting](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000030-why-the-gpu-is-waiting.html): One number — work done per byte fetched — explains quantization, batching, and why a chip rated for a quadrillion operations a second gives you thirty tokens a second.
+- [Frontier and Local, and What Each Is Actually For](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000031-frontier-and-local.html): Not a ladder with one at the top. Two different sets of constraints, and the choice is which set you would rather have.
+- [Techniques That Transfer, and the Ones That Change Value](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/core-vocabulary/lsn-1787000000032-techniques-that-transfer.html): Most of what makes a frontier harness good is not the model. It is portable — and several techniques are worth more locally than they are where they were invented.
+
+## Block 0 · Algorithms
+
+What each algorithm does and where it breaks. Your statistics course covers the maths; this covers the machinery.
+
+- [Gradient Descent and Backpropagation](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000000-gradient-descent-and-backprop.html): The one algorithm underneath every trained model you will ever use.
+- [Linear and Logistic Regression](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000001-regression-algorithms.html): The two algorithms you should try before anything clever — and the baseline everything else must beat.
+- [Decision Trees: How a Split Gets Chosen](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000002-decision-trees.html): The one algorithm you can read end to end — and the reason it overfits so eagerly.
+- [Ensembles: Bagging, Forests and Boosting](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000003-ensembles.html): Why many mediocre models beat one good one — and which kind to reach for.
+- [k-Means, k-NN and the Curse of Dimensionality](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000004-clustering-and-knn.html): Two algorithms built on distance — and the reason distance stops meaning much in high dimensions.
+- [Attention and the Transformer](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000005-attention-and-transformers.html): The algorithm every model in this program is built from.
+- [Mixture of Experts](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000006-mixture-of-experts.html): How a model gets larger without getting slower — and why that trade lands badly on the machine under your desk.
+- [Nearest-Neighbour Search at Scale](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000007-vector-search-algorithms.html): Exact search, HNSW, and the recall you quietly trade away for speed.
+- [Ranking and Hybrid Retrieval](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000008-ranking-and-hybrid-retrieval.html): Best Matching 25 (BM25), reciprocal rank fusion and rerankers — why pure vector search is rarely the best answer.
+- [Data Leakage](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000009-data-leakage.html): The failure that produces a brilliant model and a worthless one, simultaneously.
+- [MLP Patterns: Twelve Wirings of One Layer](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000010-mlp-patterns.html): Most architectures are the same layer wired differently. The wiring tells you what a model is for, and where it will fail.
+
+## Block 1 · Python, Data and EDA
+
+Real tabular data, read properly. Paired with four runnable notebooks in notebooks/01-python-eda/.
+
+- [Tabular Data and the Lies dtypes Tell](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block1-data-eda/lsn-1787300000000-tabular-data-and-dtypes.html): Rows, columns, types — and why the type a column loaded as is your first diagnostic.
+- [The First Fifteen Minutes](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block1-data-eda/lsn-1787300000001-first-fifteen-minutes.html): A survey, not a clean-up — and the four things you must find before touching anything.
+- [Missing Data: The Mechanism Matters More Than the Amount](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block1-data-eda/lsn-1787300000002-missing-data-mechanisms.html): Why 'fill it with the median' is a decision about the world, not a default.
+- [What a Plot Is Actually For](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block1-data-eda/lsn-1787300000003-what-a-plot-is-for.html): Exploration with intent — five questions worth asking, and the charts that answer them.
+- [AI-Assisted Analysis, and Where It Lies to You](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block1-data-eda/lsn-1787300000004-ai-assisted-analysis.html): Courses promise 'Python with generative AI'. Here's the honest version.
+- [Labels, and What You Hold Back](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block1-data-eda/lsn-1787300000005-labels-and-holdouts.html): Label quality caps model quality — and the data you refuse to look at is what makes any number believable.
+
+## Block 2 · Predictive Modelling
+
+Classical machine learning done properly — the metrics, the models, and knowing when a neural network is the wrong answer.
+
+- [The Confusion Matrix and What Comes Out of It](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block2-classical-ml/lsn-1787500000000-confusion-matrix-and-metrics.html): Four numbers, and every classification metric you will ever meet is built from them.
+- [From Baseline to Model](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block2-classical-ml/lsn-1787500000001-baseline-to-model.html): A ladder of increasing complexity, climbed only as far as the evidence justifies.
+- [Neural Networks, in Keras and in PyTorch](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block2-classical-ml/lsn-1787500000002-neural-networks-both-ways.html): The same network written twice — and an honest account of when it is the wrong tool.
+- [Time Series, and Why Random Splits Lie](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block2-classical-ml/lsn-1787500000003-time-series.html): Routinely skipped, in courses whose own case studies are time-series problems.
+
+## Block 3 · Retrieval and Agentic RAG
+
+Building a retrieval system that works, measuring the part everyone skips, the loop that answers multi-hop questions, and what changes at millions of documents.
+
+- [Building a Retrieval System That Works](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block3-retrieval/lsn-1787600000000-building-a-rag-system.html): Five stages, and the two that decide whether the other three matter.
+- [Transforming the Query](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block3-retrieval/lsn-1787600000001-transforming-the-query.html): Every technique so far improves what you search. This one changes what you search for.
+- [Measuring Retrieval](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block3-retrieval/lsn-1787600000002-measuring-retrieval.html): Three numbers, measured separately, because they fail independently and have different fixes.
+- [Agentic RAG: Retrieval as a Loop](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block3-retrieval/lsn-1787600000003-agentic-rag.html): When one retrieval cannot answer the question — and the failure modes that arrive with the loop.
+- [Preloading Instead of Retrieving](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block3-retrieval/lsn-1787600000004-preloading-instead-of-retrieving.html): If the corpus does not change between queries, nothing forces you to wait for a question before reading it.
+- [Retrieval at Scale: Millions of Documents](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block3-retrieval/lsn-1787600000005-retrieval-at-scale.html): What breaks first is rarely the search. It is memory, the filter, the re-index and the slowest shard.
+
+## Block 4 · Agentic AI
+
+The loop by hand before the framework, what a graph runtime actually buys, and approval gates that halt what matters.
+
+- [The Agent Loop, By Hand](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block4-agentic/lsn-1787700000000-the-loop-by-hand.html): Forty lines. Build it once and every framework afterwards is legible.
+- [What a Graph Runtime Buys](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block4-agentic/lsn-1787700000001-what-a-graph-buys.html): The five things you wanted after writing the loop by hand — and what they cost.
+- [Multi-Agent Systems and Gates That Actually Halt](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block4-agentic/lsn-1787700000002-multi-agent-and-approval.html): When to split an agent, what it costs, and why most approval gates do not stop what matters.
+- [Telemetry: Making the Run Legible](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block4-agentic/lsn-1787700000003-telemetry-and-instrumentation.html): You cannot reproduce an agent run. The trace is the only evidence it happened the way you think.
+- [Four Levers, and What Each Costs](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block4-agentic/lsn-1787700000004-loop-tradeoffs.html): Prefix caching, read accumulation, per-edit verification and reasoning effort — every one trades tokens against reliability.
+
+## Block 5 · Evaluation
+
+The front door to the measurement material scattered across this course, then labels you can defend and a cross-model comparison that does not lie.
+
+- [Where Evaluation Lives](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block5-evaluation/lsn-1787800000000-where-evaluation-lives.html): The map. Which artefact answers which question, and the order that stops you wasting a week.
+- [Eval Data You Can Trust](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block5-evaluation/lsn-1787800000001-eval-data-you-can-trust.html): A gold label is only correct if you can name the rule that produces it.
+- [One Set, Many Models](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block5-evaluation/lsn-1787800000002-one-set-many-models.html): The comparison is the point, and a budget you set without thinking is what breaks it.
+- [Rubrics and Blind Reads](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block5-evaluation/lsn-1787800000003-rubrics-and-blind-reads.html): A rubric makes a judgement checkable. Blinding makes it honest. Neither works without the other.
+- [Is the Difference Real?](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block5-evaluation/lsn-1787800000004-is-the-difference-real.html): Pairing, spread, Bessel's correction and the peeking problem — the arithmetic that decides whether a number moved or wobbled.
+- [Judging a Conversation](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block5-evaluation/lsn-1787800000005-judging-a-conversation.html): Every score so far graded one answer. An agent produces a trajectory, and the failure is usually three turns back.
+
+## Block 6 · Security
+
+Block 0 named the attack classes; this block runs them against the agent you built, starting with the injection your own retrieval pipeline invites.
+
+- [Prompt Injection, Direct and Indirect](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block6-security/lsn-1787900000000-injection-direct-and-indirect.html): The dangerous one is not the user typing something clever. It is the document you retrieved.
+- [Exfiltration and Tool Abuse](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block6-security/lsn-1787900000001-exfiltration-and-tool-abuse.html): An injected instruction is worth nothing on its own. It needs a way out, and your agent is holding several.
+- [Sandboxing, and What Actually Works](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block6-security/lsn-1787900000002-sandboxing-and-what-actually-works.html): Sorting the mitigations that hold from the ones that mostly produce confidence.
+- [Red-Teaming Your Own Agent](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block6-security/lsn-1787900000003-red-teaming-your-own-agent.html): The exit criterion for this block: break the system you built, then prove you fixed it.
+
+## Block 7 · Training and Fine-Tuning
+
+When changing the weights is the right answer — rarely — and the four ways to shrink a model, including the fact that compression does not remove capability evenly.
+
+- [When Fine-Tuning Is the Wrong Answer](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block7-training/lsn-1788000000000-when-fine-tuning-is-wrong.html): Which is most of the time, and the order to exhaust before you reach for it.
+- [Building the Dataset, and How Little You Need](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block7-training/lsn-1788000000001-building-the-dataset.html): The part that decides whether the training run was worth doing — and it is smaller than people expect.
+- [LoRA, QLoRA and the Full Fine-Tune](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block7-training/lsn-1788000000002-lora-qlora-and-full-fine-tuning.html): What low-rank adaptation actually changes, what rank buys you, and the one case where updating every weight is still right.
+- [Supervised versus Reinforcement Fine-Tuning](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block7-training/lsn-1788000000003-supervised-versus-reinforcement-tuning.html): One shows the model the answer; the other scores its attempts. The objective decides what you can teach.
+- [When the Training Run Does Not Fit](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block7-training/lsn-1788000000004-when-the-training-run-does-not-fit.html): Three techniques that trade time or precision for memory — and the order to reach for them.
+- [The Four Ways to Shrink a Model](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block7-training/lsn-1788000000005-the-four-ways-to-shrink-a-model.html): Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.
+
+## Block 8 · Deployment and APIs
+
+Calling an interface you do not control, serving one, failing over when the provider does not answer, and the design walk-through that ties the course to the questions interviewers ask.
+
+- [Calling an API You Do Not Control](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block8-deployment/lsn-1788100000000-calling-an-api-you-do-not-control.html): It will fail, it will be slow, and it will occasionally charge you twice for the same work.
+- [Serving One Yourself](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block8-deployment/lsn-1788100000001-serving-one-yourself.html): The concerns that appear the moment the caller is not you — worked against Project 4.
+- [The Image Is the Unit](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block8-deployment/lsn-1788100000002-the-image-is-the-unit.html): What goes inside, what stays configuration, and why the size is a design decision rather than an outcome.
+- [After It Ships](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block8-deployment/lsn-1788100000003-after-it-ships.html): What to watch, what to wake someone for, and the difference between the service being up and the service being right.
+- [The Artefact Is Code, Data and Configuration](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block8-deployment/lsn-1788100000004-the-artefact-is-code-data-and-config.html): A model file is not a deployment; behaviour only becomes reproducible when its inputs and assumptions travel with it.
+- [Managed Cloud Surfaces](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block8-deployment/lsn-1788100000005-managed-cloud-surfaces.html): Calling a model through Amazon Bedrock, Google Vertex AI or Microsoft Foundry keeps the request in your hands and the capacity, the cache and the calendar in the provider's.
+- [When the Provider Goes Down](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block8-deployment/lsn-1788100000006-when-the-provider-goes-down.html): Failing over is a design with five rungs, a clock and a test, not a second API key in an environment variable.
+- [Designing the Whole System: The Interview Questions](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block8-deployment/lsn-1788100000007-designing-the-whole-system.html): Nine questions that keep coming up, a drawing from query to answer, and where this course teaches each part.
+
+## Block 9 · Electives
+
+Directions the spine does not cover: input that is not text, asking the database properly, where the money goes, convolutions, recommenders, and agents that improve themselves.
+
+- [When the Input Is Not Text](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block9-electives/lsn-1788200000000-when-the-input-is-not-text.html): Images and documents enter the same context window, cost tokens, and break the assumptions the rest of this course made about both.
+- [Asking the Database Properly](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block9-electives/lsn-1788200000001-asking-the-database-properly.html): The intake sheet keeps asking whether a query would do. This is what that query looks like.
+- [Where the Money Goes](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block9-electives/lsn-1788200000002-where-the-money-goes.html): Block 0 taught routing, which is architecture. This is the measurement — attributing spend, and the four places it hides.
+- [Convolutions, and What a CNN Assumes](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block9-electives/lsn-1788200000003-convolutions-and-computer-vision.html): A grid is not a list, and building that in rather than learning it is the whole idea.
+- [Recommendation Systems, and the Loop They Sit In](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block9-electives/lsn-1788200000004-recommendation-systems.html): The one system in this course whose training data is its own past output.
+- [Agents That Improve Themselves](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block9-electives/lsn-1788200000005-agents-that-improve-themselves.html): A closed loop that measures its own output, searches for a better version, and ships the winner — without ever retraining the model.
+
+## Closing · The Future of Work
+
+The only chapter that argues rather than instructs — what the 2026 labour evidence shows, and a thesis about which capability becomes scarce, with its counter-argument attached.
+
+- [What the Evidence Actually Shows](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/closing-future-of-work/lsn-1788300000000-what-the-evidence-shows.html): Before anyone's thesis, including mine: the measured numbers, and how much weight they hold.
+- [The Apprenticeship Problem](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/closing-future-of-work/lsn-1788300000001-the-apprenticeship-problem.html): An argument, not a finding: the scarce thing becomes knowing where the boundary is, and we are automating the work that used to teach it.
+
+## Block 0 · Engineering Practice
+
+The three artifacts an LLM project accumulates — harness, recipes, decision records — how each one turns harmful, and the measurement procedure that corrects them.
+
+- [Recipes, ADRs and the Harness](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000000-three-artifacts.html): Three things every LLM project grows, answering three different questions.
+- [When the Scaffolding Turns on You](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000001-when-scaffolding-turns.html): Each of the three artifacts has a characteristic way of becoming actively harmful.
+- [Why Measurement Decides](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000002-why-measurement-decides.html): The only thing that corrects a harness, a recipe or a decision is a number that disagrees with it.
+- [How to Measure](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000003-how-to-measure.html): A procedure you can run on any change to an LLM system, in order, where every step is worthless before the one above it.
+- [SWE-bench, and How to Actually Run It](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000004-swe-bench-and-how-to-run-it.html): The benchmark behind the numbers in lesson 2 — how it is built, how to run it, and what it does not tell you.
+- [Benchmarks: Why They Matter, Why They Fail, and When to Build Your Own](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000005-benchmarks-what-to-trust.html): Existing tools save you the load generator. They do not save you from asking whether the number answers your question.
+- [Confounds You Cannot See](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000006-confounds-you-cannot-see.html): The limits, overrides and truncations that end a run silently — and get read as capability.
+- [Localising a Failure](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000007-localising-a-failure.html): Knowing something is broken is easy. Knowing which part is the whole job.
+- [Models Judging Models](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000008-models-judging-models.html): LLM-as-judge — what it genuinely buys you, the four biases it ships with, and the failure that manufactures results.
+- [Deterministic First](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000009-deterministic-first.html): The best AI engineering decision is frequently to use less of it.
+- [Code Nobody Decided](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000010-code-nobody-decided.html): The previous lesson asked whether to use a model. This one asks who chose the behaviour when you did.
+- [What AI Makes Worse](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000011-what-ai-makes-worse.html): You do not need to want to be a software engineer. You do need the parts of it that generation puts under pressure.
+- [Vibe Coding and Spec-Driven Development](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000012-spec-driven-development.html): A spectrum, not a binary — and the question that tells you where on it a task belongs.
+- [Version Control, and Why Agents Make It Non-Optional](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000013-version-control-basics.html): Git and GitHub from zero — plus the argument for why this matters more now, not less.
+- [Rungs: Running Experiments on an Agent](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000014-rungs-and-experiments.html): A ladder of progressively more assistance — and the only design that tells you where the wall actually is.
+- [Tracking Runs, and Running the Evals Automatically](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000015-tracking-runs-and-automating-evals.html): The measurement discipline this course teaches does not survive contact with fifty experiments unless something records them for you.
+- [The Artifact, and When to Retrain](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/engineering-practice/lsn-1787400000016-the-artifact-and-when-to-retrain.html): What actually ships is not the code — and the drift lesson tells you something moved without telling you what to do about it.
+
+## Course materials
+
+- [Curriculum](https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/CURRICULUM.md): all blocks, week by week, each with a runnable exit criterion.
+- [Glossary](https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/GLOSSARY.md): every term the course defines.
+- [Things to Know](https://stylusnexus.github.io/deep-dive-ai-ml/things-to-know.html): every load-bearing rule, linked to the lesson that earns it.
+- [Project 4, deployed assistant](https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/projects/p4-deployed-assistant/README.md): an authenticated, rate-limited retrieval service with provider failover.
+- [Cumulative exam](https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/artifacts/cumulative-exam.md): ten scenarios across Blocks 3 to 8 with a marking key.
+
+## Optional
+
+- [Source repository](https://github.com/stylusnexus/deep-dive-ai-ml): lesson sources, notebooks, projects and build scripts.
+- [Statistical Learning](https://github.com/stylusnexus/statistics-for-ai): the companion statistics course.
+- [Math for AI](https://stylusnexus.github.io/statistics-for-ai/math.html): the companion linear algebra and calculus course.
+- [Responsible AI and Governance](https://github.com/stylusnexus/aigp-exam-prep): the companion governance course.

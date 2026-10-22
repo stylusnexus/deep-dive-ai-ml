@@ -16,6 +16,7 @@ import xml.dom.minidom
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from lesson_map import slug_map
 from glossary_links import Linker
+from seo_meta import describe, head_meta, lesson_jsonld
 
 # Cyrillic and CJK never appear intentionally in this course; Greek (Σ, √) does.
 STRAY_SCRIPT = re.compile(r"[\u0400-\u04FF\u4E00-\u9FFF\u3040-\u30FF]")
@@ -185,6 +186,8 @@ def build(mod):
         fname = f"{lid}-{lsn['slug']}.html"
         labels = [e[0] for b in lsn["body"] if b[0] == "terms" for e in b[1]]
         lk = LINKER.for_lesson(labels, lsn["slug"])
+        rel = f"lessons/{mod.TOPIC}/{fname}"
+        desc = describe(lsn["subtitle"], mod.TITLE)
         body = "\n".join(lk.link(b[0], render_block(b, mod.TOPIC, lsn["slug"]))
                          for b in lsn["body"])
         doc = f"""<!DOCTYPE html>
@@ -193,6 +196,7 @@ def build(mod):
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{E(lsn['title'])}</title>
+{head_meta(lsn['title'], desc, rel, lesson_jsonld(lsn['title'], desc, rel, mod.TITLE))}
 {STYLE}
 </head>
 <body>
