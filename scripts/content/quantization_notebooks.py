@@ -119,7 +119,7 @@ def interpreter_with(module, cli):
 
 MLX_PY = interpreter_with("mlx_lm", "mlx_lm.convert")
 REF = "Qwen/Qwen2.5-0.5B-Instruct"
-print("python with mlx-lm:", MLX_PY)
+print("python with mlx-lm:", MLX_PY.replace(str(pathlib.Path.home()), "~"))
 print("reference model   :", REF)
 print("work folder       :", WORK.relative_to(ROOT))'''
 
@@ -214,8 +214,8 @@ HF_DIR = subprocess.run(
 if not (pathlib.Path(LQ).exists() and CONVERT.exists()):
     raise SystemExit(f"Need llama.cpp: a checkout with convert_hf_to_gguf.py and a built llama-quantize. "
                      f"Set LLAMA_CPP to it (looked for {LQ} and {CONVERT}).")
-print("llama-quantize:", LQ)
-print("converter     :", CONVERT)
+print("llama-quantize:", LQ.replace(str(pathlib.Path.home()), "~"))
+print("converter     :", str(CONVERT).replace(str(pathlib.Path.home()), "~"))
 print("model folder  :", HF_DIR.replace(str(pathlib.Path.home()), "~"))'''
 
 _GGUF_RUN = '''# The two lines:

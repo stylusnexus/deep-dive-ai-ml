@@ -83,7 +83,7 @@ saves twenty lines and adds a supply chain is a bad trade.
 
 Complete these three first - you already know the answers, so they calibrate the rubric.
 
-- [ ] Why Render over Vercel/Fly/AWS for the Stylus services
+- [ ] Why Render over Vercel/Fly/AWS for your own services
 - [ ] Why Neon + Prisma over Supabase for newer projects
 - [ ] Why local models first with escalation only on failure, rather than a hosted model by default
 
