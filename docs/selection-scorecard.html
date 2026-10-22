@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Selection Scorecard | Building and Measuring LLM Systems</title>
+<meta name="description" content="For choosing a **model**, a **platform/vendor**, or a **framework**. Three A fill-in worksheet from the free Building and Measuring LLM Systems course.">
+<link rel="canonical" href="https://stylusnexus.github.io/deep-dive-ai-ml/docs/selection-scorecard.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Building and Measuring LLM Systems">
+<meta property="og:title" content="Selection Scorecard">
+<meta property="og:description" content="For choosing a **model**, a **platform/vendor**, or a **framework**. Three A fill-in worksheet from the free Building and Measuring LLM Systems course.">
+<meta property="og:url" content="https://stylusnexus.github.io/deep-dive-ai-ml/docs/selection-scorecard.html">
+<meta property="og:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Selection Scorecard">
+<meta name="twitter:description" content="For choosing a **model**, a **platform/vendor**, or a **framework**. Three A fill-in worksheet from the free Building and Measuring LLM Systems course.">
+<meta name="twitter:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Selection Scorecard", "description": "For choosing a **model**, a **platform/vendor**, or a **framework**. Three A fill-in worksheet from the free Building and Measuring LLM Systems course.", "url": "https://stylusnexus.github.io/deep-dive-ai-ml/docs/selection-scorecard.html", "inLanguage": "en", "isAccessibleForFree": true, "learningResourceType": "worksheet", "publisher": {"@type": "Organization", "name": "Stylus Nexus", "url": "https://github.com/stylusnexus"}, "isPartOf": {"@type": "Course", "name": "Building and Measuring LLM Systems", "url": "https://stylusnexus.github.io/deep-dive-ai-ml/"}, "about": "Building and Measuring LLM Systems"}</script>
+<style>
+  :root {
+    --bg: #ffffff; --surface: #f3f5fa; --surface2: #e8ecf5; --border: #cfd6e6;
+    --accent: #2f4fd0; --accent2: #5b37c4; --green: #0d7a55; --red: #b42318;
+    --text: #1a1f2e; --muted: #4f5a70; --code-bg: #eef1f8; --field: #ffffff;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+      --accent: #8aa4ff; --accent2: #b9a2fb; --green: #34d399; --red: #f87171;
+      --text: #e2e8f0; --muted: #a3afc2; --code-bg: #0d1117; --field: #12141c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { max-width: 860px; margin: 0 auto; padding: 24px 24px 80px; background: var(--bg); color: var(--text);
+         line-height: 1.7; font-size: 16px; font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; }
+  a { color: var(--accent); }
+  h1 { font-size: 1.9em; line-height: 1.25; margin: 20px 0 8px; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { color: var(--accent2); font-size: 1.1em; margin: 28px 0 8px; }
+  h4 { font-size: 1em; margin: 20px 0 6px; }
+  p { margin: 12px 0; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 8px; overflow-x: auto; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 6px; z-index: 10; }
+  .skip:focus { left: 8px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .top { padding: 4px 0 8px; font-size: 0.92em; color: var(--muted); }
+  .top a { color: var(--muted); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+  .btn { font: inherit; font-size: 0.9em; font-weight: 600; text-decoration: none; cursor: pointer; color: var(--text);
+         background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; line-height: 1.2; }
+  .btn:hover { background: var(--surface2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.quiet { background: transparent; }
+  .btn.small { font-size: 0.82em; padding: 6px 10px; }
+  .note { color: var(--muted); font-size: 0.92em; margin: 6px 0 18px; }
+  .lead { color: var(--muted); font-size: 1.05em; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 18px 12px; margin: 20px 0; }
+  .toc h2 { border: 0; margin: 10px 0 4px; font-size: 1em; color: var(--muted); }
+  .toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 28px; }
+  .toc li { break-inside: avoid; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  ul.tasks { list-style: none; padding-left: 0; }
+  li.task label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+  li.task label:hover { background: var(--surface); }
+  li.task input { width: 20px; height: 20px; margin-top: 4px; flex: none; accent-color: var(--accent); }
+  li.task input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--border); }
+  blockquote { margin: 16px 0; padding: 8px 18px; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; }
+  blockquote p { margin: 6px 0; }
+  .fill { display: flex; gap: 10px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+  .fill > span { font-weight: 600; min-width: 5.5em; }
+  input[type=text], textarea { font: inherit; color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; }
+  .fill input[type=text] { flex: 1 1 260px; }
+  textarea { width: 100%; min-height: 5.5em; resize: vertical; line-height: 1.5; }
+  td input[type=text] { width: 100%; min-width: 7em; }
+  .answer label { display: block; font-weight: 600; margin: 14px 0 6px; }
+  .answer textarea { font-weight: 400; }
+  details.key { border: 1px solid var(--border); border-radius: 8px; padding: 4px 16px; margin: 12px 0; background: var(--surface); }
+  details.key summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+  .table-scroll { overflow-x: auto; margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.95em; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--surface2); }
+  .table-actions { margin: -8px 0 16px; }
+  ul.cards { list-style: none; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  ul.cards li { display: flex; flex-direction: column; gap: 4px; margin: 0; }
+  a.card { display: block; flex: 1; text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+  a.card:hover { background: var(--surface2); }
+  a.card h3 { margin: 0 0 4px; font-size: 1em; color: var(--accent); }
+  a.card p { margin: 0; color: var(--muted); font-size: 0.9em; line-height: 1.5; }
+  a.mdlink { font-size: 0.82em; padding-left: 4px; }
+  .foot { margin-top: 56px; color: var(--muted); font-size: 0.88em; }
+  @media (max-width: 600px) { body { padding: 16px 16px 64px; } .toc ol { columns: 1; } }
+  @media print {
+    .toolbar, .skip, .top, .table-actions, .note { display: none !important; }
+    body { max-width: none; padding: 0; background: #fff; color: #000; }
+    a { color: #000; }
+    input[type=text], textarea { border: 1px solid #888; background: #fff; color: #000; }
+    details.key:not([open]) { display: none; }
+    h2, h3 { break-after: avoid; } table, tr, li { break-inside: avoid; }
+  }
+</style>
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><nav aria-label="Site"><a href="../index.html">Building and Measuring LLM Systems</a> <span aria-hidden="true">/</span> <a href="index.html">Worksheets and references</a></nav></header>
+<main id="main">
+<h1 id="selection-scorecard">Selection Scorecard</h1>
+<div class="toolbar" role="group" aria-label="Page actions"><a class="btn" href="../artifacts/selection-scorecard.md" download>Download blank (.md)</a><button type="button" class="btn primary" id="dl-answers">Download my answers (.md)</button><button type="button" class="btn" onclick="window.print()">Print or save as PDF</button><button type="button" class="btn quiet" id="clear-answers">Clear my answers</button><a class="btn quiet" href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/artifacts/selection-scorecard.md" rel="noopener">View on GitHub</a></div>
+<p class="note" id="save-note">What you tick or type stays in this browser. To keep it, download your answers as a markdown file, or print this page or save it as a PDF.</p>
+<nav class="toc" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#a-choosing-a-model">A. Choosing a model</a></li><li><a href="#b-choosing-a-platform-or-vendor">B. Choosing a platform or vendor</a></li><li><a href="#c-choosing-a-framework-or-library">C. Choosing a framework or library</a></li><li><a href="#worked-comparisons">Worked comparisons</a></li></ol></nav>
+<p>For choosing a <strong>model</strong>, a <strong>platform/vendor</strong>, or a <strong>framework</strong>. Three different decisions with three different failure modes, so three sections.</p>
+<p>Score each line 1–5, but the score isn't the output - the <strong>notes</strong> are. A decision you can defend out loud is the deliverable.</p>
+<p>Calibrate on decisions you've already made (Render, Neon + Prisma, local models with escalation) before using it on ones you haven't. You know those answers, which is what makes them useful for testing the rubric.</p>
+<hr>
+<h2 id="a-choosing-a-model">A. Choosing a model</h2>
+<div class="table-scroll"><table class="fillable" data-csv="1"><thead><tr><th scope="col">Criterion</th><th scope="col">Score</th><th scope="col">Notes</th></tr></thead><tbody><tr><td>Capability on <strong>your</strong> task (not a benchmark)</td><td><input type="text" data-fid="f18-1" aria-label="Score for Capability on your task (not a benchmark)"></td><td><input type="text" data-fid="f18-2" aria-label="Notes for Capability on your task (not a benchmark)"></td></tr><tr><td>Cost per unit of real work</td><td><input type="text" data-fid="f19-1" aria-label="Score for Cost per unit of real work"></td><td><input type="text" data-fid="f19-2" aria-label="Notes for Cost per unit of real work"></td></tr><tr><td>Latency, p50 and p95</td><td><input type="text" data-fid="f20-1" aria-label="Score for Latency, p50 and p95"></td><td><input type="text" data-fid="f20-2" aria-label="Notes for Latency, p50 and p95"></td></tr><tr><td>Context window vs. what you actually need</td><td><input type="text" data-fid="f21-1" aria-label="Score for Context window vs. what you actually need"></td><td><input type="text" data-fid="f21-2" aria-label="Notes for Context window vs. what you actually need"></td></tr><tr><td>Open weights / can you run it yourself</td><td><input type="text" data-fid="f22-1" aria-label="Score for Open weights / can you run it yourself"></td><td><input type="text" data-fid="f22-2" aria-label="Notes for Open weights / can you run it yourself"></td></tr><tr><td>Provider stability and deprecation history</td><td><input type="text" data-fid="f23-1" aria-label="Score for Provider stability and deprecation history"></td><td><input type="text" data-fid="f23-2" aria-label="Notes for Provider stability and deprecation history"></td></tr><tr><td>Data handling - is your input training someone's model</td><td><input type="text" data-fid="f24-1" aria-label="Score for Data handling - is your input training someone&#x27;s model"></td><td><input type="text" data-fid="f24-2" aria-label="Notes for Data handling - is your input training someone&#x27;s model"></td></tr></tbody></table></div>
+<p class="table-actions"><button type="button" class="btn small" data-csv-btn="1">Download this table as CSV</button></p>
+<p><strong>Non-negotiable:</strong> score capability against a <strong>private eval set of ~20 items drawn from your real task</strong>. Public benchmarks are contaminated, gamed, and usually measuring something other than your problem. This is the <code>honest-bench</code> premise: a model that scores well on someone else's test tells you very little.</p>
+<blockquote class="fillbox"><div class="fill"><span>Eval set used:</span><input type="text" data-fid="f31" aria-label="Eval set used"></div><div class="fill"><span>Result:</span><input type="text" data-fid="f32" aria-label="Result"></div><div class="fill"><span>Decision:</span><input type="text" data-fid="f33" aria-label="Decision"></div></blockquote>
+<h3 id="local-vs-hosted">Local vs. hosted</h3>
+<p>Most people can't seriously consider "run it yourself." With 128GB unified memory you can. Ask it every time:</p>
+<ul><li>Does this need frontier capability, or is it classification/extraction/routing that a 7B model does fine?</li><li>What's the privacy value of the data never leaving the machine?</li><li>What's the cost at your actual volume - is the API cheaper than your time?</li></ul>
+<hr>
+<h2 id="b-choosing-a-platform-or-vendor">B. Choosing a platform or vendor</h2>
+<div class="table-scroll"><table class="fillable" data-csv="2"><thead><tr><th scope="col">Criterion</th><th scope="col">Score</th><th scope="col">Notes</th></tr></thead><tbody><tr><td>Lock-in surface - how much of your code assumes them</td><td><input type="text" data-fid="f50-1" aria-label="Score for Lock-in surface - how much of your code assumes them"></td><td><input type="text" data-fid="f50-2" aria-label="Notes for Lock-in surface - how much of your code assumes them"></td></tr><tr><td>Exit cost - how long to migrate off, honestly</td><td><input type="text" data-fid="f51-1" aria-label="Score for Exit cost - how long to migrate off, honestly"></td><td><input type="text" data-fid="f51-2" aria-label="Notes for Exit cost - how long to migrate off, honestly"></td></tr><tr><td>Pricing shape (per-token / per-seat / per-hour / per-GB)</td><td><input type="text" data-fid="f52-1" aria-label="Score for Pricing shape (per-token / per-seat / per-hour / per-GB)"></td><td><input type="text" data-fid="f52-2" aria-label="Notes for Pricing shape (per-token / per-seat / per-hour / per-GB)"></td></tr><tr><td>What breaks at 10x usage</td><td><input type="text" data-fid="f53-1" aria-label="Score for What breaks at 10x usage"></td><td><input type="text" data-fid="f53-2" aria-label="Notes for What breaks at 10x usage"></td></tr><tr><td>Rate limits and quotas <strong>in practice</strong>, not on the pricing page</td><td><input type="text" data-fid="f54-1" aria-label="Score for Rate limits and quotas in practice, not on the pricing page"></td><td><input type="text" data-fid="f54-2" aria-label="Notes for Rate limits and quotas in practice, not on the pricing page"></td></tr><tr><td>Data handling, residency, retention terms</td><td><input type="text" data-fid="f55-1" aria-label="Score for Data handling, residency, retention terms"></td><td><input type="text" data-fid="f55-2" aria-label="Notes for Data handling, residency, retention terms"></td></tr><tr><td>Support reality when it breaks at 2am</td><td><input type="text" data-fid="f56-1" aria-label="Score for Support reality when it breaks at 2am"></td><td><input type="text" data-fid="f56-2" aria-label="Notes for Support reality when it breaks at 2am"></td></tr></tbody></table></div>
+<p class="table-actions"><button type="button" class="btn small" data-csv-btn="2">Download this table as CSV</button></p>
+<blockquote class="fillbox"><div class="fill"><span>Decision:</span><input type="text" data-fid="f58" aria-label="Decision"></div><div class="fill"><span>What would make us leave:</span><input type="text" data-fid="f59" aria-label="What would make us leave"></div></blockquote>
+<hr>
+<h2 id="c-choosing-a-framework-or-library">C. Choosing a framework or library</h2>
+<div class="table-scroll"><table class="fillable" data-csv="3"><thead><tr><th scope="col">Criterion</th><th scope="col">Score</th><th scope="col">Notes</th></tr></thead><tbody><tr><td>Does the abstraction earn its weight, or is it a thin wrapper</td><td><input type="text" data-fid="f67-1" aria-label="Score for Does the abstraction earn its weight, or is it a thin wrapper"></td><td><input type="text" data-fid="f67-2" aria-label="Notes for Does the abstraction earn its weight, or is it a thin wrapper"></td></tr><tr><td>Maintenance burden - release cadence, breaking changes</td><td><input type="text" data-fid="f68-1" aria-label="Score for Maintenance burden - release cadence, breaking changes"></td><td><input type="text" data-fid="f68-2" aria-label="Notes for Maintenance burden - release cadence, breaking changes"></td></tr><tr><td>Dependency risk - what it drags in transitively</td><td><input type="text" data-fid="f69-1" aria-label="Score for Dependency risk - what it drags in transitively"></td><td><input type="text" data-fid="f69-2" aria-label="Notes for Dependency risk - what it drags in transitively"></td></tr><tr><td>Can you read the source when it misbehaves</td><td><input type="text" data-fid="f70-1" aria-label="Score for Can you read the source when it misbehaves"></td><td><input type="text" data-fid="f70-2" aria-label="Notes for Can you read the source when it misbehaves"></td></tr><tr><td>Could you replace it with ~200 lines of your own</td><td><input type="text" data-fid="f71-1" aria-label="Score for Could you replace it with ~200 lines of your own"></td><td><input type="text" data-fid="f71-2" aria-label="Notes for Could you replace it with ~200 lines of your own"></td></tr></tbody></table></div>
+<p class="table-actions"><button type="button" class="btn small" data-csv-btn="3">Download this table as CSV</button></p>
+<p><strong>House bias, stated openly:</strong> prefer no third-party runtime dependency where the standard library or a small amount of your own code will do. A wrapper that saves twenty lines and adds a supply chain is a bad trade.</p>
+<blockquote class="fillbox"><div class="fill"><span>Decision:</span><input type="text" data-fid="f77" aria-label="Decision"></div></blockquote>
+<hr>
+<h2 id="worked-comparisons">Worked comparisons</h2>
+<p>Complete these three first - you already know the answers, so they calibrate the rubric.</p>
+<ul class=tasks><li class="task"><label><input type="checkbox" data-fid="f85"> <span>Why Render over Vercel/Fly/AWS for your own services</span></label></li><li class="task"><label><input type="checkbox" data-fid="f86"> <span>Why Neon + Prisma over Supabase for newer projects</span></label></li><li class="task"><label><input type="checkbox" data-fid="f87"> <span>Why local models first with escalation only on failure, rather than a hosted model by default</span></label></li></ul>
+<p>Then two live ones where you don't know the answer yet:</p>
+<ul class=tasks><li class="task"><label><input type="checkbox" data-fid="f91"> <span>Vector store for Block 3 - pgvector vs. Qdrant vs. Chroma</span></label></li><li class="task"><label><input type="checkbox" data-fid="f92"> <span>Agent framework for Block 4 - LangGraph vs. raw SDK</span></label></li></ul>
+</main>
+<footer class="foot"><p>Source: <a href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/artifacts/selection-scorecard.md" rel="noopener"><code>artifacts/selection-scorecard.md</code></a>. This page is generated; edit the markdown file.</p></footer>
+<script type="application/json" id="doc-data">{"slug": "selection-scorecard", "lines": ["# Selection Scorecard", "", "For choosing a **model**, a **platform/vendor**, or a **framework**. Three", "different decisions with three different failure modes, so three sections.", "", "Score each line 1–5, but the score isn't the output - the **notes** are.", "A decision you can defend out loud is the deliverable.", "", "Calibrate on decisions you've already made (Render, Neon + Prisma, local", "models with escalation) before using it on ones you haven't. You know those", "answers, which is what makes them useful for testing the rubric.", "", "---", "", "## A. Choosing a model", "", "| Criterion | Score | Notes |", "|---|---|---|", "| Capability on **your** task (not a benchmark) | | |", "| Cost per unit of real work | | |", "| Latency, p50 and p95 | | |", "| Context window vs. what you actually need | | |", "| Open weights / can you run it yourself | | |", "| Provider stability and deprecation history | | |", "| Data handling - is your input training someone's model | | |", "", "**Non-negotiable:** score capability against a **private eval set of ~20 items", "drawn from your real task**. Public benchmarks are contaminated, gamed, and", "usually measuring something other than your problem. This is the `honest-bench`", "premise: a model that scores well on someone else's test tells you very little.", "", "> **Eval set used:**", "> **Result:**", "> **Decision:**", "", "### Local vs. hosted", "", "Most people can't seriously consider \"run it yourself.\" With 128GB unified", "memory you can. Ask it every time:", "", "- Does this need frontier capability, or is it classification/extraction/routing that a 7B model does fine?", "- What's the privacy value of the data never leaving the machine?", "- What's the cost at your actual volume - is the API cheaper than your time?", "", "---", "", "## B. Choosing a platform or vendor", "", "| Criterion | Score | Notes |", "|---|---|---|", "| Lock-in surface - how much of your code assumes them | | |", "| Exit cost - how long to migrate off, honestly | | |", "| Pricing shape (per-token / per-seat / per-hour / per-GB) | | |", "| What breaks at 10x usage | | |", "| Rate limits and quotas **in practice**, not on the pricing page | | |", "| Data handling, residency, retention terms | | |", "| Support reality when it breaks at 2am | | |", "", "> **Decision:**", "> **What would make us leave:**", "", "---", "", "## C. Choosing a framework or library", "", "| Criterion | Score | Notes |", "|---|---|---|", "| Does the abstraction earn its weight, or is it a thin wrapper | | |", "| Maintenance burden - release cadence, breaking changes | | |", "| Dependency risk - what it drags in transitively | | |", "| Can you read the source when it misbehaves | | |", "| Could you replace it with ~200 lines of your own | | |", "", "**House bias, stated openly:** prefer no third-party runtime dependency where", "the standard library or a small amount of your own code will do. A wrapper that", "saves twenty lines and adds a supply chain is a bad trade.", "", "> **Decision:**", "", "---", "", "## Worked comparisons", "", "Complete these three first - you already know the answers, so they calibrate the rubric.", "", "- [ ] Why Render over Vercel/Fly/AWS for your own services", "- [ ] Why Neon + Prisma over Supabase for newer projects", "- [ ] Why local models first with escalation only on failure, rather than a hosted model by default", "", "Then two live ones where you don't know the answer yet:", "", "- [ ] Vector store for Block 3 - pgvector vs. Qdrant vs. Chroma", "- [ ] Agent framework for Block 4 - LangGraph vs. raw SDK", ""], "fields": [{"id": "f18-1", "kind": "cell", "ln": 18, "c": 1}, {"id": "f18-2", "kind": "cell", "ln": 18, "c": 2}, {"id": "f19-1", "kind": "cell", "ln": 19, "c": 1}, {"id": "f19-2", "kind": "cell", "ln": 19, "c": 2}, {"id": "f20-1", "kind": "cell", "ln": 20, "c": 1}, {"id": "f20-2", "kind": "cell", "ln": 20, "c": 2}, {"id": "f21-1", "kind": "cell", "ln": 21, "c": 1}, {"id": "f21-2", "kind": "cell", "ln": 21, "c": 2}, {"id": "f22-1", "kind": "cell", "ln": 22, "c": 1}, {"id": "f22-2", "kind": "cell", "ln": 22, "c": 2}, {"id": "f23-1", "kind": "cell", "ln": 23, "c": 1}, {"id": "f23-2", "kind": "cell", "ln": 23, "c": 2}, {"id": "f24-1", "kind": "cell", "ln": 24, "c": 1}, {"id": "f24-2", "kind": "cell", "ln": 24, "c": 2}, {"id": "f31", "kind": "label", "ln": 31}, {"id": "f32", "kind": "label", "ln": 32}, {"id": "f33", "kind": "label", "ln": 33}, {"id": "f50-1", "kind": "cell", "ln": 50, "c": 1}, {"id": "f50-2", "kind": "cell", "ln": 50, "c": 2}, {"id": "f51-1", "kind": "cell", "ln": 51, "c": 1}, {"id": "f51-2", "kind": "cell", "ln": 51, "c": 2}, {"id": "f52-1", "kind": "cell", "ln": 52, "c": 1}, {"id": "f52-2", "kind": "cell", "ln": 52, "c": 2}, {"id": "f53-1", "kind": "cell", "ln": 53, "c": 1}, {"id": "f53-2", "kind": "cell", "ln": 53, "c": 2}, {"id": "f54-1", "kind": "cell", "ln": 54, "c": 1}, {"id": "f54-2", "kind": "cell", "ln": 54, "c": 2}, {"id": "f55-1", "kind": "cell", "ln": 55, "c": 1}, {"id": "f55-2", "kind": "cell", "ln": 55, "c": 2}, {"id": "f56-1", "kind": "cell", "ln": 56, "c": 1}, {"id": "f56-2", "kind": "cell", "ln": 56, "c": 2}, {"id": "f58", "kind": "label", "ln": 58}, {"id": "f59", "kind": "label", "ln": 59}, {"id": "f67-1", "kind": "cell", "ln": 67, "c": 1}, {"id": "f67-2", "kind": "cell", "ln": 67, "c": 2}, {"id": "f68-1", "kind": "cell", "ln": 68, "c": 1}, {"id": "f68-2", "kind": "cell", "ln": 68, "c": 2}, {"id": "f69-1", "kind": "cell", "ln": 69, "c": 1}, {"id": "f69-2", "kind": "cell", "ln": 69, "c": 2}, {"id": "f70-1", "kind": "cell", "ln": 70, "c": 1}, {"id": "f70-2", "kind": "cell", "ln": 70, "c": 2}, {"id": "f71-1", "kind": "cell", "ln": 71, "c": 1}, {"id": "f71-2", "kind": "cell", "ln": 71, "c": 2}, {"id": "f77", "kind": "label", "ln": 77}, {"id": "f85", "kind": "check", "ln": 85}, {"id": "f86", "kind": "check", "ln": 86}, {"id": "f87", "kind": "check", "ln": 87}, {"id": "f91", "kind": "check", "ln": 91}, {"id": "f92", "kind": "check", "ln": 92}]}</script>
+<script>
+(function () {
+  "use strict";
+  var data = JSON.parse(document.getElementById("doc-data").textContent);
+  var KEY = "dd-doc:" + data.slug;
+
+  /*serialize:start*/
+  function splitRow(line) {
+    var s = line.trim();
+    if (s.charAt(0) === "|") s = s.slice(1);
+    if (s.slice(-1) === "|" && s.slice(-2) !== "\\|") s = s.slice(0, -1);
+    var cells = [], cur = "";
+    for (var i = 0; i < s.length; i++) {
+      if (s[i] === "\\" && s[i + 1] === "|") { cur += "\\|"; i++; }
+      else if (s[i] === "|") { cells.push(cur.trim()); cur = ""; }
+      else cur += s[i];
+    }
+    cells.push(cur.trim());
+    return cells;
+  }
+
+  // Pure: the original markdown lines plus the visitor's values in, markdown text out.
+  // With no values it returns the source unchanged.
+  function serialize(lines, fields, values) {
+    var byLine = {};
+    fields.forEach(function (f) { (byLine[f.ln] = byLine[f.ln] || []).push(f); });
+    var out = [];
+    lines.forEach(function (line, i) {
+      var cur = line, before = [], fs = byLine[i] || [], cells = null;
+      fs.forEach(function (f) {
+        var v = values[f.id];
+        if (f.kind === "check") {
+          if (v === true) cur = cur.replace("[ ]", "[x]");
+        } else if (!v || typeof v !== "string" || !v.trim()) {
+          return;
+        } else if (f.kind === "label") {
+          cur = cur.replace(/\s+$/, "") + " " + v.trim().replace(/\s*\n\s*/g, " ");
+        } else if (f.kind === "cell") {
+          cells = cells || splitRow(cur);
+          cells[f.c] = v.trim().replace(/\s*\n\s*/g, " ").replace(/\|/g, "\\|");
+        } else if (f.kind === "quote") {
+          cur = v.trim().split("\n").map(function (t) { return ("> " + t).replace(/\s+$/, ""); }).join("\n");
+        } else if (f.kind === "insert") {
+          before = v.trim().split("\n").map(function (t) { return ("> " + t).replace(/\s+$/, ""); });
+          before.push("");
+        }
+      });
+      if (cells) cur = "| " + cells.join(" | ") + " |";
+      out = out.concat(before, [cur]);
+    });
+    return out.join("\n");
+  }
+  /*serialize:end*/
+  window.ddSerialize = serialize;
+
+  var els = Array.prototype.slice.call(document.querySelectorAll("[data-fid]"));
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { saved = {}; }
+  els.forEach(function (el) {
+    var v = saved[el.getAttribute("data-fid")];
+    if (v === undefined) return;
+    if (el.type === "checkbox") el.checked = v === true; else el.value = v;
+  });
+
+  function collect() {
+    var m = {};
+    els.forEach(function (el) {
+      var v = el.type === "checkbox" ? el.checked : el.value;
+      if (v === true || (typeof v === "string" && v.trim() !== "")) m[el.getAttribute("data-fid")] = v;
+    });
+    return m;
+  }
+  var note = document.getElementById("save-note"), base = note ? note.textContent : "";
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(collect())); } catch (e) { /* storage unavailable */ }
+  }
+  document.addEventListener("input", function (e) { if (e.target.hasAttribute && e.target.hasAttribute("data-fid")) save(); });
+  document.addEventListener("change", function (e) { if (e.target.hasAttribute && e.target.hasAttribute("data-fid")) save(); });
+
+  function download(name, text, type) {
+    var blob = new Blob([text], { type: type });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  var dl = document.getElementById("dl-answers");
+  if (dl) dl.addEventListener("click", function () {
+    download(data.slug + "-my-answers.md", serialize(data.lines, data.fields, collect()), "text/markdown;charset=utf-8");
+  });
+
+  var clear = document.getElementById("clear-answers"), armed = null;
+  if (clear) clear.addEventListener("click", function () {
+    if (!armed) {
+      clear.textContent = "Click again to clear";
+      armed = setTimeout(function () { armed = null; clear.textContent = "Clear my answers"; }, 4000);
+      return;
+    }
+    clearTimeout(armed); armed = null; clear.textContent = "Clear my answers";
+    els.forEach(function (el) { if (el.type === "checkbox") el.checked = false; else el.value = ""; });
+    try { localStorage.removeItem(KEY); } catch (e) { /* ignore */ }
+  });
+
+  function csvCell(s) { return '"' + String(s).replace(/"/g, '""') + '"'; }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-csv-btn]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var table = document.querySelector('table[data-csv="' + btn.getAttribute("data-csv-btn") + '"]');
+      var rows = [Array.prototype.map.call(table.querySelectorAll("thead th"), function (th) { return csvCell(th.textContent); }).join(",")];
+      Array.prototype.forEach.call(table.querySelectorAll("tbody tr"), function (tr) {
+        rows.push(Array.prototype.map.call(tr.children, function (td) {
+          var inp = td.querySelector("input,textarea");
+          return csvCell(inp ? inp.value : td.textContent);
+        }).join(","));
+      });
+      download(data.slug + "-table-" + btn.getAttribute("data-csv-btn") + ".csv", "﻿" + rows.join("\r\n") + "\r\n", "text/csv;charset=utf-8");
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

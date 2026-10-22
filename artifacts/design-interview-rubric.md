@@ -54,6 +54,26 @@ Under 12: redo the capstone failure drill and the Block 3 notebooks, then try ag
 Drawing the complete architecture is question 1's figure, so it is not scored
 separately.
 
+## Score sheet
+
+One row per question, 0 to 2. The three bonus marks are 0 or 1 each.
+
+| Item | Score | Notes |
+|---|---|---|
+| 1. Production-ready RAG system (0-2) | | |
+| 2. RAG or fine-tuning (0-2) | | |
+| 3. Latency without hurting quality (0-2) | | |
+| 4. Provider outage (0-2) | | |
+| 5. Evaluating an AI system (0-2) | | |
+| 6. Where to add caching (0-2) | | |
+| 7. Preventing hallucinations (0-2) | | |
+| 8. Monitoring in production (0-2) | | |
+| 9. Scaling to millions of documents (0-2) | | |
+| Bonus: asked for the five numbers or stated assumptions (0-1) | | |
+| Bonus: named a failure of their own design first (0-1) | | |
+| Bonus: said what to build first and what to leave out (0-1) | | |
+| **Total (maximum 21)** | | |
+
 ## Failure patterns to listen for
 
 - A product name where a reason should be.

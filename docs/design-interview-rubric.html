@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design interview rubric | Building and Measuring LLM Systems</title>
+<meta name="description" content="A scored mock interview for the questions AI system-design interviews keep asking. A fill-in worksheet from the free Building and Measuring LLM Systems…">
+<link rel="canonical" href="https://stylusnexus.github.io/deep-dive-ai-ml/docs/design-interview-rubric.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Building and Measuring LLM Systems">
+<meta property="og:title" content="Design interview rubric">
+<meta property="og:description" content="A scored mock interview for the questions AI system-design interviews keep asking. A fill-in worksheet from the free Building and Measuring LLM Systems…">
+<meta property="og:url" content="https://stylusnexus.github.io/deep-dive-ai-ml/docs/design-interview-rubric.html">
+<meta property="og:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Design interview rubric">
+<meta name="twitter:description" content="A scored mock interview for the questions AI system-design interviews keep asking. A fill-in worksheet from the free Building and Measuring LLM Systems…">
+<meta name="twitter:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Design interview rubric", "description": "A scored mock interview for the questions AI system-design interviews keep asking. A fill-in worksheet from the free Building and Measuring LLM Systems…", "url": "https://stylusnexus.github.io/deep-dive-ai-ml/docs/design-interview-rubric.html", "inLanguage": "en", "isAccessibleForFree": true, "learningResourceType": "worksheet", "publisher": {"@type": "Organization", "name": "Stylus Nexus", "url": "https://github.com/stylusnexus"}, "isPartOf": {"@type": "Course", "name": "Building and Measuring LLM Systems", "url": "https://stylusnexus.github.io/deep-dive-ai-ml/"}, "about": "Building and Measuring LLM Systems"}</script>
+<style>
+  :root {
+    --bg: #ffffff; --surface: #f3f5fa; --surface2: #e8ecf5; --border: #cfd6e6;
+    --accent: #2f4fd0; --accent2: #5b37c4; --green: #0d7a55; --red: #b42318;
+    --text: #1a1f2e; --muted: #4f5a70; --code-bg: #eef1f8; --field: #ffffff;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+      --accent: #8aa4ff; --accent2: #b9a2fb; --green: #34d399; --red: #f87171;
+      --text: #e2e8f0; --muted: #a3afc2; --code-bg: #0d1117; --field: #12141c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { max-width: 860px; margin: 0 auto; padding: 24px 24px 80px; background: var(--bg); color: var(--text);
+         line-height: 1.7; font-size: 16px; font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; }
+  a { color: var(--accent); }
+  h1 { font-size: 1.9em; line-height: 1.25; margin: 20px 0 8px; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { color: var(--accent2); font-size: 1.1em; margin: 28px 0 8px; }
+  h4 { font-size: 1em; margin: 20px 0 6px; }
+  p { margin: 12px 0; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 8px; overflow-x: auto; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 6px; z-index: 10; }
+  .skip:focus { left: 8px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .top { padding: 4px 0 8px; font-size: 0.92em; color: var(--muted); }
+  .top a { color: var(--muted); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+  .btn { font: inherit; font-size: 0.9em; font-weight: 600; text-decoration: none; cursor: pointer; color: var(--text);
+         background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; line-height: 1.2; }
+  .btn:hover { background: var(--surface2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.quiet { background: transparent; }
+  .btn.small { font-size: 0.82em; padding: 6px 10px; }
+  .note { color: var(--muted); font-size: 0.92em; margin: 6px 0 18px; }
+  .lead { color: var(--muted); font-size: 1.05em; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 18px 12px; margin: 20px 0; }
+  .toc h2 { border: 0; margin: 10px 0 4px; font-size: 1em; color: var(--muted); }
+  .toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 28px; }
+  .toc li { break-inside: avoid; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  ul.tasks { list-style: none; padding-left: 0; }
+  li.task label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+  li.task label:hover { background: var(--surface); }
+  li.task input { width: 20px; height: 20px; margin-top: 4px; flex: none; accent-color: var(--accent); }
+  li.task input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--border); }
+  blockquote { margin: 16px 0; padding: 8px 18px; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; }
+  blockquote p { margin: 6px 0; }
+  .fill { display: flex; gap: 10px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+  .fill > span { font-weight: 600; min-width: 5.5em; }
+  input[type=text], textarea { font: inherit; color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; }
+  .fill input[type=text] { flex: 1 1 260px; }
+  textarea { width: 100%; min-height: 5.5em; resize: vertical; line-height: 1.5; }
+  td input[type=text] { width: 100%; min-width: 7em; }
+  .answer label { display: block; font-weight: 600; margin: 14px 0 6px; }
+  .answer textarea { font-weight: 400; }
+  details.key { border: 1px solid var(--border); border-radius: 8px; padding: 4px 16px; margin: 12px 0; background: var(--surface); }
+  details.key summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+  .table-scroll { overflow-x: auto; margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.95em; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--surface2); }
+  .table-actions { margin: -8px 0 16px; }
+  ul.cards { list-style: none; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  ul.cards li { display: flex; flex-direction: column; gap: 4px; margin: 0; }
+  a.card { display: block; flex: 1; text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+  a.card:hover { background: var(--surface2); }
+  a.card h3 { margin: 0 0 4px; font-size: 1em; color: var(--accent); }
+  a.card p { margin: 0; color: var(--muted); font-size: 0.9em; line-height: 1.5; }
+  a.mdlink { font-size: 0.82em; padding-left: 4px; }
+  .foot { margin-top: 56px; color: var(--muted); font-size: 0.88em; }
+  @media (max-width: 600px) { body { padding: 16px 16px 64px; } .toc ol { columns: 1; } }
+  @media print {
+    .toolbar, .skip, .top, .table-actions, .note { display: none !important; }
+    body { max-width: none; padding: 0; background: #fff; color: #000; }
+    a { color: #000; }
+    input[type=text], textarea { border: 1px solid #888; background: #fff; color: #000; }
+    details.key:not([open]) { display: none; }
+    h2, h3 { break-after: avoid; } table, tr, li { break-inside: avoid; }
+  }
+</style>
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><nav aria-label="Site"><a href="../index.html">Building and Measuring LLM Systems</a> <span aria-hidden="true">/</span> <a href="index.html">Worksheets and references</a></nav></header>
+<main id="main">
+<h1 id="design-interview-rubric">Design interview rubric</h1>
+<div class="toolbar" role="group" aria-label="Page actions"><a class="btn" href="../artifacts/design-interview-rubric.md" download>Download blank (.md)</a><button type="button" class="btn primary" id="dl-answers">Download my answers (.md)</button><button type="button" class="btn" onclick="window.print()">Print or save as PDF</button><button type="button" class="btn quiet" id="clear-answers">Clear my answers</button><a class="btn quiet" href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/artifacts/design-interview-rubric.md" rel="noopener">View on GitHub</a></div>
+<p class="note" id="save-note">What you tick or type stays in this browser. To keep it, download your answers as a markdown file, or print this page or save it as a PDF.</p>
+<nav class="toc" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#how-to-run-it">How to run it</a></li><li><a href="#scoring">Scoring</a></li><li><a href="#the-questions-and-what-a-2-contains">The questions and what a 2 contains</a></li><li><a href="#score-sheet">Score sheet</a></li><li><a href="#failure-patterns-to-listen-for">Failure patterns to listen for</a></li><li><a href="#after-the-interview">After the interview</a></li></ol></nav>
+<p>A scored mock interview for the questions AI system-design interviews keep asking. It tests whether you can <em>say</em> the course, under a clock, to another person. Quizzes test recall and the capstone tests building. This tests explanation.</p>
+<p>Taught in <a href="../lessons/block8-deployment/lsn-1788100000000-calling-an-api-you-do-not-control.html">Designing the Whole System</a> and the lessons it points to.</p>
+<h2 id="how-to-run-it">How to run it</h2>
+<ul><li><strong>Two people.</strong> One asks, one answers, then swap. A single person can run it by recording themselves and scoring the recording the next day.</li><li><strong>45 minutes.</strong> Question 1 gets 12 minutes with a blank page. Questions 2 to 9 get 3 minutes each. The last 9 minutes are for scoring.</li><li><strong>No notes, no screen.</strong> Draw by hand.</li><li><strong>The interviewer may ask one follow-up per question.</strong> "How would you know?" is always allowed.</li></ul>
+<h2 id="scoring">Scoring</h2>
+<p>Score each question 0, 1 or 2.</p>
+<div class="table-scroll"><table><thead><tr><th scope="col">Score</th><th scope="col">Meaning</th></tr></thead><tbody><tr><td>0</td><td>Names a tool or a buzzword with no reason, or avoids the question</td></tr><tr><td>1</td><td>The right idea, with no failure named or no measurement named</td></tr><tr><td>2</td><td>The right idea, the failure it prevents, and the number that would show it failed</td></tr></tbody></table></div>
+<p>Add three marks across the whole interview, 0 or 1 each:</p>
+<ul><li>Asked for the five numbers (corpus size and churn, query rate, latency budget, cost of a wrong answer, who may see what) before drawing, or stated assumptions aloud.</li><li>Named a failure of their own design before the interviewer did.</li><li>Said what they would build first and what they would leave out until measured.</li></ul>
+<p><strong>Maximum 21.</strong> 17 or more: ready. 12 to 16: one weak block, re-read the lessons below. Under 12: redo the capstone failure drill and the Block 3 notebooks, then try again.</p>
+<h2 id="the-questions-and-what-a-2-contains">The questions and what a 2 contains</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">#</th><th scope="col">Question</th><th scope="col">A 2 answer includes</th><th scope="col">Lessons</th></tr></thead><tbody><tr><td>1</td><td>Design a production-ready RAG system.</td><td>The five numbers first. Separate ingestion and query paths drawn. Each box with what it protects against: gateway (auth, limits), cache, query rewrite, hybrid retrieval with the access filter, rerank, context assembly with citations, generation under a deadline with a fallback ladder, a grounding check, traces. The four numbers it would report separately.</td><td><code>building-a-rag-system</code>, <code>ranking-and-hybrid-retrieval</code>, <code>designing-the-whole-system</code></td></tr><tr><td>2</td><td>When would you choose RAG over fine-tuning?</td><td>Knowledge that changes, must be cited or must be access-controlled goes in retrieval. Fixed format, tone or a narrow skill goes in tuning, after prompting and retrieval were measured. Cites the failure: a tuned model can learn the rule and its blind spot.</td><td><code>when-fine-tuning-is-wrong</code>, <code>building-the-dataset</code></td></tr><tr><td>3</td><td>How would you reduce latency without hurting quality?</td><td>Separates time to first token (prefill, grows with prompt) from tokens per second (decode). Fewer, better chunks; stable prefix; streaming; rerank a short list. Re-runs the eval set after each change.</td><td><code>latency-and-caching</code>, <code>why-the-gpu-is-waiting</code></td></tr><tr><td>4</td><td>What happens if your LLM provider goes down?</td><td>Distinguishes down, throttled, slow, partial and degraded. Deadline plus circuit breaker. A tested fallback ladder ending at the retrieved passages or an honest error. Does not fail over on a 429. Names that the fallback needs its own evaluation and data agreement.</td><td><code>when-the-provider-goes-down</code>, <code>managed-cloud-surfaces</code></td></tr><tr><td>5</td><td>How do you evaluate an AI system?</td><td>Reports index recall, retrieval quality, groundedness and correctness separately, on a private gold set with a non-completion column, and checks a difference is larger than noise.</td><td><code>where-evaluation-lives</code>, <code>eval-data-you-can-trust</code>, <code>is-the-difference-real</code></td></tr><tr><td>6</td><td>Where would you add caching?</td><td>Exact-match first, then provider prompt caching with the stable prefix first, then a similarity cache only where a wrong match is cheap and never shared across tenants. Measures hit rate and wrong-hit rate.</td><td><code>latency-and-caching</code></td></tr><tr><td>7</td><td>How do you prevent hallucinations?</td><td>Says they cannot be prevented, only made detectable: ground in retrieved text, require citations, check claims against sources, refuse when retrieval is empty. Measures groundedness and the false-refusal rate.</td><td><code>hallucination-and-grounding</code>, <code>measuring-retrieval</code></td></tr><tr><td>8</td><td>What would you monitor in production?</td><td>Up and right as separate questions. Latency percentiles, error and fallback rates, cost per request, cache hit rate, plus a scheduled quality run on a fixed set. Says what wakes a person.</td><td><code>after-it-ships</code>, <code>drift</code>, <code>telemetry-and-instrumentation</code></td></tr><tr><td>9</td><td>How would you scale to millions of documents?</td><td>Does the memory sum first. Compress and rerank, partition by tenant or source, shard only when needed and notes the slowest shard sets latency. Plans the re-index for a new embedding model. Measures recall against exact search.</td><td><code>retrieval-at-scale</code>, <code>vector-search-algorithms</code></td></tr></tbody></table></div>
+<p>Drawing the complete architecture is question 1's figure, so it is not scored separately.</p>
+<h2 id="score-sheet">Score sheet</h2>
+<p>One row per question, 0 to 2. The three bonus marks are 0 or 1 each.</p>
+<div class="table-scroll"><table class="fillable" data-csv="3"><thead><tr><th scope="col">Item</th><th scope="col">Score</th><th scope="col">Notes</th></tr></thead><tbody><tr><td>1. Production-ready RAG system (0-2)</td><td><input type="text" data-fid="f62-1" aria-label="Score for 1. Production-ready RAG system (0-2)"></td><td><input type="text" data-fid="f62-2" aria-label="Notes for 1. Production-ready RAG system (0-2)"></td></tr><tr><td>2. RAG or fine-tuning (0-2)</td><td><input type="text" data-fid="f63-1" aria-label="Score for 2. RAG or fine-tuning (0-2)"></td><td><input type="text" data-fid="f63-2" aria-label="Notes for 2. RAG or fine-tuning (0-2)"></td></tr><tr><td>3. Latency without hurting quality (0-2)</td><td><input type="text" data-fid="f64-1" aria-label="Score for 3. Latency without hurting quality (0-2)"></td><td><input type="text" data-fid="f64-2" aria-label="Notes for 3. Latency without hurting quality (0-2)"></td></tr><tr><td>4. Provider outage (0-2)</td><td><input type="text" data-fid="f65-1" aria-label="Score for 4. Provider outage (0-2)"></td><td><input type="text" data-fid="f65-2" aria-label="Notes for 4. Provider outage (0-2)"></td></tr><tr><td>5. Evaluating an AI system (0-2)</td><td><input type="text" data-fid="f66-1" aria-label="Score for 5. Evaluating an AI system (0-2)"></td><td><input type="text" data-fid="f66-2" aria-label="Notes for 5. Evaluating an AI system (0-2)"></td></tr><tr><td>6. Where to add caching (0-2)</td><td><input type="text" data-fid="f67-1" aria-label="Score for 6. Where to add caching (0-2)"></td><td><input type="text" data-fid="f67-2" aria-label="Notes for 6. Where to add caching (0-2)"></td></tr><tr><td>7. Preventing hallucinations (0-2)</td><td><input type="text" data-fid="f68-1" aria-label="Score for 7. Preventing hallucinations (0-2)"></td><td><input type="text" data-fid="f68-2" aria-label="Notes for 7. Preventing hallucinations (0-2)"></td></tr><tr><td>8. Monitoring in production (0-2)</td><td><input type="text" data-fid="f69-1" aria-label="Score for 8. Monitoring in production (0-2)"></td><td><input type="text" data-fid="f69-2" aria-label="Notes for 8. Monitoring in production (0-2)"></td></tr><tr><td>9. Scaling to millions of documents (0-2)</td><td><input type="text" data-fid="f70-1" aria-label="Score for 9. Scaling to millions of documents (0-2)"></td><td><input type="text" data-fid="f70-2" aria-label="Notes for 9. Scaling to millions of documents (0-2)"></td></tr><tr><td>Bonus: asked for the five numbers or stated assumptions (0-1)</td><td><input type="text" data-fid="f71-1" aria-label="Score for Bonus: asked for the five numbers or stated assumptions (0-1)"></td><td><input type="text" data-fid="f71-2" aria-label="Notes for Bonus: asked for the five numbers or stated assumptions (0-1)"></td></tr><tr><td>Bonus: named a failure of their own design first (0-1)</td><td><input type="text" data-fid="f72-1" aria-label="Score for Bonus: named a failure of their own design first (0-1)"></td><td><input type="text" data-fid="f72-2" aria-label="Notes for Bonus: named a failure of their own design first (0-1)"></td></tr><tr><td>Bonus: said what to build first and what to leave out (0-1)</td><td><input type="text" data-fid="f73-1" aria-label="Score for Bonus: said what to build first and what to leave out (0-1)"></td><td><input type="text" data-fid="f73-2" aria-label="Notes for Bonus: said what to build first and what to leave out (0-1)"></td></tr><tr><td><strong>Total (maximum 21)</strong></td><td><input type="text" data-fid="f74-1" aria-label="Score for Total (maximum 21)"></td><td><input type="text" data-fid="f74-2" aria-label="Notes for Total (maximum 21)"></td></tr></tbody></table></div>
+<p class="table-actions"><button type="button" class="btn small" data-csv-btn="3">Download this table as CSV</button></p>
+<h2 id="failure-patterns-to-listen-for">Failure patterns to listen for</h2>
+<ul><li>A product name where a reason should be.</li><li>A cache or fallback with no mention of what it can get wrong.</li><li>"We would evaluate it" with no set, no number and no comparison.</li><li>Scaling answers that start with sharding and never mention how many vectors there are.</li><li>A design with no failure named until the interviewer finds one.</li></ul>
+<h2 id="after-the-interview">After the interview</h2>
+<p>For every question scored 0 or 1, write the missing sentence on the page and read the lesson in the last column. Re-run only those questions a week later.</p>
+</main>
+<footer class="foot"><p>Source: <a href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/artifacts/design-interview-rubric.md" rel="noopener"><code>artifacts/design-interview-rubric.md</code></a>. This page is generated; edit the markdown file.</p></footer>
+<script type="application/json" id="doc-data">{"slug": "design-interview-rubric", "lines": ["# Design interview rubric", "", "A scored mock interview for the questions AI system-design interviews keep asking.", "It tests whether you can *say* the course, under a clock, to another person. Quizzes", "test recall and the capstone tests building. This tests explanation.", "", "Taught in [Designing the Whole System](../lessons/block8-deployment/) and the lessons", "it points to.", "", "## How to run it", "", "- **Two people.** One asks, one answers, then swap. A single person can run it by", "  recording themselves and scoring the recording the next day.", "- **45 minutes.** Question 1 gets 12 minutes with a blank page. Questions 2 to 9 get", "  3 minutes each. The last 9 minutes are for scoring.", "- **No notes, no screen.** Draw by hand.", "- **The interviewer may ask one follow-up per question.** \"How would you know?\" is", "  always allowed.", "", "## Scoring", "", "Score each question 0, 1 or 2.", "", "| Score | Meaning |", "|---|---|", "| 0 | Names a tool or a buzzword with no reason, or avoids the question |", "| 1 | The right idea, with no failure named or no measurement named |", "| 2 | The right idea, the failure it prevents, and the number that would show it failed |", "", "Add three marks across the whole interview, 0 or 1 each:", "", "- Asked for the five numbers (corpus size and churn, query rate, latency budget,", "  cost of a wrong answer, who may see what) before drawing, or stated assumptions aloud.", "- Named a failure of their own design before the interviewer did.", "- Said what they would build first and what they would leave out until measured.", "", "**Maximum 21.** 17 or more: ready. 12 to 16: one weak block, re-read the lessons below.", "Under 12: redo the capstone failure drill and the Block 3 notebooks, then try again.", "", "## The questions and what a 2 contains", "", "| # | Question | A 2 answer includes | Lessons |", "|---|---|---|---|", "| 1 | Design a production-ready RAG system. | The five numbers first. Separate ingestion and query paths drawn. Each box with what it protects against: gateway (auth, limits), cache, query rewrite, hybrid retrieval with the access filter, rerank, context assembly with citations, generation under a deadline with a fallback ladder, a grounding check, traces. The four numbers it would report separately. | `building-a-rag-system`, `ranking-and-hybrid-retrieval`, `designing-the-whole-system` |", "| 2 | When would you choose RAG over fine-tuning? | Knowledge that changes, must be cited or must be access-controlled goes in retrieval. Fixed format, tone or a narrow skill goes in tuning, after prompting and retrieval were measured. Cites the failure: a tuned model can learn the rule and its blind spot. | `when-fine-tuning-is-wrong`, `building-the-dataset` |", "| 3 | How would you reduce latency without hurting quality? | Separates time to first token (prefill, grows with prompt) from tokens per second (decode). Fewer, better chunks; stable prefix; streaming; rerank a short list. Re-runs the eval set after each change. | `latency-and-caching`, `why-the-gpu-is-waiting` |", "| 4 | What happens if your LLM provider goes down? | Distinguishes down, throttled, slow, partial and degraded. Deadline plus circuit breaker. A tested fallback ladder ending at the retrieved passages or an honest error. Does not fail over on a 429. Names that the fallback needs its own evaluation and data agreement. | `when-the-provider-goes-down`, `managed-cloud-surfaces` |", "| 5 | How do you evaluate an AI system? | Reports index recall, retrieval quality, groundedness and correctness separately, on a private gold set with a non-completion column, and checks a difference is larger than noise. | `where-evaluation-lives`, `eval-data-you-can-trust`, `is-the-difference-real` |", "| 6 | Where would you add caching? | Exact-match first, then provider prompt caching with the stable prefix first, then a similarity cache only where a wrong match is cheap and never shared across tenants. Measures hit rate and wrong-hit rate. | `latency-and-caching` |", "| 7 | How do you prevent hallucinations? | Says they cannot be prevented, only made detectable: ground in retrieved text, require citations, check claims against sources, refuse when retrieval is empty. Measures groundedness and the false-refusal rate. | `hallucination-and-grounding`, `measuring-retrieval` |", "| 8 | What would you monitor in production? | Up and right as separate questions. Latency percentiles, error and fallback rates, cost per request, cache hit rate, plus a scheduled quality run on a fixed set. Says what wakes a person. | `after-it-ships`, `drift`, `telemetry-and-instrumentation` |", "| 9 | How would you scale to millions of documents? | Does the memory sum first. Compress and rerank, partition by tenant or source, shard only when needed and notes the slowest shard sets latency. Plans the re-index for a new embedding model. Measures recall against exact search. | `retrieval-at-scale`, `vector-search-algorithms` |", "", "Drawing the complete architecture is question 1's figure, so it is not scored", "separately.", "", "## Score sheet", "", "One row per question, 0 to 2. The three bonus marks are 0 or 1 each.", "", "| Item | Score | Notes |", "|---|---|---|", "| 1. Production-ready RAG system (0-2) | | |", "| 2. RAG or fine-tuning (0-2) | | |", "| 3. Latency without hurting quality (0-2) | | |", "| 4. Provider outage (0-2) | | |", "| 5. Evaluating an AI system (0-2) | | |", "| 6. Where to add caching (0-2) | | |", "| 7. Preventing hallucinations (0-2) | | |", "| 8. Monitoring in production (0-2) | | |", "| 9. Scaling to millions of documents (0-2) | | |", "| Bonus: asked for the five numbers or stated assumptions (0-1) | | |", "| Bonus: named a failure of their own design first (0-1) | | |", "| Bonus: said what to build first and what to leave out (0-1) | | |", "| **Total (maximum 21)** | | |", "", "## Failure patterns to listen for", "", "- A product name where a reason should be.", "- A cache or fallback with no mention of what it can get wrong.", "- \"We would evaluate it\" with no set, no number and no comparison.", "- Scaling answers that start with sharding and never mention how many vectors there are.", "- A design with no failure named until the interviewer finds one.", "", "## After the interview", "", "For every question scored 0 or 1, write the missing sentence on the page and read the", "lesson in the last column. Re-run only those questions a week later.", ""], "fields": [{"id": "f62-1", "kind": "cell", "ln": 62, "c": 1}, {"id": "f62-2", "kind": "cell", "ln": 62, "c": 2}, {"id": "f63-1", "kind": "cell", "ln": 63, "c": 1}, {"id": "f63-2", "kind": "cell", "ln": 63, "c": 2}, {"id": "f64-1", "kind": "cell", "ln": 64, "c": 1}, {"id": "f64-2", "kind": "cell", "ln": 64, "c": 2}, {"id": "f65-1", "kind": "cell", "ln": 65, "c": 1}, {"id": "f65-2", "kind": "cell", "ln": 65, "c": 2}, {"id": "f66-1", "kind": "cell", "ln": 66, "c": 1}, {"id": "f66-2", "kind": "cell", "ln": 66, "c": 2}, {"id": "f67-1", "kind": "cell", "ln": 67, "c": 1}, {"id": "f67-2", "kind": "cell", "ln": 67, "c": 2}, {"id": "f68-1", "kind": "cell", "ln": 68, "c": 1}, {"id": "f68-2", "kind": "cell", "ln": 68, "c": 2}, {"id": "f69-1", "kind": "cell", "ln": 69, "c": 1}, {"id": "f69-2", "kind": "cell", "ln": 69, "c": 2}, {"id": "f70-1", "kind": "cell", "ln": 70, "c": 1}, {"id": "f70-2", "kind": "cell", "ln": 70, "c": 2}, {"id": "f71-1", "kind": "cell", "ln": 71, "c": 1}, {"id": "f71-2", "kind": "cell", "ln": 71, "c": 2}, {"id": "f72-1", "kind": "cell", "ln": 72, "c": 1}, {"id": "f72-2", "kind": "cell", "ln": 72, "c": 2}, {"id": "f73-1", "kind": "cell", "ln": 73, "c": 1}, {"id": "f73-2", "kind": "cell", "ln": 73, "c": 2}, {"id": "f74-1", "kind": "cell", "ln": 74, "c": 1}, {"id": "f74-2", "kind": "cell", "ln": 74, "c": 2}]}</script>
+<script>
+(function () {
+  "use strict";
+  var data = JSON.parse(document.getElementById("doc-data").textContent);
+  var KEY = "dd-doc:" + data.slug;
+
+  /*serialize:start*/
+  function splitRow(line) {
+    var s = line.trim();
+    if (s.charAt(0) === "|") s = s.slice(1);
+    if (s.slice(-1) === "|" && s.slice(-2) !== "\\|") s = s.slice(0, -1);
+    var cells = [], cur = "";
+    for (var i = 0; i < s.length; i++) {
+      if (s[i] === "\\" && s[i + 1] === "|") { cur += "\\|"; i++; }
+      else if (s[i] === "|") { cells.push(cur.trim()); cur = ""; }
+      else cur += s[i];
+    }
+    cells.push(cur.trim());
+    return cells;
+  }
+
+  // Pure: the original markdown lines plus the visitor's values in, markdown text out.
+  // With no values it returns the source unchanged.
+  function serialize(lines, fields, values) {
+    var byLine = {};
+    fields.forEach(function (f) { (byLine[f.ln] = byLine[f.ln] || []).push(f); });
+    var out = [];
+    lines.forEach(function (line, i) {
+      var cur = line, before = [], fs = byLine[i] || [], cells = null;
+      fs.forEach(function (f) {
+        var v = values[f.id];
+        if (f.kind === "check") {
+          if (v === true) cur = cur.replace("[ ]", "[x]");
+        } else if (!v || typeof v !== "string" || !v.trim()) {
+          return;
+        } else if (f.kind === "label") {
+          cur = cur.replace(/\s+$/, "") + " " + v.trim().replace(/\s*\n\s*/g, " ");
+        } else if (f.kind === "cell") {
+          cells = cells || splitRow(cur);
+          cells[f.c] = v.trim().replace(/\s*\n\s*/g, " ").replace(/\|/g, "\\|");
+        } else if (f.kind === "quote") {
+          cur = v.trim().split("\n").map(function (t) { return ("> " + t).replace(/\s+$/, ""); }).join("\n");
+        } else if (f.kind === "insert") {
+          before = v.trim().split("\n").map(function (t) { return ("> " + t).replace(/\s+$/, ""); });
+          before.push("");
+        }
+      });
+      if (cells) cur = "| " + cells.join(" | ") + " |";
+      out = out.concat(before, [cur]);
+    });
+    return out.join("\n");
+  }
+  /*serialize:end*/
+  window.ddSerialize = serialize;
+
+  var els = Array.prototype.slice.call(document.querySelectorAll("[data-fid]"));
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { saved = {}; }
+  els.forEach(function (el) {
+    var v = saved[el.getAttribute("data-fid")];
+    if (v === undefined) return;
+    if (el.type === "checkbox") el.checked = v === true; else el.value = v;
+  });
+
+  function collect() {
+    var m = {};
+    els.forEach(function (el) {
+      var v = el.type === "checkbox" ? el.checked : el.value;
+      if (v === true || (typeof v === "string" && v.trim() !== "")) m[el.getAttribute("data-fid")] = v;
+    });
+    return m;
+  }
+  var note = document.getElementById("save-note"), base = note ? note.textContent : "";
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(collect())); } catch (e) { /* storage unavailable */ }
+  }
+  document.addEventListener("input", function (e) { if (e.target.hasAttribute && e.target.hasAttribute("data-fid")) save(); });
+  document.addEventListener("change", function (e) { if (e.target.hasAttribute && e.target.hasAttribute("data-fid")) save(); });
+
+  function download(name, text, type) {
+    var blob = new Blob([text], { type: type });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  var dl = document.getElementById("dl-answers");
+  if (dl) dl.addEventListener("click", function () {
+    download(data.slug + "-my-answers.md", serialize(data.lines, data.fields, collect()), "text/markdown;charset=utf-8");
+  });
+
+  var clear = document.getElementById("clear-answers"), armed = null;
+  if (clear) clear.addEventListener("click", function () {
+    if (!armed) {
+      clear.textContent = "Click again to clear";
+      armed = setTimeout(function () { armed = null; clear.textContent = "Clear my answers"; }, 4000);
+      return;
+    }
+    clearTimeout(armed); armed = null; clear.textContent = "Clear my answers";
+    els.forEach(function (el) { if (el.type === "checkbox") el.checked = false; else el.value = ""; });
+    try { localStorage.removeItem(KEY); } catch (e) { /* ignore */ }
+  });
+
+  function csvCell(s) { return '"' + String(s).replace(/"/g, '""') + '"'; }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-csv-btn]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var table = document.querySelector('table[data-csv="' + btn.getAttribute("data-csv-btn") + '"]');
+      var rows = [Array.prototype.map.call(table.querySelectorAll("thead th"), function (th) { return csvCell(th.textContent); }).join(",")];
+      Array.prototype.forEach.call(table.querySelectorAll("tbody tr"), function (tr) {
+        rows.push(Array.prototype.map.call(tr.children, function (td) {
+          var inp = td.querySelector("input,textarea");
+          return csvCell(inp ? inp.value : td.textContent);
+        }).join(","));
+      });
+      download(data.slug + "-table-" + btn.getAttribute("data-csv-btn") + ".csv", "﻿" + rows.join("\r\n") + "\r\n", "text/csv;charset=utf-8");
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

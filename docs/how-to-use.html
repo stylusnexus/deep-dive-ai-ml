@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to use this | Building and Measuring LLM Systems</title>
+<meta name="description" content="Three things live here: **lessons** you read, **notebooks** you run, and **projects** A reference page from the free Building and Measuring LLM Systems…">
+<link rel="canonical" href="https://stylusnexus.github.io/deep-dive-ai-ml/docs/how-to-use.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Building and Measuring LLM Systems">
+<meta property="og:title" content="How to use this">
+<meta property="og:description" content="Three things live here: **lessons** you read, **notebooks** you run, and **projects** A reference page from the free Building and Measuring LLM Systems…">
+<meta property="og:url" content="https://stylusnexus.github.io/deep-dive-ai-ml/docs/how-to-use.html">
+<meta property="og:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How to use this">
+<meta name="twitter:description" content="Three things live here: **lessons** you read, **notebooks** you run, and **projects** A reference page from the free Building and Measuring LLM Systems…">
+<meta name="twitter:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "How to use this", "description": "Three things live here: **lessons** you read, **notebooks** you run, and **projects** A reference page from the free Building and Measuring LLM Systems…", "url": "https://stylusnexus.github.io/deep-dive-ai-ml/docs/how-to-use.html", "inLanguage": "en", "isAccessibleForFree": true, "learningResourceType": "reference", "publisher": {"@type": "Organization", "name": "Stylus Nexus", "url": "https://github.com/stylusnexus"}, "isPartOf": {"@type": "Course", "name": "Building and Measuring LLM Systems", "url": "https://stylusnexus.github.io/deep-dive-ai-ml/"}, "about": "Building and Measuring LLM Systems"}</script>
+<style>
+  :root {
+    --bg: #ffffff; --surface: #f3f5fa; --surface2: #e8ecf5; --border: #cfd6e6;
+    --accent: #2f4fd0; --accent2: #5b37c4; --green: #0d7a55; --red: #b42318;
+    --text: #1a1f2e; --muted: #4f5a70; --code-bg: #eef1f8; --field: #ffffff;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+      --accent: #8aa4ff; --accent2: #b9a2fb; --green: #34d399; --red: #f87171;
+      --text: #e2e8f0; --muted: #a3afc2; --code-bg: #0d1117; --field: #12141c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { max-width: 860px; margin: 0 auto; padding: 24px 24px 80px; background: var(--bg); color: var(--text);
+         line-height: 1.7; font-size: 16px; font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; }
+  a { color: var(--accent); }
+  h1 { font-size: 1.9em; line-height: 1.25; margin: 20px 0 8px; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { color: var(--accent2); font-size: 1.1em; margin: 28px 0 8px; }
+  h4 { font-size: 1em; margin: 20px 0 6px; }
+  p { margin: 12px 0; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 8px; overflow-x: auto; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 6px; z-index: 10; }
+  .skip:focus { left: 8px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .top { padding: 4px 0 8px; font-size: 0.92em; color: var(--muted); }
+  .top a { color: var(--muted); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+  .btn { font: inherit; font-size: 0.9em; font-weight: 600; text-decoration: none; cursor: pointer; color: var(--text);
+         background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; line-height: 1.2; }
+  .btn:hover { background: var(--surface2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.quiet { background: transparent; }
+  .btn.small { font-size: 0.82em; padding: 6px 10px; }
+  .note { color: var(--muted); font-size: 0.92em; margin: 6px 0 18px; }
+  .lead { color: var(--muted); font-size: 1.05em; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 18px 12px; margin: 20px 0; }
+  .toc h2 { border: 0; margin: 10px 0 4px; font-size: 1em; color: var(--muted); }
+  .toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 28px; }
+  .toc li { break-inside: avoid; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  ul.tasks { list-style: none; padding-left: 0; }
+  li.task label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+  li.task label:hover { background: var(--surface); }
+  li.task input { width: 20px; height: 20px; margin-top: 4px; flex: none; accent-color: var(--accent); }
+  li.task input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--border); }
+  blockquote { margin: 16px 0; padding: 8px 18px; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; }
+  blockquote p { margin: 6px 0; }
+  .fill { display: flex; gap: 10px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+  .fill > span { font-weight: 600; min-width: 5.5em; }
+  input[type=text], textarea { font: inherit; color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; }
+  .fill input[type=text] { flex: 1 1 260px; }
+  textarea { width: 100%; min-height: 5.5em; resize: vertical; line-height: 1.5; }
+  td input[type=text] { width: 100%; min-width: 7em; }
+  .answer label { display: block; font-weight: 600; margin: 14px 0 6px; }
+  .answer textarea { font-weight: 400; }
+  details.key { border: 1px solid var(--border); border-radius: 8px; padding: 4px 16px; margin: 12px 0; background: var(--surface); }
+  details.key summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+  .table-scroll { overflow-x: auto; margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.95em; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--surface2); }
+  .table-actions { margin: -8px 0 16px; }
+  ul.cards { list-style: none; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  ul.cards li { display: flex; flex-direction: column; gap: 4px; margin: 0; }
+  a.card { display: block; flex: 1; text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+  a.card:hover { background: var(--surface2); }
+  a.card h3 { margin: 0 0 4px; font-size: 1em; color: var(--accent); }
+  a.card p { margin: 0; color: var(--muted); font-size: 0.9em; line-height: 1.5; }
+  a.mdlink { font-size: 0.82em; padding-left: 4px; }
+  .foot { margin-top: 56px; color: var(--muted); font-size: 0.88em; }
+  @media (max-width: 600px) { body { padding: 16px 16px 64px; } .toc ol { columns: 1; } }
+  @media print {
+    .toolbar, .skip, .top, .table-actions, .note { display: none !important; }
+    body { max-width: none; padding: 0; background: #fff; color: #000; }
+    a { color: #000; }
+    input[type=text], textarea { border: 1px solid #888; background: #fff; color: #000; }
+    details.key:not([open]) { display: none; }
+    h2, h3 { break-after: avoid; } table, tr, li { break-inside: avoid; }
+  }
+</style>
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><nav aria-label="Site"><a href="../index.html">Building and Measuring LLM Systems</a> <span aria-hidden="true">/</span> <a href="index.html">Worksheets and references</a></nav></header>
+<main id="main">
+<h1 id="how-to-use-this">How to use this</h1>
+<div class="toolbar" role="group" aria-label="Page actions"><a class="btn" href="../HOW-TO-USE.md" download>Download (.md)</a><button type="button" class="btn" onclick="window.print()">Print or save as PDF</button><a class="btn quiet" href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/HOW-TO-USE.md" rel="noopener">View on GitHub</a></div>
+<p class="note" id="save-note">A reference page. The source is a markdown file in the repository.</p>
+<nav class="toc" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#the-short-version">The short version</a></li><li><a href="#what-each-part-is-for">What each part is for</a></li><li><a href="#a-block-start-to-finish">A block, start to finish</a></li><li><a href="#testing-what-you-know">Testing what you know</a></li><li><a href="#the-three-that-thread-through">The three that thread through</a></li><li><a href="#making-it-stick">Making it stick</a></li><li><a href="#if-you-have-less-than-13-weeks">If you have less than 13 weeks</a></li><li><a href="#when-you-find-a-mistake">When you find a mistake</a></li><li><a href="#what-you-need">What you need</a></li></ol></nav>
+<p>Three things live here: <strong>lessons</strong> you read, <strong>notebooks</strong> you run, and <strong>projects</strong> you build. This page says how they fit together and in what order.</p>
+<h2 id="the-short-version">The short version</h2>
+<pre><code class=lang-bash>open index.html      # the landing page - every lesson, by block
+make up              # the environments, if you&#x27;re going to run notebooks</code></pre>
+<p>Then, per block: read the lessons, run the notebook, build the project if the block has one, and stop when you hit the block's exit criterion. <a href="curriculum.html"><code>CURRICULUM.md</code></a> is the map and tells you what each exit criterion is.</p>
+<p>Before Block 1, run the <a href="entry-diagnostic.html">entry diagnostic</a>. It routes repair work; it is not an admissions test.</p>
+<p>That's the whole loop. The rest of this page is detail you can come back for.</p>
+<h2 id="what-each-part-is-for">What each part is for</h2>
+<div class="table-scroll"><table><thead><tr><th scope="col">Part</th><th scope="col">What it is</th><th scope="col">How you use it</th></tr></thead><tbody><tr><td><a href="../index.html"><code>index.html</code></a></td><td>Landing page, every lesson by block</td><td>Open it in a browser. No server, no build</td></tr><tr><td><code>lessons/</code></td><td>Self-contained HTML - prose, diagrams, quizzes</td><td>Read in block order, or jump to one; each is written to stand alone</td></tr><tr><td><code>notebooks/</code></td><td>Runnable labs, one folder per block</td><td>See <a href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/notebooks/README.md" rel="noopener"><code>notebooks/README.md</code></a></td></tr><tr><td><code>projects/</code></td><td>Four portfolio builds; Project 4 is also the capstone</td><td>At block boundaries 2, 3, 4 and 8</td></tr><tr><td><a href="../artifacts/sop/index.html"><code>artifacts/sop/</code></a></td><td>Checklists, aviation-style</td><td>Open before you build, tick as you go</td></tr><tr><td><a href="engineering-foundations.html"><code>artifacts/engineering-foundations.md</code></a></td><td>Optional systems-engineering reading map</td><td>Experienced developers can skip it; otherwise use it when a project exposes a representation, time, distributed-failure or maintenance assumption</td></tr><tr><td><a href="cumulative-exam.html"><code>artifacts/cumulative-exam.md</code></a> and <a href="design-interview-rubric.html"><code>artifacts/design-interview-rubric.md</code></a></td><td>A written exam across Blocks 3, 5, 6, 7 and 8, and a scored mock design interview</td><td>After Block 8, with the <a href="p4-deployed-assistant.html#capstone">Project 4 capstone run</a></td></tr><tr><td><a href="glossary.html"><code>GLOSSARY.md</code></a></td><td>Every term, cumulative</td><td>Add to it as you go; feed into spaced repetition</td></tr><tr><td><a href="../things-to-know.html"><code>things-to-know.html</code></a></td><td>Every rule harvested from the lessons</td><td>The revision sheet. Read it when you've forgotten a block</td></tr></tbody></table></div>
+<h2 id="a-block-start-to-finish">A block, start to finish</h2>
+<ol><li><strong>Fill in the intake sheet</strong> - <a href="project-intake.html"><code>artifacts/project-intake.md</code></a>, before any code. It asks what you're building and how you'll know it worked.</li><li><strong>Read the block's lessons.</strong> They assume the previous blocks' vocabulary but not your memory of it - every acronym re-expands.</li><li><strong>Run the block's notebook.</strong> It arrives already executed so you can read the results first, then re-run it yourself. After the guided run, close the notebook and rebuild one small example from memory before looking back at the answer.</li><li><strong>Open the matching SOP</strong> when you start building. There's one for training, deep learning, fine-tuning, generative AI, LLM engineering, measurement, MCP and security, plus a non-normal checklist for when something is already broken.</li><li><strong>Hit the exit criterion.</strong> Every block has one, and it's a thing that runs rather than a box you tick.</li><li><strong>Commit.</strong> Block boundaries are the save points.</li></ol>
+<h2 id="testing-what-you-know">Testing what you know</h2>
+<p>Three tests, each asking a different question. Do them in this order after Block 8.</p>
+<ol><li><strong>The capstone run</strong> tests whether you can build. From <code>projects/p4-deployed-assistant/</code>, <code>python3 capstone/run_capstone.py</code> runs the service's tests, a drill that fails its model providers on purpose, a 29-question gold set and the memory arithmetic for a larger corpus, then writes a report. Read the two questions it misses before you change anything. See <a href="p4-deployed-assistant.html#capstone">its README</a> for the setup.</li><li><strong><a href="cumulative-exam.html">The cumulative exam</a></strong> tests whether you can reason across lessons. Ten written scenarios, closed book, about 90 minutes, with a marking key.</li><li><strong><a href="design-interview-rubric.html">The design interview rubric</a></strong> tests whether you can explain it. Two people, 45 minutes, nine questions scored 0 to 2. The lesson <em>Designing the Whole System</em> in Block 8 maps each question to where the course answers it.</li></ol>
+<p>The per-lesson quizzes check recall only. These three are the ones that tell you whether you can do the job.</p>
+<h2 id="the-three-that-thread-through">The three that thread through</h2>
+<p>These aren't modules - they're the judgment the course exists to build, practised in every block rather than taught once:</p>
+<ul><li><strong><a href="project-intake.html">The intake sheet</a></strong> - what to look for before building</li><li><strong><a href="selection-scorecard.html">The selection scorecard</a></strong> - how to evaluate a model, vendor or framework</li><li><strong><a href="glossary.html">The glossary</a></strong> - how to say it out loud</li></ul>
+<p>Re-read the intake sheet <em>after</em> the build, against what actually happened. That comparison is most of the value.</p>
+<h2 id="making-it-stick">Making it stick</h2>
+<p>Thirteen weeks is long enough to forget week 3 by week 13, so there's a mechanism:</p>
+<ul><li>Every glossary term goes into spaced repetition</li><li>Every lesson's <code>know</code> blocks are harvested into <a href="../things-to-know.html"><code>things-to-know.html</code></a></li><li>Each is a rule, a reason and a worked example - a rule on its own is a slogan</li></ul>
+<p>If you can't explain a term out loud without looking, you haven't got it yet.</p>
+<h2 id="if-you-have-less-than-13-weeks">If you have less than 13 weeks</h2>
+<p>The shortest path that still leaves you able to build something real:</p>
+<p><strong>Block 0</strong> (vocabulary) → <strong>Block 3</strong> (retrieval) → <strong>Block 5</strong> (evaluation) → <strong>Block 6</strong> (security)</p>
+<p>That's the spine of an LLM system: know the words, get grounded answers, prove they're right, and don't get owned. Blocks 1 and 2 are classical ML and matter if you're doing tabular work. Block 7 is training, which most projects should skip - its first lesson argues exactly that.</p>
+<h2 id="when-you-find-a-mistake">When you find a mistake</h2>
+<p>Two fabricated statistics reached these lessons before anyone checked them. Both came from search summaries rather than papers, and both looked entirely reasonable.</p>
+<p>So: if a number looks wrong, it might be. Check it, and if it <em>is</em> wrong, fix it at source and record the verdict. <code>make numbers</code> fails on any figure nobody has reviewed, which is what forces the judgement to happen once rather than never.</p>
+<p>Lessons and notebooks are <strong>generated</strong>. Never edit <code>lessons/*.html</code> directly - edit the module in <code>scripts/content/</code> and run <code>make lessons</code>. <a href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/CLAUDE.md" rel="noopener"><code>CLAUDE.md</code></a> has the full authoring rules.</p>
+<h2 id="what-you-need">What you need</h2>
+<p>To <strong>read</strong> the lessons: a browser. That's all - they're self-contained HTML.</p>
+<p>To <strong>run</strong> the notebooks, three things beyond a laptop that can run Docker:</p>
+<ul><li><strong>Blocks 1 to 3</strong> need the containers, and Block 3 needs pgvector running. <code>make up</code>.</li><li><strong>Blocks 3, 4 and 6</strong> call a real model on a local OpenAI-compatible endpoint (<code>localhost:11434</code> or <code>11455</code> - Ollama or LM Studio). Any chat model will do; it takes whichever the endpoint offers first.</li><li><strong>Block 7's training run</strong> uses MLX on Apple Silicon. The notebook analyses a recorded run, so you can read the result without reproducing it.</li></ul>
+<p>Blocks 5, 8 and 9 run on any Python 3 with nothing installed.</p>
+<p>Nothing here requires renting a GPU.</p>
+</main>
+<footer class="foot"><p>Source: <a href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/HOW-TO-USE.md" rel="noopener"><code>HOW-TO-USE.md</code></a>. This page is generated; edit the markdown file.</p></footer>
+<script type="application/json" id="doc-data">{"slug": "how-to-use", "lines": ["# How to use this", "", "Three things live here: **lessons** you read, **notebooks** you run, and **projects**", "you build. This page says how they fit together and in what order.", "", "## The short version", "", "```bash", "open index.html      # the landing page - every lesson, by block", "make up              # the environments, if you're going to run notebooks", "```", "", "Then, per block: read the lessons, run the notebook, build the project if the block", "has one, and stop when you hit the block's exit criterion. [`CURRICULUM.md`](CURRICULUM.md)", "is the map and tells you what each exit criterion is.", "", "Before Block 1, run the [entry diagnostic](artifacts/prerequisite-diagnostic.md).", "It routes repair work; it is not an admissions test.", "", "That's the whole loop. The rest of this page is detail you can come back for.", "", "## What each part is for", "", "| Part | What it is | How you use it |", "|---|---|---|", "| [`index.html`](index.html) | Landing page, every lesson by block | Open it in a browser. No server, no build |", "| `lessons/` | Self-contained HTML - prose, diagrams, quizzes | Read in block order, or jump to one; each is written to stand alone |", "| `notebooks/` | Runnable labs, one folder per block | See [`notebooks/README.md`](notebooks/README.md) |", "| `projects/` | Four portfolio builds; Project 4 is also the capstone | At block boundaries 2, 3, 4 and 8 |", "| [`artifacts/sop/`](artifacts/sop/) | Checklists, aviation-style | Open before you build, tick as you go |", "| [`artifacts/engineering-foundations.md`](artifacts/engineering-foundations.md) | Optional systems-engineering reading map | Experienced developers can skip it; otherwise use it when a project exposes a representation, time, distributed-failure or maintenance assumption |", "| [`artifacts/cumulative-exam.md`](artifacts/cumulative-exam.md) and [`artifacts/design-interview-rubric.md`](artifacts/design-interview-rubric.md) | A written exam across Blocks 3, 5, 6, 7 and 8, and a scored mock design interview | After Block 8, with the [Project 4 capstone run](projects/p4-deployed-assistant/README.md#capstone) |", "| [`GLOSSARY.md`](GLOSSARY.md) | Every term, cumulative | Add to it as you go; feed into spaced repetition |", "| [`things-to-know.html`](things-to-know.html) | Every rule harvested from the lessons | The revision sheet. Read it when you've forgotten a block |", "", "## A block, start to finish", "", "1. **Fill in the intake sheet** - [`artifacts/project-intake.md`](artifacts/project-intake.md),", "   before any code. It asks what you're building and how you'll know it worked.", "2. **Read the block's lessons.** They assume the previous blocks' vocabulary but not", "   your memory of it - every acronym re-expands.", "3. **Run the block's notebook.** It arrives already executed so you can read the", "   results first, then re-run it yourself. After the guided run, close the notebook", "   and rebuild one small example from memory before looking back at the answer.", "4. **Open the matching SOP** when you start building. There's one for training,", "   deep learning, fine-tuning, generative AI, LLM engineering, measurement, MCP and", "   security, plus a non-normal checklist for when something is already broken.", "5. **Hit the exit criterion.** Every block has one, and it's a thing that runs", "   rather than a box you tick.", "6. **Commit.** Block boundaries are the save points.", "", "## Testing what you know", "", "Three tests, each asking a different question. Do them in this order after Block 8.", "", "1. **The capstone run** tests whether you can build. From `projects/p4-deployed-assistant/`,", "   `python3 capstone/run_capstone.py` runs the service's tests, a drill that fails its", "   model providers on purpose, a 29-question gold set and the memory arithmetic for a larger", "   corpus, then writes a report. Read the two questions it misses before you change anything.", "   See [its README](projects/p4-deployed-assistant/README.md#capstone) for the setup.", "2. **[The cumulative exam](artifacts/cumulative-exam.md)** tests whether you can reason across", "   lessons. Ten written scenarios, closed book, about 90 minutes, with a marking key.", "3. **[The design interview rubric](artifacts/design-interview-rubric.md)** tests whether you can", "   explain it. Two people, 45 minutes, nine questions scored 0 to 2. The lesson", "   *Designing the Whole System* in Block 8 maps each question to where the course answers it.", "", "The per-lesson quizzes check recall only. These three are the ones that tell you whether", "you can do the job.", "", "## The three that thread through", "", "These aren't modules - they're the judgment the course exists to build, practised", "in every block rather than taught once:", "", "- **[The intake sheet](artifacts/project-intake.md)** - what to look for before building", "- **[The selection scorecard](artifacts/selection-scorecard.md)** - how to evaluate a model, vendor or framework", "- **[The glossary](GLOSSARY.md)** - how to say it out loud", "", "Re-read the intake sheet *after* the build, against what actually happened. That", "comparison is most of the value.", "", "## Making it stick", "", "Thirteen weeks is long enough to forget week 3 by week 13, so there's a mechanism:", "", "- Every glossary term goes into spaced repetition", "- Every lesson's `know` blocks are harvested into [`things-to-know.html`](things-to-know.html)", "- Each is a rule, a reason and a worked example - a rule on its own is a slogan", "", "If you can't explain a term out loud without looking, you haven't got it yet.", "", "## If you have less than 13 weeks", "", "The shortest path that still leaves you able to build something real:", "", "**Block 0** (vocabulary) → **Block 3** (retrieval) → **Block 5** (evaluation) → **Block 6** (security)", "", "That's the spine of an LLM system: know the words, get grounded answers, prove", "they're right, and don't get owned. Blocks 1 and 2 are classical ML and matter if", "you're doing tabular work. Block 7 is training, which most projects should skip -", "its first lesson argues exactly that.", "", "## When you find a mistake", "", "Two fabricated statistics reached these lessons before anyone checked them. Both", "came from search summaries rather than papers, and both looked entirely reasonable.", "", "So: if a number looks wrong, it might be. Check it, and if it *is* wrong, fix it at", "source and record the verdict. `make numbers` fails on any figure nobody has", "reviewed, which is what forces the judgement to happen once rather than never.", "", "Lessons and notebooks are **generated**. Never edit `lessons/*.html` directly - edit", "the module in `scripts/content/` and run `make lessons`. [`CLAUDE.md`](CLAUDE.md) has", "the full authoring rules.", "", "## What you need", "", "To **read** the lessons: a browser. That's all - they're self-contained HTML.", "", "To **run** the notebooks, three things beyond a laptop that can run Docker:", "", "- **Blocks 1 to 3** need the containers, and Block 3 needs pgvector running. `make up`.", "- **Blocks 3, 4 and 6** call a real model on a local OpenAI-compatible endpoint", "  (`localhost:11434` or `11455` - Ollama or LM Studio). Any chat model will do; it", "  takes whichever the endpoint offers first.", "- **Block 7's training run** uses MLX on Apple Silicon. The notebook analyses a", "  recorded run, so you can read the result without reproducing it.", "", "Blocks 5, 8 and 9 run on any Python 3 with nothing installed.", "", "Nothing here requires renting a GPU.", ""], "fields": []}</script>
+
+</body>
+</html>

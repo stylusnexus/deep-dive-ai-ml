@@ -9,10 +9,12 @@ Deliberately not a general markdown parser. It handles the forms these files
 actually use and raises on anything else, because silently dropping a checklist
 item is precisely the failure this repo is arranged around preventing.
 """
-import html, json, pathlib, re, sys
+import html, json, pathlib, posixpath, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / "artifacts" / "sop"
+sys.path.insert(0, str(ROOT / "scripts"))
+from build_docs import BY_SRC          # worksheet pages the checklists link to
 
 ORDER = ["README", "training", "deep-learning", "fine-tuning", "generative-ai",
          "llm-engineering", "tuning", "measurement", "judging", "security",
@@ -37,7 +39,11 @@ def inline(t: str) -> str:
         if target.endswith(".md") and stem in SECTION_IDS:
             return f'<a class="jump" data-to="{stem}">{label} &rarr;</a>'
         if target.endswith(".md"):
-            # a markdown file that is not a section: open it where it lives
+            # a markdown file that is not a section: its worksheet page if it has one,
+            # otherwise open it where it lives
+            repo_path = posixpath.normpath(posixpath.join("artifacts/sop", target))
+            if repo_path in BY_SRC:
+                return f'<a href="../../docs/{BY_SRC[repo_path]}.html">{label}</a>'
             href = target if target.startswith(("http", "../")) else f"../{target}"
             return f'<a href="{href}">{label}</a>'
         return f'<a href="{target}" target="_blank" rel="noopener">{label}</a>'
@@ -48,6 +54,7 @@ def inline(t: str) -> str:
 def parse(path: pathlib.Path) -> dict:
     doc = {"id": path.stem, "title": "", "blocks": []}
     lines = path.read_text().split("\n")
+    doc["lines"] = lines
     i, n = 0, len(lines)
     item_no = 0
 
@@ -72,7 +79,7 @@ def parse(path: pathlib.Path) -> dict:
             if killer:
                 body = body[1:].strip()
             item_no += 1
-            doc["blocks"].append({"t": "item", "killer": killer,
+            doc["blocks"].append({"t": "item", "killer": killer, "ln": i,
                                   "id": f"{doc['id']}-{item_no}", "text": body})
             i += 1
         elif s.startswith("- "):
@@ -121,7 +128,10 @@ def render(doc: dict) -> str:
                f'<h1>{E(doc["title"])}</h1>'
                f'<div class="progress"><span class="bar"><i></i></span>'
                f'<span class="count"></span>'
-               f'<button class="reset" title="Clear ticks on this checklist">reset</button></div></div>')
+               f'<button class="reset" title="Clear ticks on this checklist">reset</button></div>'
+               f'<div class="acts"><a class="act" href="{doc["id"]}.md" download>Download blank (.md)</a>'
+               f'<button type="button" class="act" data-dl="{doc["id"]}">Download my ticks (.md)</button>'
+               f'<button type="button" class="act" data-print>Print or save as PDF</button></div></div>')
     for b in doc["blocks"]:
         t = b["t"]
         if t == "h2":
@@ -167,6 +177,10 @@ for name in ORDER:
 md_items = sum(len(re.findall(r"^- \[ \]", (SRC / f"{d['id']}.md").read_text(), re.M)) for d in docs)
 html_items = sum(sum(1 for b in d["blocks"] if b["t"] == "item") for d in docs)
 assert md_items == html_items, f"lost items: {md_items} in markdown, {html_items} in HTML"
+
+SRC_JSON = json.dumps({d["id"]: {"lines": d["lines"],
+                                  "items": {b["id"]: b["ln"] for b in d["blocks"] if b["t"] == "item"}}
+                       for d in docs}, ensure_ascii=False).replace("</", "<\\/")
 
 nav = "".join(
     f'<button class="navbtn{" master" if d["id"] == "README" else ""}" data-to="{d["id"]}">'
@@ -244,9 +258,20 @@ th {{ color:var(--muted); font-size:.85em; text-transform:uppercase; letter-spac
         border-radius:6px; padding:4px 10px; font-size:.85em; cursor:pointer; }}
 .reset:hover, .back:hover {{ color:var(--text); }}
 .back {{ display:inline-block; margin-bottom:10px; border-color:var(--accent); color:var(--accent); }}
+.acts {{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }}
+.act {{ background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:6px;
+        padding:5px 12px; font:inherit; font-size:.85em; text-decoration:none; cursor:pointer; }}
+.act:hover {{ border-color:var(--accent); }}
+@media print {{
+  :root {{ --bg:#fff; --surface:#fff; --surface2:#fff; --border:#999; --text:#000; --muted:#333; --accent:#000; }}
+  nav, .acts, .reset, .back {{ display:none !important; }}
+  body {{ background:#fff; color:#000; }}
+  .item {{ break-inside:avoid; }}
+}}
 </style></head><body>
 <nav><span class="brand">MASTER SOP</span>{nav}</nav>
 <main>{"".join(render(d) for d in docs)}</main>
+<script type="application/json" id="sop-src">{SRC_JSON}</script>
 <script>
 const KEY = "sop-v1";
 const load = () => {{ try {{ return JSON.parse(localStorage.getItem(KEY)) || {{}}; }} catch {{ return {{}}; }} }};
@@ -344,6 +369,22 @@ document.addEventListener("change", e => {{
   if (!box) return;
   if (box.checked) state[box.dataset.id] = 1; else delete state[box.dataset.id];
   save(state); paint();
+}});
+
+const SRC = JSON.parse(document.getElementById("sop-src").textContent);
+document.addEventListener("click", e => {{
+  const dl = e.target.closest("[data-dl]");
+  if (dl) {{
+    const id = dl.dataset.dl, d = SRC[id], lines = d.lines.slice();
+    for (const [iid, ln] of Object.entries(d.items)) if (state[iid]) lines[ln] = lines[ln].replace("[ ]", "[x]");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([lines.join("\\n")], {{ type: "text/markdown;charset=utf-8" }}));
+    a.download = id + "-my-ticks.md";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    return;
+  }}
+  if (e.target.closest("[data-print]")) window.print();
 }});
 
 document.querySelectorAll("input[type=checkbox]").forEach(b => {{ b.checked = !!state[b.dataset.id]; }});

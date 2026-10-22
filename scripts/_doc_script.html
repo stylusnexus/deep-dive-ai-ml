@@ -1,0 +1,120 @@
+<script>
+(function () {
+  "use strict";
+  var data = JSON.parse(document.getElementById("doc-data").textContent);
+  var KEY = "dd-doc:" + data.slug;
+
+  /*serialize:start*/
+  function splitRow(line) {
+    var s = line.trim();
+    if (s.charAt(0) === "|") s = s.slice(1);
+    if (s.slice(-1) === "|" && s.slice(-2) !== "\\|") s = s.slice(0, -1);
+    var cells = [], cur = "";
+    for (var i = 0; i < s.length; i++) {
+      if (s[i] === "\\" && s[i + 1] === "|") { cur += "\\|"; i++; }
+      else if (s[i] === "|") { cells.push(cur.trim()); cur = ""; }
+      else cur += s[i];
+    }
+    cells.push(cur.trim());
+    return cells;
+  }
+
+  // Pure: the original markdown lines plus the visitor's values in, markdown text out.
+  // With no values it returns the source unchanged.
+  function serialize(lines, fields, values) {
+    var byLine = {};
+    fields.forEach(function (f) { (byLine[f.ln] = byLine[f.ln] || []).push(f); });
+    var out = [];
+    lines.forEach(function (line, i) {
+      var cur = line, before = [], fs = byLine[i] || [], cells = null;
+      fs.forEach(function (f) {
+        var v = values[f.id];
+        if (f.kind === "check") {
+          if (v === true) cur = cur.replace("[ ]", "[x]");
+        } else if (!v || typeof v !== "string" || !v.trim()) {
+          return;
+        } else if (f.kind === "label") {
+          cur = cur.replace(/\s+$/, "") + " " + v.trim().replace(/\s*\n\s*/g, " ");
+        } else if (f.kind === "cell") {
+          cells = cells || splitRow(cur);
+          cells[f.c] = v.trim().replace(/\s*\n\s*/g, " ").replace(/\|/g, "\\|");
+        } else if (f.kind === "quote") {
+          cur = v.trim().split("\n").map(function (t) { return ("> " + t).replace(/\s+$/, ""); }).join("\n");
+        } else if (f.kind === "insert") {
+          before = v.trim().split("\n").map(function (t) { return ("> " + t).replace(/\s+$/, ""); });
+          before.push("");
+        }
+      });
+      if (cells) cur = "| " + cells.join(" | ") + " |";
+      out = out.concat(before, [cur]);
+    });
+    return out.join("\n");
+  }
+  /*serialize:end*/
+  window.ddSerialize = serialize;
+
+  var els = Array.prototype.slice.call(document.querySelectorAll("[data-fid]"));
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { saved = {}; }
+  els.forEach(function (el) {
+    var v = saved[el.getAttribute("data-fid")];
+    if (v === undefined) return;
+    if (el.type === "checkbox") el.checked = v === true; else el.value = v;
+  });
+
+  function collect() {
+    var m = {};
+    els.forEach(function (el) {
+      var v = el.type === "checkbox" ? el.checked : el.value;
+      if (v === true || (typeof v === "string" && v.trim() !== "")) m[el.getAttribute("data-fid")] = v;
+    });
+    return m;
+  }
+  var note = document.getElementById("save-note"), base = note ? note.textContent : "";
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(collect())); } catch (e) { /* storage unavailable */ }
+  }
+  document.addEventListener("input", function (e) { if (e.target.hasAttribute && e.target.hasAttribute("data-fid")) save(); });
+  document.addEventListener("change", function (e) { if (e.target.hasAttribute && e.target.hasAttribute("data-fid")) save(); });
+
+  function download(name, text, type) {
+    var blob = new Blob([text], { type: type });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  var dl = document.getElementById("dl-answers");
+  if (dl) dl.addEventListener("click", function () {
+    download(data.slug + "-my-answers.md", serialize(data.lines, data.fields, collect()), "text/markdown;charset=utf-8");
+  });
+
+  var clear = document.getElementById("clear-answers"), armed = null;
+  if (clear) clear.addEventListener("click", function () {
+    if (!armed) {
+      clear.textContent = "Click again to clear";
+      armed = setTimeout(function () { armed = null; clear.textContent = "Clear my answers"; }, 4000);
+      return;
+    }
+    clearTimeout(armed); armed = null; clear.textContent = "Clear my answers";
+    els.forEach(function (el) { if (el.type === "checkbox") el.checked = false; else el.value = ""; });
+    try { localStorage.removeItem(KEY); } catch (e) { /* ignore */ }
+  });
+
+  function csvCell(s) { return '"' + String(s).replace(/"/g, '""') + '"'; }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-csv-btn]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var table = document.querySelector('table[data-csv="' + btn.getAttribute("data-csv-btn") + '"]');
+      var rows = [Array.prototype.map.call(table.querySelectorAll("thead th"), function (th) { return csvCell(th.textContent); }).join(",")];
+      Array.prototype.forEach.call(table.querySelectorAll("tbody tr"), function (tr) {
+        rows.push(Array.prototype.map.call(tr.children, function (td) {
+          var inp = td.querySelector("input,textarea");
+          return csvCell(inp ? inp.value : td.textContent);
+        }).join(","));
+      });
+      download(data.slug + "-table-" + btn.getAttribute("data-csv-btn") + ".csv", "﻿" + rows.join("\r\n") + "\r\n", "text/csv;charset=utf-8");
+    });
+  });
+})();
+</script>

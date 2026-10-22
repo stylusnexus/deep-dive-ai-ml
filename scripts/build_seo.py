@@ -12,6 +12,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 from lesson_map import slug_map
 from seo_meta import SITE, NAME, plain
+from build_docs import DOCS
 
 REPO = "https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/"
 
@@ -42,7 +43,10 @@ def main():
     missing = set(by_topic) - {t for t, _, _ in sections}
     assert not missing, f"lesson sets missing from the landing page order: {sorted(missing)}"
 
-    pages = [("", "index.html"), ("things-to-know.html", "things-to-know.html")]
+    pages = [("", "index.html"), ("things-to-know.html", "things-to-know.html"),
+             ("docs/", "docs/index.html")]
+    pages += [(f"docs/{slug}.html", f"docs/{slug}.html") for _, slug, _, _ in DOCS]
+    pages += [("artifacts/sop/index.html", "artifacts/sop/index.html")]
     for topic, _, _ in sections:
         pages += [(f"lessons/{topic}/{i['file']}", f"lessons/{topic}/{i['file']}")
                   for i in by_topic.get(topic, [])]
@@ -84,6 +88,11 @@ def main():
         f"- [Curriculum]({REPO}CURRICULUM.md): all blocks, week by week, each with a runnable exit criterion.",
         f"- [Glossary]({REPO}GLOSSARY.md): every term the course defines.",
         f"- [Things to Know]({SITE}things-to-know.html): every load-bearing rule, linked to the lesson that earns it.",
+        f"- [Worksheets and references]({SITE}docs/): fill-in worksheets (project intake, selection scorecard, entry diagnostic, cumulative exam, design interview rubric) and reference pages, each also available as markdown.",
+        f"- [SOP checklists]({SITE}artifacts/sop/index.html): operating checklists with killer items and hard gates.",
+        f"- [Project intake sheet]({REPO}artifacts/project-intake.md): ten questions to answer before writing code.",
+        f"- [Selection scorecard]({REPO}artifacts/selection-scorecard.md): for choosing a model, a vendor or a framework.",
+        f"- [Design interview rubric]({REPO}artifacts/design-interview-rubric.md): a scored 45-minute mock interview on nine system-design questions.",
         f"- [Project 4, deployed assistant]({REPO}projects/p4-deployed-assistant/README.md): an authenticated, rate-limited retrieval service with provider failover.",
         f"- [Cumulative exam]({REPO}artifacts/cumulative-exam.md): ten scenarios across Blocks 3 to 8 with a marking key.",
         "", "## Optional", "",

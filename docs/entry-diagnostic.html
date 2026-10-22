@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entry Diagnostic | Building and Measuring LLM Systems</title>
+<meta name="description" content="This is a routing check, not an exam. Spend 30–45 minutes, answer without A fill-in worksheet from the free Building and Measuring LLM Systems course.">
+<link rel="canonical" href="https://stylusnexus.github.io/deep-dive-ai-ml/docs/entry-diagnostic.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Building and Measuring LLM Systems">
+<meta property="og:title" content="Entry Diagnostic">
+<meta property="og:description" content="This is a routing check, not an exam. Spend 30–45 minutes, answer without A fill-in worksheet from the free Building and Measuring LLM Systems course.">
+<meta property="og:url" content="https://stylusnexus.github.io/deep-dive-ai-ml/docs/entry-diagnostic.html">
+<meta property="og:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Entry Diagnostic">
+<meta name="twitter:description" content="This is a routing check, not an exam. Spend 30–45 minutes, answer without A fill-in worksheet from the free Building and Measuring LLM Systems course.">
+<meta name="twitter:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Entry Diagnostic", "description": "This is a routing check, not an exam. Spend 30–45 minutes, answer without A fill-in worksheet from the free Building and Measuring LLM Systems course.", "url": "https://stylusnexus.github.io/deep-dive-ai-ml/docs/entry-diagnostic.html", "inLanguage": "en", "isAccessibleForFree": true, "learningResourceType": "worksheet", "publisher": {"@type": "Organization", "name": "Stylus Nexus", "url": "https://github.com/stylusnexus"}, "isPartOf": {"@type": "Course", "name": "Building and Measuring LLM Systems", "url": "https://stylusnexus.github.io/deep-dive-ai-ml/"}, "about": "Building and Measuring LLM Systems"}</script>
+<style>
+  :root {
+    --bg: #ffffff; --surface: #f3f5fa; --surface2: #e8ecf5; --border: #cfd6e6;
+    --accent: #2f4fd0; --accent2: #5b37c4; --green: #0d7a55; --red: #b42318;
+    --text: #1a1f2e; --muted: #4f5a70; --code-bg: #eef1f8; --field: #ffffff;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+      --accent: #8aa4ff; --accent2: #b9a2fb; --green: #34d399; --red: #f87171;
+      --text: #e2e8f0; --muted: #a3afc2; --code-bg: #0d1117; --field: #12141c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { max-width: 860px; margin: 0 auto; padding: 24px 24px 80px; background: var(--bg); color: var(--text);
+         line-height: 1.7; font-size: 16px; font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; }
+  a { color: var(--accent); }
+  h1 { font-size: 1.9em; line-height: 1.25; margin: 20px 0 8px; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { color: var(--accent2); font-size: 1.1em; margin: 28px 0 8px; }
+  h4 { font-size: 1em; margin: 20px 0 6px; }
+  p { margin: 12px 0; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 8px; overflow-x: auto; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 6px; z-index: 10; }
+  .skip:focus { left: 8px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .top { padding: 4px 0 8px; font-size: 0.92em; color: var(--muted); }
+  .top a { color: var(--muted); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+  .btn { font: inherit; font-size: 0.9em; font-weight: 600; text-decoration: none; cursor: pointer; color: var(--text);
+         background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; line-height: 1.2; }
+  .btn:hover { background: var(--surface2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.quiet { background: transparent; }
+  .btn.small { font-size: 0.82em; padding: 6px 10px; }
+  .note { color: var(--muted); font-size: 0.92em; margin: 6px 0 18px; }
+  .lead { color: var(--muted); font-size: 1.05em; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 18px 12px; margin: 20px 0; }
+  .toc h2 { border: 0; margin: 10px 0 4px; font-size: 1em; color: var(--muted); }
+  .toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 28px; }
+  .toc li { break-inside: avoid; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  ul.tasks { list-style: none; padding-left: 0; }
+  li.task label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+  li.task label:hover { background: var(--surface); }
+  li.task input { width: 20px; height: 20px; margin-top: 4px; flex: none; accent-color: var(--accent); }
+  li.task input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--border); }
+  blockquote { margin: 16px 0; padding: 8px 18px; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; }
+  blockquote p { margin: 6px 0; }
+  .fill { display: flex; gap: 10px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+  .fill > span { font-weight: 600; min-width: 5.5em; }
+  input[type=text], textarea { font: inherit; color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; }
+  .fill input[type=text] { flex: 1 1 260px; }
+  textarea { width: 100%; min-height: 5.5em; resize: vertical; line-height: 1.5; }
+  td input[type=text] { width: 100%; min-width: 7em; }
+  .answer label { display: block; font-weight: 600; margin: 14px 0 6px; }
+  .answer textarea { font-weight: 400; }
+  details.key { border: 1px solid var(--border); border-radius: 8px; padding: 4px 16px; margin: 12px 0; background: var(--surface); }
+  details.key summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+  .table-scroll { overflow-x: auto; margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.95em; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--surface2); }
+  .table-actions { margin: -8px 0 16px; }
+  ul.cards { list-style: none; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  ul.cards li { display: flex; flex-direction: column; gap: 4px; margin: 0; }
+  a.card { display: block; flex: 1; text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+  a.card:hover { background: var(--surface2); }
+  a.card h3 { margin: 0 0 4px; font-size: 1em; color: var(--accent); }
+  a.card p { margin: 0; color: var(--muted); font-size: 0.9em; line-height: 1.5; }
+  a.mdlink { font-size: 0.82em; padding-left: 4px; }
+  .foot { margin-top: 56px; color: var(--muted); font-size: 0.88em; }
+  @media (max-width: 600px) { body { padding: 16px 16px 64px; } .toc ol { columns: 1; } }
+  @media print {
+    .toolbar, .skip, .top, .table-actions, .note { display: none !important; }
+    body { max-width: none; padding: 0; background: #fff; color: #000; }
+    a { color: #000; }
+    input[type=text], textarea { border: 1px solid #888; background: #fff; color: #000; }
+    details.key:not([open]) { display: none; }
+    h2, h3 { break-after: avoid; } table, tr, li { break-inside: avoid; }
+  }
+</style>
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><nav aria-label="Site"><a href="../index.html">Building and Measuring LLM Systems</a> <span aria-hidden="true">/</span> <a href="index.html">Worksheets and references</a></nav></header>
+<main id="main">
+<h1 id="entry-diagnostic">Entry Diagnostic</h1>
+<div class="toolbar" role="group" aria-label="Page actions"><a class="btn" href="../artifacts/prerequisite-diagnostic.md" download>Download blank (.md)</a><button type="button" class="btn primary" id="dl-answers">Download my answers (.md)</button><button type="button" class="btn" onclick="window.print()">Print or save as PDF</button><button type="button" class="btn quiet" id="clear-answers">Clear my answers</button><a class="btn quiet" href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/artifacts/prerequisite-diagnostic.md" rel="noopener">View on GitHub</a></div>
+<p class="note" id="save-note">What you tick or type stays in this browser. To keep it, download your answers as a markdown file, or print this page or save it as a PDF.</p>
+<nav class="toc" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#python-and-data">Python and data</a></li><li><a href="#mathematics-and-statistics">Mathematics and statistics</a></li><li><a href="#applied-judgement">Applied judgement</a></li><li><a href="#routing">Routing</a></li><li><a href="#repair-paths">Repair paths</a></li></ol></nav>
+<p>This is a routing check, not an exam. Spend 30–45 minutes, answer without searching, and use the result to choose a repair path before starting Block 1. Do not turn the score into a gate: the point is to expose a missing prerequisite while it is still cheap to repair.</p>
+<h2 id="python-and-data">Python and data</h2>
+<ul class=tasks><li class="task"><label><input type="checkbox" data-fid="f9"> <span>Write a function that accepts a list of numbers and returns the mean, handling an empty list deliberately.</span></label></li><li class="task"><label><input type="checkbox" data-fid="f11"> <span>Explain the difference between a list, a dictionary and a NumPy array.</span></label></li><li class="task"><label><input type="checkbox" data-fid="f12"> <span>Load a CSV, inspect dtypes and missing values, and state one data-quality question the first inspection cannot answer.</span></label></li><li class="task"><label><input type="checkbox" data-fid="f14"> <span>Explain why fitting an imputer or scaler before a train/test split leaks information.</span></label></li></ul>
+<h2 id="mathematics-and-statistics">Mathematics and statistics</h2>
+<ul class=tasks><li class="task"><label><input type="checkbox" data-fid="f19"> <span>Explain what a derivative represents in an optimisation problem.</span></label></li><li class="task"><label><input type="checkbox" data-fid="f20"> <span>Read a matrix multiplication shape and predict whether two matrices can be multiplied.</span></label></li><li class="task"><label><input type="checkbox" data-fid="f22"> <span>Explain the difference between a mean and a median, and name a case where the median is the safer summary.</span></label></li><li class="task"><label><input type="checkbox" data-fid="f24"> <span>Interpret a confidence interval without calling it the probability that a fixed parameter lies inside the observed interval.</span></label></li></ul>
+<h2 id="applied-judgement">Applied judgement</h2>
+<ul class=tasks><li class="task"><label><input type="checkbox" data-fid="f29"> <span>Name the decision a model output would change and the cost of each error.</span></label></li><li class="task"><label><input type="checkbox" data-fid="f30"> <span>Describe a dumb baseline for one prediction problem.</span></label></li><li class="task"><label><input type="checkbox" data-fid="f31"> <span>State what evidence would make you stop building and use a rule, lookup or query instead.</span></label></li></ul>
+<h2 id="routing">Routing</h2>
+<ul><li><strong>9–11 checked:</strong> start the curriculum normally.</li><li><strong>6–8 checked:</strong> start normally, but repair the unchecked items during Block 1.</li><li><strong>0–5 checked:</strong> spend one short study session on the unchecked prerequisites, then rerun this diagnostic. Do not wait for mathematical perfection.</li></ul>
+<h2 id="repair-paths">Repair paths</h2>
+<p>Each unchecked item has a lesson that teaches it. The lessons are in the <a href="https://stylusnexus.github.io/statistics-for-ai/" rel="noopener">statistics-for-ai</a> course and its <a href="https://stylusnexus.github.io/statistics-for-ai/math.html" rel="noopener">math companion</a>.</p>
+<ul><li>Derivative in an optimisation problem: <a href="https://stylusnexus.github.io/statistics-for-ai/ai-math-foundations/lsn-1786039516003-derivatives.html" rel="noopener">Math lesson 4, Derivatives</a></li><li>Matrix multiplication shapes: <a href="https://stylusnexus.github.io/statistics-for-ai/ai-math-foundations/lsn-1786039516001-matrices-and-transformations.html" rel="noopener">Math lesson 2, Matrices</a></li><li>Mean versus median: <a href="https://stylusnexus.github.io/statistics-for-ai/ai-statistics-foundations/lsn-1786039515001-describing-data.html" rel="noopener">Statistics lesson 2, Describing Data</a></li><li>Confidence intervals: <a href="https://stylusnexus.github.io/statistics-for-ai/ai-statistics-foundations/lsn-1786039515004-sampling-and-estimation.html" rel="noopener">Statistics lesson 5, Sampling and Estimation</a>, then <a href="https://stylusnexus.github.io/statistics-for-ai/ai-statistics-foundations/lsn-1786039515015-bayesian-inference.html" rel="noopener">lesson 16, Bayesian Inference</a> for how a credible interval differs</li><li>Leakage from fitting an imputer or scaler before the split: <a href="https://stylusnexus.github.io/statistics-for-ai/ai-statistics-foundations/lsn-1786039515016-study-design-and-confounding.html" rel="noopener">Statistics lesson 17, Study Design</a> and <a href="https://stylusnexus.github.io/statistics-for-ai/ai-statistics-foundations/lsn-1786039515017-resampling-bootstrap-and-cross-validation.html" rel="noopener">lesson 18, Resampling</a></li></ul>
+<p>The score is a routing signal, not a measure of intelligence or eligibility. A missed item tells you what to practise; it does not tell you to postpone building until you have completed another course.</p>
+</main>
+<footer class="foot"><p>Source: <a href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/artifacts/prerequisite-diagnostic.md" rel="noopener"><code>artifacts/prerequisite-diagnostic.md</code></a>. This page is generated; edit the markdown file.</p></footer>
+<script type="application/json" id="doc-data">{"slug": "entry-diagnostic", "lines": ["# Entry Diagnostic", "", "This is a routing check, not an exam. Spend 30–45 minutes, answer without", "searching, and use the result to choose a repair path before starting Block 1.", "Do not turn the score into a gate: the point is to expose a missing prerequisite", "while it is still cheap to repair.", "", "## Python and data", "", "- [ ] Write a function that accepts a list of numbers and returns the mean,", "  handling an empty list deliberately.", "- [ ] Explain the difference between a list, a dictionary and a NumPy array.", "- [ ] Load a CSV, inspect dtypes and missing values, and state one data-quality", "  question the first inspection cannot answer.", "- [ ] Explain why fitting an imputer or scaler before a train/test split leaks", "  information.", "", "## Mathematics and statistics", "", "- [ ] Explain what a derivative represents in an optimisation problem.", "- [ ] Read a matrix multiplication shape and predict whether two matrices can be", "  multiplied.", "- [ ] Explain the difference between a mean and a median, and name a case where", "  the median is the safer summary.", "- [ ] Interpret a confidence interval without calling it the probability that a", "  fixed parameter lies inside the observed interval.", "", "## Applied judgement", "", "- [ ] Name the decision a model output would change and the cost of each error.", "- [ ] Describe a dumb baseline for one prediction problem.", "- [ ] State what evidence would make you stop building and use a rule, lookup or", "  query instead.", "", "## Routing", "", "- **9–11 checked:** start the curriculum normally.", "- **6–8 checked:** start normally, but repair the unchecked items during Block 1.", "- **0–5 checked:** spend one short study session on the unchecked prerequisites,", "  then rerun this diagnostic. Do not wait for mathematical perfection.", "", "## Repair paths", "", "Each unchecked item has a lesson that teaches it. The lessons are in the", "[statistics-for-ai](https://stylusnexus.github.io/statistics-for-ai/) course and its [math companion](https://stylusnexus.github.io/statistics-for-ai/math.html).", "", "- Derivative in an optimisation problem: [Math lesson 4, Derivatives](https://stylusnexus.github.io/statistics-for-ai/ai-math-foundations/lsn-1786039516003-derivatives.html)", "- Matrix multiplication shapes: [Math lesson 2, Matrices](https://stylusnexus.github.io/statistics-for-ai/ai-math-foundations/lsn-1786039516001-matrices-and-transformations.html)", "- Mean versus median: [Statistics lesson 2, Describing Data](https://stylusnexus.github.io/statistics-for-ai/ai-statistics-foundations/lsn-1786039515001-describing-data.html)", "- Confidence intervals: [Statistics lesson 5, Sampling and Estimation](https://stylusnexus.github.io/statistics-for-ai/ai-statistics-foundations/lsn-1786039515004-sampling-and-estimation.html), then [lesson 16, Bayesian Inference](https://stylusnexus.github.io/statistics-for-ai/ai-statistics-foundations/lsn-1786039515015-bayesian-inference.html) for how a credible interval differs", "- Leakage from fitting an imputer or scaler before the split: [Statistics lesson 17, Study Design](https://stylusnexus.github.io/statistics-for-ai/ai-statistics-foundations/lsn-1786039515016-study-design-and-confounding.html) and [lesson 18, Resampling](https://stylusnexus.github.io/statistics-for-ai/ai-statistics-foundations/lsn-1786039515017-resampling-bootstrap-and-cross-validation.html)", "", "The score is a routing signal, not a measure of intelligence or eligibility. A", "missed item tells you what to practise; it does not tell you to postpone building", "until you have completed another course.", ""], "fields": [{"id": "f9", "kind": "check", "ln": 9}, {"id": "f11", "kind": "check", "ln": 11}, {"id": "f12", "kind": "check", "ln": 12}, {"id": "f14", "kind": "check", "ln": 14}, {"id": "f19", "kind": "check", "ln": 19}, {"id": "f20", "kind": "check", "ln": 20}, {"id": "f22", "kind": "check", "ln": 22}, {"id": "f24", "kind": "check", "ln": 24}, {"id": "f29", "kind": "check", "ln": 29}, {"id": "f30", "kind": "check", "ln": 30}, {"id": "f31", "kind": "check", "ln": 31}]}</script>
+<script>
+(function () {
+  "use strict";
+  var data = JSON.parse(document.getElementById("doc-data").textContent);
+  var KEY = "dd-doc:" + data.slug;
+
+  /*serialize:start*/
+  function splitRow(line) {
+    var s = line.trim();
+    if (s.charAt(0) === "|") s = s.slice(1);
+    if (s.slice(-1) === "|" && s.slice(-2) !== "\\|") s = s.slice(0, -1);
+    var cells = [], cur = "";
+    for (var i = 0; i < s.length; i++) {
+      if (s[i] === "\\" && s[i + 1] === "|") { cur += "\\|"; i++; }
+      else if (s[i] === "|") { cells.push(cur.trim()); cur = ""; }
+      else cur += s[i];
+    }
+    cells.push(cur.trim());
+    return cells;
+  }
+
+  // Pure: the original markdown lines plus the visitor's values in, markdown text out.
+  // With no values it returns the source unchanged.
+  function serialize(lines, fields, values) {
+    var byLine = {};
+    fields.forEach(function (f) { (byLine[f.ln] = byLine[f.ln] || []).push(f); });
+    var out = [];
+    lines.forEach(function (line, i) {
+      var cur = line, before = [], fs = byLine[i] || [], cells = null;
+      fs.forEach(function (f) {
+        var v = values[f.id];
+        if (f.kind === "check") {
+          if (v === true) cur = cur.replace("[ ]", "[x]");
+        } else if (!v || typeof v !== "string" || !v.trim()) {
+          return;
+        } else if (f.kind === "label") {
+          cur = cur.replace(/\s+$/, "") + " " + v.trim().replace(/\s*\n\s*/g, " ");
+        } else if (f.kind === "cell") {
+          cells = cells || splitRow(cur);
+          cells[f.c] = v.trim().replace(/\s*\n\s*/g, " ").replace(/\|/g, "\\|");
+        } else if (f.kind === "quote") {
+          cur = v.trim().split("\n").map(function (t) { return ("> " + t).replace(/\s+$/, ""); }).join("\n");
+        } else if (f.kind === "insert") {
+          before = v.trim().split("\n").map(function (t) { return ("> " + t).replace(/\s+$/, ""); });
+          before.push("");
+        }
+      });
+      if (cells) cur = "| " + cells.join(" | ") + " |";
+      out = out.concat(before, [cur]);
+    });
+    return out.join("\n");
+  }
+  /*serialize:end*/
+  window.ddSerialize = serialize;
+
+  var els = Array.prototype.slice.call(document.querySelectorAll("[data-fid]"));
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { saved = {}; }
+  els.forEach(function (el) {
+    var v = saved[el.getAttribute("data-fid")];
+    if (v === undefined) return;
+    if (el.type === "checkbox") el.checked = v === true; else el.value = v;
+  });
+
+  function collect() {
+    var m = {};
+    els.forEach(function (el) {
+      var v = el.type === "checkbox" ? el.checked : el.value;
+      if (v === true || (typeof v === "string" && v.trim() !== "")) m[el.getAttribute("data-fid")] = v;
+    });
+    return m;
+  }
+  var note = document.getElementById("save-note"), base = note ? note.textContent : "";
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(collect())); } catch (e) { /* storage unavailable */ }
+  }
+  document.addEventListener("input", function (e) { if (e.target.hasAttribute && e.target.hasAttribute("data-fid")) save(); });
+  document.addEventListener("change", function (e) { if (e.target.hasAttribute && e.target.hasAttribute("data-fid")) save(); });
+
+  function download(name, text, type) {
+    var blob = new Blob([text], { type: type });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  var dl = document.getElementById("dl-answers");
+  if (dl) dl.addEventListener("click", function () {
+    download(data.slug + "-my-answers.md", serialize(data.lines, data.fields, collect()), "text/markdown;charset=utf-8");
+  });
+
+  var clear = document.getElementById("clear-answers"), armed = null;
+  if (clear) clear.addEventListener("click", function () {
+    if (!armed) {
+      clear.textContent = "Click again to clear";
+      armed = setTimeout(function () { armed = null; clear.textContent = "Clear my answers"; }, 4000);
+      return;
+    }
+    clearTimeout(armed); armed = null; clear.textContent = "Clear my answers";
+    els.forEach(function (el) { if (el.type === "checkbox") el.checked = false; else el.value = ""; });
+    try { localStorage.removeItem(KEY); } catch (e) { /* ignore */ }
+  });
+
+  function csvCell(s) { return '"' + String(s).replace(/"/g, '""') + '"'; }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-csv-btn]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var table = document.querySelector('table[data-csv="' + btn.getAttribute("data-csv-btn") + '"]');
+      var rows = [Array.prototype.map.call(table.querySelectorAll("thead th"), function (th) { return csvCell(th.textContent); }).join(",")];
+      Array.prototype.forEach.call(table.querySelectorAll("tbody tr"), function (tr) {
+        rows.push(Array.prototype.map.call(tr.children, function (td) {
+          var inp = td.querySelector("input,textarea");
+          return csvCell(inp ? inp.value : td.textContent);
+        }).join(","));
+      });
+      download(data.slug + "-table-" + btn.getAttribute("data-csv-btn") + ".csv", "﻿" + rows.join("\r\n") + "\r\n", "text/csv;charset=utf-8");
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

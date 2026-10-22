@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 1 · Wind Turbine Failure Prediction | Building and Measuring LLM Systems</title>
+<meta name="description" content="Fill in [`intake.md`](intake.md). All ten questions, dated, before touching the A reference page from the free Building and Measuring LLM Systems course.">
+<link rel="canonical" href="https://stylusnexus.github.io/deep-dive-ai-ml/docs/p1-turbine-failure.html">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Building and Measuring LLM Systems">
+<meta property="og:title" content="Project 1 · Wind Turbine Failure Prediction">
+<meta property="og:description" content="Fill in [`intake.md`](intake.md). All ten questions, dated, before touching the A reference page from the free Building and Measuring LLM Systems course.">
+<meta property="og:url" content="https://stylusnexus.github.io/deep-dive-ai-ml/docs/p1-turbine-failure.html">
+<meta property="og:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Project 1 · Wind Turbine Failure Prediction">
+<meta name="twitter:description" content="Fill in [`intake.md`](intake.md). All ten questions, dated, before touching the A reference page from the free Building and Measuring LLM Systems course.">
+<meta name="twitter:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LearningResource", "name": "Project 1 · Wind Turbine Failure Prediction", "description": "Fill in [`intake.md`](intake.md). All ten questions, dated, before touching the A reference page from the free Building and Measuring LLM Systems course.", "url": "https://stylusnexus.github.io/deep-dive-ai-ml/docs/p1-turbine-failure.html", "inLanguage": "en", "isAccessibleForFree": true, "learningResourceType": "reference", "publisher": {"@type": "Organization", "name": "Stylus Nexus", "url": "https://github.com/stylusnexus"}, "isPartOf": {"@type": "Course", "name": "Building and Measuring LLM Systems", "url": "https://stylusnexus.github.io/deep-dive-ai-ml/"}, "about": "Building and Measuring LLM Systems"}</script>
+<style>
+  :root {
+    --bg: #ffffff; --surface: #f3f5fa; --surface2: #e8ecf5; --border: #cfd6e6;
+    --accent: #2f4fd0; --accent2: #5b37c4; --green: #0d7a55; --red: #b42318;
+    --text: #1a1f2e; --muted: #4f5a70; --code-bg: #eef1f8; --field: #ffffff;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+      --accent: #8aa4ff; --accent2: #b9a2fb; --green: #34d399; --red: #f87171;
+      --text: #e2e8f0; --muted: #a3afc2; --code-bg: #0d1117; --field: #12141c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { max-width: 860px; margin: 0 auto; padding: 24px 24px 80px; background: var(--bg); color: var(--text);
+         line-height: 1.7; font-size: 16px; font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; }
+  a { color: var(--accent); }
+  h1 { font-size: 1.9em; line-height: 1.25; margin: 20px 0 8px; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { color: var(--accent2); font-size: 1.1em; margin: 28px 0 8px; }
+  h4 { font-size: 1em; margin: 20px 0 6px; }
+  p { margin: 12px 0; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 8px; overflow-x: auto; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 6px; z-index: 10; }
+  .skip:focus { left: 8px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .top { padding: 4px 0 8px; font-size: 0.92em; color: var(--muted); }
+  .top a { color: var(--muted); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+  .btn { font: inherit; font-size: 0.9em; font-weight: 600; text-decoration: none; cursor: pointer; color: var(--text);
+         background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; line-height: 1.2; }
+  .btn:hover { background: var(--surface2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.quiet { background: transparent; }
+  .btn.small { font-size: 0.82em; padding: 6px 10px; }
+  .note { color: var(--muted); font-size: 0.92em; margin: 6px 0 18px; }
+  .lead { color: var(--muted); font-size: 1.05em; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 18px 12px; margin: 20px 0; }
+  .toc h2 { border: 0; margin: 10px 0 4px; font-size: 1em; color: var(--muted); }
+  .toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 28px; }
+  .toc li { break-inside: avoid; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  ul.tasks { list-style: none; padding-left: 0; }
+  li.task label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+  li.task label:hover { background: var(--surface); }
+  li.task input { width: 20px; height: 20px; margin-top: 4px; flex: none; accent-color: var(--accent); }
+  li.task input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--border); }
+  blockquote { margin: 16px 0; padding: 8px 18px; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; }
+  blockquote p { margin: 6px 0; }
+  .fill { display: flex; gap: 10px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+  .fill > span { font-weight: 600; min-width: 5.5em; }
+  input[type=text], textarea { font: inherit; color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; }
+  .fill input[type=text] { flex: 1 1 260px; }
+  textarea { width: 100%; min-height: 5.5em; resize: vertical; line-height: 1.5; }
+  td input[type=text] { width: 100%; min-width: 7em; }
+  .answer label { display: block; font-weight: 600; margin: 14px 0 6px; }
+  .answer textarea { font-weight: 400; }
+  details.key { border: 1px solid var(--border); border-radius: 8px; padding: 4px 16px; margin: 12px 0; background: var(--surface); }
+  details.key summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+  .table-scroll { overflow-x: auto; margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.95em; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--surface2); }
+  .table-actions { margin: -8px 0 16px; }
+  ul.cards { list-style: none; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  ul.cards li { display: flex; flex-direction: column; gap: 4px; margin: 0; }
+  a.card { display: block; flex: 1; text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+  a.card:hover { background: var(--surface2); }
+  a.card h3 { margin: 0 0 4px; font-size: 1em; color: var(--accent); }
+  a.card p { margin: 0; color: var(--muted); font-size: 0.9em; line-height: 1.5; }
+  a.mdlink { font-size: 0.82em; padding-left: 4px; }
+  .foot { margin-top: 56px; color: var(--muted); font-size: 0.88em; }
+  @media (max-width: 600px) { body { padding: 16px 16px 64px; } .toc ol { columns: 1; } }
+  @media print {
+    .toolbar, .skip, .top, .table-actions, .note { display: none !important; }
+    body { max-width: none; padding: 0; background: #fff; color: #000; }
+    a { color: #000; }
+    input[type=text], textarea { border: 1px solid #888; background: #fff; color: #000; }
+    details.key:not([open]) { display: none; }
+    h2, h3 { break-after: avoid; } table, tr, li { break-inside: avoid; }
+  }
+</style>
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><nav aria-label="Site"><a href="../index.html">Building and Measuring LLM Systems</a> <span aria-hidden="true">/</span> <a href="index.html">Worksheets and references</a></nav></header>
+<main id="main">
+<h1 id="project-1-wind-turbine-failure-prediction">Project 1 · Wind Turbine Failure Prediction</h1>
+<div class="toolbar" role="group" aria-label="Page actions"><a class="btn" href="../projects/p1-turbine-failure/README.md" download>Download (.md)</a><button type="button" class="btn" onclick="window.print()">Print or save as PDF</button><a class="btn quiet" href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/projects/p1-turbine-failure/README.md" rel="noopener">View on GitHub</a></div>
+<p class="note" id="save-note">A reference page. The source is a markdown file in the repository.</p>
+<nav class="toc" aria-label="On this page"><h2>On this page</h2><ol><li><a href="#before-you-write-any-code">Before you write any code</a></li><li><a href="#what-done-looks-like">What "done" looks like</a></li><li><a href="#running-it">Running it</a></li><li><a href="#the-honest-framing">The honest framing</a></li></ol></nav>
+<p><strong>Block 2 exit criterion.</strong> The energy project.</p>
+<blockquote class="note"><p>Analyse equipment data from a wind energy provider, build models to identify potential failures, and enable timely repairs before equipment breaks down.</p></blockquote>
+<h2 id="before-you-write-any-code">Before you write any code</h2>
+<p>Fill in <a href="p1-intake.html"><code>intake.md</code></a>. All ten questions, dated, before touching the data. That is not ceremony - question 2 (the dumb baseline) and question 6 (the cost of each error type) both determine how you will read every later result, and neither is answerable once you have seen a score you like.</p>
+<h2 id="what-done-looks-like">What "done" looks like</h2>
+<p>Not a notebook with a good number in it. A deliverable someone can act on:</p>
+<ul class=tasks><li class="task"><label><input type="checkbox" disabled> <span>Intake sheet completed <strong>before</strong> modelling, and reviewed after</span></label></li><li class="task"><label><input type="checkbox" disabled> <span>Baseline scored and written down</span></label></li><li class="task"><label><input type="checkbox" disabled> <span>A leakage audit: every feature interrogated against <em>would I have this at prediction time?</em></span></label></li><li class="task"><label><input type="checkbox" disabled> <span>At least three models compared on identical folds with a threshold-free metric</span></label></li><li class="task"><label><input type="checkbox" disabled> <span>Spread reported, not just means - and a statement about whether the best model is <em>demonstrably</em> better</span></label></li><li class="task"><label><input type="checkbox" disabled> <span>A threshold chosen from costs, with the reasoning written out</span></label></li><li class="task"><label><input type="checkbox" disabled> <span>A decision table an operations manager could act on</span></label></li><li class="task"><label><input type="checkbox" disabled> <span>One paragraph naming what would make you distrust this model in six months</span></label></li></ul>
+<h2 id="running-it">Running it</h2>
+<pre><code class=lang-bash>python src/train.py                 # end to end: load, split, train, evaluate, report
+python src/train.py --costs 1500 9000   # false alarm, missed failure</code></pre>
+<p>Writes <code>report.md</code> and <code>artifacts/</code> - the model, the metrics, the threshold table.</p>
+<h2 id="the-honest-framing">The honest framing</h2>
+<p>The interesting output of this project is <strong>not</strong> the model. It is the sentence "at a threshold of X we catch Y% of failures for Z wasted call-outs, which costs about £N a year against £M for doing nothing." The model is how you get that sentence; the sentence is what anyone will actually use.</p>
+</main>
+<footer class="foot"><p>Source: <a href="https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/projects/p1-turbine-failure/README.md" rel="noopener"><code>projects/p1-turbine-failure/README.md</code></a>. This page is generated; edit the markdown file.</p></footer>
+<script type="application/json" id="doc-data">{"slug": "p1-turbine-failure", "lines": ["# Project 1 · Wind Turbine Failure Prediction", "", "**Block 2 exit criterion.** The energy project.", "", "> Analyse equipment data from a wind energy provider, build models to identify", "> potential failures, and enable timely repairs before equipment breaks down.", "", "## Before you write any code", "", "Fill in [`intake.md`](intake.md). All ten questions, dated, before touching the", "data. That is not ceremony - question 2 (the dumb baseline) and question 6 (the", "cost of each error type) both determine how you will read every later result, and", "neither is answerable once you have seen a score you like.", "", "## What \"done\" looks like", "", "Not a notebook with a good number in it. A deliverable someone can act on:", "", "- [ ] Intake sheet completed **before** modelling, and reviewed after", "- [ ] Baseline scored and written down", "- [ ] A leakage audit: every feature interrogated against *would I have this at prediction time?*", "- [ ] At least three models compared on identical folds with a threshold-free metric", "- [ ] Spread reported, not just means - and a statement about whether the best model is *demonstrably* better", "- [ ] A threshold chosen from costs, with the reasoning written out", "- [ ] A decision table an operations manager could act on", "- [ ] One paragraph naming what would make you distrust this model in six months", "", "## Running it", "", "```bash", "python src/train.py                 # end to end: load, split, train, evaluate, report", "python src/train.py --costs 1500 9000   # false alarm, missed failure", "```", "", "Writes `report.md` and `artifacts/` - the model, the metrics, the threshold table.", "", "## The honest framing", "", "The interesting output of this project is **not** the model. It is the sentence", "\"at a threshold of X we catch Y% of failures for Z wasted call-outs, which costs", "about £N a year against £M for doing nothing.\" The model is how you get that", "sentence; the sentence is what anyone will actually use.", ""], "fields": []}</script>
+
+</body>
+</html>

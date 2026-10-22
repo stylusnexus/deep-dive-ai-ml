@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worksheets and references | Building and Measuring LLM Systems</title>
+<meta name="description" content="Fill-in worksheets and reference pages for the free Building and Measuring LLM Systems course: intake sheets, a selection scorecard, an exam, a rubric, the curriculum and glossary.">
+<link rel="canonical" href="https://stylusnexus.github.io/deep-dive-ai-ml/docs/">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Building and Measuring LLM Systems">
+<meta property="og:title" content="Worksheets and references">
+<meta property="og:description" content="Fill-in worksheets and reference pages for the free Building and Measuring LLM Systems course: intake sheets, a selection scorecard, an exam, a rubric, the curriculum and glossary.">
+<meta property="og:url" content="https://stylusnexus.github.io/deep-dive-ai-ml/docs/">
+<meta property="og:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Worksheets and references">
+<meta name="twitter:description" content="Fill-in worksheets and reference pages for the free Building and Measuring LLM Systems course: intake sheets, a selection scorecard, an exam, a rubric, the curriculum and glossary.">
+<meta name="twitter:image" content="https://stylusnexus.github.io/deep-dive-ai-ml/og.png">
+<style>
+  :root {
+    --bg: #ffffff; --surface: #f3f5fa; --surface2: #e8ecf5; --border: #cfd6e6;
+    --accent: #2f4fd0; --accent2: #5b37c4; --green: #0d7a55; --red: #b42318;
+    --text: #1a1f2e; --muted: #4f5a70; --code-bg: #eef1f8; --field: #ffffff;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #242736; --border: #2e3248;
+      --accent: #8aa4ff; --accent2: #b9a2fb; --green: #34d399; --red: #f87171;
+      --text: #e2e8f0; --muted: #a3afc2; --code-bg: #0d1117; --field: #12141c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { max-width: 860px; margin: 0 auto; padding: 24px 24px 80px; background: var(--bg); color: var(--text);
+         line-height: 1.7; font-size: 16px; font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; }
+  a { color: var(--accent); }
+  h1 { font-size: 1.9em; line-height: 1.25; margin: 20px 0 8px; }
+  h2 { color: var(--accent); font-size: 1.35em; margin: 40px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { color: var(--accent2); font-size: 1.1em; margin: 28px 0 8px; }
+  h4 { font-size: 1em; margin: 20px 0 6px; }
+  p { margin: 12px 0; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 8px; overflow-x: auto; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 28px 0; }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 6px; z-index: 10; }
+  .skip:focus { left: 8px; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .top { padding: 4px 0 8px; font-size: 0.92em; color: var(--muted); }
+  .top a { color: var(--muted); }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+  .btn { font: inherit; font-size: 0.9em; font-weight: 600; text-decoration: none; cursor: pointer; color: var(--text);
+         background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; line-height: 1.2; }
+  .btn:hover { background: var(--surface2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.quiet { background: transparent; }
+  .btn.small { font-size: 0.82em; padding: 6px 10px; }
+  .note { color: var(--muted); font-size: 0.92em; margin: 6px 0 18px; }
+  .lead { color: var(--muted); font-size: 1.05em; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 18px 12px; margin: 20px 0; }
+  .toc h2 { border: 0; margin: 10px 0 4px; font-size: 1em; color: var(--muted); }
+  .toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 28px; }
+  .toc li { break-inside: avoid; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  ul.tasks { list-style: none; padding-left: 0; }
+  li.task label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+  li.task label:hover { background: var(--surface); }
+  li.task input { width: 20px; height: 20px; margin-top: 4px; flex: none; accent-color: var(--accent); }
+  li.task input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--border); }
+  blockquote { margin: 16px 0; padding: 8px 18px; border-left: 4px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; }
+  blockquote p { margin: 6px 0; }
+  .fill { display: flex; gap: 10px; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+  .fill > span { font-weight: 600; min-width: 5.5em; }
+  input[type=text], textarea { font: inherit; color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; }
+  .fill input[type=text] { flex: 1 1 260px; }
+  textarea { width: 100%; min-height: 5.5em; resize: vertical; line-height: 1.5; }
+  td input[type=text] { width: 100%; min-width: 7em; }
+  .answer label { display: block; font-weight: 600; margin: 14px 0 6px; }
+  .answer textarea { font-weight: 400; }
+  details.key { border: 1px solid var(--border); border-radius: 8px; padding: 4px 16px; margin: 12px 0; background: var(--surface); }
+  details.key summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+  .table-scroll { overflow-x: auto; margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.95em; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--surface2); }
+  .table-actions { margin: -8px 0 16px; }
+  ul.cards { list-style: none; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  ul.cards li { display: flex; flex-direction: column; gap: 4px; margin: 0; }
+  a.card { display: block; flex: 1; text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+  a.card:hover { background: var(--surface2); }
+  a.card h3 { margin: 0 0 4px; font-size: 1em; color: var(--accent); }
+  a.card p { margin: 0; color: var(--muted); font-size: 0.9em; line-height: 1.5; }
+  a.mdlink { font-size: 0.82em; padding-left: 4px; }
+  .foot { margin-top: 56px; color: var(--muted); font-size: 0.88em; }
+  @media (max-width: 600px) { body { padding: 16px 16px 64px; } .toc ol { columns: 1; } }
+  @media print {
+    .toolbar, .skip, .top, .table-actions, .note { display: none !important; }
+    body { max-width: none; padding: 0; background: #fff; color: #000; }
+    a { color: #000; }
+    input[type=text], textarea { border: 1px solid #888; background: #fff; color: #000; }
+    details.key:not([open]) { display: none; }
+    h2, h3 { break-after: avoid; } table, tr, li { break-inside: avoid; }
+  }
+</style>
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><nav aria-label="Site"><a href="../index.html">Building and Measuring LLM Systems</a></nav></header>
+<main id="main">
+<h1>Worksheets and references</h1>
+<p class="lead">Everything that used to be a raw markdown file, as a page you can use.</p>
+<h2>Worksheets you can fill in</h2><p>Tick boxes and type answers. They save in your browser, and you can download your answers as a markdown file or print them.</p><ul class="cards"><li><a class="card" href="project-intake.html"><h3>Project Intake Sheet</h3><p>Fill this in **before** writing code. Every project, every substantial lab.</p></a><a class="mdlink" href="../artifacts/project-intake.md" download>Download .md</a></li><li><a class="card" href="selection-scorecard.html"><h3>Selection Scorecard</h3><p>For choosing a **model**, a **platform/vendor**, or a **framework**. Three</p></a><a class="mdlink" href="../artifacts/selection-scorecard.md" download>Download .md</a></li><li><a class="card" href="cumulative-exam.html"><h3>Cumulative exam: Blocks 3, 5, 6, 7 and 8</h3><p>Ten scenarios, written answers, closed book. Each needs two or more lessons to answer,</p></a><a class="mdlink" href="../artifacts/cumulative-exam.md" download>Download .md</a></li><li><a class="card" href="design-interview-rubric.html"><h3>Design interview rubric</h3><p>A scored mock interview for the questions AI system-design interviews keep asking.</p></a><a class="mdlink" href="../artifacts/design-interview-rubric.md" download>Download .md</a></li><li><a class="card" href="entry-diagnostic.html"><h3>Entry Diagnostic</h3><p>This is a routing check, not an exam. Spend 30–45 minutes, answer without</p></a><a class="mdlink" href="../artifacts/prerequisite-diagnostic.md" download>Download .md</a></li><li><a class="card" href="p1-intake.html"><h3>Project Intake Sheet</h3><p>Fill this in **before** writing code. Every project, every substantial lab.</p></a><a class="mdlink" href="../projects/p1-turbine-failure/intake.md" download>Download .md</a></li><li><a class="card" href="p2-intake.html"><h3>Project Intake Sheet</h3><p>Fill this in **before** writing code. Every project, every substantial lab.</p></a><a class="mdlink" href="../projects/p2-financial-rag/intake.md" download>Download .md</a></li><li><a class="card" href="p3-intake.html"><h3>Project Intake Sheet</h3><p>Fill this in **before** writing code. Every project, every substantial lab.</p></a><a class="mdlink" href="../projects/p3-delivery-agents/intake.md" download>Download .md</a></li><li><a class="card" href="p4-intake.html"><h3>Project Intake Sheet</h3><p>Fill this in **before** writing code. Every project, every substantial lab.</p></a><a class="mdlink" href="../projects/p4-deployed-assistant/intake.md" download>Download .md</a></li></ul><h2>Reference</h2><p>The curriculum, glossary and project write-ups, as readable pages.</p><ul class="cards"><li><a class="card" href="curriculum.html"><h3>Curriculum</h3><p>~13 weeks. Each block has an exit criterion - a thing that runs, not a box ticked. Commit at every block boundary.</p></a><a class="mdlink" href="../CURRICULUM.md" download>Download .md</a></li><li><a class="card" href="glossary.html"><h3>Glossary</h3><p>Accumulates block by block. Every term defined here is fed into engram spaced</p></a><a class="mdlink" href="../GLOSSARY.md" download>Download .md</a></li><li><a class="card" href="how-to-use.html"><h3>How to use this</h3><p>Three things live here: **lessons** you read, **notebooks** you run, and **projects**</p></a><a class="mdlink" href="../HOW-TO-USE.md" download>Download .md</a></li><li><a class="card" href="engineering-foundations.html"><h3>Optional Engineering Foundations</h3><p>This is a reading map, not another block. Use it when a project exposes a systems</p></a><a class="mdlink" href="../artifacts/engineering-foundations.md" download>Download .md</a></li><li><a class="card" href="projects.html"><h3>Portfolio projects</h3><p>Four projects across four domains, each ending as a published Hugging Face</p></a><a class="mdlink" href="../projects/README.md" download>Download .md</a></li><li><a class="card" href="p1-turbine-failure.html"><h3>Project 1 · Wind Turbine Failure Prediction</h3><p>Fill in [`intake.md`](intake.md). All ten questions, dated, before touching the</p></a><a class="mdlink" href="../projects/p1-turbine-failure/README.md" download>Download .md</a></li><li><a class="card" href="p2-financial-rag.html"><h3>Project 2 · Grounded Document Assistant</h3><p>The corpus here is the operations corpus from `data/corpus/` rather than a real</p></a><a class="mdlink" href="../projects/p2-financial-rag/README.md" download>Download .md</a></li><li><a class="card" href="p3-delivery-agents.html"><h3>Project 3 · Multi-Agent Exception Handling</h3><p>Three things the course has argued for, made concrete:</p></a><a class="mdlink" href="../projects/p3-delivery-agents/README.md" download>Download .md</a></li><li><a class="card" href="p4-deployed-assistant.html"><h3>Project 4 · Deployed Grounded Assistant</h3><p>interface someone else can call.</p></a><a class="mdlink" href="../projects/p4-deployed-assistant/README.md" download>Download .md</a></li><li><a class="card" href="p1-report.html"><h3>Wind Turbine Failure Prediction - Report</h3><p>Generated by `src/train.py`. Costs assumed: £1,500 per wasted call-out,</p></a><a class="mdlink" href="../projects/p1-turbine-failure/report.md" download>Download .md</a></li><li><a class="card" href="p2-report.html"><h3>Grounded Document Assistant - Report</h3><p>Generated by `src/rag.py`. Corpus: `corpus` (10 documents,</p></a><a class="mdlink" href="../projects/p2-financial-rag/report.md" download>Download .md</a></li><li><a class="card" href="p3-report.html"><h3>Multi-Agent Delivery Exception Handling - Report</h3><p>Generated by `src/pipeline.py`. 132 exceptions, 6 policies.</p></a><a class="mdlink" href="../projects/p3-delivery-agents/report.md" download>Download .md</a></li><li><a class="card" href="p4-report.html"><h3>Deployed Grounded Assistant - Report</h3><p>A FastAPI service exposing the Block 3 corpus as an authenticated, rate-limited</p></a><a class="mdlink" href="../projects/p4-deployed-assistant/report.md" download>Download .md</a></li><li><a class="card" href="p4-capstone-report.html"><h3>Project 4 capstone report</h3><p>Run: 2026-10-15T02:47:30Z. Mode: retrieval-only (no model). Corpus hash: `5cf29b4172f79225943d7316318098230d10c169d68e9e213120389f9612fc70`.</p></a><a class="mdlink" href="../projects/p4-deployed-assistant/capstone/report.md" download>Download .md</a></li><li><a class="card" href="docker.html"><h3>Environments</h3><p>Two Jupyter stacks because TensorFlow and the newest Torch/pandas don&#x27;t</p></a><a class="mdlink" href="../docker/README.md" download>Download .md</a></li></ul><h2>Checklists</h2><p>Operating checklists with killer items and hard gates.</p><ul class="cards"><li><a class="card" href="../artifacts/sop/index.html"><h3>SOP checklists</h3><p>Aviation-style checklists for LLM work, with a separate non-normal checklist for when something is already wrong.</p></a></li></ul>
+</main>
+<footer class="foot"><p>These pages are generated from the markdown files in the repository.</p></footer>
+</body>
+</html>

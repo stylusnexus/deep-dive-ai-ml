@@ -65,7 +65,7 @@ What each algorithm does and where it breaks. Your statistics course covers the 
 - [Data Leakage](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000009-data-leakage.html): The failure that produces a brilliant model and a worthless one, simultaneously.
 - [MLP Patterns: Twelve Wirings of One Layer](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/algorithms/lsn-1787100000010-mlp-patterns.html): Most architectures are the same layer wired differently. The wiring tells you what a model is for, and where it will fail.
 
-## Block 1 · Python, Data and EDA
+## Block 1 · Python, Data and Exploratory Analysis
 
 Real tabular data, read properly. Paired with four runnable notebooks in notebooks/01-python-eda/.
 
@@ -85,7 +85,7 @@ Classical machine learning done properly — the metrics, the models, and knowin
 - [Neural Networks, in Keras and in PyTorch](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block2-classical-ml/lsn-1787500000002-neural-networks-both-ways.html): The same network written twice — and an honest account of when it is the wrong tool.
 - [Time Series, and Why Random Splits Lie](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block2-classical-ml/lsn-1787500000003-time-series.html): Routinely skipped, in courses whose own case studies are time-series problems.
 
-## Block 3 · Retrieval and Agentic RAG
+## Block 3 · Retrieval-Augmented Generation (RAG)
 
 Building a retrieval system that works, measuring the part everyone skips, the loop that answers multi-hop questions, and what changes at millions of documents.
 
@@ -137,7 +137,7 @@ When changing the weights is the right answer — rarely — and the four ways t
 - [When the Training Run Does Not Fit](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block7-training/lsn-1788000000004-when-the-training-run-does-not-fit.html): Three techniques that trade time or precision for memory — and the order to reach for them.
 - [The Four Ways to Shrink a Model](https://stylusnexus.github.io/deep-dive-ai-ml/lessons/block7-training/lsn-1788000000005-the-four-ways-to-shrink-a-model.html): Quantization, pruning, distillation and factorisation — what each removes, and which of them compose.
 
-## Block 8 · Deployment and APIs
+## Block 8 · Deployment and Interfaces
 
 Calling an interface you do not control, serving one, failing over when the provider does not answer, and the design walk-through that ties the course to the questions interviewers ask.
 
@@ -195,6 +195,11 @@ The three artifacts an LLM project accumulates — harness, recipes, decision re
 - [Curriculum](https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/CURRICULUM.md): all blocks, week by week, each with a runnable exit criterion.
 - [Glossary](https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/GLOSSARY.md): every term the course defines.
 - [Things to Know](https://stylusnexus.github.io/deep-dive-ai-ml/things-to-know.html): every load-bearing rule, linked to the lesson that earns it.
+- [Worksheets and references](https://stylusnexus.github.io/deep-dive-ai-ml/docs/): fill-in worksheets (project intake, selection scorecard, entry diagnostic, cumulative exam, design interview rubric) and reference pages, each also available as markdown.
+- [SOP checklists](https://stylusnexus.github.io/deep-dive-ai-ml/artifacts/sop/index.html): operating checklists with killer items and hard gates.
+- [Project intake sheet](https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/artifacts/project-intake.md): ten questions to answer before writing code.
+- [Selection scorecard](https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/artifacts/selection-scorecard.md): for choosing a model, a vendor or a framework.
+- [Design interview rubric](https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/artifacts/design-interview-rubric.md): a scored 45-minute mock interview on nine system-design questions.
 - [Project 4, deployed assistant](https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/projects/p4-deployed-assistant/README.md): an authenticated, rate-limited retrieval service with provider failover.
 - [Cumulative exam](https://github.com/stylusnexus/deep-dive-ai-ml/blob/main/artifacts/cumulative-exam.md): ten scenarios across Blocks 3 to 8 with a marking key.
 
