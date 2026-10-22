@@ -14,5 +14,5 @@ numbers: ; python3 scripts/check_numbers.py
 seo: ; python3 scripts/build_seo.py
 docs-check: ; python3 scripts/check_docs.py
 docs: ; python3 scripts/build_docs.py && python3 scripts/build_sop.py && python3 scripts/check_docs.py
-lessons: ; @for m in $$(ls scripts/content/*.py | xargs -n1 basename | sed 's/\.py//' | grep -v _notebooks); do python3 scripts/build_lessons.py $$m; done; python3 scripts/build_index.py; python3 scripts/build_knows.py; python3 scripts/build_docs.py; python3 scripts/build_sop.py; python3 scripts/build_seo.py
+lessons: ; @for m in $$(ls scripts/content/*.py | xargs -n1 basename | sed 's/\.py//' | grep -v _notebooks); do python3 scripts/build_lessons.py $$m; done; python3 scripts/build_index.py; python3 scripts/build_knows.py; python3 scripts/build_404.py; python3 scripts/build_docs.py; python3 scripts/build_sop.py; python3 scripts/build_seo.py
 verify: glossary links numbers notebooks docs-check

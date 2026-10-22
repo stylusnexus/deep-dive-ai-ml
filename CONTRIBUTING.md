@@ -23,6 +23,7 @@ Edit the source and rebuild:
 | The landing page | `scripts/build_index.py`, `scripts/_index_style.html` | `make lessons` |
 | A notebook | `scripts/content/*_notebooks.py` | `python3 scripts/build_notebooks.py <module>`, then re-execute it |
 | An SOP checklist | the markdown in `artifacts/sop/` | `make docs` |
+| The 404 page | `scripts/build_404.py` | `make lessons` |
 | A worksheet or reference page | the markdown file listed in `DOCS` in `scripts/build_docs.py` | `make docs` |
 
 `make lessons` rebuilds every set, the index, the revision sheet and the search

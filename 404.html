@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page not found | Building and Measuring LLM Systems</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="This page does not exist. Browse the lessons, worksheets and references of the free Building and Measuring LLM Systems course.">
+<meta name="color-scheme" content="dark light">
+<style>
+  /* Landing page. Direction: type and nothing else; the seam in the hero is the
+     line between a claim and the run that settles it. System fonts only. */
+  :root {
+    --m: clamp(16px, 2.5vw, 32px);
+    --gap: clamp(12px, 2vw, 28px);
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* fixed fields, the same in both themes */
+    --forest: #0f1f10; --paper: #f3f6ee; --lime: #c6f19d;
+    /* themed */
+    --bg: #0f1f10; --surface: #162a17; --ink: #ffffff; --muted: #b3bdb3;
+    --accent: #c6f19d; --accent-ink: #0f1f10; --focus: #c6f19d;
+    --n1: #1f4023; --n2: #2b5a32; --n3: #37753f; --nest-ink: #ffffff;
+    --agent: #f3f6ee; --agent-ink: #0f1f10;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f3f6ee; --surface: #e3eadb; --ink: #0f1f10; --muted: #3f4f40;
+      --accent: #1d4d24; --accent-ink: #ffffff; --focus: #1d4d24;
+      --n1: #dde7d2; --n2: #c3d8b4; --n3: #a5c590; --nest-ink: #0f1f10;
+      --agent: #0f1f10; --agent-ink: #f3f6ee;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 1.125rem/1.6 var(--font);
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  h1, h2, h3, p, ol, ul, figure { margin: 0; }
+  a { color: inherit; }
+  a:focus-visible, .btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  .skip {
+    position: absolute; left: var(--m); top: -80px; z-index: 100;
+    background: var(--lime); color: var(--forest); padding: 0.7rem 1.1rem; font-weight: 700;
+  }
+  .skip:focus { top: 10px; outline: 3px solid var(--forest); outline-offset: 2px; }
+
+  /* shared pieces */
+  .wrap { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); }
+  section { padding: clamp(64px, 9vw, 130px) var(--m); }
+  .h2 {
+    font: 800 clamp(2rem, 1.2rem + 4vw, 4.5rem)/1 var(--font);
+    letter-spacing: -0.035em; text-wrap: balance;
+  }
+  .btn {
+    display: inline-block; text-decoration: none; font-weight: 700; font-size: 1.125rem;
+    padding: 1rem 1.6rem; min-height: 56px; background: var(--accent); color: var(--accent-ink);
+    transition: transform .18s ease, background-color .18s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); }
+
+  /* hero: two fields meet at half height; the seam runs between the two lines of the title */
+  .hero {
+    --H: max(640px, 100svh); --f: clamp(1.9rem, 8vw, 10rem);
+    position: relative; height: var(--H); background: var(--forest); overflow: hidden; padding: 0;
+  }
+  .hero .up { position: absolute; inset: 0 0 50% 0; background: var(--paper); }
+  .hero .down { position: absolute; inset: 50% 0 0 0; color: #fff; }
+  .hero-title {
+    position: absolute; z-index: 2; left: var(--m); top: calc(var(--H) / 2 - 1.05 * var(--f));
+    font: 800 var(--f)/1.05 var(--font); letter-spacing: -0.035em; white-space: nowrap;
+  }
+  .ln { display: block; overflow: hidden; padding: 0.08em 0 0.1em; margin: -0.08em 0 -0.1em; }
+  .ln:first-child { color: var(--forest); }
+  .ln:last-child { color: var(--lime); }
+  .ln > span { display: inline-block; animation: rise .95s cubic-bezier(.16,.8,.2,1) both; }
+  .ln:nth-child(2) > span { animation-delay: .11s; }
+  .hero-copy {
+    position: absolute; left: var(--m); right: var(--m);
+    top: calc(1.05 * var(--f) + clamp(32px, 3vw, 48px));
+    animation: fade .8s ease .55s both;
+  }
+  .hero-copy p { max-width: 36rem; font-size: 1.375rem; line-height: 1.5; }
+  .hero-copy .btn { margin-top: 28px; background: var(--lime); color: var(--forest); }
+  .hero-copy small { display: block; margin-top: 14px; font-size: 0.9375rem; color: #c9d3c9; }
+  @keyframes rise { from { transform: translateY(105%); } to { transform: none; } }
+  @keyframes fade { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+  .bar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 5; color: var(--forest);
+    display: flex; justify-content: space-between; align-items: center; padding: 10px var(--m);
+  }
+  .bar .mark { font-weight: 800; font-size: 1.125rem; text-decoration: none; letter-spacing: -0.01em; padding: 0.7rem 0; }
+  .bar ul { list-style: none; padding: 0; display: flex; gap: clamp(0.75rem, 2.5vw, 2rem); }
+  .bar ul a { display: block; padding: 0.7rem 0.15rem; font-weight: 600; font-size: 0.9375rem; text-decoration: none; }
+  .bar a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .bar a:focus-visible { outline-color: var(--forest); }
+
+  /* the claims: poster lines */
+  .claims .head { grid-column: 1 / 9; }
+  .claims .head p { margin-top: 1.25rem; max-width: 34rem; }
+  .claims ol { list-style: none; padding: 0; margin-top: clamp(40px, 6vw, 88px); grid-column: 1 / -1; }
+  .claim {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 23rem); column-gap: var(--gap);
+    align-items: baseline; padding: 0.03em 0 clamp(8px, 1.2vw, 18px);
+  }
+  .claim a {
+    font: 800 clamp(2.3rem, 8vw, 10rem)/0.98 var(--font); letter-spacing: -0.04em;
+    text-decoration: none; transition: color .18s ease;
+  }
+  .claim a:hover, .claim a:focus-visible { color: var(--accent); }
+  .claim p { font-size: 1.125rem; line-height: 1.45; }
+
+  /* what this is */
+  .about { background: var(--surface); }
+  .about .h2 { grid-column: 1 / 7; }
+  .about .note { grid-column: 9 / 13; align-self: end; }
+  .facts {
+    grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between;
+    gap: 36px var(--gap); margin-top: clamp(56px, 8vw, 120px); padding: 0; list-style: none;
+  }
+  .facts strong { display: block; font: 300 clamp(2.5rem, 1.2rem + 4vw, 4.5rem)/1 var(--font); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .facts span { display: block; font-size: 0.9375rem; color: var(--muted); max-width: 15rem; margin-top: 6px; }
+  .figure { grid-column: 1 / 8; margin-top: clamp(56px, 8vw, 120px); }
+  .figure svg { display: block; width: 100%; height: auto; }
+  .figure figcaption { margin-top: 14px; font-size: 0.9375rem; color: var(--muted); }
+  .start { grid-column: 9 / 13; margin-top: clamp(56px, 8vw, 120px); align-self: end; }
+  .start p { margin-bottom: 24px; }
+  .nest-t { font: 700 26px var(--font); fill: var(--nest-ink); }
+  .nest-s { font: 400 24px var(--font); fill: var(--nest-ink); }
+  .nest-l { font: 700 26px var(--font); fill: var(--forest); }
+  .nest-ls { font: 400 24px var(--font); fill: var(--forest); }
+  .nest-a { font: 700 26px var(--font); fill: var(--agent-ink); }
+  .nest-as { font: 400 24px var(--font); fill: var(--agent-ink); }
+
+  /* the lessons */
+  .lessons-intro { padding-bottom: clamp(32px, 4vw, 56px); }
+  .lessons-intro .h2 { grid-column: 1 / 10; }
+  .lessons-intro p { grid-column: 1 / 8; margin-top: 1.25rem; }
+  .set { background: var(--bg); }
+  .set.alt { background: var(--surface); }
+  .set h3 { grid-column: 1 / 7; font: 800 clamp(1.5rem, 1.1rem + 1.4vw, 2.125rem)/1.1 var(--font); letter-spacing: -0.03em; text-wrap: balance; }
+  .set .note { grid-column: 8 / 13; font-size: 1.125rem; }
+  .set ol {
+    grid-column: 1 / -1; list-style: none; padding: 0; margin-top: clamp(32px, 4vw, 56px);
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px var(--gap);
+  }
+  .set li { position: relative; }
+  .set li a { font-weight: 700; font-size: 1.125rem; line-height: 1.35; text-underline-offset: 4px; text-decoration-thickness: 0.08em; }
+  .set li a::after { content: ""; position: absolute; inset: -8px -10px; }
+  .set li a:hover { color: var(--accent); }
+  .set li a:focus-visible { outline: none; }
+  .set li a:focus-visible::after { outline: 3px solid var(--focus); outline-offset: 0; }
+  .set li p { margin-top: 6px; font-size: 1.125rem; line-height: 1.5; }
+
+  /* paper field */
+  .paper {
+    --bg: var(--paper); --ink: var(--forest); --muted: #3f4f40; --accent: #1d4d24;
+    --accent-ink: #fff; --focus: #1d4d24; --t: #e3eadb;
+    background: var(--paper); color: var(--forest);
+  }
+  .program .h2 { grid-column: 1 / 7; }
+  .program .lead { grid-column: 8 / 13; align-self: end; }
+  .rows {
+    grid-column: 1 / -1; list-style: none; padding: 0; margin-top: clamp(40px, 6vw, 88px);
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(32px, 4vw, 56px) var(--gap);
+  }
+  .rows li { position: relative; }
+  .rows a { font: 800 clamp(1.5rem, 1.1rem + 1.4vw, 2.125rem)/1.1 var(--font); letter-spacing: -0.025em; text-decoration: none; }
+  .rows a::after { content: ""; position: absolute; inset: -6px -8px; }
+  .rows a:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 0.06em; }
+  .rows a:focus-visible { outline: none; }
+  .rows a:focus-visible::after { outline: 3px solid var(--focus); outline-offset: 0; }
+  .rows p { margin-top: 10px; }
+
+  /* the three courses elsewhere */
+  .elsewhere .h2 { grid-column: 1 / 10; }
+  .elsewhere ul { grid-column: 1 / -1; list-style: none; padding: 0; margin-top: clamp(40px, 6vw, 88px); }
+  .elsewhere li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 24rem); column-gap: var(--gap); align-items: baseline; padding-bottom: clamp(20px, 3vw, 40px); }
+  .elsewhere a { font: 800 clamp(1.9rem, 1.2rem + 4vw, 4.5rem)/1 var(--font); letter-spacing: -0.035em; text-decoration: none; transition: color .18s ease; }
+  .elsewhere a:hover, .elsewhere a:focus-visible { color: var(--accent); }
+
+  /* close */
+  .cta { background: var(--ink); color: var(--bg); min-height: 90svh; display: flex; flex-direction: column; justify-content: space-between; --focus: var(--bg); }
+  .cta h2 { font: 800 clamp(3rem, 13vw, 15rem)/0.92 var(--font); letter-spacing: -0.045em; max-width: 9.5em; }
+  .cta .foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px 48px; }
+  .cta .foot p { max-width: 32rem; font-size: 1.375rem; line-height: 1.5; }
+  .cta .btn { background: var(--bg); color: var(--ink); }
+
+  footer { background: var(--forest); color: #fff; padding: clamp(64px, 8vw, 110px) var(--m) 36px; --focus: var(--lime); }
+  footer .places { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 36px; }
+  footer .places a { display: block; padding: 0.5rem 0; font-size: clamp(1.25rem, 1rem + 1vw, 2.125rem); font-weight: 700; color: var(--lime); text-decoration: none; letter-spacing: -0.02em; }
+  footer .places a:hover { text-decoration: underline; text-underline-offset: 6px; }
+  footer .name { font: 800 clamp(3rem, 13vw, 15rem)/1 var(--font); letter-spacing: -0.05em; margin-top: clamp(40px, 6vw, 90px); white-space: nowrap; }
+  footer .legal { margin-top: 28px; font-size: 0.9375rem; color: #b3bdb3; }
+
+  /* motion: only transform and opacity, and only when script is running */
+  .js [data-rise] { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s cubic-bezier(.16,.8,.2,1); transition-delay: var(--d, 0ms); }
+  .js [data-rise].in { opacity: 1; transform: none; }
+
+  @media (max-width: 860px) {
+    .claims .head, .about .h2, .about .note, .figure, .start, .lessons-intro .h2, .lessons-intro p,
+    .set h3, .set .note, .program .h2, .program .lead, .elsewhere .h2 { grid-column: 1 / -1; }
+    .set .note, .program .lead { margin-top: 1rem; }
+    .rows { grid-template-columns: minmax(0, 1fr); }
+    .about .note { margin-top: 1.25rem; }
+    .claim, .elsewhere li { grid-template-columns: minmax(0, 1fr); row-gap: 6px; }
+    .claim a { font-size: clamp(2rem, 11.5vw, 5rem); }
+    .facts { display: grid; grid-template-columns: 1fr 1fr; }
+    .cta { min-height: 80svh; }
+    .cta .foot .btn { width: 100%; text-align: center; }
+  }
+  @media (max-width: 640px) { .set ol { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 520px) {
+    .bar ul li:last-child { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .ln > span, .hero-copy { animation: none; }
+    .js [data-rise] { opacity: 1; transform: none; transition: none; }
+    .btn, .claim a, .elsewhere a { transition: none; }
+    .btn:hover { transform: none; }
+  }
+</style>
+
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar">
+  <a class="mark" href="https://stylusnexus.github.io/deep-dive-ai-ml/">Stylus Nexus</a>
+  <nav aria-label="Primary">
+    <ul>
+      <li><a href="https://stylusnexus.github.io/deep-dive-ai-ml/#lessons">Lessons</a></li>
+      <li><a href="https://stylusnexus.github.io/deep-dive-ai-ml/docs/">Worksheets</a></li>
+      <li><a href="https://github.com/stylusnexus/deep-dive-ai-ml">Source</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main">
+<section class="hero" aria-label="Page not found">
+  <div class="up"></div>
+  <h1 class="hero-title"><span class="ln"><span>That page</span></span><span class="ln"><span>is not here</span></span></h1>
+  <div class="down">
+    <div class="hero-copy">
+      <p>It moved, or it never existed. Lesson addresses include the lesson's position in its set, so a link saved before a lesson was added can point at an old name. The lesson list always has the current ones.</p>
+      <a class="btn" href="https://stylusnexus.github.io/deep-dive-ai-ml/#lessons">See all lessons</a>
+      <small><a href="https://stylusnexus.github.io/deep-dive-ai-ml/lessons/orientation/lsn-1787200000000-the-map.html">Start with the map</a> &middot; <a href="https://stylusnexus.github.io/deep-dive-ai-ml/docs/">Worksheets and references</a> &middot; <a href="https://stylusnexus.github.io/deep-dive-ai-ml/things-to-know.html">Things to Know</a></small>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <nav aria-label="Project">
+    <ul class="places">
+      <li><a href="https://github.com/stylusnexus/deep-dive-ai-ml">Source on GitHub</a></li>
+      <li><a href="https://stylusnexus.github.io/deep-dive-ai-ml/docs/curriculum.html">Curriculum</a></li>
+      <li><a href="https://stylusnexus.github.io/deep-dive-ai-ml/docs/glossary.html">Glossary</a></li>
+      <li><a href="https://stylusnexus.github.io/deep-dive-ai-ml/docs/">Worksheets</a></li>
+    </ul>
+  </nav>
+  <p class="name" aria-hidden="true">Stylus Nexus</p>
+  <p class="legal">Published by Stylus Nexus. Building and Measuring LLM Systems.</p>
+</footer>
+</body>
+</html>
