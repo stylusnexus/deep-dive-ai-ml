@@ -1,5 +1,9 @@
 # Building and Measuring LLM Systems
 
+[![Read the course](https://img.shields.io/badge/read_the_course-stylusnexus.github.io-c6f19d?labelColor=0f1f10)](https://stylusnexus.github.io/deep-dive-ai-ml/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0f1f10)](LICENSE)
+[![Python](https://img.shields.io/badge/python-notebooks-0f1f10)](notebooks/README.md)
+
 A self-built curriculum in applied AI and machine learning: ~13 weeks of lessons, runnable notebooks, and four portfolio projects.
 
 ## Where it stands
